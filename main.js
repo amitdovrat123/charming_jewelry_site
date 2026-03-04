@@ -27,96 +27,179 @@ if (hamburger && navLinks) {
   });
 }
 
-// ===== Testimonials Auto-Scroll =====
+// ===== Testimonials Arrow Navigation =====
 (function () {
-  const track    = document.getElementById('testimonialsTrack');
   const viewport = document.getElementById('testimonialsViewport');
   const prevBtn  = document.querySelector('.testimonials-prev');
   const nextBtn  = document.querySelector('.testimonials-next');
+  if (!viewport) return;
 
-  if (!track || !viewport) return;
+  const STEP = 320; // card width (300) + gap (20)
 
-  let offset  = 0;
-  let paused  = false;
-  const SPEED = 0.6; // px per rAF frame (~36px/sec at 60fps)
-  const CARD_STEP = 320; // approx card width + gap
-
-  function getHalfWidth() {
-    return track.scrollWidth / 2;
-  }
-
-  function tick() {
-    if (!paused) {
-      offset += SPEED;
-      if (offset >= getHalfWidth()) offset = 0;
-      track.style.transform = 'translateX(-' + offset + 'px)';
-    }
-    requestAnimationFrame(tick);
-  }
-
-  requestAnimationFrame(tick);
-
-  // Pause on hover
-  viewport.addEventListener('mouseenter', () => { paused = true; });
-  viewport.addEventListener('mouseleave', () => { paused = false; });
-
-  // Pause on touch
-  viewport.addEventListener('touchstart', () => { paused = true; }, { passive: true });
-  viewport.addEventListener('touchend', () => {
-    setTimeout(() => { paused = false; }, 2500);
-  }, { passive: true });
-
-  // Manual arrows
-  function clampOffset(val) {
-    return Math.max(0, Math.min(val, getHalfWidth() - 1));
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      paused = true;
-      offset = clampOffset(offset + CARD_STEP);
-      track.style.transform = 'translateX(-' + offset + 'px)';
-      setTimeout(() => { paused = false; }, 1800);
-    });
-  }
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      paused = true;
-      offset = clampOffset(offset - CARD_STEP);
-      track.style.transform = 'translateX(-' + offset + 'px)';
-      setTimeout(() => { paused = false; }, 1800);
-    });
-  }
+  if (prevBtn) prevBtn.addEventListener('click', function() {
+    viewport.scrollBy({ left: STEP, behavior: 'smooth' });
+  });
+  if (nextBtn) nextBtn.addEventListener('click', function() {
+    viewport.scrollBy({ left: -STEP, behavior: 'smooth' });
+  });
 })();
 
-// ===== Shop — Product Order Buttons → WhatsApp =====
+// ===== Product Image Gallery (arrows) =====
+(function () {
+  function switchSlide(container, dir) {
+    const slides = Array.from(container.querySelectorAll('.product-slide'));
+    const cur = slides.findIndex(function(s) { return s.classList.contains('product-slide--active'); });
+    const next = (cur + dir + slides.length) % slides.length;
+    slides.forEach(function(s, i) { s.classList.toggle('product-slide--active', i === next); });
+    return next;
+  }
+
+  document.querySelectorAll('.shop-card-img').forEach(function(container) {
+    var prev = container.querySelector('.img-arrow--prev');
+    var next = container.querySelector('.img-arrow--next');
+    if (prev) prev.addEventListener('click', function(e) { e.stopPropagation(); switchSlide(container, -1); });
+    if (next) next.addEventListener('click', function(e) { e.stopPropagation(); switchSlide(container, +1); });
+  });
+
+  // Expose for lightbox sync
+  window._switchSlide = switchSlide;
+})();
+
+// ===== Lightbox =====
+(function () {
+  const lightbox    = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const closeBtn    = document.getElementById('lightboxClose');
+  const prevBtn     = document.getElementById('lightboxPrev');
+  const nextBtn     = document.getElementById('lightboxNext');
+  if (!lightbox || !lightboxImg) return;
+
+  var activeContainer = null;
+
+  function syncImage() {
+    if (!activeContainer) return;
+    var active = activeContainer.querySelector('.product-slide--active');
+    if (active) { lightboxImg.src = active.src; lightboxImg.alt = active.alt || ''; }
+  }
+
+  function openLightbox(container) {
+    activeContainer = container;
+    syncImage();
+    lightbox.classList.add('is-open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('is-open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    activeContainer = null;
+  }
+
+  document.querySelectorAll('.shop-card-img').forEach(function(container) {
+    container.addEventListener('click', function(e) {
+      if (e.target.classList.contains('img-arrow')) return;
+      openLightbox(container);
+    });
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+
+  if (prevBtn) prevBtn.addEventListener('click', function() {
+    if (!activeContainer) return;
+    window._switchSlide(activeContainer, -1);
+    syncImage();
+  });
+
+  if (nextBtn) nextBtn.addEventListener('click', function() {
+    if (!activeContainer) return;
+    window._switchSlide(activeContainer, +1);
+    syncImage();
+  });
+
+  lightbox.addEventListener('click', function(e) {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (!lightbox.classList.contains('is-open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') { window._switchSlide(activeContainer, -1); syncImage(); }
+    if (e.key === 'ArrowLeft')  { window._switchSlide(activeContainer, +1); syncImage(); }
+  });
+})();
+
+// ===== Card Pricing — Dynamic Total =====
+(function () {
+  const SHIPPING_COST = 35;
+
+  document.querySelectorAll('.shop-card').forEach(function(card) {
+    var btn = card.querySelector('.shop-order-btn');
+    if (!btn) return;
+    var basePrice = parseInt(btn.dataset.price) || 0;
+    var noteEl  = card.querySelector('.shop-shipping-note');
+    var totalEl = card.querySelector('.js-total-price');
+
+    function updatePrice() {
+      var checked = card.querySelector('.delivery-group input[type="radio"]:checked');
+      var isPickup = checked && checked.value.indexOf('איסוף') !== -1;
+      var total = isPickup ? basePrice : basePrice + SHIPPING_COST;
+      if (noteEl) {
+        noteEl.textContent = isPickup
+          ? '(איסוף עצמי — חינם)'
+          : '+ 35 ₪ משלוח (בהתאם לתקנון)';
+      }
+      if (totalEl) totalEl.textContent = total + ' ₪';
+    }
+
+    card.querySelectorAll('.delivery-group input[type="radio"]').forEach(function(r) {
+      r.addEventListener('change', updatePrice);
+    });
+    updatePrice();
+  });
+})();
+
+// ===== Shop — Order Buttons → WhatsApp =====
 (function () {
   const WA_NUMBER = '972524131991';
+  const SHIPPING_COST = 35;
 
-  document.querySelectorAll('.shop-order-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const card    = btn.closest('.shop-card');
-      const product = btn.dataset.product || '';
-      const price   = btn.dataset.price   || '';
+  document.querySelectorAll('.shop-order-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var card    = btn.closest('.shop-card');
+      var product = btn.dataset.product || '';
+      var price   = parseInt(btn.dataset.price) || 0;
 
-      // Collect all selected radio options within this card
-      const parts = [];
-      card.querySelectorAll('.option-group').forEach(group => {
-        const label   = group.querySelector('.option-label');
-        const checked = group.querySelector('input[type="radio"]:checked');
+      // Color, charm, and other non-delivery non-personalisation selections
+      var parts = [];
+      card.querySelectorAll('.option-group:not(.personalisation-group):not(.delivery-group)').forEach(function(group) {
+        var label   = group.querySelector('.option-label');
+        var checked = group.querySelector('input[type="radio"]:checked');
         if (label && checked) {
           parts.push(label.textContent.trim().replace(/:$/, '') + ': ' + checked.value);
         }
       });
 
-      let message = 'היי ויק, אשמח להזמין *' + product + '*';
-      if (price) message += ' (' + price + ' ₪)';
-      if (parts.length) message += '\n' + parts.join('\n');
-      message += '\nאשמח לפרטים נוספים 😊';
+      // Delivery
+      var deliveryChecked = card.querySelector('.delivery-group input[type="radio"]:checked');
+      var isPickup = deliveryChecked && deliveryChecked.value.indexOf('איסוף') !== -1;
+      var deliveryText = isPickup
+        ? 'איסוף עצמי מראשון לציון (חינם)'
+        : 'משלוח עד הבית (+35 ש"ח)';
+      var totalPrice = isPickup ? price : price + SHIPPING_COST;
 
-      const url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(message);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      // Personalisation
+      var personal = card.querySelector('.personal-input');
+      var personalVal = personal && personal.value.trim();
+
+      var msg = 'היי ויק, הגעתי אלייך דרך האתר ואני מעוניינת להזמין את *' + product + '*:\n\n';
+      parts.forEach(function(p) { msg += p + '\n'; });
+      if (personalVal) msg += 'בחירה אישית: ' + personalVal + '\n';
+      msg += '\nאופן קבלה: ' + deliveryText;
+      msg += '\n\nסה"כ לתשלום: ' + totalPrice + ' ש"ח';
+
+      window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
     });
   });
 })();
