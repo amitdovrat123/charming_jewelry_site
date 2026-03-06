@@ -17,17 +17,36 @@ function esc(v) {
   return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// Normalize field names — support both old schema (price/stock/salePrice)
+// and new admin schema (priceOriginal/stockCount/priceSale)
+function getPrice(data)     { return parseInt(data.priceOriginal ?? data.price)     || 0; }
+function getSale(data)      { return parseInt(data.priceSale     ?? data.salePrice) || 0; }
+function getStock(data)     { return data.stockCount  ?? data.stock  ?? null; }
+function getBadgeLabel(data){ return data.badge || null; }
+
 function cardHTML(data, docId) {
   uid++;
-  const price    = parseInt(data.price) || 0;
-  const hasSale  = data.salePrice && data.salePrice > 0 && data.salePrice < price;
-  const sellPrice = hasSale ? parseInt(data.salePrice) : price;
-  const isOOS    = data.stock === 0;
-  const total    = sellPrice + SHIPPING;
+  const price     = getPrice(data);
+  const sale      = getSale(data);
+  const hasSale   = sale > 0 && sale < price;
+  const sellPrice = hasSale ? sale : price;
+  const isOOS     = getStock(data) === 0;
+  const badge     = getBadgeLabel(data);
+  const total     = sellPrice + SHIPPING;
+
+  // Badge HTML
+  const BADGE_CLASS = {
+    'חדש':      'shop-card-badge',
+    'בסט-סלר':  'shop-card-badge shop-card-badge--hot',
+    'מבצע':     'shop-card-badge shop-card-badge--sale',
+  };
+  const badgeHTML = badge
+    ? `<span class="${BADGE_CLASS[badge] ?? 'shop-card-badge'}">${esc(badge)}</span>`
+    : '';
 
   const priceBlock = hasSale
     ? `<div class="shop-price-area">
-         <span class="shop-card-price shop-price-sale">${data.salePrice} &#8362;</span>
+         <span class="shop-card-price shop-price-sale">${sale} &#8362;</span>
          <span class="shop-price-original">${price} &#8362;</span>
          <span class="shop-sale-badge">מבצע</span>
        </div>
@@ -39,8 +58,7 @@ function cardHTML(data, docId) {
 
   const orderBlock = isOOS
     ? `<div class="shop-oos-badge">אזל המלאי — לבירור זמינות צרי קשר</div>
-       <button class="btn shop-order-btn shop-order-btn--oos"
-               data-product="${esc(data.name)}" data-price="${sellPrice}" disabled>אזל המלאי</button>`
+       <button class="btn shop-order-btn shop-order-btn--oos" disabled>אזל המלאי</button>`
     : `<div class="shop-total-line">סה"כ לתשלום: <strong class="js-total-price">${total} &#8362;</strong></div>
        <button class="btn shop-order-btn"
                data-product="${esc(data.name)}" data-price="${sellPrice}">הזמיני עכשיו</button>`;
@@ -72,6 +90,7 @@ function cardHTML(data, docId) {
          src="${esc(data.imageUrl || '')}"
          alt="${esc(data.name)}"
          loading="lazy" />
+    ${badgeHTML}
     <button class="img-arrow img-arrow--prev" aria-label="תמונה קודמת">&#8250;</button>
     <button class="img-arrow img-arrow--next" aria-label="תמונה הבאה">&#8249;</button>
   </div>
@@ -94,8 +113,10 @@ function initCard(card) {
   const nextBtn = imgBox && imgBox.querySelector('.img-arrow--next');
   const isOOS   = card.classList.contains('shop-card--oos');
 
-  if (prevBtn) prevBtn.hidden = true;
-  if (nextBtn) nextBtn.hidden = true;
+  // Single-image: hide arrows
+  const slides = imgBox ? imgBox.querySelectorAll('.product-slide') : [];
+  if (prevBtn) prevBtn.hidden = slides.length <= 1;
+  if (nextBtn) nextBtn.hidden = slides.length <= 1;
 
   // Lightbox
   if (imgBox) {
@@ -112,7 +133,7 @@ function initCard(card) {
     });
   }
 
-  if (isOOS || !btn) return; // out-of-stock: no pricing/order logic needed
+  if (isOOS || !btn) return;
 
   const basePrice = parseInt(btn.dataset.price) || 0;
 
@@ -120,8 +141,8 @@ function initCard(card) {
     const checked  = card.querySelector('.delivery-group input[type="radio"]:checked');
     const isPickup = checked && checked.value.includes('איסוף');
     const total    = isPickup ? basePrice : basePrice + SHIPPING;
-    if (noteEl)  noteEl.textContent  = isPickup ? '(איסוף עצמי — חינם)' : `+ 35 \u20aa משלוח (בהתאם לתקנון)`;
-    if (totalEl) totalEl.textContent = total + ' \u20aa';
+    if (noteEl)  noteEl.textContent  = isPickup ? '(איסוף עצמי — חינם)' : `+ 35 ₪ משלוח (בהתאם לתקנון)`;
+    if (totalEl) totalEl.textContent = total + ' ₪';
   }
 
   card.querySelectorAll('.delivery-group input[type="radio"]').forEach(r => {
@@ -134,15 +155,15 @@ function initCard(card) {
     const checked  = card.querySelector('.delivery-group input[type="radio"]:checked');
     const isPickup = checked && checked.value.includes('איסוף');
     const delivery = isPickup
-      ? `\u05d0\u05d9\u05e1\u05d5\u05e3 \u05e2\u05e6\u05de\u05d9 \u05de\u05e8\u05d0\u05e9\u05d5\u05df \u05dc\u05e6\u05d9\u05d5\u05df (\u05d7\u05d9\u05e0\u05dd)`
-      : `\u05de\u05e9\u05dc\u05d5\u05d7 \u05e2\u05d3 \u05d4\u05d1\u05d9\u05ea (+35 \u05e9"\u05d7)`;
+      ? 'איסוף עצמי מראשון לציון (חינם)'
+      : 'משלוח עד הבית (+35 ש"ח)';
     const total    = isPickup ? price : price + SHIPPING;
     const personal = (card.querySelector('.personal-input') || {}).value?.trim() || '';
 
-    let msg = `\u05d4\u05d9\u05d9 \u05d5\u05d9\u05e7, \u05d4\u05d2\u05e2\u05ea\u05d9 \u05d0\u05dc\u05d9\u05d9\u05da \u05d3\u05e8\u05da \u05d4\u05d0\u05ea\u05e8 \u05d5\u05d0\u05e0\u05d9 \u05de\u05e2\u05d5\u05e0\u05d9\u05d9\u05e0\u05ea \u05dc\u05d4\u05d6\u05de\u05d9\u05df \u05d0\u05ea *${product}*:\n\n`;
-    if (personal) msg += `\u05d1\u05d7\u05d9\u05e8\u05d4 \u05d0\u05d9\u05e9\u05d9\u05ea: ${personal}\n`;
-    msg += `\n\u05d0\u05d5\u05e4\u05df \u05e7\u05d1\u05dc\u05d4: ${delivery}`;
-    msg += `\n\n\u05e1\u05d4"\u05db \u05dc\u05ea\u05e9\u05dc\u05d5\u05dd: ${total} \u05e9"\u05d7`;
+    let msg = `היי ויק, הגעתי אלייך דרך האתר ואני מעוניינת להזמין את *${product}*:\n\n`;
+    if (personal) msg += `בחירה אישית: ${personal}\n`;
+    msg += `\nאופן קבלה: ${delivery}`;
+    msg += `\n\nסה"כ לתשלום: ${total} ש"ח`;
 
     window.open(
       'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg),
@@ -151,13 +172,18 @@ function initCard(card) {
   });
 }
 
-// ── Real-time Firestore subscription ──────────────────────────────────────────
+// ── Real-time Firestore subscription ──────────────────────────────
 const q = query(collection(db, COL_PATH), orderBy('createdAt', 'desc'));
 
 onSnapshot(q, snapshot => {
   if (loadEl) loadEl.style.display = 'none';
 
-  if (snapshot.empty) {
+  // Filter: only show published products
+  const visible = snapshot.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(p => !p.status || p.status === 'published');
+
+  if (!visible.length) {
     if (emptyEl) emptyEl.style.display = '';
     if (grid)    grid.innerHTML = '';
     return;
@@ -167,7 +193,7 @@ onSnapshot(q, snapshot => {
 
   uid = 0;
   if (grid) {
-    grid.innerHTML = snapshot.docs.map(d => cardHTML(d.data(), d.id)).join('');
+    grid.innerHTML = visible.map(p => cardHTML(p, p.id)).join('');
     grid.querySelectorAll('.shop-card').forEach(initCard);
   }
 }, err => {

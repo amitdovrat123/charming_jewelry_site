@@ -10,39 +10,55 @@
       theme: {
         extend: {
           colors: {
-            gold:  { DEFAULT: '#d4a373', dark: '#b8893e', light: '#f0dfc0', pale: '#fdf6ee' },
+            gold: { DEFAULT: '#d4a373', dark: '#b8893e', light: '#f0dfc0', pale: '#fdf6ee' },
             cream: { DEFAULT: '#fcf8f3', dark: '#f0e6d8' },
           }
         }
       }
     }
   </script>
-  <!-- Cloudinary Upload Widget -->
   <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { font-family: 'Assistant', sans-serif; }
-    [data-v]  { display: none !important; }
-    .spin     { animation: spin .8s linear infinite; }
-    .fadein   { animation: fadein .28s ease; }
-    @keyframes spin    { to { transform: rotate(360deg); } }
-    @keyframes fadein  { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    [data-v] { display: none !important; }
+    .spin  { animation: spin  .8s linear infinite; }
+    .fadein{ animation: fadein .28s ease; }
+    @keyframes spin   { to { transform: rotate(360deg); } }
+    @keyframes fadein { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
     input:focus, select:focus, textarea:focus { border-color: #d4a373 !important; outline: none; }
-    .row-hover:hover { background: #fdf6ee; }
-    .del-btn { opacity:0; transition:.15s; }
-    .row-hover:hover .del-btn { opacity:1; }
-    ::-webkit-scrollbar { width:6px; }
-    ::-webkit-scrollbar-thumb { background:#e8cfc4; border-radius:9px; }
-    .upload-btn-inner { transition: all .2s; }
-    .upload-btn-inner:hover { background: #b8893e; transform: translateY(-1px); }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #e8cfc4; border-radius: 9px; }
+
+    /* Toggle */
+    .tog input { display: none; }
+    .tog-track { width:40px; height:22px; background:#e5e7eb; border-radius:11px; position:relative; cursor:pointer; transition:.25s; flex-shrink:0; }
+    .tog-track::after { content:''; position:absolute; top:3px; right:3px; width:16px; height:16px; background:#fff; border-radius:50%; transition:.25s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .tog input:checked ~ .tog-track { background:#d4a373; }
+    .tog input:checked ~ .tog-track::after { transform:translateX(-18px); }
+
+    /* Table row actions */
+    .act-btns { opacity:0; transition:.15s; }
+    tr:hover .act-btns { opacity:1; }
+
+    /* Sort indicator */
+    .sh { cursor:pointer; user-select:none; white-space:nowrap; }
+    .sh:hover span { color:#d4a373; }
+    .sh.asc  .arr::after { content:'↑'; color:#d4a373; margin-right:3px; font-size:.7rem; }
+    .sh.desc .arr::after { content:'↓'; color:#d4a373; margin-right:3px; font-size:.7rem; }
+    .arr::after { content:''; }
+
+    /* AI btn */
+    @keyframes ai-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .ai-loading { animation: ai-pulse 1.2s ease infinite; }
+
+    /* Modal scroll */
+    #product-modal .modal-inner { max-height: 90vh; overflow-y: auto; }
   </style>
 </head>
-
 <body class="bg-[#fcf8f3] min-h-screen text-gray-800">
 
-<!-- ══════════════════════════════════════════════════════════
-     LOADING VIEW
-═══════════════════════════════════════════════════════════ -->
+<!-- ════ LOADING ════ -->
 <div id="v-loading" class="fixed inset-0 flex items-center justify-center bg-[#fcf8f3] z-50">
   <div class="text-center">
     <div class="w-11 h-11 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-4"></div>
@@ -50,23 +66,17 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     ACCESS DENIED VIEW
-═══════════════════════════════════════════════════════════ -->
+<!-- ════ DENIED ════ -->
 <div id="v-denied" data-v class="fixed inset-0 flex items-center justify-center bg-[#fcf8f3] z-40 p-6">
   <div class="text-center fadein max-w-xs">
     <div class="text-7xl mb-5">🔒</div>
     <h1 class="text-2xl font-bold text-gray-800 mb-2">גישה נדחתה</h1>
     <p class="text-gray-400 text-sm mb-7">אין לך הרשאת מנהל לעמוד זה.</p>
-    <a href="index.html" class="inline-block bg-[#d4a373] hover:bg-[#b8893e] text-white px-7 py-3 rounded-full font-bold text-sm transition-colors">
-      חזרה לאתר
-    </a>
+    <a href="index.html" class="inline-block bg-[#d4a373] hover:bg-[#b8893e] text-white px-7 py-3 rounded-full font-bold text-sm transition-colors">חזרה לאתר</a>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     LOGIN VIEW
-═══════════════════════════════════════════════════════════ -->
+<!-- ════ LOGIN ════ -->
 <div id="v-login" data-v class="min-h-screen flex items-center justify-center p-4 bg-[#fcf8f3]">
   <div class="bg-white rounded-2xl shadow-lg border border-[#f0dfc0] p-8 w-full max-w-sm fadein">
     <div class="text-center mb-8">
@@ -77,228 +87,316 @@
       <div class="mb-4">
         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">דוא"ל</label>
         <input id="a-email" type="email" placeholder="your@email.com" autocomplete="email"
-          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 outline-none transition-colors" required />
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50" required />
       </div>
       <div class="mb-4">
         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">סיסמה</label>
         <input id="a-pass" type="password" placeholder="••••••••" autocomplete="current-password"
-          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 outline-none transition-colors" required />
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50" required />
       </div>
       <p id="login-err" class="text-red-400 text-sm min-h-[1.25rem] mb-2"></p>
       <button type="submit" id="login-btn"
-        class="w-full bg-[#d4a373] hover:bg-[#b8893e] disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-full py-3 font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+        class="w-full bg-[#d4a373] hover:bg-[#b8893e] disabled:opacity-60 text-white rounded-full py-3 font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
         כניסה
       </button>
     </form>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     DASHBOARD VIEW
-═══════════════════════════════════════════════════════════ -->
-<div id="v-dash" data-v class="fadein">
+<!-- ════ DASHBOARD ════ -->
+<div id="v-dash" data-v class="fadein min-h-screen">
 
-  <!-- ── Top navbar ──────────────────────────────────────── -->
+  <!-- Header -->
   <header class="bg-white border-b border-[#f0dfc0] sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-base leading-none select-none">✦</div>
+        <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm select-none font-bold">✦</div>
         <div>
           <span class="font-black tracking-[2px] text-gray-800 text-sm">CHARMING</span>
           <span class="block text-[10px] text-[#d4a373] font-semibold leading-none tracking-wider">ADMIN PANEL</span>
         </div>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <a href="index.html" target="_blank"
-          class="hidden sm:inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#d4a373] border border-gray-200 hover:border-[#d4a373] px-3 py-1.5 rounded-full transition-colors font-semibold">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          האתר
+          class="hidden sm:inline-flex items-center gap-1 text-xs text-gray-400 hover:text-[#d4a373] border border-gray-200 hover:border-[#d4a373] px-3 py-1.5 rounded-full transition-colors font-semibold">
+          ↗ האתר
         </a>
-        <span id="admin-name" class="text-sm text-gray-500 hidden sm:block truncate max-w-[160px]"></span>
-        <button id="logout-btn"
-          class="text-xs border border-gray-200 text-gray-500 hover:border-[#d4a373] hover:text-[#d4a373] px-4 py-2 rounded-full font-bold transition-colors">
-          התנתק
-        </button>
+        <span id="admin-name" class="text-xs text-gray-400 hidden sm:block truncate max-w-[140px]"></span>
+        <button id="logout-btn" class="text-xs border border-gray-200 text-gray-500 hover:border-[#d4a373] hover:text-[#d4a373] px-3 py-1.5 rounded-full font-bold transition-colors">התנתק</button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
 
-    <!-- ── Stats row ────────────────────────────────────── -->
+    <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">סה"כ מוצרים</p>
         <p id="s-total" class="text-3xl font-black text-[#d4a373]">—</p>
       </div>
       <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">קטגוריות</p>
-        <p id="s-cats" class="text-3xl font-black text-[#d4a373]">—</p>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">פורסם</p>
+        <p id="s-pub" class="text-3xl font-black text-emerald-500">—</p>
       </div>
       <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">אזל מלאי</p>
         <p id="s-oos" class="text-3xl font-black text-red-400">—</p>
       </div>
-      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm overflow-hidden">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">נוסף לאחרונה</p>
-        <p id="s-last" class="text-sm font-bold text-gray-700 mt-1 truncate">—</p>
+      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">מוצרים מומלצים</p>
+        <p id="s-feat" class="text-3xl font-black text-amber-500">—</p>
       </div>
     </div>
 
-    <!-- ── Main grid: form + table ──────────────────────── -->
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <!-- Controls bar -->
+    <div class="bg-white border border-[#f0dfc0] rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3 shadow-sm">
+      <input id="search-inp" type="search" placeholder="חיפוש לפי שם / SKU..."
+        class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 flex-1 min-w-[180px]" />
 
-      <!-- ADD PRODUCT FORM -->
-      <div class="lg:col-span-2">
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm p-6 lg:sticky lg:top-24">
+      <select id="filter-cat" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+        <option value="">כל הקטגוריות</option>
+        <option>צמידים</option><option>שרשראות</option><option>עגילים</option><option>טבעות</option><option>ערכות</option>
+      </select>
 
-          <h2 class="font-bold text-gray-800 text-base mb-5 flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-[#d4a373] text-white text-sm flex items-center justify-center leading-none font-bold">+</span>
-            הוסיפי מוצר חדש
-          </h2>
+      <select id="filter-col" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+        <option value="">כל האוספים</option>
+        <option>קיץ 2025</option><option>חגים</option><option>יומיום</option><option>מתנות</option>
+      </select>
 
-          <form id="add-form" novalidate class="space-y-4">
+      <select id="filter-stat" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+        <option value="">כל הסטטוסים</option>
+        <option value="published">פורסם</option>
+        <option value="draft">טיוטה</option>
+      </select>
 
-            <!-- Product name -->
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">שם המוצר *</label>
-              <input id="p-name" type="text" placeholder="לדוגמה: שרשרת לב זהב ורוד" required
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
-            </div>
-
-            <!-- Price + Sale price -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">מחיר (₪) *</label>
-                <input id="p-price" type="number" placeholder="149" min="0" required
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">מחיר מבצע (₪)</label>
-                <input id="p-sale" type="number" placeholder="ריק = אין"  min="0"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
-              </div>
-            </div>
-
-            <!-- Category + Stock -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">קטגוריה *</label>
-                <select id="p-cat" required
-                  class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50 outline-none transition-colors">
-                  <option value="">בחרי...</option>
-                  <option>צמידים</option>
-                  <option>שרשראות</option>
-                  <option>עגילים</option>
-                  <option>טבעות</option>
-                  <option>ערכות</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">מלאי (יח')</label>
-                <input id="p-stock" type="number" placeholder="ריק = ללא הגבלה" min="0"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
-              </div>
-            </div>
-
-            <!-- Image upload -->
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">תמונת מוצר</label>
-              <input id="p-img" type="hidden" value="" />
-              <button type="button" id="upload-btn"
-                class="upload-btn-inner w-full bg-[#d4a373] text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                העלי תמונה מהמחשב
-              </button>
-              <p id="img-filename" class="text-xs text-gray-400 mt-1.5 text-center min-h-[1rem]"></p>
-            </div>
-
-            <!-- Live preview -->
-            <div id="img-wrap" class="hidden">
-              <img id="img-prev" src="" alt="תצוגה מקדימה"
-                class="w-full h-44 object-cover rounded-xl border border-[#f0dfc0] shadow-sm"
-                onerror="document.getElementById('img-wrap').classList.add('hidden')" />
-            </div>
-
-            <!-- Description -->
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">תיאור</label>
-              <textarea id="p-desc" rows="3" placeholder="תיאור קצר ואלגנטי של המוצר..."
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none resize-none transition-colors"></textarea>
-            </div>
-
-            <p id="form-err" class="text-red-400 text-xs min-h-[1rem]"></p>
-
-            <button type="submit" id="save-btn"
-              class="w-full bg-[#d4a373] hover:bg-[#b8893e] disabled:opacity-60 disabled:cursor-not-allowed
-                     text-white rounded-full py-3 font-bold text-sm transition-all
-                     hover:-translate-y-0.5 hover:shadow-md">
-              שמרי מוצר
-            </button>
-
-          </form>
-        </div>
-      </div>
-
-      <!-- PRODUCTS TABLE -->
-      <div class="lg:col-span-3">
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
-
-          <div class="px-6 py-4 border-b border-[#f0dfc0] flex items-center justify-between">
-            <h2 class="font-bold text-gray-800 text-base">מלאי מוצרים</h2>
-            <span id="tbl-count"
-              class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">
-              טוען...
-            </span>
-          </div>
-
-          <div id="tbl-loading" class="py-14 text-center">
-            <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
-            <p class="text-gray-300 text-sm font-semibold">טוען מוצרים...</p>
-          </div>
-
-          <div id="tbl-empty" data-v class="py-20 text-center">
-            <p class="text-5xl mb-3">💎</p>
-            <p class="text-gray-500 font-semibold text-sm">אין מוצרים עדיין</p>
-            <p class="text-gray-300 text-xs mt-1">הוסיפי מוצר ראשון באמצעות הטופס</p>
-          </div>
-
-          <div id="tbl-rows" data-v class="divide-y divide-[#fdf6ee]"></div>
-
-        </div>
-      </div>
-
+      <button id="add-btn"
+        class="mr-auto bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-1.5">
+        <span class="text-base leading-none">+</span> מוצר חדש
+      </button>
     </div>
+
+    <!-- Table -->
+    <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-6 py-3 border-b border-[#f0dfc0] flex items-center justify-between">
+        <h2 class="font-bold text-gray-800 text-sm">רשימת מוצרים</h2>
+        <span id="tbl-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">טוען...</span>
+      </div>
+
+      <!-- Loading -->
+      <div id="tbl-loading" class="py-14 text-center">
+        <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
+        <p class="text-gray-300 text-sm">טוען מוצרים...</p>
+      </div>
+
+      <!-- Empty -->
+      <div id="tbl-empty" data-v class="py-20 text-center">
+        <p class="text-5xl mb-3">💎</p>
+        <p class="text-gray-500 font-semibold text-sm">אין מוצרים</p>
+        <p class="text-gray-300 text-xs mt-1">הוסיפי מוצר ראשון בלחיצה על "מוצר חדש"</p>
+      </div>
+
+      <!-- Table itself -->
+      <div id="tbl-wrap" data-v class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-[#f0dfc0] bg-[#fdf6ee]">
+            <tr>
+              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide w-16">תמונה</th>
+              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh" data-sort="name">
+                מוצר <span class="arr"></span>
+              </th>
+              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh hidden sm:table-cell" data-sort="category">
+                קטגוריה <span class="arr"></span>
+              </th>
+              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh" data-sort="priceOriginal">
+                מחיר <span class="arr"></span>
+              </th>
+              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh hidden md:table-cell" data-sort="stockCount">
+                מלאי <span class="arr"></span>
+              </th>
+              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden lg:table-cell">תג</th>
+              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">סטטוס</th>
+              <th class="px-4 py-3 w-28"></th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body" class="divide-y divide-[#fdf6ee]"></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
-</div>
+</div><!-- /v-dash -->
 
-<!-- ══════════════════════════════════════════════════════════
-     DELETE MODAL
-═══════════════════════════════════════════════════════════ -->
-<div id="del-modal" data-v
-  class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-  style="background:rgba(44,42,41,.5);backdrop-filter:blur(5px)">
-  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-xs w-full text-center fadein">
-    <p class="text-5xl mb-4">🗑️</p>
-    <h3 class="font-bold text-gray-800 text-lg mb-2">למחוק את המוצר?</h3>
-    <p class="text-gray-400 text-sm mb-7">פעולה זו אינה ניתנת לשחזור.</p>
-    <div class="flex gap-3">
-      <button id="del-cancel"
-        class="flex-1 border border-gray-200 text-gray-500 hover:border-gray-300 rounded-full py-3 font-bold text-sm transition-colors">
+
+<!-- ════ PRODUCT MODAL (Add / Edit) ════ -->
+<div id="product-modal" data-v
+  class="fixed inset-0 z-[9000] flex items-center justify-center p-3 sm:p-6"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)">
+
+  <div class="modal-inner bg-white rounded-2xl shadow-2xl w-full max-w-2xl fadein">
+
+    <!-- Modal header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0] sticky top-0 bg-white rounded-t-2xl z-10">
+      <h2 id="modal-title" class="font-black text-gray-800 text-base tracking-wide">מוצר חדש</h2>
+      <button id="modal-close" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+    </div>
+
+    <div class="px-6 py-5 space-y-5">
+
+      <!-- Row 1: Name + SKU -->
+      <div class="grid grid-cols-3 gap-4">
+        <div class="col-span-2">
+          <label class="lbl">שם המוצר *</label>
+          <input id="p-name" type="text" placeholder="שרשרת לב זהב ורוד"
+            class="inp" required />
+        </div>
+        <div>
+          <label class="lbl">SKU</label>
+          <input id="p-sku" type="text" placeholder="CHR-001"
+            class="inp" />
+        </div>
+      </div>
+
+      <!-- Row 2: Category + Collection + Material -->
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="lbl">קטגוריה *</label>
+          <select id="p-cat" class="inp" required>
+            <option value="">בחרי...</option>
+            <option>צמידים</option><option>שרשראות</option><option>עגילים</option><option>טבעות</option><option>ערכות</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">אוסף</label>
+          <select id="p-col" class="inp">
+            <option value="">—</option>
+            <option>קיץ 2025</option><option>חגים</option><option>יומיום</option><option>מתנות</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">חומר</label>
+          <select id="p-mat" class="inp">
+            <option value="">—</option>
+            <option>פלדת אל-חלד</option><option>כסף 925</option><option>זהב ציפוי</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 3: Prices + Stock -->
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="lbl">מחיר מקורי (₪) *</label>
+          <input id="p-price" type="number" placeholder="149" min="0" class="inp" required />
+        </div>
+        <div>
+          <label class="lbl">מחיר מבצע (₪)</label>
+          <input id="p-sale" type="number" placeholder="ריק = אין" min="0" class="inp" />
+        </div>
+        <div>
+          <label class="lbl">מלאי (יח')</label>
+          <input id="p-stock" type="number" placeholder="ריק = ללא הגבלה" min="0" class="inp" />
+        </div>
+      </div>
+
+      <!-- Row 4: Badge + Status + isFeatured -->
+      <div class="grid grid-cols-3 gap-4 items-end">
+        <div>
+          <label class="lbl">תג</label>
+          <select id="p-badge" class="inp">
+            <option value="">ללא תג</option>
+            <option value="חדש">חדש</option>
+            <option value="בסט-סלר">בסט-סלר</option>
+            <option value="מבצע">מבצע</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">סטטוס</label>
+          <select id="p-status" class="inp">
+            <option value="published">פורסם</option>
+            <option value="draft">טיוטה</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2 pb-1">
+          <label class="tog flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="p-featured" />
+            <span class="tog-track"></span>
+          </label>
+          <span class="text-sm text-gray-600 font-semibold">מוצר מומלץ ⭐</span>
+        </div>
+      </div>
+
+      <!-- Image upload -->
+      <div>
+        <label class="lbl">תמונת מוצר</label>
+        <input id="p-img" type="hidden" value="" />
+        <button type="button" id="upload-btn"
+          class="w-full bg-[#d4a373] hover:bg-[#b8893e] text-white rounded-xl py-2.5 font-bold text-sm flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span id="upload-btn-label">העלי תמונה מהמחשב</span>
+        </button>
+        <div id="img-wrap" class="hidden mt-3">
+          <img id="img-prev" src="" alt="תצוגה מקדימה"
+            class="w-full h-44 object-cover rounded-xl border border-[#f0dfc0]"
+            onerror="document.getElementById('img-wrap').classList.add('hidden')" />
+        </div>
+      </div>
+
+      <!-- Description + AI -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="lbl !mb-0">תיאור</label>
+          <button type="button" id="ai-btn"
+            class="flex items-center gap-1.5 text-xs font-bold text-[#d4a373] hover:text-[#b8893e] border border-[#f0dfc0] hover:border-[#d4a373] px-3 py-1.5 rounded-full transition-colors">
+            ✨ <span id="ai-btn-label">צרי תיאור ב-AI</span>
+          </button>
+        </div>
+        <textarea id="p-desc" rows="4" placeholder="תיאור אלגנטי של המוצר — אפשר לקבל עזרה מ-AI ☝️"
+          class="inp resize-none"></textarea>
+        <p id="ai-err" class="text-red-400 text-xs mt-1 min-h-[1rem]"></p>
+      </div>
+
+    </div><!-- /form body -->
+
+    <!-- Modal footer -->
+    <div class="px-6 py-4 border-t border-[#f0dfc0] flex items-center justify-between gap-3 sticky bottom-0 bg-white rounded-b-2xl">
+      <p id="form-err" class="text-red-400 text-xs flex-1 min-h-[1rem]"></p>
+      <button id="modal-cancel"
+        class="border border-gray-200 text-gray-500 hover:border-gray-300 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">
         ביטול
       </button>
-      <button id="del-confirm"
-        class="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-full py-3 font-bold text-sm transition-colors">
-        מחקי
+      <button id="save-btn"
+        class="bg-[#d4a373] hover:bg-[#b8893e] disabled:opacity-60 text-white px-8 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+        שמרי מוצר
       </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════ DELETE MODAL ════ -->
+<div id="del-modal" data-v
+  class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-xs w-full text-center fadein">
+    <p class="text-5xl mb-4">🗑️</p>
+    <h3 class="font-bold text-gray-800 text-lg mb-1">למחוק את המוצר?</h3>
+    <p id="del-name" class="text-[#d4a373] font-semibold text-sm mb-4 truncate"></p>
+    <p class="text-gray-400 text-xs mb-7">פעולה זו אינה ניתנת לשחזור.</p>
+    <div class="flex gap-3">
+      <button id="del-cancel" class="flex-1 border border-gray-200 text-gray-500 hover:border-gray-300 rounded-full py-3 font-bold text-sm transition-colors">ביטול</button>
+      <button id="del-confirm" class="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-full py-3 font-bold text-sm transition-colors">מחקי</button>
     </div>
   </div>
 </div>
 
+
+<style>
+  .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
+  .inp { width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s; font-family:inherit; }
+  select.inp { cursor:pointer; }
+  textarea.inp { display:block; }
+</style>
 
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -306,14 +404,17 @@ import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
-  getFirestore, collection, addDoc, deleteDoc, doc,
-  onSnapshot, query, orderBy, serverTimestamp,
+  getFirestore, collection, addDoc, updateDoc, deleteDoc,
+  doc, onSnapshot, query, orderBy, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// ── Config ─────────────────────────────────────────────────────
-const ADMIN_EMAIL = 'amitdovrat123@gmail.com';
+// ── Config ──────────────────────────────────────────────────────
+const ADMIN_EMAIL    = 'amitdovrat123@gmail.com';
+const GEMINI_API_KEY = '';   // ← הכניסי את מפתח Gemini API כאן
+const GEMINI_MODEL   = 'gemini-2.5-flash-preview-05-20';
+const COL_PATH       = 'artifacts/charming-3dd6f/public/data/products';
 
-const app = initializeApp({
+const app  = initializeApp({
   apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
   authDomain:        'charming-3dd6f.firebaseapp.com',
   projectId:         'charming-3dd6f',
@@ -323,72 +424,37 @@ const app = initializeApp({
 });
 const auth = getAuth(app);
 const db   = getFirestore(app);
-const PRODUCTS_COL = 'artifacts/charming-3dd6f/public/data/products';
 
-// ── Cloudinary Upload Widget ────────────────────────────────────
-const cloudWidget = cloudinary.createUploadWidget({
-  cloudName:    'dhri2dbek',
-  uploadPreset: 'charming_preset',
-  sources:      ['local', 'camera'],
-  multiple:     false,
-  cropping:     false,
-  folder:       'charming_products',
-  clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
-  maxFileSize:  8000000,
-  styles: {
-    palette: {
-      window:          '#FFFFFF',
-      windowBorder:    '#d4a373',
-      tabIcon:         '#d4a373',
-      menuIcons:       '#9a8e8a',
-      textDark:        '#2c2a29',
-      textLight:       '#FFFFFF',
-      link:            '#d4a373',
-      action:          '#d4a373',
-      inactiveTabIcon: '#9a8e8a',
-      error:           '#e74c3c',
-      inProgress:      '#d4a373',
-      complete:        '#27ae60',
-      sourceBg:        '#fdf8f5',
-    },
-    fonts: { default: { active: true } },
-  },
-}, (error, result) => {
-  if (error) { console.error('Cloudinary error:', error); return; }
-  if (result && result.event === 'success') {
-    const url = result.info.secure_url;
-    document.getElementById('p-img').value = url;
-    document.getElementById('img-filename').textContent = result.info.original_filename + '.' + result.info.format;
-    const img  = document.getElementById('img-prev');
-    const wrap = document.getElementById('img-wrap');
-    img.src = url;
-    wrap.classList.remove('hidden');
-    document.getElementById('upload-btn').textContent = '✓ תמונה הועלתה — לחצי להחלפה';
-  }
-});
+// ── State ────────────────────────────────────────────────────────
+let allProducts      = [];
+let sortField        = 'createdAt';
+let sortDir          = 'desc';
+let searchQ          = '';
+let filterCat        = '';
+let filterCol        = '';
+let filterStat       = '';
+let modalMode        = 'add';   // 'add' | 'edit' | 'duplicate'
+let editId           = null;
+let pendingDeleteId  = null;
+let unsubProducts    = null;
 
-document.getElementById('upload-btn').addEventListener('click', () => cloudWidget.open());
-
-// ── View switcher ──────────────────────────────────────────────
-const VIEWS = ['v-loading', 'v-denied', 'v-login', 'v-dash'];
+// ── View switcher ────────────────────────────────────────────────
+const VIEWS = ['v-loading','v-denied','v-login','v-dash'];
 function show(id) {
   VIEWS.forEach(v => {
     const el = document.getElementById(v);
     if (v === id) el.removeAttribute('data-v');
-    else          el.setAttribute('data-v', '');
+    else          el.setAttribute('data-v','');
   });
 }
 
-// ── Auth guard ─────────────────────────────────────────────────
-let unsubProducts = null;
-
+// ── Auth ─────────────────────────────────────────────────────────
 onAuthStateChanged(auth, user => {
   if (!user)                      { show('v-login');  return; }
   if (user.email !== ADMIN_EMAIL) { show('v-denied'); return; }
   initDashboard(user);
 });
 
-// ── Login ──────────────────────────────────────────────────────
 document.getElementById('login-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = document.getElementById('login-btn');
@@ -402,197 +468,450 @@ document.getElementById('login-form').addEventListener('submit', async e => {
     );
   } catch(ex) {
     const map = {
-      'auth/invalid-credential': 'פרטי התחברות שגויים.',
-      'auth/user-not-found':     'כתובת הדוא"ל לא נמצאה.',
-      'auth/wrong-password':     'סיסמה שגויה.',
-      'auth/too-many-requests':  'יותר מדי ניסיונות, נסי שוב מאוחר יותר.',
+      'auth/invalid-credential':'פרטי התחברות שגויים.',
+      'auth/user-not-found':'כתובת הדוא"ל לא נמצאה.',
+      'auth/wrong-password':'סיסמה שגויה.',
+      'auth/too-many-requests':'יותר מדי ניסיונות, נסי מאוחר יותר.',
     };
     err.textContent = map[ex.code] ?? 'שגיאה. נסי שנית.';
     btn.disabled = false; btn.textContent = 'כניסה';
   }
 });
 
-// ── Logout ─────────────────────────────────────────────────────
 document.getElementById('logout-btn').addEventListener('click', () => {
   if (unsubProducts) unsubProducts();
   signOut(auth);
 });
 
-// ── Add product ────────────────────────────────────────────────
-document.getElementById('add-form').addEventListener('submit', async e => {
-  e.preventDefault();
+// ── Cloudinary widget ────────────────────────────────────────────
+const cloudWidget = cloudinary.createUploadWidget({
+  cloudName:    'dhri2dbek',
+  uploadPreset: 'charming_preset',
+  sources:      ['local','camera'],
+  multiple:     false,
+  cropping:     false,
+  folder:       'charming_products',
+  clientAllowedFormats: ['jpg','jpeg','png','webp'],
+  maxFileSize:  8000000,
+  styles: {
+    palette: {
+      window:'#FFFFFF', windowBorder:'#d4a373', tabIcon:'#d4a373',
+      menuIcons:'#9a8e8a', textDark:'#2c2a29', textLight:'#FFFFFF',
+      link:'#d4a373', action:'#d4a373', inactiveTabIcon:'#9a8e8a',
+      error:'#e74c3c', inProgress:'#d4a373', complete:'#27ae60', sourceBg:'#fdf8f5',
+    },
+    fonts: { default: { active: true } },
+  },
+}, (error, result) => {
+  if (error) return;
+  if (result && result.event === 'success') {
+    const url = result.info.secure_url;
+    document.getElementById('p-img').value = url;
+    document.getElementById('upload-btn-label').textContent = '✓ תמונה הועלתה — לחצי להחלפה';
+    const img  = document.getElementById('img-prev');
+    const wrap = document.getElementById('img-wrap');
+    img.src = url;
+    wrap.classList.remove('hidden');
+  }
+});
+document.getElementById('upload-btn').addEventListener('click', () => cloudWidget.open());
+
+// ── Modal open/close ─────────────────────────────────────────────
+function openModal(mode, product = null) {
+  modalMode = mode;
+  editId    = (mode === 'edit' && product) ? product.id : null;
+
+  // Reset form
+  clearForm();
+
+  if (product) {
+    document.getElementById('p-name').value    = mode === 'duplicate' ? product.name + ' (עותק)' : product.name || '';
+    document.getElementById('p-sku').value     = mode === 'duplicate' ? '' : product.sku || '';
+    document.getElementById('p-cat').value     = product.category || '';
+    document.getElementById('p-col').value     = product.collection || '';
+    document.getElementById('p-mat').value     = product.material || '';
+    document.getElementById('p-price').value   = product.priceOriginal ?? product.price ?? '';
+    document.getElementById('p-sale').value    = product.priceSale ?? product.salePrice ?? '';
+    document.getElementById('p-stock').value   = product.stockCount ?? product.stock ?? '';
+    document.getElementById('p-badge').value   = product.badge || '';
+    document.getElementById('p-status').value  = product.status || 'published';
+    document.getElementById('p-featured').checked = !!product.isFeatured;
+    document.getElementById('p-desc').value    = product.description || '';
+
+    const imgUrl = product.imageUrl || '';
+    document.getElementById('p-img').value = imgUrl;
+    if (imgUrl) {
+      document.getElementById('img-prev').src = imgUrl;
+      document.getElementById('img-wrap').classList.remove('hidden');
+      document.getElementById('upload-btn-label').textContent = '✓ תמונה קיימת — לחצי להחלפה';
+    }
+  }
+
+  const titles = { add: 'מוצר חדש', edit: 'עריכת מוצר', duplicate: 'שכפול מוצר' };
+  const saveLabels = { add: 'שמרי מוצר', edit: 'עדכני מוצר', duplicate: 'שמרי עותק' };
+  document.getElementById('modal-title').textContent = titles[mode];
+  document.getElementById('save-btn').textContent    = saveLabels[mode];
+
+  document.getElementById('product-modal').removeAttribute('data-v');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('product-modal').setAttribute('data-v','');
+  document.body.style.overflow = '';
+}
+
+function clearForm() {
+  ['p-name','p-sku','p-price','p-sale','p-stock','p-desc'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  ['p-cat','p-col','p-mat','p-badge'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('p-status').value = 'published';
+  document.getElementById('p-featured').checked = false;
+  document.getElementById('p-img').value = '';
+  document.getElementById('img-wrap').classList.add('hidden');
+  document.getElementById('img-prev').src = '';
+  document.getElementById('upload-btn-label').textContent = 'העלי תמונה מהמחשב';
+  document.getElementById('form-err').textContent = '';
+  document.getElementById('ai-err').textContent = '';
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('add-btn').addEventListener('click', () => openModal('add'));
+
+// Close on backdrop click
+document.getElementById('product-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── Save product (add / edit / duplicate) ────────────────────────
+document.getElementById('save-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-btn');
   const err = document.getElementById('form-err');
 
-  const name      = document.getElementById('p-name').value.trim();
-  const price     = parseFloat(document.getElementById('p-price').value);
-  const saleRaw   = document.getElementById('p-sale').value.trim();
-  const salePrice = saleRaw !== '' ? parseFloat(saleRaw) : null;
-  const cat       = document.getElementById('p-cat').value;
-  const stockRaw  = document.getElementById('p-stock').value.trim();
-  const stock     = stockRaw !== '' ? parseInt(stockRaw) : null;
-  const img       = document.getElementById('p-img').value.trim();
-  const desc      = document.getElementById('p-desc').value.trim();
+  const name       = document.getElementById('p-name').value.trim();
+  const sku        = document.getElementById('p-sku').value.trim() || autoSKU();
+  const cat        = document.getElementById('p-cat').value;
+  const col        = document.getElementById('p-col').value;
+  const mat        = document.getElementById('p-mat').value;
+  const priceOrig  = parseFloat(document.getElementById('p-price').value);
+  const saleRaw    = document.getElementById('p-sale').value.trim();
+  const priceSale  = saleRaw !== '' ? parseFloat(saleRaw) : null;
+  const stockRaw   = document.getElementById('p-stock').value.trim();
+  const stockCount = stockRaw !== '' ? parseInt(stockRaw) : null;
+  const badge      = document.getElementById('p-badge').value;
+  const status     = document.getElementById('p-status').value;
+  const isFeatured = document.getElementById('p-featured').checked;
+  const imageUrl   = document.getElementById('p-img').value.trim();
+  const description = document.getElementById('p-desc').value.trim();
 
-  if (!name)            { err.textContent = 'יש להזין שם מוצר.'; return; }
-  if (!price || price <= 0) { err.textContent = 'יש להזין מחיר תקין.'; return; }
-  if (!cat)             { err.textContent = 'יש לבחור קטגוריה.'; return; }
-  if (salePrice !== null && salePrice >= price) {
-    err.textContent = 'מחיר המבצע חייב להיות נמוך מהמחיר הרגיל.'; return;
+  if (!name)               { err.textContent = 'יש להזין שם מוצר.'; return; }
+  if (!priceOrig || priceOrig <= 0) { err.textContent = 'יש להזין מחיר תקין.'; return; }
+  if (!cat)                { err.textContent = 'יש לבחור קטגוריה.'; return; }
+  if (priceSale !== null && priceSale >= priceOrig) {
+    err.textContent = 'מחיר המבצע חייב להיות נמוך מהמחיר המקורי.'; return;
   }
 
-  btn.disabled = true; btn.textContent = 'שומרת...'; err.textContent = '';
-  try {
-    const data = {
-      name, price, category: cat,
-      imageUrl: img, description: desc,
-      createdAt: serverTimestamp(),
-    };
-    if (salePrice !== null) data.salePrice = salePrice;
-    if (stock     !== null) data.stock     = stock;
+  err.textContent = '';
+  btn.disabled = true;
 
-    await addDoc(collection(db, PRODUCTS_COL), data);
-    document.getElementById('add-form').reset();
-    document.getElementById('p-img').value = '';
-    document.getElementById('img-wrap').classList.add('hidden');
-    document.getElementById('img-filename').textContent = '';
-    const uploadBtnEl = document.getElementById('upload-btn');
-    uploadBtnEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>העלי תמונה מהמחשב`;
+  const data = {
+    name, sku, category: cat, collection: col || null, material: mat || null,
+    priceOriginal: priceOrig, priceSale, stockCount,
+    badge: badge || null, status, isFeatured,
+    imageUrl: imageUrl || null, description: description || null,
+    updatedAt: serverTimestamp(),
+  };
+
+  try {
+    if (modalMode === 'edit' && editId) {
+      await updateDoc(doc(db, COL_PATH, editId), data);
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, COL_PATH), data);
+    }
+    closeModal();
   } catch(ex) {
     err.textContent = 'שגיאה בשמירה. נסי שנית.';
     console.error(ex);
   } finally {
-    btn.disabled = false; btn.textContent = 'שמרי מוצר';
+    btn.disabled = false;
   }
 });
 
-// ── Delete modal ───────────────────────────────────────────────
-let pendingId = null;
-
-function openDel(id) {
-  pendingId = id;
+// ── Delete ───────────────────────────────────────────────────────
+function openDelete(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('del-name').textContent = name;
   document.getElementById('del-modal').removeAttribute('data-v');
 }
-function closeDel() {
-  pendingId = null;
-  document.getElementById('del-modal').setAttribute('data-v', '');
+function closeDelete() {
+  pendingDeleteId = null;
+  document.getElementById('del-modal').setAttribute('data-v','');
 }
-
-document.getElementById('del-cancel').addEventListener('click', closeDel);
+document.getElementById('del-cancel').addEventListener('click', closeDelete);
 document.getElementById('del-confirm').addEventListener('click', async () => {
-  if (!pendingId) return;
-  try { await deleteDoc(doc(db, PRODUCTS_COL, pendingId)); }
+  if (!pendingDeleteId) return;
+  try { await deleteDoc(doc(db, COL_PATH, pendingDeleteId)); }
   catch(ex) { console.error('Delete failed:', ex); }
-  closeDel();
+  closeDelete();
 });
 
-// ── Category badge colours ─────────────────────────────────────
+// ── AI Description Generator ─────────────────────────────────────
+document.getElementById('ai-btn').addEventListener('click', async () => {
+  const aiBtn   = document.getElementById('ai-btn');
+  const label   = document.getElementById('ai-btn-label');
+  const aiErr   = document.getElementById('ai-err');
+  const textarea = document.getElementById('p-desc');
+
+  if (!GEMINI_API_KEY) {
+    aiErr.textContent = 'מפתח Gemini API חסר. הכניסי אותו ב-GEMINI_API_KEY.';
+    return;
+  }
+
+  const name = document.getElementById('p-name').value.trim();
+  const cat  = document.getElementById('p-cat').value;
+  const mat  = document.getElementById('p-mat').value;
+
+  if (!name) { aiErr.textContent = 'יש להזין שם מוצר לפני יצירת תיאור.'; return; }
+
+  aiBtn.disabled = true;
+  label.textContent = 'מייצרת תיאור...';
+  aiBtn.classList.add('ai-loading');
+  aiErr.textContent = '';
+
+  const systemPrompt = `אתה קופירייטר מקצועי של המותג "Charming by Vik" — מותג תכשיטים יוקרתי בסגנון קיץ.
+כתוב תיאור מוצר בעברית בלבד. אסור להשתמש בשום מילה באנגלית.
+הטון: אלגנטי, חם, מזמין ומקצועי — שירי אך ברור.
+אסור: ז'רגון, שפה מכירתית אגרסיבית, קלישאות זולות.
+מבנה חובה:
+1. כותרת קליטה (שורה אחת, ללא נקודתיים)
+2. 2-3 משפטי תיאור עשירים
+3. משפט סיום אחד על עמידות
+מילות מפתח שחובה לשלב: "ניצוץ", "צ'ארמינג", "קיץ", "פלדת אל-חלד", "עמיד במים".`;
+
+  const userPrompt = `צרי תיאור מוצר עבור:
+שם: ${name}
+קטגוריה: ${cat || 'תכשיט'}
+חומר: ${mat || 'פלדת אל-חלד'}`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ parts: [{ text: userPrompt }] }],
+          generationConfig: { temperature: 0.9, maxOutputTokens: 300 },
+        }),
+      }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error('תגובה ריקה');
+    textarea.value = text.trim();
+  } catch(ex) {
+    aiErr.textContent = 'שגיאה בחיבור ל-AI. בדקי את המפתח.';
+    console.error('Gemini error:', ex);
+  } finally {
+    aiBtn.disabled = false;
+    label.textContent = 'צרי תיאור ב-AI';
+    aiBtn.classList.remove('ai-loading');
+  }
+});
+
+// ── Filters & Sort ───────────────────────────────────────────────
+document.getElementById('search-inp').addEventListener('input', e => { searchQ = e.target.value.trim().toLowerCase(); renderTable(); });
+document.getElementById('filter-cat').addEventListener('change', e => { filterCat = e.target.value; renderTable(); });
+document.getElementById('filter-col').addEventListener('change', e => { filterCol = e.target.value; renderTable(); });
+document.getElementById('filter-stat').addEventListener('change', e => { filterStat = e.target.value; renderTable(); });
+
+document.querySelectorAll('.sh').forEach(th => {
+  th.addEventListener('click', () => {
+    const field = th.dataset.sort;
+    if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortField = field; sortDir = 'asc'; }
+    document.querySelectorAll('.sh').forEach(h => h.classList.remove('asc','desc'));
+    th.classList.add(sortDir);
+    renderTable();
+  });
+});
+
+// ── Category badge colours ────────────────────────────────────────
 const CAT_COLOR = {
-  'צמידים':  'bg-pink-50 text-pink-500',
-  'שרשראות': 'bg-amber-50 text-amber-600',
-  'עגילים':  'bg-purple-50 text-purple-500',
-  'טבעות':   'bg-emerald-50 text-emerald-600',
-  'ערכות':   'bg-blue-50 text-blue-500',
+  'צמידים':'bg-pink-50 text-pink-500','שרשראות':'bg-amber-50 text-amber-600',
+  'עגילים':'bg-purple-50 text-purple-500','טבעות':'bg-emerald-50 text-emerald-600','ערכות':'bg-blue-50 text-blue-500',
+};
+const BADGE_CLASS = {
+  'חדש':'bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0]',
+  'בסט-סלר':'bg-amber-50 text-amber-600 border border-amber-200',
+  'מבצע':'bg-red-50 text-red-500 border border-red-200',
 };
 
-// ── Dashboard init ─────────────────────────────────────────────
+// ── Render Table ─────────────────────────────────────────────────
+function renderTable() {
+  let list = allProducts.filter(p => {
+    if (searchQ && !(p.name?.toLowerCase().includes(searchQ) || p.sku?.toLowerCase().includes(searchQ))) return false;
+    if (filterCat  && p.category   !== filterCat)  return false;
+    if (filterCol  && p.collection !== filterCol)   return false;
+    if (filterStat && p.status     !== filterStat)  return false;
+    return true;
+  });
+
+  // Sort
+  list.sort((a, b) => {
+    let va = a[sortField], vb = b[sortField];
+    if (va == null) va = sortDir === 'asc' ? Infinity : -Infinity;
+    if (vb == null) vb = sortDir === 'asc' ? Infinity : -Infinity;
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    // Handle Firestore Timestamps
+    if (va?.seconds) va = va.seconds;
+    if (vb?.seconds) vb = vb.seconds;
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1  : -1;
+    return 0;
+  });
+
+  document.getElementById('tbl-count').textContent = `${list.length} מוצרים`;
+
+  const tblEmpty = document.getElementById('tbl-empty');
+  const tblWrap  = document.getElementById('tbl-wrap');
+
+  if (!list.length) {
+    tblEmpty.removeAttribute('data-v');
+    tblWrap.setAttribute('data-v','');
+    document.getElementById('tbl-body').innerHTML = '';
+    return;
+  }
+  tblEmpty.setAttribute('data-v','');
+  tblWrap.removeAttribute('data-v');
+
+  document.getElementById('tbl-body').innerHTML = list.map(p => {
+    const thumb = p.imageUrl
+      ? `<img src="${p.imageUrl}" class="w-11 h-11 rounded-lg object-cover border border-[#f0dfc0]" onerror="this.style.display='none'" />`
+      : `<div class="w-11 h-11 rounded-lg bg-[#fdf6ee] flex items-center justify-center text-lg">💎</div>`;
+
+    const catBadge = p.category
+      ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full ${CAT_COLOR[p.category] ?? 'bg-gray-50 text-gray-400'}">${esc(p.category)}</span>`
+      : '';
+
+    const price = p.priceOriginal ?? p.price ?? 0;
+    const sale  = p.priceSale ?? p.salePrice ?? null;
+    const hasSale = sale && sale > 0 && sale < price;
+    const priceHTML = hasSale
+      ? `<span class="text-gray-300 line-through text-xs">${price}₪</span> <span class="text-[#d4a373] font-bold text-sm">${sale}₪</span>`
+      : `<span class="text-gray-700 font-semibold text-sm">${price}₪</span>`;
+
+    const stock = p.stockCount ?? p.stock ?? null;
+    const stockHTML = stock === 0
+      ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400">אזל</span>`
+      : stock !== null
+        ? `<span class="text-xs text-gray-600 font-semibold">${stock}</span>`
+        : `<span class="text-xs text-gray-300">∞</span>`;
+
+    const badgeHTML = p.badge
+      ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${BADGE_CLASS[p.badge] ?? ''}">${esc(p.badge)}</span>`
+      : '<span class="text-gray-200 text-xs">—</span>';
+
+    const statusHTML = p.status === 'published'
+      ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">פורסם</span>`
+      : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">טיוטה</span>`;
+
+    const featStar = p.isFeatured ? `<span class="text-amber-400 text-sm">⭐</span>` : '';
+
+    return `<tr class="hover:bg-[#fdf6ee] transition-colors" data-id="${p.id}">
+      <td class="px-4 py-3">${thumb}</td>
+      <td class="px-4 py-3">
+        <p class="font-semibold text-gray-800 text-sm leading-tight flex items-center gap-1">${esc(p.name)} ${featStar}</p>
+        ${p.sku ? `<p class="text-[10px] text-gray-400 font-mono mt-0.5">${esc(p.sku)}</p>` : ''}
+      </td>
+      <td class="px-4 py-3 hidden sm:table-cell">${catBadge}${p.collection ? `<p class="text-[10px] text-gray-400 mt-0.5">${esc(p.collection)}</p>` : ''}</td>
+      <td class="px-4 py-3">${priceHTML}</td>
+      <td class="px-4 py-3 hidden md:table-cell">${stockHTML}</td>
+      <td class="px-4 py-3 hidden lg:table-cell">${badgeHTML}</td>
+      <td class="px-4 py-3">${statusHTML}</td>
+      <td class="px-4 py-3">
+        <div class="act-btns flex items-center gap-1 justify-end">
+          <button data-act="edit" data-id="${p.id}" title="עריכה"
+            class="p-1.5 rounded-lg text-gray-300 hover:text-[#d4a373] hover:bg-[#fdf6ee] transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button data-act="dup" data-id="${p.id}" title="שכפול"
+            class="p-1.5 rounded-lg text-gray-300 hover:text-blue-400 hover:bg-blue-50 transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button data-act="del" data-id="${p.id}" data-name="${esc(p.name)}" title="מחיקה"
+            class="p-1.5 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Event delegation for row actions
+  document.getElementById('tbl-body').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const product = allProducts.find(p => p.id === id);
+    if (!product) return;
+    if (btn.dataset.act === 'edit') openModal('edit', product);
+    if (btn.dataset.act === 'dup')  openModal('duplicate', product);
+    if (btn.dataset.act === 'del')  openDelete(id, btn.dataset.name);
+  }, { once: true }); // re-attached each render — use delegated approach below
+}
+
+// ── Dashboard init ────────────────────────────────────────────────
 function initDashboard(user) {
   show('v-dash');
   document.getElementById('admin-name').textContent = user.displayName || user.email;
 
-  const elLoading = document.getElementById('tbl-loading');
-  const elEmpty   = document.getElementById('tbl-empty');
-  const elRows    = document.getElementById('tbl-rows');
-  const elCount   = document.getElementById('tbl-count');
-
-  const q = query(collection(db, PRODUCTS_COL), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, COL_PATH), orderBy('createdAt', 'desc'));
 
   unsubProducts = onSnapshot(q, snap => {
-    const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const total    = products.length;
-    const cats     = new Set(products.map(p => p.category).filter(Boolean));
-    const oos      = products.filter(p => p.stock === 0).length;
+    allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     // Stats
-    document.getElementById('s-total').textContent = total;
-    document.getElementById('s-cats').textContent  = cats.size;
-    document.getElementById('s-oos').textContent   = oos || '0';
-    document.getElementById('s-last').textContent  = total ? products[0].name : '—';
-    elCount.textContent = `${total} מוצרים`;
+    document.getElementById('s-total').textContent = allProducts.length;
+    document.getElementById('s-pub').textContent   = allProducts.filter(p => p.status === 'published').length;
+    document.getElementById('s-oos').textContent   = allProducts.filter(p => (p.stockCount ?? p.stock) === 0).length;
+    document.getElementById('s-feat').textContent  = allProducts.filter(p => p.isFeatured).length;
 
-    elLoading.setAttribute('data-v', '');
-
-    if (!total) {
-      elEmpty.removeAttribute('data-v');
-      elRows.setAttribute('data-v', '');
-      return;
-    }
-
-    elEmpty.setAttribute('data-v', '');
-    elRows.removeAttribute('data-v');
-
-    elRows.innerHTML = products.map(p => {
-      const thumb = p.imageUrl
-        ? `<img src="${p.imageUrl}" alt="${esc(p.name)}"
-               class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-[#f0dfc0]"
-               onerror="this.outerHTML='<div class=\'w-12 h-12 rounded-xl bg-[#fdf6ee] flex-shrink-0 flex items-center justify-center text-xl\'>💎</div>'" />`
-        : `<div class="w-12 h-12 rounded-xl bg-[#fdf6ee] flex-shrink-0 flex items-center justify-center text-xl">💎</div>`;
-
-      const catBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${CAT_COLOR[p.category] ?? 'bg-gray-50 text-gray-400'}">${esc(p.category || '—')}</span>`;
-
-      // Price display
-      const hasSale = p.salePrice && p.salePrice > 0 && p.salePrice < p.price;
-      const priceHTML = hasSale
-        ? `<span class="text-xs text-gray-300 line-through">${p.price} ₪</span>
-           <span class="text-xs text-[#d4a373] font-bold">${p.salePrice} ₪</span>`
-        : `<span class="text-xs text-gray-400 font-semibold">${p.price ? p.price + ' ₪' : ''}</span>`;
-
-      // Stock indicator
-      let stockDot = '';
-      if (p.stock === 0) {
-        stockDot = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-400">אזל</span>`;
-      } else if (p.stock != null) {
-        stockDot = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600">${p.stock} יח'</span>`;
-      } else {
-        stockDot = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-50 text-gray-300">ללא הגבלה</span>`;
-      }
-
-      return `
-        <div class="row-hover flex items-center gap-4 px-6 py-4 transition-colors">
-          ${thumb}
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-800 text-sm truncate">${esc(p.name)}</p>
-            <div class="flex items-center flex-wrap gap-1.5 mt-0.5">
-              ${catBadge}
-              ${priceHTML}
-              ${stockDot}
-            </div>
-            ${p.description ? `<p class="text-xs text-gray-400 mt-0.5 truncate max-w-[260px]">${esc(p.description)}</p>` : ''}
-          </div>
-          <button data-del="${p.id}" class="del-btn text-gray-300 hover:text-red-400 hover:bg-red-50 p-2 rounded-xl transition-colors flex-shrink-0" aria-label="מחק">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14H6L5 6"/>
-              <path d="M10 11v6"/><path d="M14 11v6"/>
-              <path d="M9 6V4h6v2"/>
-            </svg>
-          </button>
-        </div>`;
-    }).join('');
-
-    elRows.querySelectorAll('[data-del]')
-      .forEach(btn => btn.addEventListener('click', () => openDel(btn.dataset.del)));
-
+    document.getElementById('tbl-loading').setAttribute('data-v','');
+    renderTable();
   }, err => {
     console.error(err);
-    elLoading.setAttribute('data-v', '');
-    elRows.removeAttribute('data-v');
-    elRows.innerHTML = '<p class="text-center text-red-400 text-sm py-10">שגיאה בטעינת המוצרים.</p>';
+    document.getElementById('tbl-loading').setAttribute('data-v','');
   });
+
+  // Re-attach delegation after each render by using document-level delegation
+  document.getElementById('tbl-body').addEventListener('click', handleRowAction);
 }
 
-// ── HTML escape helper ─────────────────────────────────────────
+function handleRowAction(e) {
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+  if (btn.dataset.act === 'edit') openModal('edit', product);
+  if (btn.dataset.act === 'dup')  openModal('duplicate', product);
+  if (btn.dataset.act === 'del')  openDelete(id, btn.dataset.name || product.name);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function autoSKU() {
+  return 'CHR-' + Math.random().toString(36).substring(2,6).toUpperCase();
+}
+
 function esc(str) {
   const d = document.createElement('div');
   d.textContent = String(str ?? '');

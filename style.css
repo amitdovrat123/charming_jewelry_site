@@ -1811,6 +1811,10 @@ ul { list-style: none; }
   background: var(--ink);
 }
 
+.shop-card-badge--sale {
+  background: #dc2626;
+}
+
 .shop-card-body {
   padding: 16px 18px 20px;
   flex: 1;
