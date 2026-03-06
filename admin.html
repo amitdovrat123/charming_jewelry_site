@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>לוח ניהול | Charming by Vik</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold:  { DEFAULT: '#d4a373', dark: '#b8893e', light: '#f0dfc0', pale: '#fdf6ee' },
+            cream: { DEFAULT: '#fcf8f3', dark: '#f0e6d8' },
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Assistant', sans-serif; }
+    [data-v]  { display: none !important; }
+    .spin     { animation: spin .8s linear infinite; }
+    .fadein   { animation: fadein .28s ease; }
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadein  { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    input:focus, select:focus, textarea:focus { border-color: #d4a373 !important; }
+    .row-hover:hover { background: #fdf6ee; }
+    .del-btn { opacity:0; transition:.15s; }
+    .row-hover:hover .del-btn { opacity:1; }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-thumb { background:#e8cfc4; border-radius:9px; }
+  </style>
+</head>
+
+<body class="bg-[#fcf8f3] min-h-screen text-gray-800">
+
+<!-- ══════════════════════════════════════════════════════════
+     LOADING VIEW
+═══════════════════════════════════════════════════════════ -->
+<div id="v-loading" class="fixed inset-0 flex items-center justify-center bg-[#fcf8f3] z-50">
+  <div class="text-center">
+    <div class="w-11 h-11 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-4"></div>
+    <p class="text-[#d4a373] font-bold tracking-widest text-sm">CHARMING</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ACCESS DENIED VIEW
+═══════════════════════════════════════════════════════════ -->
+<div id="v-denied" data-v class="fixed inset-0 flex items-center justify-center bg-[#fcf8f3] z-40 p-6">
+  <div class="text-center fadein max-w-xs">
+    <div class="text-7xl mb-5">🔒</div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">גישה נדחתה</h1>
+    <p class="text-gray-400 text-sm mb-7">אין לך הרשאת מנהל לעמוד זה.</p>
+    <a href="index.html" class="inline-block bg-[#d4a373] hover:bg-[#b8893e] text-white px-7 py-3 rounded-full font-bold text-sm transition-colors">
+      חזרה לאתר
+    </a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     LOGIN VIEW
+═══════════════════════════════════════════════════════════ -->
+<div id="v-login" data-v class="min-h-screen flex items-center justify-center p-4 bg-[#fcf8f3]">
+  <div class="bg-white rounded-2xl shadow-lg border border-[#f0dfc0] p-8 w-full max-w-sm fadein">
+    <div class="text-center mb-8">
+      <p class="font-black text-xl tracking-[3px] text-gray-800">CHARMING</p>
+      <p class="text-[#d4a373] text-sm font-semibold mt-0.5">לוח ניהול</p>
+    </div>
+    <form id="login-form" novalidate>
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">דוא"ל</label>
+        <input id="a-email" type="email" placeholder="your@email.com" autocomplete="email"
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 outline-none transition-colors" required />
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">סיסמה</label>
+        <input id="a-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 outline-none transition-colors" required />
+      </div>
+      <p id="login-err" class="text-red-400 text-sm min-h-[1.25rem] mb-2"></p>
+      <button type="submit" id="login-btn"
+        class="w-full bg-[#d4a373] hover:bg-[#b8893e] disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-full py-3 font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+        כניסה
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     DASHBOARD VIEW
+═══════════════════════════════════════════════════════════ -->
+<div id="v-dash" data-v class="fadein">
+
+  <!-- ── Top navbar ──────────────────────────────────────── -->
+  <header class="bg-white border-b border-[#f0dfc0] sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-base leading-none select-none">✦</div>
+        <div>
+          <span class="font-black tracking-[2px] text-gray-800 text-sm">CHARMING</span>
+          <span class="block text-[10px] text-[#d4a373] font-semibold leading-none tracking-wider">ADMIN PANEL</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="admin-name" class="text-sm text-gray-500 hidden sm:block truncate max-w-[160px]"></span>
+        <button id="logout-btn"
+          class="text-xs border border-gray-200 text-gray-500 hover:border-[#d4a373] hover:text-[#d4a373] px-4 py-2 rounded-full font-bold transition-colors">
+          התנתק
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+    <!-- ── Stats row ────────────────────────────────────── -->
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">סה"כ מוצרים</p>
+        <p id="s-total" class="text-3xl font-black text-[#d4a373]">—</p>
+      </div>
+      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">קטגוריות</p>
+        <p id="s-cats" class="text-3xl font-black text-[#d4a373]">—</p>
+      </div>
+      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm overflow-hidden">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">נוסף לאחרונה</p>
+        <p id="s-last" class="text-sm font-bold text-gray-700 mt-1 truncate">—</p>
+      </div>
+    </div>
+
+    <!-- ── Main grid: form + table ──────────────────────── -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+      <!-- ADD PRODUCT FORM -->
+      <div class="lg:col-span-2">
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm p-6 lg:sticky lg:top-24">
+
+          <h2 class="font-bold text-gray-800 text-base mb-5 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#d4a373] text-white text-sm flex items-center justify-center leading-none font-bold">+</span>
+            הוסף מוצר חדש
+          </h2>
+
+          <form id="add-form" novalidate class="space-y-4">
+
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">שם המוצר *</label>
+              <input id="p-name" type="text" placeholder="לדוגמה: שרשרת לב זהב ורוד" required
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">מחיר (₪) *</label>
+                <input id="p-price" type="number" placeholder="149" min="0" required
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">קטגוריה *</label>
+                <select id="p-cat" required
+                  class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50 outline-none transition-colors">
+                  <option value="">בחרי...</option>
+                  <option>צמידים</option>
+                  <option>שרשראות</option>
+                  <option>עגילים</option>
+                  <option>טבעות</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">כתובת תמונה (URL)</label>
+              <input id="p-img" type="text" placeholder="https://..."
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
+            </div>
+
+            <!-- live image preview -->
+            <div id="img-wrap" class="hidden">
+              <img id="img-prev" src="" alt="תצוגה מקדימה"
+                class="w-full h-40 object-cover rounded-xl border border-[#f0dfc0]"
+                onerror="document.getElementById('img-wrap').classList.add('hidden')" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">תיאור</label>
+              <textarea id="p-desc" rows="3" placeholder="תיאור קצר ואלגנטי של המוצר..."
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none resize-none transition-colors"></textarea>
+            </div>
+
+            <p id="form-err" class="text-red-400 text-xs min-h-[1rem]"></p>
+
+            <button type="submit" id="save-btn"
+              class="w-full bg-[#d4a373] hover:bg-[#b8893e] disabled:opacity-60 disabled:cursor-not-allowed
+                     text-white rounded-full py-3 font-bold text-sm transition-all
+                     hover:-translate-y-0.5 hover:shadow-md">
+              שמור מוצר
+            </button>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- PRODUCTS TABLE -->
+      <div class="lg:col-span-3">
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+
+          <div class="px-6 py-4 border-b border-[#f0dfc0] flex items-center justify-between">
+            <h2 class="font-bold text-gray-800 text-base">מלאי מוצרים</h2>
+            <span id="tbl-count"
+              class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">
+              טוען...
+            </span>
+          </div>
+
+          <!-- Table loading -->
+          <div id="tbl-loading" class="py-14 text-center">
+            <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
+            <p class="text-gray-300 text-sm font-semibold">טוען מוצרים...</p>
+          </div>
+
+          <!-- Empty state -->
+          <div id="tbl-empty" data-v class="py-20 text-center">
+            <p class="text-5xl mb-3">💎</p>
+            <p class="text-gray-500 font-semibold text-sm">אין מוצרים עדיין</p>
+            <p class="text-gray-300 text-xs mt-1">הוסיפי מוצר ראשון באמצעות הטופס</p>
+          </div>
+
+          <!-- Rows -->
+          <div id="tbl-rows" data-v class="divide-y divide-[#fdf6ee]"></div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     DELETE MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="del-modal" data-v
+  class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.5);backdrop-filter:blur(5px)">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-xs w-full text-center fadein">
+    <p class="text-5xl mb-4">🗑️</p>
+    <h3 class="font-bold text-gray-800 text-lg mb-2">למחוק את המוצר?</h3>
+    <p class="text-gray-400 text-sm mb-7">פעולה זו אינה ניתנת לשחזור.</p>
+    <div class="flex gap-3">
+      <button id="del-cancel"
+        class="flex-1 border border-gray-200 text-gray-500 hover:border-gray-300 rounded-full py-3 font-bold text-sm transition-colors">
+        ביטול
+      </button>
+      <button id="del-confirm"
+        class="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-full py-3 font-bold text-sm transition-colors">
+        מחק
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {
+  getFirestore, collection, addDoc, deleteDoc, doc,
+  onSnapshot, query, orderBy, serverTimestamp,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// ── Config ─────────────────────────────────────────────────────
+const ADMIN_EMAIL = 'amitdovrat123@gmail.com';
+
+const app  = initializeApp({
+  apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
+  authDomain:        'charming-3dd6f.firebaseapp.com',
+  projectId:         'charming-3dd6f',
+  storageBucket:     'charming-3dd6f.firebasestorage.app',
+  messagingSenderId: '13025110676',
+  appId:             '1:13025110676:web:1cddc38b2d147e5e195001',
+});
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const PRODUCTS_COL = 'artifacts/charming-3dd6f/public/data/products';
+
+// ── View switcher ──────────────────────────────────────────────
+const VIEWS = ['v-loading','v-denied','v-login','v-dash'];
+function show(id) {
+  VIEWS.forEach(v => {
+    const el = document.getElementById(v);
+    if (v === id) el.removeAttribute('data-v');
+    else          el.setAttribute('data-v', '');
+  });
+}
+
+// ── Auth guard ─────────────────────────────────────────────────
+let unsubProducts = null;
+
+onAuthStateChanged(auth, user => {
+  if (!user)                    { show('v-login');  return; }
+  if (user.email !== ADMIN_EMAIL) { show('v-denied'); return; }
+  initDashboard(user);
+});
+
+// ── Login ──────────────────────────────────────────────────────
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  btn.disabled = true; btn.textContent = 'מתחבר...'; err.textContent = '';
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      document.getElementById('a-email').value.trim(),
+      document.getElementById('a-pass').value,
+    );
+  } catch(ex) {
+    const map = {
+      'auth/invalid-credential': 'פרטי התחברות שגויים.',
+      'auth/user-not-found':     'כתובת הדוא"ל לא נמצאה.',
+      'auth/wrong-password':     'סיסמה שגויה.',
+      'auth/too-many-requests':  'יותר מדי ניסיונות, נסי שוב מאוחר יותר.',
+    };
+    err.textContent = map[ex.code] ?? 'שגיאה. נסי שנית.';
+    btn.disabled = false; btn.textContent = 'כניסה';
+  }
+});
+
+// ── Logout ─────────────────────────────────────────────────────
+document.getElementById('logout-btn').addEventListener('click', () => {
+  if (unsubProducts) unsubProducts();
+  signOut(auth);
+});
+
+// ── Image URL preview ──────────────────────────────────────────
+document.getElementById('p-img').addEventListener('input', e => {
+  const url  = e.target.value.trim();
+  const wrap = document.getElementById('img-wrap');
+  const img  = document.getElementById('img-prev');
+  if (url) { img.src = url; wrap.classList.remove('hidden'); }
+  else     { wrap.classList.add('hidden'); }
+});
+
+// ── Add product ────────────────────────────────────────────────
+document.getElementById('add-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('save-btn');
+  const err = document.getElementById('form-err');
+
+  const name  = document.getElementById('p-name').value.trim();
+  const price = parseFloat(document.getElementById('p-price').value);
+  const cat   = document.getElementById('p-cat').value;
+  const img   = document.getElementById('p-img').value.trim();
+  const desc  = document.getElementById('p-desc').value.trim();
+
+  if (!name)       { err.textContent = 'יש להזין שם מוצר.'; return; }
+  if (!price || price <= 0) { err.textContent = 'יש להזין מחיר תקין.'; return; }
+  if (!cat)        { err.textContent = 'יש לבחור קטגוריה.'; return; }
+
+  btn.disabled = true; btn.textContent = 'שומר...'; err.textContent = '';
+  try {
+    await addDoc(collection(db, PRODUCTS_COL), {
+      name, price, category: cat,
+      imageUrl: img, description: desc,
+      createdAt: serverTimestamp(),
+    });
+    document.getElementById('add-form').reset();
+    document.getElementById('img-wrap').classList.add('hidden');
+  } catch(ex) {
+    err.textContent = 'שגיאה בשמירה. נסי שנית.';
+    console.error(ex);
+  } finally {
+    btn.disabled = false; btn.textContent = 'שמור מוצר';
+  }
+});
+
+// ── Delete modal ───────────────────────────────────────────────
+let pendingId = null;
+
+function openDel(id) {
+  pendingId = id;
+  document.getElementById('del-modal').removeAttribute('data-v');
+}
+function closeDel() {
+  pendingId = null;
+  document.getElementById('del-modal').setAttribute('data-v', '');
+}
+
+document.getElementById('del-cancel').addEventListener('click', closeDel);
+document.getElementById('del-confirm').addEventListener('click', async () => {
+  if (!pendingId) return;
+  try { await deleteDoc(doc(db, PRODUCTS_COL, pendingId)); }
+  catch(ex) { console.error('Delete failed:', ex); }
+  closeDel();
+});
+
+// ── Category badge colours ─────────────────────────────────────
+const CAT_COLOR = {
+  'צמידים':  'bg-pink-50 text-pink-500',
+  'שרשראות': 'bg-amber-50 text-amber-600',
+  'עגילים':  'bg-purple-50 text-purple-500',
+  'טבעות':   'bg-emerald-50 text-emerald-600',
+};
+
+// ── Dashboard init ─────────────────────────────────────────────
+function initDashboard(user) {
+  show('v-dash');
+  document.getElementById('admin-name').textContent = user.displayName || user.email;
+
+  const elLoading = document.getElementById('tbl-loading');
+  const elEmpty   = document.getElementById('tbl-empty');
+  const elRows    = document.getElementById('tbl-rows');
+  const elCount   = document.getElementById('tbl-count');
+
+  const q = query(collection(db, PRODUCTS_COL), orderBy('createdAt', 'desc'));
+
+  unsubProducts = onSnapshot(q, snap => {
+    const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const total    = products.length;
+    const cats     = new Set(products.map(p => p.category).filter(Boolean));
+
+    // Stats
+    document.getElementById('s-total').textContent = total;
+    document.getElementById('s-cats').textContent  = cats.size;
+    document.getElementById('s-last').textContent  = total ? products[0].name : '—';
+    elCount.textContent = `${total} מוצרים`;
+
+    // Hide spinner
+    elLoading.setAttribute('data-v', '');
+
+    if (!total) {
+      elEmpty.removeAttribute('data-v');
+      elRows.setAttribute('data-v', '');
+      return;
+    }
+
+    elEmpty.setAttribute('data-v', '');
+    elRows.removeAttribute('data-v');
+
+    elRows.innerHTML = products.map(p => {
+      const thumb = p.imageUrl
+        ? `<img src="${p.imageUrl}" alt="${esc(p.name)}"
+               class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-[#f0dfc0]"
+               onerror="this.outerHTML='<div class=\'w-12 h-12 rounded-xl bg-[#fdf6ee] flex-shrink-0 flex items-center justify-center text-xl\'>💎</div>'" />`
+        : `<div class="w-12 h-12 rounded-xl bg-[#fdf6ee] flex-shrink-0 flex items-center justify-center text-xl">💎</div>`;
+
+      const badge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${CAT_COLOR[p.category] ?? 'bg-gray-50 text-gray-400'}">${esc(p.category || '—')}</span>`;
+
+      return `
+        <div class="row-hover flex items-center gap-4 px-6 py-4 transition-colors group">
+          ${thumb}
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-800 text-sm truncate">${esc(p.name)}</p>
+            <div class="flex items-center gap-2 mt-0.5">
+              ${badge}
+              <span class="text-xs text-gray-400 font-semibold">${p.price ? p.price + ' ₪' : ''}</span>
+            </div>
+            ${p.description ? `<p class="text-xs text-gray-400 mt-0.5 truncate max-w-[260px]">${esc(p.description)}</p>` : ''}
+          </div>
+          <button data-del="${p.id}" class="del-btn text-gray-300 hover:text-red-400 hover:bg-red-50 p-2 rounded-xl transition-colors" aria-label="מחק">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/>
+              <path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </div>`;
+    }).join('');
+
+    elRows.querySelectorAll('[data-del]')
+      .forEach(btn => btn.addEventListener('click', () => openDel(btn.dataset.del)));
+
+  }, err => {
+    console.error(err);
+    elLoading.setAttribute('data-v', '');
+    elRows.removeAttribute('data-v');
+    elRows.innerHTML = '<p class="text-center text-red-400 text-sm py-10">שגיאה בטעינת המוצרים.</p>';
+  });
+}
+
+// ── HTML escape helper ─────────────────────────────────────────
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str ?? '');
+  return d.innerHTML;
+}
+</script>
+
+</body>
+</html>

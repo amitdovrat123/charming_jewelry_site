@@ -2996,3 +2996,35 @@ ul { list-style: none; }
 
   .auth-coupon-code { font-size: 1.7rem; letter-spacing: 3px; }
 }
+
+/* ===== Catalog Loading & Empty States ===== */
+.catalog-loading {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@keyframes catalog-spin {
+  to { transform: rotate(360deg); }
+}
+
+.catalog-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--sand-dark);
+  border-top-color: var(--pink);
+  border-radius: 50%;
+  animation: catalog-spin 0.75s linear infinite;
+}
+
+.catalog-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
