@@ -740,6 +740,16 @@ function renderCheckoutStep2(el) {
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div>
+              <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">קומה</label>
+              <input id="co-floor" type="text" value="${esc(addr.floor || '')}" placeholder="3" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">דירה</label>
+              <input id="co-apt" type="text" value="${esc(addr.apt || '')}" placeholder="12" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
               <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">עיר *</label>
               <input id="co-city" type="text" value="${esc(addr.city || '')}" placeholder="תל אביב" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
             </div>
@@ -781,7 +791,13 @@ function renderCheckoutStep2(el) {
       const city   = el.querySelector('#co-city').value.trim();
       if (!street || !city) { err.textContent = 'יש למלא רחוב ועיר.'; return; }
       if (currentUser && el.querySelector('#co-save-addr')?.checked) {
-        const addrData = { street, city, zip: el.querySelector('#co-zip').value.trim(), email: currentUser.email };
+        const addrData = {
+          street, city,
+          floor: el.querySelector('#co-floor').value.trim(),
+          apt:   el.querySelector('#co-apt').value.trim(),
+          zip:   el.querySelector('#co-zip').value.trim(),
+          email: currentUser.email,
+        };
         try { await setDoc(doc(db, USERS_ROOT, currentUser.uid), addrData, { merge: true }); } catch {}
         userProfile = { ...userProfile, ...addrData };
       }
@@ -852,8 +868,15 @@ function renderCheckoutStep3(el) {
 
     const itemsText   = checkoutItems.map(i => `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪`).join('\n');
     const deliveryTxt = checkoutDelivery === 'delivery' ? `משלוח עד הבית (+${SHIPPING} ₪)` : 'איסוף עצמי מראשון לציון (חינם)';
-    const addrLine    = (checkoutDelivery === 'delivery' && userProfile.street)
-      ? `\nכתובת: ${userProfile.street}, ${userProfile.city}${userProfile.zip ? ' ' + userProfile.zip : ''}` : '';
+    const addrParts = [
+      userProfile.street,
+      userProfile.floor ? `קומה ${userProfile.floor}` : '',
+      userProfile.apt   ? `דירה ${userProfile.apt}`   : '',
+      userProfile.city,
+      userProfile.zip   || '',
+    ].filter(Boolean);
+    const addrLine = (checkoutDelivery === 'delivery' && userProfile.street)
+      ? `\nכתובת: ${addrParts.join(', ')}` : '';
     const waMsg = `היי ויק, הגעתי דרך האתר ואני מעוניינת להזמין:\n\n${itemsText}\n\nאופן קבלה: ${deliveryTxt}${addrLine}\n\nסה"כ לתשלום: *${total} ₪*${note ? '\n\nהערה: ' + note : ''}`;
 
     if (currentUser) {
