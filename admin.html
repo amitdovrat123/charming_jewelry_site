@@ -17,6 +17,8 @@
       }
     }
   </script>
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { font-family: 'Assistant', sans-serif; }
@@ -25,12 +27,14 @@
     .fadein   { animation: fadein .28s ease; }
     @keyframes spin    { to { transform: rotate(360deg); } }
     @keyframes fadein  { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-    input:focus, select:focus, textarea:focus { border-color: #d4a373 !important; }
+    input:focus, select:focus, textarea:focus { border-color: #d4a373 !important; outline: none; }
     .row-hover:hover { background: #fdf6ee; }
     .del-btn { opacity:0; transition:.15s; }
     .row-hover:hover .del-btn { opacity:1; }
     ::-webkit-scrollbar { width:6px; }
     ::-webkit-scrollbar-thumb { background:#e8cfc4; border-radius:9px; }
+    .upload-btn-inner { transition: all .2s; }
+    .upload-btn-inner:hover { background: #b8893e; transform: translateY(-1px); }
   </style>
 </head>
 
@@ -71,12 +75,12 @@
     </div>
     <form id="login-form" novalidate>
       <div class="mb-4">
-        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">דוא"ל</label>
+        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">דוא"ל</label>
         <input id="a-email" type="email" placeholder="your@email.com" autocomplete="email"
           class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 outline-none transition-colors" required />
       </div>
       <div class="mb-4">
-        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">סיסמה</label>
+        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">סיסמה</label>
         <input id="a-pass" type="password" placeholder="••••••••" autocomplete="current-password"
           class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 outline-none transition-colors" required />
       </div>
@@ -105,6 +109,11 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
+        <a href="index.html" target="_blank"
+          class="hidden sm:inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#d4a373] border border-gray-200 hover:border-[#d4a373] px-3 py-1.5 rounded-full transition-colors font-semibold">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          האתר
+        </a>
         <span id="admin-name" class="text-sm text-gray-500 hidden sm:block truncate max-w-[160px]"></span>
         <button id="logout-btn"
           class="text-xs border border-gray-200 text-gray-500 hover:border-[#d4a373] hover:text-[#d4a373] px-4 py-2 rounded-full font-bold transition-colors">
@@ -117,7 +126,7 @@
   <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 
     <!-- ── Stats row ────────────────────────────────────── -->
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">סה"כ מוצרים</p>
         <p id="s-total" class="text-3xl font-black text-[#d4a373]">—</p>
@@ -125,6 +134,10 @@
       <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">קטגוריות</p>
         <p id="s-cats" class="text-3xl font-black text-[#d4a373]">—</p>
+      </div>
+      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">אזל מלאי</p>
+        <p id="s-oos" class="text-3xl font-black text-red-400">—</p>
       </div>
       <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm overflow-hidden">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">נוסף לאחרונה</p>
@@ -141,23 +154,34 @@
 
           <h2 class="font-bold text-gray-800 text-base mb-5 flex items-center gap-2">
             <span class="w-6 h-6 rounded-full bg-[#d4a373] text-white text-sm flex items-center justify-center leading-none font-bold">+</span>
-            הוסף מוצר חדש
+            הוסיפי מוצר חדש
           </h2>
 
           <form id="add-form" novalidate class="space-y-4">
 
+            <!-- Product name -->
             <div>
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">שם המוצר *</label>
               <input id="p-name" type="text" placeholder="לדוגמה: שרשרת לב זהב ורוד" required
                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
             </div>
 
+            <!-- Price + Sale price -->
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">מחיר (₪) *</label>
                 <input id="p-price" type="number" placeholder="149" min="0" required
                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
               </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">מחיר מבצע (₪)</label>
+                <input id="p-sale" type="number" placeholder="ריק = אין"  min="0"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
+              </div>
+            </div>
+
+            <!-- Category + Stock -->
+            <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">קטגוריה *</label>
                 <select id="p-cat" required
@@ -167,23 +191,40 @@
                   <option>שרשראות</option>
                   <option>עגילים</option>
                   <option>טבעות</option>
+                  <option>ערכות</option>
                 </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">מלאי (יח')</label>
+                <input id="p-stock" type="number" placeholder="ריק = ללא הגבלה" min="0"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
               </div>
             </div>
 
+            <!-- Image upload -->
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">כתובת תמונה (URL)</label>
-              <input id="p-img" type="text" placeholder="https://..."
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 outline-none transition-colors" />
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">תמונת מוצר</label>
+              <input id="p-img" type="hidden" value="" />
+              <button type="button" id="upload-btn"
+                class="upload-btn-inner w-full bg-[#d4a373] text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                העלי תמונה מהמחשב
+              </button>
+              <p id="img-filename" class="text-xs text-gray-400 mt-1.5 text-center min-h-[1rem]"></p>
             </div>
 
-            <!-- live image preview -->
+            <!-- Live preview -->
             <div id="img-wrap" class="hidden">
               <img id="img-prev" src="" alt="תצוגה מקדימה"
-                class="w-full h-40 object-cover rounded-xl border border-[#f0dfc0]"
+                class="w-full h-44 object-cover rounded-xl border border-[#f0dfc0] shadow-sm"
                 onerror="document.getElementById('img-wrap').classList.add('hidden')" />
             </div>
 
+            <!-- Description -->
             <div>
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">תיאור</label>
               <textarea id="p-desc" rows="3" placeholder="תיאור קצר ואלגנטי של המוצר..."
@@ -196,7 +237,7 @@
               class="w-full bg-[#d4a373] hover:bg-[#b8893e] disabled:opacity-60 disabled:cursor-not-allowed
                      text-white rounded-full py-3 font-bold text-sm transition-all
                      hover:-translate-y-0.5 hover:shadow-md">
-              שמור מוצר
+              שמרי מוצר
             </button>
 
           </form>
@@ -215,20 +256,17 @@
             </span>
           </div>
 
-          <!-- Table loading -->
           <div id="tbl-loading" class="py-14 text-center">
             <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
             <p class="text-gray-300 text-sm font-semibold">טוען מוצרים...</p>
           </div>
 
-          <!-- Empty state -->
           <div id="tbl-empty" data-v class="py-20 text-center">
             <p class="text-5xl mb-3">💎</p>
             <p class="text-gray-500 font-semibold text-sm">אין מוצרים עדיין</p>
             <p class="text-gray-300 text-xs mt-1">הוסיפי מוצר ראשון באמצעות הטופס</p>
           </div>
 
-          <!-- Rows -->
           <div id="tbl-rows" data-v class="divide-y divide-[#fdf6ee]"></div>
 
         </div>
@@ -255,7 +293,7 @@
       </button>
       <button id="del-confirm"
         class="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-full py-3 font-bold text-sm transition-colors">
-        מחק
+        מחקי
       </button>
     </div>
   </div>
@@ -275,7 +313,7 @@ import {
 // ── Config ─────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'amitdovrat123@gmail.com';
 
-const app  = initializeApp({
+const app = initializeApp({
   apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
   authDomain:        'charming-3dd6f.firebaseapp.com',
   projectId:         'charming-3dd6f',
@@ -287,8 +325,52 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 const PRODUCTS_COL = 'artifacts/charming-3dd6f/public/data/products';
 
+// ── Cloudinary Upload Widget ────────────────────────────────────
+const cloudWidget = cloudinary.createUploadWidget({
+  cloudName:    'dhri2dbek',
+  uploadPreset: 'charming_preset',
+  sources:      ['local', 'camera'],
+  multiple:     false,
+  cropping:     false,
+  folder:       'charming_products',
+  clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+  maxFileSize:  8000000,
+  styles: {
+    palette: {
+      window:          '#FFFFFF',
+      windowBorder:    '#d4a373',
+      tabIcon:         '#d4a373',
+      menuIcons:       '#9a8e8a',
+      textDark:        '#2c2a29',
+      textLight:       '#FFFFFF',
+      link:            '#d4a373',
+      action:          '#d4a373',
+      inactiveTabIcon: '#9a8e8a',
+      error:           '#e74c3c',
+      inProgress:      '#d4a373',
+      complete:        '#27ae60',
+      sourceBg:        '#fdf8f5',
+    },
+    fonts: { default: { active: true } },
+  },
+}, (error, result) => {
+  if (error) { console.error('Cloudinary error:', error); return; }
+  if (result && result.event === 'success') {
+    const url = result.info.secure_url;
+    document.getElementById('p-img').value = url;
+    document.getElementById('img-filename').textContent = result.info.original_filename + '.' + result.info.format;
+    const img  = document.getElementById('img-prev');
+    const wrap = document.getElementById('img-wrap');
+    img.src = url;
+    wrap.classList.remove('hidden');
+    document.getElementById('upload-btn').textContent = '✓ תמונה הועלתה — לחצי להחלפה';
+  }
+});
+
+document.getElementById('upload-btn').addEventListener('click', () => cloudWidget.open());
+
 // ── View switcher ──────────────────────────────────────────────
-const VIEWS = ['v-loading','v-denied','v-login','v-dash'];
+const VIEWS = ['v-loading', 'v-denied', 'v-login', 'v-dash'];
 function show(id) {
   VIEWS.forEach(v => {
     const el = document.getElementById(v);
@@ -301,7 +383,7 @@ function show(id) {
 let unsubProducts = null;
 
 onAuthStateChanged(auth, user => {
-  if (!user)                    { show('v-login');  return; }
+  if (!user)                      { show('v-login');  return; }
   if (user.email !== ADMIN_EMAIL) { show('v-denied'); return; }
   initDashboard(user);
 });
@@ -311,7 +393,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = document.getElementById('login-btn');
   const err = document.getElementById('login-err');
-  btn.disabled = true; btn.textContent = 'מתחבר...'; err.textContent = '';
+  btn.disabled = true; btn.textContent = 'מתחברת...'; err.textContent = '';
   try {
     await signInWithEmailAndPassword(
       auth,
@@ -336,45 +418,51 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   signOut(auth);
 });
 
-// ── Image URL preview ──────────────────────────────────────────
-document.getElementById('p-img').addEventListener('input', e => {
-  const url  = e.target.value.trim();
-  const wrap = document.getElementById('img-wrap');
-  const img  = document.getElementById('img-prev');
-  if (url) { img.src = url; wrap.classList.remove('hidden'); }
-  else     { wrap.classList.add('hidden'); }
-});
-
 // ── Add product ────────────────────────────────────────────────
 document.getElementById('add-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = document.getElementById('save-btn');
   const err = document.getElementById('form-err');
 
-  const name  = document.getElementById('p-name').value.trim();
-  const price = parseFloat(document.getElementById('p-price').value);
-  const cat   = document.getElementById('p-cat').value;
-  const img   = document.getElementById('p-img').value.trim();
-  const desc  = document.getElementById('p-desc').value.trim();
+  const name      = document.getElementById('p-name').value.trim();
+  const price     = parseFloat(document.getElementById('p-price').value);
+  const saleRaw   = document.getElementById('p-sale').value.trim();
+  const salePrice = saleRaw !== '' ? parseFloat(saleRaw) : null;
+  const cat       = document.getElementById('p-cat').value;
+  const stockRaw  = document.getElementById('p-stock').value.trim();
+  const stock     = stockRaw !== '' ? parseInt(stockRaw) : null;
+  const img       = document.getElementById('p-img').value.trim();
+  const desc      = document.getElementById('p-desc').value.trim();
 
-  if (!name)       { err.textContent = 'יש להזין שם מוצר.'; return; }
+  if (!name)            { err.textContent = 'יש להזין שם מוצר.'; return; }
   if (!price || price <= 0) { err.textContent = 'יש להזין מחיר תקין.'; return; }
-  if (!cat)        { err.textContent = 'יש לבחור קטגוריה.'; return; }
+  if (!cat)             { err.textContent = 'יש לבחור קטגוריה.'; return; }
+  if (salePrice !== null && salePrice >= price) {
+    err.textContent = 'מחיר המבצע חייב להיות נמוך מהמחיר הרגיל.'; return;
+  }
 
-  btn.disabled = true; btn.textContent = 'שומר...'; err.textContent = '';
+  btn.disabled = true; btn.textContent = 'שומרת...'; err.textContent = '';
   try {
-    await addDoc(collection(db, PRODUCTS_COL), {
+    const data = {
       name, price, category: cat,
       imageUrl: img, description: desc,
       createdAt: serverTimestamp(),
-    });
+    };
+    if (salePrice !== null) data.salePrice = salePrice;
+    if (stock     !== null) data.stock     = stock;
+
+    await addDoc(collection(db, PRODUCTS_COL), data);
     document.getElementById('add-form').reset();
+    document.getElementById('p-img').value = '';
     document.getElementById('img-wrap').classList.add('hidden');
+    document.getElementById('img-filename').textContent = '';
+    const uploadBtnEl = document.getElementById('upload-btn');
+    uploadBtnEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>העלי תמונה מהמחשב`;
   } catch(ex) {
     err.textContent = 'שגיאה בשמירה. נסי שנית.';
     console.error(ex);
   } finally {
-    btn.disabled = false; btn.textContent = 'שמור מוצר';
+    btn.disabled = false; btn.textContent = 'שמרי מוצר';
   }
 });
 
@@ -404,6 +492,7 @@ const CAT_COLOR = {
   'שרשראות': 'bg-amber-50 text-amber-600',
   'עגילים':  'bg-purple-50 text-purple-500',
   'טבעות':   'bg-emerald-50 text-emerald-600',
+  'ערכות':   'bg-blue-50 text-blue-500',
 };
 
 // ── Dashboard init ─────────────────────────────────────────────
@@ -422,14 +511,15 @@ function initDashboard(user) {
     const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     const total    = products.length;
     const cats     = new Set(products.map(p => p.category).filter(Boolean));
+    const oos      = products.filter(p => p.stock === 0).length;
 
     // Stats
     document.getElementById('s-total').textContent = total;
     document.getElementById('s-cats').textContent  = cats.size;
+    document.getElementById('s-oos').textContent   = oos || '0';
     document.getElementById('s-last').textContent  = total ? products[0].name : '—';
     elCount.textContent = `${total} מוצרים`;
 
-    // Hide spinner
     elLoading.setAttribute('data-v', '');
 
     if (!total) {
@@ -448,20 +538,38 @@ function initDashboard(user) {
                onerror="this.outerHTML='<div class=\'w-12 h-12 rounded-xl bg-[#fdf6ee] flex-shrink-0 flex items-center justify-center text-xl\'>💎</div>'" />`
         : `<div class="w-12 h-12 rounded-xl bg-[#fdf6ee] flex-shrink-0 flex items-center justify-center text-xl">💎</div>`;
 
-      const badge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${CAT_COLOR[p.category] ?? 'bg-gray-50 text-gray-400'}">${esc(p.category || '—')}</span>`;
+      const catBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${CAT_COLOR[p.category] ?? 'bg-gray-50 text-gray-400'}">${esc(p.category || '—')}</span>`;
+
+      // Price display
+      const hasSale = p.salePrice && p.salePrice > 0 && p.salePrice < p.price;
+      const priceHTML = hasSale
+        ? `<span class="text-xs text-gray-300 line-through">${p.price} ₪</span>
+           <span class="text-xs text-[#d4a373] font-bold">${p.salePrice} ₪</span>`
+        : `<span class="text-xs text-gray-400 font-semibold">${p.price ? p.price + ' ₪' : ''}</span>`;
+
+      // Stock indicator
+      let stockDot = '';
+      if (p.stock === 0) {
+        stockDot = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-400">אזל</span>`;
+      } else if (p.stock != null) {
+        stockDot = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600">${p.stock} יח'</span>`;
+      } else {
+        stockDot = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-50 text-gray-300">ללא הגבלה</span>`;
+      }
 
       return `
-        <div class="row-hover flex items-center gap-4 px-6 py-4 transition-colors group">
+        <div class="row-hover flex items-center gap-4 px-6 py-4 transition-colors">
           ${thumb}
           <div class="flex-1 min-w-0">
             <p class="font-semibold text-gray-800 text-sm truncate">${esc(p.name)}</p>
-            <div class="flex items-center gap-2 mt-0.5">
-              ${badge}
-              <span class="text-xs text-gray-400 font-semibold">${p.price ? p.price + ' ₪' : ''}</span>
+            <div class="flex items-center flex-wrap gap-1.5 mt-0.5">
+              ${catBadge}
+              ${priceHTML}
+              ${stockDot}
             </div>
             ${p.description ? `<p class="text-xs text-gray-400 mt-0.5 truncate max-w-[260px]">${esc(p.description)}</p>` : ''}
           </div>
-          <button data-del="${p.id}" class="del-btn text-gray-300 hover:text-red-400 hover:bg-red-50 p-2 rounded-xl transition-colors" aria-label="מחק">
+          <button data-del="${p.id}" class="del-btn text-gray-300 hover:text-red-400 hover:bg-red-50 p-2 rounded-xl transition-colors flex-shrink-0" aria-label="מחק">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"/>
