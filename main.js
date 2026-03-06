@@ -160,6 +160,28 @@ if (hamburger && navLinks) {
   });
 })();
 
+// ===== FAQ Accordion =====
+(function () {
+  document.querySelectorAll('.faq-question').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var answer = btn.nextElementSibling;
+      var isOpen = btn.getAttribute('aria-expanded') === 'true';
+
+      // Close all others in the same category
+      var allBtns = btn.closest('.faq-list').querySelectorAll('.faq-question');
+      allBtns.forEach(function(other) {
+        if (other !== btn) {
+          other.setAttribute('aria-expanded', 'false');
+          other.nextElementSibling.classList.remove('is-open');
+        }
+      });
+
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      answer.classList.toggle('is-open', !isOpen);
+    });
+  });
+})();
+
 // ===== Shop — Order Buttons → WhatsApp =====
 (function () {
   const WA_NUMBER = '972524131991';
