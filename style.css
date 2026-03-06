@@ -3245,6 +3245,12 @@ ul { list-style: none; }
 }
 
 
+/* ===== Main wrapper (isolates CSS filters from fixed elements) ===== */
+#main-wrapper {
+  /* Acts as the filter target; fixed elements live outside this div */
+  min-height: 100vh;
+}
+
 /* ===== Accessibility Widget (Israeli Standard 5568 / WCAG 2.0 AA) ===== */
 
 /* -- Widget container -- */
@@ -3436,13 +3442,19 @@ ul { list-style: none; }
 .a11y-statement-close:hover { background: var(--pink-light); color: var(--ink); }
 .a11y-statement-close:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
-/* ===== Accessibility Body Modifier Classes ===== */
+/* ===== Accessibility Modifier Classes ===== */
+/*
+ * CRITICAL: CSS `filter` on <body> creates a new containing block which
+ * breaks position:fixed children. Grayscale & high-contrast are therefore
+ * applied to #main-wrapper ONLY, keeping the accessibility widget,
+ * WhatsApp FAB, and auth modal correctly fixed in the viewport.
+ */
 
-/* Grayscale */
-body.a11y-grayscale { filter: grayscale(100%); }
+/* Grayscale — wrapper only */
+#main-wrapper.a11y-grayscale { filter: grayscale(100%); }
 
-/* High contrast — override CSS custom properties */
-body.a11y-high-contrast {
+/* High contrast — override design tokens on wrapper */
+#main-wrapper.a11y-high-contrast {
   --sand:       #000000;
   --sand-dark:  #ffffff;
   --sand-light: #111111;
@@ -3458,26 +3470,26 @@ body.a11y-high-contrast {
 }
 
 /* Readable font */
-body.a11y-readable-font,
-body.a11y-readable-font h1,
-body.a11y-readable-font h2,
-body.a11y-readable-font h3,
-body.a11y-readable-font h4,
-body.a11y-readable-font p,
-body.a11y-readable-font a,
-body.a11y-readable-font button,
-body.a11y-readable-font input,
-body.a11y-readable-font select,
-body.a11y-readable-font textarea,
-body.a11y-readable-font label,
-body.a11y-readable-font span,
-body.a11y-readable-font li {
+#main-wrapper.a11y-readable-font,
+#main-wrapper.a11y-readable-font h1,
+#main-wrapper.a11y-readable-font h2,
+#main-wrapper.a11y-readable-font h3,
+#main-wrapper.a11y-readable-font h4,
+#main-wrapper.a11y-readable-font p,
+#main-wrapper.a11y-readable-font a,
+#main-wrapper.a11y-readable-font button,
+#main-wrapper.a11y-readable-font input,
+#main-wrapper.a11y-readable-font select,
+#main-wrapper.a11y-readable-font textarea,
+#main-wrapper.a11y-readable-font label,
+#main-wrapper.a11y-readable-font span,
+#main-wrapper.a11y-readable-font li {
   font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Highlight links */
-body.a11y-highlight-links a,
-body.a11y-highlight-links [role="link"] {
+#main-wrapper.a11y-highlight-links a,
+#main-wrapper.a11y-highlight-links [role="link"] {
   text-decoration: underline;
   outline: 2px solid var(--pink);
   outline-offset: 2px;
@@ -3485,21 +3497,23 @@ body.a11y-highlight-links [role="link"] {
 }
 
 /* Highlight headings */
-body.a11y-highlight-headings h1,
-body.a11y-highlight-headings h2,
-body.a11y-highlight-headings h3,
-body.a11y-highlight-headings h4 {
+#main-wrapper.a11y-highlight-headings h1,
+#main-wrapper.a11y-highlight-headings h2,
+#main-wrapper.a11y-highlight-headings h3,
+#main-wrapper.a11y-highlight-headings h4 {
   border-bottom: 3px solid var(--pink);
   padding-bottom: 4px;
 }
 
-/* Pause animations */
+/* Pause animations — stays on body to cover ALL elements globally,
+   including Tailwind animate-pulse, transitions, and fixed-position UI */
 body.a11y-pause-animations *,
 body.a11y-pause-animations *::before,
 body.a11y-pause-animations *::after {
-  animation-duration: 0.001s;
-  animation-delay: 0.001s;
-  transition-duration: 0.001s;
+  animation-duration:        0.001s;
+  animation-delay:           0.001s;
+  transition-duration:       0.001s;
+  animation-iteration-count: 1;
 }
 
 /* Responsive: shift widget slightly on mobile */

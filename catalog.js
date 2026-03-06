@@ -27,6 +27,7 @@ let checkoutCartItems    = [];
 let checkoutDelivery     = 'delivery';
 let isQuickBuy           = false;
 let pendingCheckoutAfterAuth = false;   // redirect-after-login flag
+let _checkoutStartAtStep2   = false;   // skip step-1 init after auth redirect
 
 // Product gallery
 let pvImages   = [];
@@ -556,7 +557,13 @@ function initCheckoutView() {
   if (!isQuickBuy) {
     checkoutCartItems = cart.map(i => ({ ...i, _selected: true }));
   }
-  checkoutStep     = 1;
+  // After auth redirect: jump directly to step 2
+  if (_checkoutStartAtStep2) {
+    _checkoutStartAtStep2 = false;
+    checkoutStep = 2;
+  } else {
+    checkoutStep = 1;
+  }
   checkoutDelivery = 'delivery';
   renderCheckoutStep(el);
 }
@@ -995,17 +1002,11 @@ function subscribeAuth() {
       // After login: proceed to checkout step 2 if the user was blocked
       if (pendingCheckoutAfterAuth) {
         pendingCheckoutAfterAuth = false;
-        checkoutStep = 2;
-        const coEl = document.getElementById('view-checkout');
-        if (coEl && currentView === 'checkout') {
-          renderCheckoutStep(coEl);
+        _checkoutStartAtStep2    = true;
+        if (currentView === 'checkout') {
+          initCheckoutView();   // re-init in place; reads _checkoutStartAtStep2
         } else {
           switchView('checkout');
-          // switchView calls initCheckoutView which resets to step 1 — fix:
-          setTimeout(() => {
-            const el2 = document.getElementById('view-checkout');
-            if (el2) { checkoutStep = 2; renderCheckoutStep(el2); }
-          }, 0);
         }
       }
     } else {
@@ -1038,13 +1039,17 @@ function setupNav() {
 
 // ── Inject views ───────────────────────────────────────────────
 function injectViews() {
-  const footer = document.querySelector('footer');
+  // Insert inside #main-wrapper (not body) so CSS filter on wrapper
+  // does not break fixed-position elements outside of it.
+  const wrapper = document.getElementById('main-wrapper') || document.body;
+  const footer  = wrapper.querySelector('footer');
   ['shop', 'product', 'profile', 'checkout'].forEach(v => {
     const div     = document.createElement('div');
     div.id        = 'view-' + v;
     div.className = 'v-section';
     div.style.display = 'none';
-    document.body.insertBefore(div, footer);
+    if (footer) wrapper.insertBefore(div, footer);
+    else        wrapper.appendChild(div);
   });
 }
 
@@ -1061,10 +1066,15 @@ const A11Y_FEATURES = [
 ];
 
 function injectAccessibility() {
-  // Load saved settings and apply
+  // Load saved settings and apply to correct target
   const saved = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
+  const _wrapper = () => document.getElementById('main-wrapper') || document.body;
   A11Y_FEATURES.forEach(f => {
-    if (saved[f.key]) document.body.classList.add('a11y-' + f.key);
+    if (!saved[f.key]) return;
+    // pause-animations targets body so it affects ALL elements (incl. fixed ones)
+    // grayscale / high-contrast MUST target #main-wrapper to avoid breaking fixed positioning
+    const target = f.key === 'pause-animations' ? document.body : _wrapper();
+    target.classList.add('a11y-' + f.key);
   });
   applyTextScale(saved);
 
@@ -1147,8 +1157,12 @@ function injectAccessibility() {
   // Feature toggles
   menu.querySelectorAll('.a11y-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const key      = btn.dataset.a11y;
-      const isActive = document.body.classList.toggle('a11y-' + key);
+      const key    = btn.dataset.a11y;
+      // pause-animations → body (global); everything else → #main-wrapper
+      const target = key === 'pause-animations'
+        ? document.body
+        : (document.getElementById('main-wrapper') || document.body);
+      const isActive = target.classList.toggle('a11y-' + key);
       btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-pressed', String(isActive));
       const settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
@@ -1160,8 +1174,10 @@ function injectAccessibility() {
 
   // Reset
   document.getElementById('a11y-reset').addEventListener('click', () => {
+    const mw = document.getElementById('main-wrapper') || document.body;
     A11Y_FEATURES.forEach(f => {
-      document.body.classList.remove('a11y-' + f.key);
+      mw.classList.remove('a11y-' + f.key);
+      document.body.classList.remove('a11y-' + f.key); // also clear body (pause-animations)
       menu.querySelector(`[data-a11y="${f.key}"]`)?.classList.remove('active');
       menu.querySelector(`[data-a11y="${f.key}"]`)?.setAttribute('aria-pressed', 'false');
     });
