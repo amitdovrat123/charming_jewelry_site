@@ -298,8 +298,8 @@
         </div>
       </div>
 
-      <!-- Row 4: Badge + Status + isFeatured -->
-      <div class="grid grid-cols-3 gap-4 items-end">
+      <!-- Row 4: Badge + Status + Color + isFeatured -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end">
         <div>
           <label class="lbl">תג</label>
           <select id="p-badge" class="inp">
@@ -314,6 +314,16 @@
           <select id="p-status" class="inp">
             <option value="published">פורסם</option>
             <option value="draft">טיוטה</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">גוון</label>
+          <select id="p-color" class="inp">
+            <option value="">—</option>
+            <option>זהב</option>
+            <option>כסף</option>
+            <option>זהב ורוד</option>
+            <option>אחר</option>
           </select>
         </div>
         <div class="flex items-center gap-2 pb-1">
@@ -549,6 +559,7 @@ function openModal(mode, product = null) {
     document.getElementById('p-badge').value   = product.badge || '';
     document.getElementById('p-status').value  = product.status || 'published';
     document.getElementById('p-featured').checked = !!product.isFeatured;
+    document.getElementById('p-color').value   = product.color || '';
     document.getElementById('p-desc').value    = product.description || '';
 
     const imgs = Array.isArray(product.images) && product.images.length
@@ -581,6 +592,7 @@ function clearForm() {
     document.getElementById(id).value = '';
   });
   document.getElementById('p-mat').value    = 'פלדת אל-חלד';
+  document.getElementById('p-color').value  = '';
   document.getElementById('p-status').value = 'published';
   document.getElementById('p-featured').checked = false;
   uploadedImages = [];
@@ -617,7 +629,8 @@ document.getElementById('save-btn').addEventListener('click', async () => {
   const stockCount = stockRaw !== '' ? parseInt(stockRaw) : null;
   const badge      = document.getElementById('p-badge').value;
   const status     = document.getElementById('p-status').value;
-  const isFeatured = document.getElementById('p-featured').checked;
+  const isFeatured  = document.getElementById('p-featured').checked;
+  const color       = document.getElementById('p-color').value;
   const description = document.getElementById('p-desc').value.trim();
   let imagesArr = [];
   try { imagesArr = JSON.parse(document.getElementById('p-imgs').value || '[]') || []; } catch { imagesArr = []; }
@@ -633,7 +646,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
   btn.disabled = true;
 
   const data = {
-    name, sku, category: cat, collection: col || null, material: mat || null,
+    name, sku, category: cat, collection: col || null, material: mat || null, color: color || null,
     priceOriginal: priceOrig, priceSale, stockCount,
     badge: badge || null, status, isFeatured,
     images: imagesArr,
