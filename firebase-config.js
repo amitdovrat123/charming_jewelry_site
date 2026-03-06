@@ -1,5 +1,5 @@
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider }
+import { getAuth, GoogleAuthProvider, OAuthProvider }
                              from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore }      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -20,5 +20,12 @@ export const db             = getFirestore(app);
 export const googleProvider = (() => {
   const p = new GoogleAuthProvider();
   p.setCustomParameters({ prompt: 'select_account' });
+  return p;
+})();
+
+export const appleProvider = (() => {
+  const p = new OAuthProvider('apple.com');
+  p.addScope('email');
+  p.addScope('name');
   return p;
 })();

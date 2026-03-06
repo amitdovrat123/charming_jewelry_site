@@ -1,4 +1,4 @@
-import { auth, db, googleProvider } from './firebase-config.js';
+import { auth, db, googleProvider, appleProvider } from './firebase-config.js';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -13,6 +13,11 @@ import {
   getDoc,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// ── Apple icon SVG ────────────────────────────────────────────
+const APPLE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 814 1000" fill="currentColor" aria-hidden="true" focusable="false">
+  <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.5 135.4-317.1 268.4-317.1 70.5 0 133.1 44.5 176.1 44.5 41 0 117.6-47.9 196.7-47.9 31.1 0 115.8 2.6 175.4 80.3zm-190.1-123c-5.2-30.1-16.9-61.7-37.3-88.1-23.4-30.1-68.7-52.7-111.2-52.7-2.6 0-5.2.3-7.8.6 0 67.8 47.9 137.9 100.5 174.6 27.8 19.5 70.4 38.5 115.5 40.1l.3-2.6c0-29.8-5.3-66.3-16.5-88.3z"/>
+</svg>`;
 
 // ── Google icon SVG ───────────────────────────────────────────
 const GOOGLE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
@@ -59,6 +64,10 @@ const MODAL_HTML = `
         ${GOOGLE_ICON}
         <span>התחברות מהירה עם Google</span>
       </button>
+      <button class="auth-apple-btn" id="apple-login-btn" type="button">
+        ${APPLE_ICON}
+        <span>כניסה מהירה עם Apple</span>
+      </button>
     </div>
 
     <!-- ── REGISTER PANEL ──────────────────────────────────── -->
@@ -103,6 +112,10 @@ const MODAL_HTML = `
       <button class="auth-google-btn" id="google-reg-btn" type="button">
         ${GOOGLE_ICON}
         <span>הרשמה מהירה עם Google</span>
+      </button>
+      <button class="auth-apple-btn" id="apple-reg-btn" type="button">
+        ${APPLE_ICON}
+        <span>הרשמה מהירה עם Apple</span>
       </button>
     </div>
 
@@ -314,6 +327,44 @@ async function handleGoogleAuth(panelId) {
   }
 }
 
+// ── Apple sign-in ─────────────────────────────────────────────
+async function handleAppleAuth(panelId) {
+  if (isLoading) return;
+  isLoading     = true;
+  skipAutoClose = true;
+  const errorEl = document.getElementById(`${panelId}-error`);
+  if (errorEl) errorEl.textContent = '';
+
+  try {
+    const result = await signInWithPopup(auth, appleProvider);
+    const user   = result.user;
+    const exists = await userExistsInFirestore(user.uid);
+
+    if (!exists) {
+      // Apple only provides the name on the very first sign-in
+      const name = user.displayName || '';
+      await saveUserToFirestore(user, { name, newsletter: true });
+      updateNavbar(user);
+      const overlay = document.getElementById('auth-overlay');
+      if (overlay && !overlay.classList.contains('is-open')) {
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      switchTab('success');
+    } else {
+      skipAutoClose = false;
+      closeModal();
+    }
+  } catch (err) {
+    skipAutoClose = false;
+    const msg = getErrorMsg(err.code);
+    if (msg && errorEl) errorEl.textContent = msg;
+  } finally {
+    isLoading = false;
+  }
+}
+
 // ── Navbar ────────────────────────────────────────────────────
 function updateNavbar(user) {
   const navItem = document.getElementById('auth-nav-item');
@@ -376,6 +427,11 @@ function setupEvents() {
     .addEventListener('click', () => handleGoogleAuth('login'));
   document.getElementById('google-reg-btn')
     .addEventListener('click', () => handleGoogleAuth('reg'));
+
+  document.getElementById('apple-login-btn')
+    .addEventListener('click', () => handleAppleAuth('login'));
+  document.getElementById('apple-reg-btn')
+    .addEventListener('click', () => handleAppleAuth('reg'));
 
   document.getElementById('auth-success-close')
     .addEventListener('click', closeModal);

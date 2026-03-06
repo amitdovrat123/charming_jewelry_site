@@ -2836,6 +2836,32 @@ ul { list-style: none; }
   border-color: var(--pink);
 }
 
+/* Apple button */
+.auth-apple-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #000;
+  border: 1.5px solid #000;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  min-height: 44px;
+  margin-top: 10px;
+  font-family: 'Assistant', sans-serif;
+}
+
+.auth-apple-btn:hover {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+}
+
 /* Checkboxes */
 .auth-checkboxes {
   display: flex;
