@@ -15,17 +15,18 @@ const COL_PATH            = 'artifacts/charming-3dd6f/public/data/products';
 const USERS_ROOT          = 'artifacts/charming-3dd6f/users';
 
 // ── State ──────────────────────────────────────────────────────
-let cart              = loadCart();
-let currentUser       = null;
-let allProducts       = [];
-let productsLoaded    = false;
-let currentProduct    = null;
-let userProfile       = {};
-let checkoutStep      = 1;
-let checkoutItems     = [];
-let checkoutCartItems = [];
-let checkoutDelivery  = 'delivery';
-let isQuickBuy        = false;
+let cart                 = loadCart();
+let currentUser          = null;
+let allProducts          = [];
+let productsLoaded       = false;
+let currentProduct       = null;
+let userProfile          = {};
+let checkoutStep         = 1;
+let checkoutItems        = [];
+let checkoutCartItems    = [];
+let checkoutDelivery     = 'delivery';
+let isQuickBuy           = false;
+let pendingCheckoutAfterAuth = false;   // redirect-after-login flag
 
 // Product gallery
 let pvImages   = [];
@@ -121,6 +122,10 @@ function showToast(msg) {
   t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2000);
 }
 
+// ── Input style helper ─────────────────────────────────────────
+const INP = 'width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);box-sizing:border-box;';
+const LBL = 'display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;';
+
 // ── Card HTML ──────────────────────────────────────────────────
 function cardHTML(product) {
   const { data, id } = product;
@@ -168,6 +173,18 @@ function bindCardClicks(container) {
   });
 }
 
+// ── Free-ship banner helper ────────────────────────────────────
+function freeShipBannerHTML(subtotal) {
+  if (subtotal >= FREE_SHIP_THRESHOLD) {
+    return `<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:#15803d;margin-bottom:16px;">
+      ✅ מזל טוב! הגעת ל-${FREE_SHIP_THRESHOLD} ₪ — <strong>משלוח חינם!</strong>
+    </div>`;
+  }
+  return `<div style="background:var(--pink-light);border:1.5px solid var(--sand-dark);border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:var(--ink-soft);margin-bottom:16px;">
+    🚚 משלוח חינם בקנייה מעל <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — עוד <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>!` : ''}
+  </div>`;
+}
+
 // ── Home view ──────────────────────────────────────────────────
 function renderHome() {
   const grid    = document.getElementById('home-catalog-grid');
@@ -198,16 +215,7 @@ function renderShop() {
   const colors     = [...new Set(published.map(p => p.data.color).filter(Boolean))];
 
   const subtotal = getCartSubtotal();
-  let bannerHtml = '';
-  if (subtotal > 0 && subtotal < FREE_SHIP_THRESHOLD) {
-    bannerHtml = `<div style="background:var(--pink-light);border:1.5px solid var(--sand-dark);border-radius:12px;padding:12px 18px;text-align:center;font-size:0.88rem;color:var(--ink-soft);margin-bottom:20px;">
-      🚚 הוסיפי עוד <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong> לקבלת משלוח חינם!
-    </div>`;
-  } else if (subtotal >= FREE_SHIP_THRESHOLD) {
-    bannerHtml = `<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 18px;text-align:center;font-size:0.88rem;color:#15803d;margin-bottom:20px;">
-      ✅ מזל טוב! הגעת לסכום של ${FREE_SHIP_THRESHOLD} ₪ — משלוח חינם!
-    </div>`;
-  }
+  const bannerHtml = freeShipBannerHTML(subtotal);
 
   const catPills = [
     `<button class="shop-filter-pill${!shopFilterCat ? ' active' : ''}" data-filter-cat="">הכל</button>`,
@@ -247,6 +255,7 @@ function renderShop() {
     </section>`;
 
   el.querySelector('#shop-back-btn').addEventListener('click', () => switchView('home'));
+
   el.querySelectorAll('[data-filter-cat]').forEach(btn => {
     btn.addEventListener('click', () => { shopFilterCat = btn.dataset.filterCat; renderShop(); });
   });
@@ -338,7 +347,7 @@ function renderProductView() {
             ${metaChips ? `<div style="display:flex;gap:8px;flex-wrap:wrap;">${metaChips}</div>` : ''}
             ${data.description ? `<p style="font-size:0.97rem;color:var(--ink-soft);line-height:1.75;margin:0;">${esc(data.description)}</p>` : ''}
             <div style="padding:12px 16px;background:var(--sand-light);border-radius:12px;border:1px solid var(--sand-dark);font-size:0.85rem;color:var(--ink-soft);line-height:1.6;">
-              🚚 משלוח עד הבית (35 ₪) או איסוף עצמי מראשון לציון (חינם) — בחירה בשלב התשלום.
+              🚚 משלוח עד הבית (35 ₪) — תוך 3–5 ימי עסקים. איסוף עצמי מראשון לציון בחינם — בתיאום מראש.
             </div>
             ${actionHtml}
           </div>
@@ -353,6 +362,7 @@ function renderProductView() {
     el.querySelector('#pv-quick-buy').addEventListener('click', () => {
       isQuickBuy    = true;
       checkoutItems = [{ id, name: data.name, price: sellPrice(data), imageUrl: pvImages[0] || '', qty: 1 }];
+      // Quick buy also requires login — handled in initCheckoutView / step1 next handler
       switchView('checkout');
     });
   }
@@ -420,16 +430,20 @@ function renderProfileView() {
             <p style="margin:4px 0 0;font-size:0.88rem;color:var(--muted);">${esc(currentUser.email || '')}</p>
           </div>
           <div>
-            <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">שם מלא</label>
-            <input id="prof-name" type="text" value="${esc(userProfile.fullName || currentUser.displayName || '')}" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);box-sizing:border-box;" />
+            <label style="${LBL}">שם מלא</label>
+            <input id="prof-name" type="text" value="${esc(userProfile.fullName || currentUser.displayName || '')}" style="${INP}" />
           </div>
           <div>
-            <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">טלפון</label>
-            <input id="prof-phone" type="tel" value="${esc(userProfile.phone || '')}" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);box-sizing:border-box;" />
+            <label style="${LBL}">טלפון</label>
+            <input id="prof-phone" type="tel" value="${esc(userProfile.phone || '')}" placeholder="05X-XXXXXXX" style="${INP}" />
           </div>
           <div>
-            <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">כתובת למשלוח</label>
-            <input id="prof-street" type="text" placeholder="רחוב ומספר" value="${esc(userProfile.street || '')}" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);box-sizing:border-box;margin-bottom:8px;" />
+            <label style="${LBL}">כתובת למשלוח</label>
+            <input id="prof-street" type="text" placeholder="רחוב ומספר" value="${esc(userProfile.street || '')}" style="${INP}margin-bottom:8px;" />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+              <input id="prof-floor" type="text" placeholder="קומה" value="${esc(userProfile.floor || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <input id="prof-apt"   type="text" placeholder="דירה / מס' בית" value="${esc(userProfile.apt || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+            </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <input id="prof-city" type="text" placeholder="עיר"   value="${esc(userProfile.city || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
               <input id="prof-zip"  type="text" placeholder="מיקוד" value="${esc(userProfile.zip  || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
@@ -470,6 +484,8 @@ function renderProfileView() {
       fullName: el.querySelector('#prof-name').value.trim(),
       phone:    el.querySelector('#prof-phone').value.trim(),
       street:   el.querySelector('#prof-street').value.trim(),
+      floor:    el.querySelector('#prof-floor').value.trim(),
+      apt:      el.querySelector('#prof-apt').value.trim(),
       city:     el.querySelector('#prof-city').value.trim(),
       zip:      el.querySelector('#prof-zip').value.trim(),
       email:    currentUser.email,
@@ -531,25 +547,11 @@ function renderProfileView() {
 }
 
 // ── Checkout view ──────────────────────────────────────────────
+// Guest users can browse step 1 (cart review) freely.
+// Login is required only when proceeding to step 2 (shipping details).
 function initCheckoutView() {
   const el = document.getElementById('view-checkout');
   if (!el) return;
-
-  if (!currentUser) {
-    el.innerHTML = `
-      <section style="min-height:80vh;padding:80px 0;display:flex;align-items:center;justify-content:center;background:var(--sand);">
-        <div style="text-align:center;max-width:360px;padding:0 20px;">
-          <div style="font-size:4rem;margin-bottom:20px;">🛒</div>
-          <h2 style="font-size:1.4rem;font-weight:700;color:var(--ink);margin:0 0 10px;">נדרשת התחברות</h2>
-          <p style="color:var(--muted);font-size:0.9rem;margin:0 0 28px;">התחברי להמשיך לתשלום.</p>
-          <button id="checkout-login-btn" class="btn">התחברות / הרשמה</button>
-          <button id="checkout-back-btn" style="display:block;margin:16px auto 0;background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;">← חזרה לקניות</button>
-        </div>
-      </section>`;
-    el.querySelector('#checkout-login-btn').addEventListener('click', () => document.getElementById('auth-nav-btn')?.click());
-    el.querySelector('#checkout-back-btn').addEventListener('click', () => switchView(previousView || 'home'));
-    return;
-  }
 
   if (!isQuickBuy) {
     checkoutCartItems = cart.map(i => ({ ...i, _selected: true }));
@@ -568,18 +570,18 @@ function renderCheckoutStep(el) {
 function stepIndicator(active) {
   const steps = ['עגלת קניות', 'פרטי משלוח', 'אישור הזמנה'];
   return `
-    <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px;" role="list" aria-label="שלבי תשלום">
       ${steps.map((label, i) => {
         const n = i + 1;
         const done   = n < active;
         const isAct  = n === active;
         return `
-          <div style="display:flex;align-items:center;">
+          <div style="display:flex;align-items:center;" role="listitem">
             <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-              <div style="width:32px;height:32px;border-radius:50%;background:${done || isAct ? 'var(--pink)' : 'var(--sand-dark)'};color:${done || isAct ? '#fff' : 'var(--muted)'};display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;">${done ? '✓' : n}</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:${done || isAct ? 'var(--pink)' : 'var(--sand-dark)'};color:${done || isAct ? '#fff' : 'var(--muted)'};display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;" aria-current="${isAct ? 'step' : false}">${done ? '✓' : n}</div>
               <span style="font-size:0.7rem;color:${isAct ? 'var(--ink)' : 'var(--muted)'};white-space:nowrap;">${label}</span>
             </div>
-            ${i < steps.length - 1 ? `<div style="width:40px;height:2px;background:${n < active ? 'var(--pink)' : 'var(--sand-dark)'};margin-bottom:22px;margin-inline:8px;"></div>` : ''}
+            ${i < steps.length - 1 ? `<div style="width:40px;height:2px;background:${n < active ? 'var(--pink)' : 'var(--sand-dark)'};margin-bottom:22px;margin-inline:8px;" aria-hidden="true"></div>` : ''}
           </div>`;
       }).join('')}
     </div>`;
@@ -602,11 +604,15 @@ function renderCheckoutStep1(el) {
     return;
   }
 
+  const selItems = isQuickBuy ? items : items.filter(i => i._selected !== false);
+  const subtotal = selItems.reduce((s, i) => s + i.price * (i.qty || 1), 0);
+  const bannerHtml = freeShipBannerHTML(subtotal);
+
   const itemsHtml = items.map((item, idx) => `
     <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--sand-dark);">
-      ${!isQuickBuy ? `<input type="checkbox" class="co-check" data-idx="${idx}" ${item._selected !== false ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--pink);cursor:pointer;flex-shrink:0;" />` : ''}
+      ${!isQuickBuy ? `<input type="checkbox" class="co-check" data-idx="${idx}" ${item._selected !== false ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--pink);cursor:pointer;flex-shrink:0;" aria-label="בחרי פריט ${esc(item.name)}" />` : ''}
       <div style="width:60px;height:60px;border-radius:10px;overflow:hidden;background:var(--pink-light);flex-shrink:0;">
-        ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" style="width:100%;height:100%;object-fit:cover;" />` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">💎</div>'}
+        ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" style="width:100%;height:100%;object-fit:cover;" alt="${esc(item.name)}" />` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">💎</div>'}
       </div>
       <div style="flex:1;min-width:0;">
         <p style="margin:0 0 4px;font-size:0.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(item.name)}</p>
@@ -614,16 +620,13 @@ function renderCheckoutStep1(el) {
       </div>
       ${!isQuickBuy ? `
         <div style="display:flex;align-items:center;gap:6px;">
-          <button class="co-minus" data-idx="${idx}" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--sand-dark);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">−</button>
-          <span style="font-size:0.9rem;font-weight:600;min-width:18px;text-align:center;">${item.qty || 1}</span>
-          <button class="co-plus"  data-idx="${idx}" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--sand-dark);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
-          <button class="co-remove" data-idx="${idx}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.8rem;padding:4px 6px;border-radius:6px;flex-shrink:0;">הסר</button>
+          <button class="co-minus" data-idx="${idx}" aria-label="הפחיתי כמות" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--sand-dark);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">−</button>
+          <span style="font-size:0.9rem;font-weight:600;min-width:18px;text-align:center;" aria-live="polite">${item.qty || 1}</span>
+          <button class="co-plus"  data-idx="${idx}" aria-label="הוסיפי כמות" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--sand-dark);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+          <button class="co-remove" data-idx="${idx}" aria-label="הסירי פריט" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.8rem;padding:4px 6px;border-radius:6px;flex-shrink:0;">הסר</button>
         </div>
       ` : `<span style="font-size:0.9rem;font-weight:600;flex-shrink:0;">× ${item.qty || 1}</span>`}
     </div>`).join('');
-
-  const selItems = isQuickBuy ? items : items.filter(i => i._selected !== false);
-  const subtotal = selItems.reduce((s, i) => s + i.price * (i.qty || 1), 0);
 
   el.innerHTML = `
     <section style="padding:80px 0 110px;background:var(--sand);">
@@ -631,12 +634,13 @@ function renderCheckoutStep1(el) {
         <button id="co-back1" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">← המשיכי בקניות</button>
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">העגלה שלי</h2>
         ${stepIndicator(1)}
+        ${bannerHtml}
         <div>${itemsHtml}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0 0;">
           <span style="font-size:0.97rem;color:var(--ink-soft);">סה"כ (${selItems.length} פריטים)</span>
           <span id="co-subtotal" style="font-size:1.2rem;font-weight:700;color:var(--ink);">${subtotal} ₪</span>
         </div>
-        <button id="co-next1" class="btn" style="width:100%;margin-top:18px;min-height:50px;font-size:1rem;${!selItems.length ? 'opacity:0.5;' : ''}">המשיכי לפרטי משלוח →</button>
+        <button id="co-next1" class="btn" style="width:100%;margin-top:18px;min-height:50px;font-size:1rem;${!selItems.length ? 'opacity:0.5;' : ''}">מעבר לתשלום →</button>
       </div>
     </section>`;
 
@@ -655,6 +659,13 @@ function renderCheckoutStep1(el) {
         .map(i => ({ id: i.id, name: i.name, price: i.price, imageUrl: i.imageUrl, qty: i.qty || 1 }));
     }
     if (!checkoutItems.length) { showToast('יש לבחור לפחות פריט אחד'); return; }
+
+    // Login wall: only at the transition to checkout details
+    if (!currentUser) {
+      pendingCheckoutAfterAuth = true;
+      document.getElementById('auth-nav-btn')?.click();
+      return;
+    }
     checkoutStep = 2;
     renderCheckoutStep(el);
   });
@@ -717,12 +728,14 @@ function renderCheckoutStep2(el) {
       <div class="container" style="max-width:640px;">
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">פרטי משלוח</h2>
         ${stepIndicator(2)}
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px;">
+
+        <!-- Shipping method -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px;" role="radiogroup" aria-label="אופן קבלת ההזמנה">
           <label style="display:flex;align-items:center;gap:14px;padding:16px 18px;border:2px solid ${checkoutDelivery === 'delivery' ? 'var(--pink)' : 'var(--sand-dark)'};border-radius:14px;cursor:pointer;transition:.2s;">
             <input type="radio" name="co-ship" value="delivery" ${checkoutDelivery === 'delivery' ? 'checked' : ''} style="accent-color:var(--pink);width:18px;height:18px;" />
             <div>
               <p style="margin:0 0 2px;font-size:0.95rem;font-weight:600;color:var(--ink);">משלוח עד הבית</p>
-              <p style="margin:0;font-size:0.82rem;color:var(--muted);">תוך 3–5 ימי עסקים | 35 ₪</p>
+              <p style="margin:0;font-size:0.82rem;color:var(--muted);">תוך 3–5 ימי עסקים | 35 ₪ (חינם מ-400 ₪)</p>
             </div>
           </label>
           <label style="display:flex;align-items:center;gap:14px;padding:16px 18px;border:2px solid ${checkoutDelivery === 'pickup' ? 'var(--pink)' : 'var(--sand-dark)'};border-radius:14px;cursor:pointer;transition:.2s;">
@@ -733,36 +746,62 @@ function renderCheckoutStep2(el) {
             </div>
           </label>
         </div>
+
+        <!-- Contact info -->
+        <div style="margin-bottom:20px;">
+          <p style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:0 0 14px;">פרטי יצירת קשר</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+              <label for="co-name" style="${LBL}">שם מלא *</label>
+              <input id="co-name" type="text" value="${esc(addr.fullName || currentUser?.displayName || '')}" placeholder="שם פרטי ושם משפחה" style="${INP}" autocomplete="name" />
+            </div>
+            <div>
+              <label for="co-phone" style="${LBL}">טלפון *</label>
+              <input id="co-phone" type="tel" value="${esc(addr.phone || '')}" placeholder="05X-XXXXXXX" style="${INP}" autocomplete="tel" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivery address (shown only for home delivery) -->
         <div id="co-addr" style="${checkoutDelivery === 'delivery' ? 'display:flex;' : 'display:none;'}flex-direction:column;gap:12px;margin-bottom:24px;">
+          <p style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:0;">כתובת למשלוח</p>
           <div>
-            <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">רחוב ומספר *</label>
-            <input id="co-street" type="text" value="${esc(addr.street || '')}" placeholder="רחוב הרצל 10" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);box-sizing:border-box;" />
+            <label for="co-street" style="${LBL}">רחוב ומספר *</label>
+            <input id="co-street" type="text" value="${esc(addr.street || '')}" placeholder="רחוב הרצל 10" style="${INP}" autocomplete="street-address" />
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div>
-              <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">קומה</label>
-              <input id="co-floor" type="text" value="${esc(addr.floor || '')}" placeholder="3" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <label for="co-floor" style="${LBL}">קומה</label>
+              <input id="co-floor" type="text" value="${esc(addr.floor || '')}" placeholder="3" style="${INP}" />
             </div>
             <div>
-              <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">דירה</label>
-              <input id="co-apt" type="text" value="${esc(addr.apt || '')}" placeholder="12" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <label for="co-apt" style="${LBL}">דירה / מספר בית</label>
+              <input id="co-apt" type="text" value="${esc(addr.apt || '')}" placeholder="12" style="${INP}" />
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div>
-              <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">עיר *</label>
-              <input id="co-city" type="text" value="${esc(addr.city || '')}" placeholder="תל אביב" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <label for="co-city" style="${LBL}">עיר *</label>
+              <input id="co-city" type="text" value="${esc(addr.city || '')}" placeholder="תל אביב" style="${INP}" autocomplete="address-level2" />
             </div>
             <div>
-              <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">מיקוד</label>
-              <input id="co-zip" type="text" value="${esc(addr.zip || '')}" placeholder="12345" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <label for="co-zip" style="${LBL}">מיקוד</label>
+              <input id="co-zip" type="text" value="${esc(addr.zip || '')}" placeholder="12345" style="${INP}" autocomplete="postal-code" />
             </div>
           </div>
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;color:var(--ink-soft);">
-            <input type="checkbox" id="co-save-addr" checked style="accent-color:var(--pink);" /> שמרי כתובת לפעם הבאה
+            <input type="checkbox" id="co-save-addr" checked style="accent-color:var(--pink);" /> שמרי פרטים לפעם הבאה
           </label>
         </div>
-        <p id="co-step2-err" style="color:#ef4444;font-size:0.85rem;min-height:1.2rem;margin-bottom:12px;"></p>
+
+        <!-- Shipping & Returns note -->
+        <div style="padding:12px 16px;background:var(--sand-light);border-radius:12px;border:1px solid var(--sand-dark);font-size:0.82rem;color:var(--muted);line-height:1.65;margin-bottom:20px;">
+          <strong style="color:var(--ink-soft);">משלוחים והחזרות:</strong> משלוח בדואר רשום תוך 3–5 ימי עסקים.
+          החזרה/החלפה תוך 14 יום מקבלת הפריט — בתיאום מראש בלבד.
+          לפריטים בהזמנה אישית אין אפשרות ביטול.
+        </div>
+
+        <p id="co-step2-err" style="color:#ef4444;font-size:0.85rem;min-height:1.2rem;margin-bottom:12px;" role="alert" aria-live="assertive"></p>
         <div style="display:flex;gap:12px;">
           <button id="co-back2" class="btn btn-outline" style="flex:1;min-height:50px;">← חזרה</button>
           <button id="co-next2" class="btn" style="flex:2;min-height:50px;font-size:1rem;">המשיכי לסיכום →</button>
@@ -785,23 +824,35 @@ function renderCheckoutStep2(el) {
   el.querySelector('#co-back2').addEventListener('click', () => { checkoutStep = 1; renderCheckoutStep(el); });
 
   el.querySelector('#co-next2').addEventListener('click', async () => {
-    const err = el.querySelector('#co-step2-err');
+    const err   = el.querySelector('#co-step2-err');
+    const name  = el.querySelector('#co-name').value.trim();
+    const phone = el.querySelector('#co-phone').value.trim();
+
+    if (!name)  { err.textContent = 'יש למלא שם מלא.';  return; }
+    if (!phone) { err.textContent = 'יש למלא מספר טלפון.'; return; }
+
     if (checkoutDelivery === 'delivery') {
       const street = el.querySelector('#co-street').value.trim();
       const city   = el.querySelector('#co-city').value.trim();
       if (!street || !city) { err.textContent = 'יש למלא רחוב ועיר.'; return; }
-      if (currentUser && el.querySelector('#co-save-addr')?.checked) {
-        const addrData = {
-          street, city,
-          floor: el.querySelector('#co-floor').value.trim(),
-          apt:   el.querySelector('#co-apt').value.trim(),
-          zip:   el.querySelector('#co-zip').value.trim(),
-          email: currentUser.email,
-        };
-        try { await setDoc(doc(db, USERS_ROOT, currentUser.uid), addrData, { merge: true }); } catch {}
-        userProfile = { ...userProfile, ...addrData };
-      }
     }
+
+    const addrData = {
+      fullName: name,
+      phone,
+      email:  currentUser.email,
+      street: checkoutDelivery === 'delivery' ? el.querySelector('#co-street').value.trim() : (addr.street || ''),
+      floor:  checkoutDelivery === 'delivery' ? el.querySelector('#co-floor').value.trim()  : (addr.floor  || ''),
+      apt:    checkoutDelivery === 'delivery' ? el.querySelector('#co-apt').value.trim()    : (addr.apt    || ''),
+      city:   checkoutDelivery === 'delivery' ? el.querySelector('#co-city').value.trim()   : (addr.city   || ''),
+      zip:    checkoutDelivery === 'delivery' ? el.querySelector('#co-zip').value.trim()    : (addr.zip    || ''),
+    };
+
+    if (el.querySelector('#co-save-addr')?.checked) {
+      try { await setDoc(doc(db, USERS_ROOT, currentUser.uid), addrData, { merge: true }); } catch {}
+    }
+    userProfile = { ...userProfile, ...addrData };
+
     err.textContent = '';
     checkoutStep = 3;
     renderCheckoutStep(el);
@@ -810,13 +861,14 @@ function renderCheckoutStep2(el) {
 
 function renderCheckoutStep3(el) {
   const itemsSubtotal = checkoutItems.reduce((s, i) => s + i.price * (i.qty || 1), 0);
-  const shippingCost  = checkoutDelivery === 'delivery' ? SHIPPING : 0;
+  const freeShipping  = checkoutDelivery === 'delivery' && itemsSubtotal >= FREE_SHIP_THRESHOLD;
+  const shippingCost  = checkoutDelivery === 'delivery' ? (freeShipping ? 0 : SHIPPING) : 0;
   const total         = itemsSubtotal + shippingCost;
 
   const itemsHtml = checkoutItems.map(item => `
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--sand-dark);">
       <div style="width:50px;height:50px;border-radius:8px;overflow:hidden;background:var(--pink-light);flex-shrink:0;">
-        ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" style="width:100%;height:100%;object-fit:cover;" />` : '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:1.3rem;">💎</div>'}
+        ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" style="width:100%;height:100%;object-fit:cover;" alt="${esc(item.name)}" />` : '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:1.3rem;">💎</div>'}
       </div>
       <div style="flex:1;">
         <p style="margin:0 0 2px;font-size:0.9rem;font-weight:600;color:var(--ink);">${esc(item.name)}</p>
@@ -846,7 +898,7 @@ function renderCheckoutStep3(el) {
           </div>
         </div>
         <div style="margin-bottom:20px;">
-          <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;">הערה אישית (לא חובה)</label>
+          <label for="co-note" style="display:block;font-size:0.82rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;">הערה אישית (לא חובה)</label>
           <textarea id="co-note" rows="3" placeholder="הוסיפי הערה על ההזמנה..." style="width:100%;padding:12px 14px;border:1.5px solid var(--sand-dark);border-radius:12px;font-family:inherit;font-size:0.9rem;resize:none;background:var(--sand-light);box-sizing:border-box;direction:rtl;"></textarea>
         </div>
         <div style="display:flex;gap:12px;">
@@ -862,12 +914,15 @@ function renderCheckoutStep3(el) {
   el.querySelector('#co-back3').addEventListener('click', () => { checkoutStep = 2; renderCheckoutStep(el); });
 
   el.querySelector('#co-submit').addEventListener('click', async () => {
-    const note   = el.querySelector('#co-note').value.trim();
-    const btn    = el.querySelector('#co-submit');
+    const note = el.querySelector('#co-note').value.trim();
+    const btn  = el.querySelector('#co-submit');
     btn.disabled = true;
 
-    const itemsText   = checkoutItems.map(i => `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪`).join('\n');
-    const deliveryTxt = checkoutDelivery === 'delivery' ? `משלוח עד הבית (+${SHIPPING} ₪)` : 'איסוף עצמי מראשון לציון (חינם)';
+    const itemsText    = checkoutItems.map(i => `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪`).join('\n');
+    const deliveryTxt  = checkoutDelivery === 'delivery'
+      ? `משלוח עד הבית (+${shippingCost === 0 ? '0 ₪ — משלוח חינם!' : shippingCost + ' ₪'})`
+      : 'איסוף עצמי מראשון לציון (חינם)';
+
     const addrParts = [
       userProfile.street,
       userProfile.floor ? `קומה ${userProfile.floor}` : '',
@@ -877,12 +932,24 @@ function renderCheckoutStep3(el) {
     ].filter(Boolean);
     const addrLine = (checkoutDelivery === 'delivery' && userProfile.street)
       ? `\nכתובת: ${addrParts.join(', ')}` : '';
-    const waMsg = `היי ויק, הגעתי דרך האתר ואני מעוניינת להזמין:\n\n${itemsText}\n\nאופן קבלה: ${deliveryTxt}${addrLine}\n\nסה"כ לתשלום: *${total} ₪*${note ? '\n\nהערה: ' + note : ''}`;
+
+    const contactLine = [
+      userProfile.fullName ? `שם: ${userProfile.fullName}` : '',
+      userProfile.phone    ? `טלפון: ${userProfile.phone}` : '',
+    ].filter(Boolean).join(' | ');
+
+    const waMsg = `היי ויק, הגעתי דרך האתר ואני מעוניינת להזמין:\n\n${itemsText}\n\nאופן קבלה: ${deliveryTxt}${addrLine}\n\n${contactLine}\n\nסה"כ לתשלום: *${total} ₪*${note ? '\n\nהערה: ' + note : ''}`;
 
     if (currentUser) {
       try {
         await addDoc(collection(db, `${USERS_ROOT}/${currentUser.uid}/orders`), {
-          items: checkoutItems, delivery: checkoutDelivery, total, note: note || null, createdAt: serverTimestamp(),
+          items:    checkoutItems,
+          delivery: checkoutDelivery,
+          total,
+          note:     note || null,
+          fullName: userProfile.fullName || '',
+          phone:    userProfile.phone    || '',
+          createdAt: serverTimestamp(),
         });
       } catch (ex) { console.error('Order save failed:', ex); }
     }
@@ -903,8 +970,8 @@ function subscribeProducts() {
   onSnapshot(q, snap => {
     productsLoaded = true;
     allProducts    = snap.docs.map(d => ({ id: d.id, data: d.data() }));
-    if      (currentView === 'home')                            renderHome();
-    else if (currentView === 'shop')                            renderShop();
+    if      (currentView === 'home')                        renderHome();
+    else if (currentView === 'shop')                        renderShop();
     else if (currentView === 'product' && currentProduct) {
       const updated = allProducts.find(p => p.id === currentProduct.id);
       if (updated) currentProduct = updated;
@@ -918,15 +985,32 @@ function subscribeAuth() {
     currentUser = user;
     const navBtn = document.getElementById('nav-user-btn');
     if (navBtn) navBtn.setAttribute('data-logged-in', user ? '1' : '0');
+
     if (user) {
       try {
         const snap = await getDoc(doc(db, USERS_ROOT, user.uid));
         if (snap.exists()) userProfile = snap.data();
       } catch {}
+
+      // After login: proceed to checkout step 2 if the user was blocked
+      if (pendingCheckoutAfterAuth) {
+        pendingCheckoutAfterAuth = false;
+        checkoutStep = 2;
+        const coEl = document.getElementById('view-checkout');
+        if (coEl && currentView === 'checkout') {
+          renderCheckoutStep(coEl);
+        } else {
+          switchView('checkout');
+          // switchView calls initCheckoutView which resets to step 1 — fix:
+          setTimeout(() => {
+            const el2 = document.getElementById('view-checkout');
+            if (el2) { checkoutStep = 2; renderCheckoutStep(el2); }
+          }, 0);
+        }
+      }
     } else {
       userProfile = {};
-      if (currentView === 'checkout') initCheckoutView();
-      if (currentView === 'profile')  renderProfileView();
+      if (currentView === 'profile') renderProfileView();
     }
   });
 }
@@ -956,12 +1040,184 @@ function setupNav() {
 function injectViews() {
   const footer = document.querySelector('footer');
   ['shop', 'product', 'profile', 'checkout'].forEach(v => {
-    const div       = document.createElement('div');
-    div.id          = 'view-' + v;
-    div.className   = 'v-section';
+    const div     = document.createElement('div');
+    div.id        = 'view-' + v;
+    div.className = 'v-section';
     div.style.display = 'none';
     document.body.insertBefore(div, footer);
   });
+}
+
+// ── Accessibility widget ───────────────────────────────────────
+const A11Y_FEATURES = [
+  { key: 'text-larger',        label: 'הגדלת טקסט',      icon: 'A+' },
+  { key: 'text-smaller',       label: 'הקטנת טקסט',      icon: 'A−' },
+  { key: 'grayscale',          label: 'גווני אפור',       icon: '◑'  },
+  { key: 'high-contrast',      label: 'ניגודיות גבוהה',   icon: '◐'  },
+  { key: 'readable-font',      label: 'פונט קריא',        icon: 'Aa' },
+  { key: 'highlight-links',    label: 'הדגשת קישורים',    icon: '🔗' },
+  { key: 'highlight-headings', label: 'הדגשת כותרות',     icon: 'H'  },
+  { key: 'pause-animations',   label: 'עצירת אנימציות',   icon: '⏸' },
+];
+
+function injectAccessibility() {
+  // Load saved settings and apply
+  const saved = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
+  A11Y_FEATURES.forEach(f => {
+    if (saved[f.key]) document.body.classList.add('a11y-' + f.key);
+  });
+  applyTextScale(saved);
+
+  const A11Y_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24" fill="currentColor" aria-hidden="true" focusable="false">
+    <path d="M256 48a208 208 0 1 1 0 416A208 208 0 0 1 256 48zm0-48C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 128a48 48 0 1 0 0-96 48 48 0 0 0 0 96zm-32 32c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h8v80c0 13.3 10.7 24 24 24s24-10.7 24-24v-80h8v80c0 13.3 10.7 24 24 24s24-10.7 24-24v-80h8c17.7 0 32-14.3 32-32V240c0-17.7-14.3-32-32-32H224z"/>
+  </svg>`;
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="a11y-widget" dir="rtl">
+      <button id="a11y-toggle"
+        aria-label="פתחי תפריט נגישות"
+        aria-expanded="false"
+        aria-controls="a11y-menu"
+        aria-haspopup="dialog">
+        ${A11Y_ICON}
+      </button>
+      <div id="a11y-menu"
+        role="dialog"
+        aria-label="אפשרויות נגישות"
+        aria-hidden="true"
+        hidden>
+        <div class="a11y-header">
+          <h3 class="a11y-title" id="a11y-dialog-title">הגדרות נגישות</h3>
+          <button id="a11y-close" aria-label="סגרי תפריט נגישות">×</button>
+        </div>
+        <div class="a11y-grid" role="group" aria-label="אפשרויות">
+          ${A11Y_FEATURES.map(f => `
+            <button class="a11y-btn ${saved[f.key] ? 'active' : ''}"
+              data-a11y="${f.key}"
+              aria-pressed="${saved[f.key] ? 'true' : 'false'}"
+              type="button">
+              <span class="a11y-btn-icon" aria-hidden="true">${f.icon}</span>
+              <span class="a11y-btn-label">${f.label}</span>
+            </button>`).join('')}
+        </div>
+        <div class="a11y-footer">
+          <button id="a11y-reset" type="button">איפוס הכל</button>
+          <button id="a11y-statement-btn" type="button">הצהרת נגישות</button>
+        </div>
+      </div>
+    </div>`);
+
+  const toggle = document.getElementById('a11y-toggle');
+  const menu   = document.getElementById('a11y-menu');
+  const close  = document.getElementById('a11y-close');
+
+  function openA11yMenu() {
+    menu.hidden = false;
+    menu.setAttribute('aria-hidden', 'false');
+    toggle.setAttribute('aria-expanded', 'true');
+    close.focus();
+  }
+  function closeA11yMenu() {
+    menu.hidden = true;
+    menu.setAttribute('aria-hidden', 'true');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.focus();
+  }
+
+  toggle.addEventListener('click', () => menu.hidden ? openA11yMenu() : closeA11yMenu());
+  close.addEventListener('click',  closeA11yMenu);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !menu.hidden) closeA11yMenu();
+  });
+
+  // Focus trap inside menu
+  menu.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const focusable = [...menu.querySelectorAll('button, a[href]')];
+    const first = focusable[0];
+    const last  = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // Feature toggles
+  menu.querySelectorAll('.a11y-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key      = btn.dataset.a11y;
+      const isActive = document.body.classList.toggle('a11y-' + key);
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+      const settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
+      settings[key]  = isActive;
+      localStorage.setItem('a11y-settings', JSON.stringify(settings));
+      if (key === 'text-larger' || key === 'text-smaller') applyTextScale(settings);
+    });
+  });
+
+  // Reset
+  document.getElementById('a11y-reset').addEventListener('click', () => {
+    A11Y_FEATURES.forEach(f => {
+      document.body.classList.remove('a11y-' + f.key);
+      menu.querySelector(`[data-a11y="${f.key}"]`)?.classList.remove('active');
+      menu.querySelector(`[data-a11y="${f.key}"]`)?.setAttribute('aria-pressed', 'false');
+    });
+    document.documentElement.style.fontSize = '';
+    localStorage.removeItem('a11y-settings');
+  });
+
+  // Accessibility statement
+  document.getElementById('a11y-statement-btn').addEventListener('click', () => {
+    closeA11yMenu();
+    showA11yStatement();
+  });
+}
+
+function applyTextScale(settings) {
+  if (settings['text-larger'])  document.documentElement.style.fontSize = '112%';
+  else if (settings['text-smaller']) document.documentElement.style.fontSize = '88%';
+  else document.documentElement.style.fontSize = '';
+}
+
+function showA11yStatement() {
+  let modal = document.getElementById('a11y-statement-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'a11y-statement-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'הצהרת נגישות');
+    modal.setAttribute('dir', 'rtl');
+    modal.innerHTML = `
+      <div class="a11y-statement-overlay"></div>
+      <div class="a11y-statement-content">
+        <button class="a11y-statement-close" aria-label="סגרי הצהרת נגישות" type="button">×</button>
+        <h2 style="font-size:1.3rem;font-weight:700;color:var(--ink);margin:0 0 16px;">הצהרת נגישות</h2>
+        <p style="color:var(--ink-soft);line-height:1.75;font-size:0.9rem;margin:0 0 10px;">
+          אתר <strong>Charming by Vik</strong> מחויב לנגישות דיגיטלית לאנשים עם מוגבלויות.
+          אנו פועלים בהתאם לתקן הישראלי 5568 ולהנחיות WCAG 2.0 ברמה AA.
+        </p>
+        <p style="color:var(--ink-soft);line-height:1.75;font-size:0.9rem;margin:0 0 10px;">
+          האתר כולל: ניווט מקלדת מלא, תגיות ARIA לקוראי מסך, יחס ניגודיות עומד בתקן, ואפשרויות נגישות מתכווננות.
+        </p>
+        <p style="color:var(--ink-soft);line-height:1.75;font-size:0.9rem;margin:0;">
+          לפרטים ולדיווח על בעיות נגישות:
+          <a href="mailto:charming.by.vik@gmail.com" style="color:var(--pink-deep);">charming.by.vik@gmail.com</a>
+        </p>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('.a11y-statement-overlay').addEventListener('click', () => { modal.hidden = true; document.body.style.overflow = ''; });
+    modal.querySelector('.a11y-statement-close').addEventListener('click',   () => { modal.hidden = true; document.body.style.overflow = ''; });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !modal.hidden) { modal.hidden = true; document.body.style.overflow = ''; }
+    });
+  }
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden';
+  modal.querySelector('.a11y-statement-close').focus();
 }
 
 // ── Init ───────────────────────────────────────────────────────
@@ -969,6 +1225,7 @@ function init() {
   injectViews();
   setupNav();
   updateCartBadge();
+  injectAccessibility();
   const homeEl = document.getElementById('view-home');
   if (homeEl) homeEl.style.display = 'block';
   subscribeProducts();
