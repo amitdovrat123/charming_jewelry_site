@@ -1182,12 +1182,15 @@ ul { list-style: none; }
 }
 
 .hero-logo-img {
-  width: 178px;
-  height: 178px;
+  width: 300px;
+  height: 300px;
   object-fit: cover;
   border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 8px 40px rgba(26, 20, 0, 0.22), 0 0 0 6px rgba(201, 149, 122, 0.18);
+  border: 4px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 12px 60px rgba(26, 20, 0, 0.28),
+    0 0 0 8px rgba(201, 149, 122, 0.22),
+    0 0 0 14px rgba(201, 149, 122, 0.08);
 }
 
 /* ===== About — Two-Column Layout ===== */
@@ -2016,7 +2019,7 @@ ul { list-style: none; }
 }
 
 @media (max-width: 768px) {
-  .hero-logo-img { width: 140px; height: 140px; }
+  .hero-logo-img { width: 180px; height: 180px; }
   .hero-logo-wrap { margin-bottom: 20px; }
 
   .journey-steps { gap: 56px; }
@@ -3779,7 +3782,7 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
   display: flex;
   align-items: center;
   white-space: nowrap;
-  animation: ticker-scroll 40s linear infinite;
+  animation: ticker-scroll 28s linear infinite;
 }
 
 .ticker-item {

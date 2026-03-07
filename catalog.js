@@ -1061,7 +1061,7 @@ function setupNav() {
   document.getElementById('home-all-products-btn')?.addEventListener('click', () => goToShop());
 
   // Footer SPA links — navigate without full page reload
-  document.querySelectorAll('a[href="#shop"], a[href="index.html#shop"]').forEach(a => {
+  document.querySelectorAll('a[href="index.html#shop"]').forEach(a => {
     a.addEventListener('click', e => { e.preventDefault(); goToShop(); });
   });
   document.querySelectorAll('.footer-links a[href="index.html"]').forEach(a => {
