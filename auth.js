@@ -318,6 +318,10 @@ async function handleGoogleAuth(panelId) {
 
 // ── Navbar ────────────────────────────────────────────────────
 function updateNavbar(user) {
+  // sync green dot on user icon (works on all pages)
+  document.getElementById('nav-user-btn')
+    ?.setAttribute('data-logged-in', user ? '1' : '0');
+
   const navItem = document.getElementById('auth-nav-item');
   if (!navItem) return;
 
