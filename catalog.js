@@ -993,6 +993,13 @@ function subscribeAuth() {
     const navBtn = document.getElementById('nav-user-btn');
     if (navBtn) navBtn.setAttribute('data-logged-in', user ? '1' : '0');
 
+    // Admin link: only reveal for the admin email
+    const adminLink = document.querySelector('.footer-admin-link');
+    if (adminLink) {
+      const isAdmin = user && user.email === 'amitdovrat123@gmail.com';
+      adminLink.classList.toggle('footer-admin-link--visible', isAdmin);
+    }
+
     if (user) {
       try {
         const snap = await getDoc(doc(db, USERS_ROOT, user.uid));
@@ -1035,6 +1042,77 @@ function setupNav() {
   });
 
   document.getElementById('home-all-products-btn')?.addEventListener('click', () => switchView('shop'));
+
+  // Footer SPA links — navigate without full page reload
+  document.querySelectorAll('a[href="#shop"], a[href="index.html#shop"]').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); switchView('shop'); });
+  });
+  document.querySelectorAll('.footer-links a[href="index.html"]').forEach(a => {
+    a.addEventListener('click', e => {
+      if (window.location.pathname.match(/index\.html$|\/$/) || window.location.pathname === '/') {
+        e.preventDefault(); switchView('home');
+      }
+    });
+  });
+}
+
+// ── Promo Popup (Welcome Banner) ───────────────────────────────
+function injectPromoPopup() {
+  const KEY      = 'charming-promo-v9';
+  const INTERVAL = 7 * 24 * 60 * 60 * 1000;
+  const last     = parseInt(localStorage.getItem(KEY) || '0');
+  if (Date.now() - last < INTERVAL) return;
+  if (document.getElementById('promo-popup')) return;
+
+  const popup = document.createElement('div');
+  popup.id = 'promo-popup';
+  popup.setAttribute('role', 'dialog');
+  popup.setAttribute('aria-modal', 'true');
+  popup.setAttribute('aria-labelledby', 'promo-title');
+  popup.setAttribute('dir', 'rtl');
+  popup.innerHTML = `
+    <div class="promo-backdrop" aria-hidden="true"></div>
+    <div class="promo-card">
+      <button id="promo-close" class="promo-close-btn" aria-label="סגרי חלון">×</button>
+      <div class="promo-deco" aria-hidden="true">💎</div>
+      <h2 id="promo-title" class="promo-title">משהו צ'ארמינג מחכה לך...</h2>
+      <p class="promo-sub">הצטרפי למועדון הלקוחות שלנו עכשיו וקבלי <strong>10% הנחה</strong> על הקנייה הראשונה שלך!</p>
+      <button id="promo-cta" class="btn promo-cta-btn">להרשמה וקבלת ההטבה ✨</button>
+      <button id="promo-later" class="promo-later-btn" type="button">אולי מאוחר יותר</button>
+    </div>`;
+  document.body.appendChild(popup);
+
+  function closePopup() {
+    localStorage.setItem(KEY, String(Date.now()));
+    popup.classList.remove('promo-visible');
+    document.body.style.overflow = '';
+    setTimeout(() => { if (popup.parentNode) popup.remove(); }, 420);
+  }
+
+  function escHandler(e) {
+    if (e.key === 'Escape') { closePopup(); document.removeEventListener('keydown', escHandler); }
+  }
+
+  popup.querySelector('.promo-backdrop').addEventListener('click', closePopup);
+  popup.querySelector('#promo-close').addEventListener('click', closePopup);
+  popup.querySelector('#promo-later').addEventListener('click', closePopup);
+  document.addEventListener('keydown', escHandler);
+
+  popup.querySelector('#promo-cta').addEventListener('click', () => {
+    closePopup();
+    if (currentUser) {
+      switchView('profile');
+    } else {
+      switchView('profile');
+      setTimeout(() => document.getElementById('auth-nav-btn')?.click(), 120);
+    }
+  });
+
+  requestAnimationFrame(() => {
+    popup.classList.add('promo-visible');
+    document.body.style.overflow = 'hidden';
+    popup.querySelector('#promo-close').focus();
+  });
 }
 
 // ── Inject views ───────────────────────────────────────────────
@@ -1062,6 +1140,8 @@ function init() {
   if (homeEl) homeEl.style.display = 'block';
   subscribeProducts();
   subscribeAuth();
+  // Promotional popup — 5 s delay, once per 7 days
+  setTimeout(injectPromoPopup, 5000);
 }
 
 init();
