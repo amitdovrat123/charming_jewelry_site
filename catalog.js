@@ -91,17 +91,19 @@ function loadCart() {
 }
 function saveCart() { localStorage.setItem('charming-cart', JSON.stringify(cart)); }
 
-function addToCart(product) {
+function addToCart(product, customizationNote) {
   const existing = cart.find(i => i.id === product.id);
   if (existing) {
     existing.qty = (existing.qty || 1) + 1;
+    if (customizationNote) existing.customizationNote = customizationNote;
   } else {
     cart.push({
-      id:       product.id,
-      name:     product.data.name,
-      price:    sellPrice(product.data),
-      imageUrl: getImages(product.data)[0] || '',
-      qty:      1,
+      id:               product.id,
+      name:             product.data.name,
+      price:            sellPrice(product.data),
+      imageUrl:         getImages(product.data)[0] || '',
+      qty:              1,
+      customizationNote: customizationNote || null,
     });
   }
   saveCart();
@@ -232,8 +234,19 @@ function shopCardHTML(product) {
   const matChip = data.material
     ? `<span class="sp-card-material">${esc(data.material)}</span>` : '';
 
-  const customBadge = data.isCustomizable
-    ? `<div class="sp-custom-badge">✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה</div>` : '';
+  const customField = data.isCustomizable ? `
+    <div class="sp-custom-field">
+      <div class="sp-custom-field-label-row">
+        <label class="sp-custom-field-label" for="custom-note-${sid}">התאמה אישית של צ'ארמים <span class="sp-custom-optional">(אופציונלי)</span></label>
+        <span class="sp-custom-info-wrap">
+          <button type="button" class="sp-custom-info-btn" aria-label="מידע על מספור הצ'ארמים">?</button>
+          <span class="sp-custom-tooltip" role="tooltip">הצ'ארם הימני ביותר בתמונה נחשב למספר 1, הבא אחריו למספר 2 וכן הלאה.</span>
+        </span>
+      </div>
+      <textarea id="custom-note-${sid}" class="sp-custom-textarea" dir="rtl" rows="2"
+        placeholder="ציינו את מספר הצ'ארם (מימין לשמאל, הימני הוא 1) ואת השינוי. לדוגמה: 2-מזל תאומים"
+      ></textarea>
+    </div>` : '';
 
   const actionBtn = oos
     ? `<button class="sp-card-add sp-card-add--oos" disabled>אזל מהמלאי</button>`
@@ -252,7 +265,7 @@ function shopCardHTML(product) {
         <div class="sp-card-price-row">${priceHtml}${metalChip}${matChip}</div>
         ${actionBtn}
       </div>
-      ${customBadge}
+      ${customField}
     </div>`;
 }
 
@@ -269,8 +282,17 @@ function bindShopCardClicks(container) {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       const product = allProducts.find(p => p.id === btn.dataset.productId);
-      if (product) addToCart(product);
+      if (product) {
+        const card     = btn.closest('.sp-shop-card');
+        const textarea = card?.querySelector('.sp-custom-textarea');
+        const note     = textarea?.value?.trim() || null;
+        addToCart(product, note);
+      }
     });
+  });
+  // Prevent card navigation when interacting with the customization field
+  container.querySelectorAll('.sp-custom-field').forEach(field => {
+    field.addEventListener('click', e => e.stopPropagation());
   });
   container.querySelectorAll('.sp-card-quickview').forEach(btn => {
     btn.addEventListener('click', e => {
@@ -838,6 +860,7 @@ function renderCheckoutStep1(el) {
       <div style="flex:1;min-width:0;">
         <p style="margin:0 0 4px;font-size:0.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(item.name)}</p>
         <p style="margin:0;font-size:0.82rem;color:var(--muted);">${item.price} ₪</p>
+        ${item.customizationNote ? `<p style="margin:3px 0 0;font-size:0.78rem;font-style:italic;color:var(--pink-deep);">בקשת התאמה: ${esc(item.customizationNote)}</p>` : ''}
       </div>
       ${!isQuickBuy ? `
         <div style="display:flex;align-items:center;gap:6px;">
@@ -877,7 +900,7 @@ function renderCheckoutStep1(el) {
     if (!isQuickBuy) {
       checkoutItems = checkoutCartItems
         .filter(i => i._selected !== false)
-        .map(i => ({ id: i.id, name: i.name, price: i.price, imageUrl: i.imageUrl, qty: i.qty || 1 }));
+        .map(i => ({ id: i.id, name: i.name, price: i.price, imageUrl: i.imageUrl, qty: i.qty || 1, customizationNote: i.customizationNote || null }));
     }
     if (!checkoutItems.length) { showToast('יש לבחור לפחות פריט אחד'); return; }
 
@@ -1093,6 +1116,7 @@ function renderCheckoutStep3(el) {
       </div>
       <div style="flex:1;">
         <p style="margin:0 0 2px;font-size:0.9rem;font-weight:600;color:var(--ink);">${esc(item.name)}</p>
+        ${item.customizationNote ? `<p style="margin:2px 0;font-size:0.76rem;font-style:italic;color:var(--pink-deep);">בקשת התאמה: ${esc(item.customizationNote)}</p>` : ''}
         <p style="margin:0;font-size:0.8rem;color:var(--muted);">× ${item.qty || 1}</p>
       </div>
       <span style="font-size:0.92rem;font-weight:600;color:var(--ink-soft);flex-shrink:0;">${item.price * (item.qty || 1)} ₪</span>
@@ -1139,7 +1163,10 @@ function renderCheckoutStep3(el) {
     const btn  = el.querySelector('#co-submit');
     btn.disabled = true;
 
-    const itemsText    = checkoutItems.map(i => `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪`).join('\n');
+    const itemsText    = checkoutItems.map(i => {
+      const noteLine = i.customizationNote ? `\n  התאמה: ${i.customizationNote}` : '';
+      return `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪${noteLine}`;
+    }).join('\n');
     const deliveryTxt  = checkoutDelivery === 'delivery'
       ? `משלוח עד הבית (+${shippingCost === 0 ? '0 ₪ — משלוח חינם!' : shippingCost + ' ₪'})`
       : 'איסוף עצמי מראשון לציון (חינם)';

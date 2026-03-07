@@ -3807,6 +3807,139 @@ ul { list-style: none; }
   border-radius: 50px;
 }
 
+/* ===== V14.1: Product Customization Field ===== */
+
+.sp-custom-field {
+  padding: 10px 14px 12px;
+  background: var(--sand);
+  border-top: 1px solid var(--sand-dark);
+}
+
+.sp-custom-field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.sp-custom-field-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.4;
+  cursor: default;
+}
+
+.sp-custom-optional {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* Info icon + tooltip */
+.sp-custom-info-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.sp-custom-info-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sand-dark);
+  background: var(--sand-light);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.sp-custom-info-btn:hover,
+.sp-custom-info-btn:focus {
+  border-color: var(--pink);
+  color: var(--pink-deep);
+  outline: none;
+}
+
+.sp-custom-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: normal;
+  width: 200px;
+  text-align: right;
+  direction: rtl;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 20;
+}
+.sp-custom-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+.sp-custom-info-wrap:hover .sp-custom-tooltip,
+.sp-custom-info-btn:focus ~ .sp-custom-tooltip {
+  opacity: 1;
+}
+
+/* Package card image header (V14.2) */
+.package-card-header--img {
+  padding: 0;
+  background: var(--pink-light);
+  overflow: hidden;
+}
+.package-card-header--img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Textarea */
+.sp-custom-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1.5px solid var(--sand-dark);
+  border-radius: 10px;
+  background: var(--sand-light);
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  direction: rtl;
+  resize: none;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+  display: block;
+}
+.sp-custom-textarea::placeholder {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.sp-custom-textarea:focus {
+  outline: none;
+  border-color: var(--pink);
+}
+
 /* Product view — 2-col on desktop, 1-col on mobile */
 .pv-layout {
   display: grid;
