@@ -3262,29 +3262,29 @@ ul { list-style: none; }
   direction: rtl;
 }
 
-/* -- Toggle button -- */
+/* -- Toggle button (charcoal, neutral so it doesn't compete with brand) -- */
 #a11y-toggle {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #1a56db;
-  border: 2px solid #1a56db;
+  background: #2c2a29;
+  border: 2px solid #2c2a29;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(26, 86, 219, 0.38);
+  box-shadow: 0 4px 16px rgba(44, 42, 41, 0.35);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   color: #fff;
 }
 #a11y-toggle:hover {
   transform: translateY(-3px) scale(1.06);
-  box-shadow: 0 8px 28px rgba(26, 86, 219, 0.5);
+  box-shadow: 0 8px 28px rgba(44, 42, 41, 0.5);
 }
 #a11y-toggle:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px #1a56db;
+  box-shadow: 0 0 0 5px #2c2a29;
 }
 
 /* -- Menu panel -- */
@@ -3292,7 +3292,7 @@ ul { list-style: none; }
   position: absolute;
   bottom: 62px;
   left: 0;
-  width: 272px;
+  width: 340px;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
@@ -3330,12 +3330,39 @@ ul { list-style: none; }
   transition: background 0.2s, color 0.2s;
 }
 #a11y-close:hover { background: #f1f5f9; color: #1e293b; }
-#a11y-close:focus-visible { outline: 2px solid #1a56db; outline-offset: 2px; }
+#a11y-close:focus-visible { outline: 2px solid #2c2a29; outline-offset: 2px; }
 
-/* -- Feature grid -- */
-.a11y-grid {
+/* -- Scrollable body with sections -- */
+.a11y-body {
+  max-height: 420px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.a11y-body::-webkit-scrollbar { width: 4px; }
+.a11y-body::-webkit-scrollbar-track { background: transparent; }
+.a11y-body::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+/* -- Section -- */
+.a11y-section {
+  border-bottom: 1px solid #f1f5f9;
+}
+.a11y-section:last-child { border-bottom: none; }
+.a11y-section-label {
+  padding: 8px 14px 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: 'Assistant', sans-serif;
+  background: #fafafa;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* -- Feature grid (3 columns per section) -- */
+.a11y-section-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1px;
   background: #f1f5f9;
 }
@@ -3344,17 +3371,17 @@ ul { list-style: none; }
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  padding: 13px 8px;
+  padding: 11px 6px;
   background: #fff;
   border: none;
   cursor: pointer;
   font-family: 'Assistant', sans-serif;
   transition: background 0.2s;
-  min-height: 64px;
+  min-height: 60px;
 }
 .a11y-btn:hover { background: #f8fafc; }
-.a11y-btn.active { background: #eff6ff; }
-.a11y-btn:focus-visible { outline: 2px solid #1a56db; outline-offset: -2px; }
+.a11y-btn.active { background: #f0f0f0; }
+.a11y-btn:focus-visible { outline: 2px solid #2c2a29; outline-offset: -2px; }
 .a11y-btn-icon {
   font-size: 1rem;
   font-weight: 700;
@@ -3363,14 +3390,14 @@ ul { list-style: none; }
   font-family: 'Assistant', monospace;
 }
 .a11y-btn-label {
-  font-size: 0.7rem;
+  font-size: 0.63rem;
   color: #64748b;
   text-align: center;
   line-height: 1.3;
   font-family: 'Assistant', sans-serif;
 }
-.a11y-btn.active .a11y-btn-icon  { color: #1a56db; }
-.a11y-btn.active .a11y-btn-label { color: #1a56db; font-weight: 600; }
+.a11y-btn.active .a11y-btn-icon  { color: #2c2a29; }
+.a11y-btn.active .a11y-btn-label { color: #2c2a29; font-weight: 700; }
 
 /* -- Footer -- */
 .a11y-footer {
@@ -3397,7 +3424,7 @@ ul { list-style: none; }
 #a11y-reset:hover,
 #a11y-statement-btn:hover { background: #f1f5f9; border-color: #94a3b8; color: #1e293b; }
 #a11y-reset:focus-visible,
-#a11y-statement-btn:focus-visible { outline: 2px solid #1a56db; outline-offset: 2px; }
+#a11y-statement-btn:focus-visible { outline: 2px solid #2c2a29; outline-offset: 2px; }
 
 /* -- Accessibility Statement Modal -- */
 #a11y-statement-modal {
@@ -3445,15 +3472,15 @@ ul { list-style: none; }
 /* ===== Accessibility Modifier Classes ===== */
 /*
  * CRITICAL: CSS `filter` on <body> creates a new containing block which
- * breaks position:fixed children. Grayscale & high-contrast are therefore
- * applied to #main-wrapper ONLY, keeping the accessibility widget,
- * WhatsApp FAB, and auth modal correctly fixed in the viewport.
+ * breaks position:fixed children. All visual filters are applied to
+ * #main-wrapper ONLY, keeping the accessibility widget, WhatsApp FAB,
+ * cart drawer, and auth modal correctly fixed in the viewport.
  */
 
-/* Grayscale — wrapper only */
+/* Grayscale */
 #main-wrapper.a11y-grayscale { filter: grayscale(100%); }
 
-/* High contrast — override design tokens on wrapper */
+/* High contrast */
 #main-wrapper.a11y-high-contrast {
   --sand:       #000000;
   --sand-dark:  #ffffff;
@@ -3467,6 +3494,17 @@ ul { list-style: none; }
   --muted:      #cccccc;
   background:   #000000;
   color:        #ffffff;
+}
+
+/* Negative contrast (invert) */
+#main-wrapper.a11y-negative-contrast { filter: invert(100%) hue-rotate(180deg); }
+
+/* Light background */
+#main-wrapper.a11y-light-background {
+  --sand:       #ffffff;
+  --sand-light: #ffffff;
+  --pink-light: #fff8f5;
+  background:   #ffffff;
 }
 
 /* Readable font */
@@ -3487,6 +3525,25 @@ ul { list-style: none; }
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Line height */
+#main-wrapper.a11y-line-height p,
+#main-wrapper.a11y-line-height li,
+#main-wrapper.a11y-line-height span,
+#main-wrapper.a11y-line-height a,
+#main-wrapper.a11y-line-height label {
+  line-height: 2;
+}
+
+/* Letter spacing */
+#main-wrapper.a11y-letter-spacing p,
+#main-wrapper.a11y-letter-spacing li,
+#main-wrapper.a11y-letter-spacing span,
+#main-wrapper.a11y-letter-spacing a,
+#main-wrapper.a11y-letter-spacing button,
+#main-wrapper.a11y-letter-spacing label {
+  letter-spacing: 0.12em;
+}
+
 /* Highlight links */
 #main-wrapper.a11y-highlight-links a,
 #main-wrapper.a11y-highlight-links [role="link"] {
@@ -3505,8 +3562,7 @@ ul { list-style: none; }
   padding-bottom: 4px;
 }
 
-/* Pause animations — stays on body to cover ALL elements globally,
-   including Tailwind animate-pulse, transitions, and fixed-position UI */
+/* Pause animations — on body to cover ALL elements including fixed UI */
 body.a11y-pause-animations *,
 body.a11y-pause-animations *::before,
 body.a11y-pause-animations *::after {
@@ -3516,9 +3572,37 @@ body.a11y-pause-animations *::after {
   animation-iteration-count: 1;
 }
 
-/* Responsive: shift widget slightly on mobile */
+/* Big cursors — on body so cursor applies everywhere */
+body.a11y-big-cursor-white * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M5 3l28 16-12 2-7 12z' fill='white' stroke='black' stroke-width='2'/%3E%3C/svg%3E") 5 3, auto; }
+body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M5 3l28 16-12 2-7 12z' fill='black' stroke='white' stroke-width='2'/%3E%3C/svg%3E") 5 3, auto; }
+
+/* Reading guide — fixed horizontal line following cursor */
+#a11y-reading-guide {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(201, 149, 122, 0.7);
+  pointer-events: none;
+  z-index: 7999;
+  transform: translateY(-1px);
+  box-shadow: 0 0 8px rgba(201, 149, 122, 0.4);
+}
+
+/* Reading mask — two dimming panels above/below reading band */
+.a11y-reading-mask-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 7998;
+  transition: height 0.05s linear;
+}
+
+/* Responsive: shift widget on mobile */
 @media (max-width: 480px) {
   #a11y-widget { bottom: 16px; left: 16px; }
   #a11y-toggle { width: 46px; height: 46px; }
-  #a11y-menu { width: 250px; }
+  #a11y-menu { width: 300px; }
 }
