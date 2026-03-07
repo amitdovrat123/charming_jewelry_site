@@ -7,6 +7,10 @@ import {
   onAuthStateChanged, signOut,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
+// ── Environment ────────────────────────────────────────────────
+const isLocal = window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1';
+
 // ── Constants ──────────────────────────────────────────────────
 const WA_NUMBER           = '972524131991';
 const SHIPPING            = 35;
@@ -44,6 +48,7 @@ let previousView = 'home';
 
 // ── View management ────────────────────────────────────────────
 function switchView(view) {
+  if (isLocal) console.debug('[switchView]', view);
   previousView = currentView;
   currentView  = view;
   document.querySelectorAll('.v-section').forEach(el => { el.style.display = 'none'; });
@@ -56,6 +61,8 @@ function switchView(view) {
   if (view === 'profile')  renderProfileView();
   if (view === 'checkout') initCheckoutView();
 }
+
+window.switchView = switchView; // expose to HTML event listeners (module scope isolation)
 
 // ── Cart helpers ───────────────────────────────────────────────
 function loadCart() {
