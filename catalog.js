@@ -1140,6 +1140,14 @@ function init() {
   if (homeEl) homeEl.style.display = 'block';
   subscribeProducts();
   subscribeAuth();
+
+  // Handle redirect from other pages: index.html?view=profile / checkout / shop
+  const _viewParam = new URLSearchParams(window.location.search).get('view');
+  if (_viewParam && ['shop', 'profile', 'checkout'].includes(_viewParam)) {
+    window.history.replaceState({}, '', window.location.pathname);
+    switchView(_viewParam);
+  }
+
   // Promotional popup — 5 s delay, once per 7 days
   setTimeout(injectPromoPopup, 5000);
 }
