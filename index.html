@@ -9,7 +9,27 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { corePlugins: { preflight: false } }</script>
 </head>
-<body>
+<body class="has-ticker">
+
+  <!-- ===== TICKER BANNER ===== -->
+  <div class="ticker-bar" role="marquee" aria-label="עדכונים ומבצעים">
+    <div class="ticker-track">
+      <span class="ticker-item">✨ 10% הנחה על כל החנות למצטרפות חדשות למועדון 🌸</span>
+      <span class="ticker-sep">✦</span>
+      <span class="ticker-item">🚚 משלוח חינם בקנייה מעל 400 ש"ח 🎁</span>
+      <span class="ticker-sep">✦</span>
+      <span class="ticker-item">💎 קולקציית הקיץ החדשה כבר כאן! ✨</span>
+      <span class="ticker-sep">✦</span>
+      <!-- duplicate for seamless loop -->
+      <span class="ticker-item">✨ 10% הנחה על כל החנות למצטרפות חדשות למועדון 🌸</span>
+      <span class="ticker-sep">✦</span>
+      <span class="ticker-item">🚚 משלוח חינם בקנייה מעל 400 ש"ח 🎁</span>
+      <span class="ticker-sep">✦</span>
+      <span class="ticker-item">💎 קולקציית הקיץ החדשה כבר כאן! ✨</span>
+      <span class="ticker-sep">✦</span>
+    </div>
+  </div>
+
 <div id="main-wrapper">
 
   <!-- Navigation -->
@@ -59,6 +79,89 @@
       <div class="hero-cta-group">
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A7%D7%95%D7%9D%20%D7%91%D7%A1%D7%93%D7%A0%D7%94%21" target="_blank" rel="noopener noreferrer" class="btn">הזמיני סדנה</a>
         <a href="#shop" class="btn btn-outline">לחנות שלנו</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CATEGORIES ===== -->
+  <section class="categories-section">
+    <div class="container">
+      <span class="section-eyebrow">קולקציות</span>
+      <h2 class="section-title">קנה לפי קטגוריה</h2>
+      <div class="categories-grid">
+
+        <!-- שרשראות -->
+        <button class="category-card" onclick="goToShop('שרשראות')" aria-label="קנה שרשראות">
+          <img
+            src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=600&h=600&fit=crop&q=80"
+            alt="שרשראות"
+            loading="lazy"
+          />
+          <div class="category-card-overlay">
+            <span class="category-card-label">שרשראות</span>
+          </div>
+        </button>
+
+        <!-- צמידים -->
+        <button class="category-card" onclick="goToShop('צמידים')" aria-label="קנה צמידים">
+          <img
+            src="https://images.unsplash.com/photo-1573408301185-9519f94f836c?w=600&h=600&fit=crop&q=80"
+            alt="צמידים"
+            loading="lazy"
+          />
+          <div class="category-card-overlay">
+            <span class="category-card-label">צמידים</span>
+          </div>
+        </button>
+
+        <!-- עגילים -->
+        <button class="category-card" onclick="goToShop('עגילים')" aria-label="קנה עגילים">
+          <img
+            src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=600&fit=crop&q=80"
+            alt="עגילים"
+            loading="lazy"
+          />
+          <div class="category-card-overlay">
+            <span class="category-card-label">עגילים</span>
+          </div>
+        </button>
+
+        <!-- טבעות -->
+        <button class="category-card" onclick="goToShop('טבעות')" aria-label="קנה טבעות">
+          <img
+            src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&h=600&fit=crop&q=80"
+            alt="טבעות"
+            loading="lazy"
+          />
+          <div class="category-card-overlay">
+            <span class="category-card-label">טבעות</span>
+          </div>
+        </button>
+
+        <!-- מארזי צ'ארמינג -->
+        <button class="category-card" onclick="goToShop('מארזים')" aria-label="מארזי צ'ארמינג">
+          <img
+            src="https://images.unsplash.com/photo-1596073419667-9d77d59f1d0a?w=600&h=600&fit=crop&q=80"
+            alt="מארזי צ'ארמינג"
+            loading="lazy"
+          />
+          <div class="category-card-overlay">
+            <span class="category-card-label">מארזי צ׳ארמינג</span>
+          </div>
+        </button>
+
+        <!-- מוצרים נבחרים -->
+        <button class="category-card" onclick="goToShop('', true)" aria-label="מוצרים נבחרים">
+          <img
+            src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop&q=80"
+            alt="מוצרים נבחרים"
+            loading="lazy"
+          />
+          <div class="category-card-overlay">
+            <span class="category-card-label">מוצרים נבחרים</span>
+          </div>
+        </button>
+
       </div>
     </div>
   </section>

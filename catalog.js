@@ -64,6 +64,16 @@ function switchView(view) {
 
 window.switchView = switchView; // expose to HTML event listeners (module scope isolation)
 
+// ── Category navigation helper ─────────────────────────────────
+// Resets all filters before switching to shop, optionally pre-applying a category or featured flag.
+function goToShop(cat, featured) {
+  shopFilterCat      = cat      ?? '';
+  shopFilterColor    = '';
+  shopFilterFeatured = featured ?? false;
+  switchView('shop');
+}
+window.goToShop = goToShop;
+
 // ── Cart helpers ───────────────────────────────────────────────
 function loadCart() {
   try { return JSON.parse(localStorage.getItem('charming-cart') || '[]'); } catch { return []; }
@@ -1037,7 +1047,7 @@ function setupNav() {
 
   document.querySelector('[data-view="shop"]')?.addEventListener('click', e => {
     e.preventDefault();
-    switchView('shop');
+    goToShop();
   });
 
   document.querySelector('.logo')?.addEventListener('click', e => {
@@ -1048,11 +1058,11 @@ function setupNav() {
     if (window.location.pathname.match(/index\.html$|\/$/) ) { e.preventDefault(); switchView('home'); }
   });
 
-  document.getElementById('home-all-products-btn')?.addEventListener('click', () => switchView('shop'));
+  document.getElementById('home-all-products-btn')?.addEventListener('click', () => goToShop());
 
   // Footer SPA links — navigate without full page reload
   document.querySelectorAll('a[href="#shop"], a[href="index.html#shop"]').forEach(a => {
-    a.addEventListener('click', e => { e.preventDefault(); switchView('shop'); });
+    a.addEventListener('click', e => { e.preventDefault(); goToShop(); });
   });
   document.querySelectorAll('.footer-links a[href="index.html"]').forEach(a => {
     a.addEventListener('click', e => {
