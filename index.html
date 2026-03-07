@@ -11,26 +11,10 @@
 </head>
 <body class="has-ticker">
 
-  <!-- ===== TICKER BANNER ===== -->
-  <div class="ticker-bar" role="marquee" aria-label="עדכונים ומבצעים">
-    <div class="ticker-track">
-      <span class="ticker-item">✨ 10% הנחה על כל החנות למצטרפות חדשות למועדון 🌸</span>
-      <span class="ticker-sep">✦</span>
-      <span class="ticker-item">🚚 משלוח חינם בקנייה מעל 400 ש"ח 🎁</span>
-      <span class="ticker-sep">✦</span>
-      <span class="ticker-item">💎 קולקציית הקיץ החדשה כבר כאן! ✨</span>
-      <span class="ticker-sep">✦</span>
-      <!-- duplicate for seamless loop -->
-      <span class="ticker-item">✨ 10% הנחה על כל החנות למצטרפות חדשות למועדון 🌸</span>
-      <span class="ticker-sep">✦</span>
-      <span class="ticker-item">🚚 משלוח חינם בקנייה מעל 400 ש"ח 🎁</span>
-      <span class="ticker-sep">✦</span>
-      <span class="ticker-item">💎 קולקציית הקיץ החדשה כבר כאן! ✨</span>
-      <span class="ticker-sep">✦</span>
-    </div>
+  <!-- ===== ANNOUNCEMENT BANNER ===== -->
+  <div class="ticker-bar" role="banner" aria-label="הודעה">
+    <span class="announcement-text">✦ 10% הנחה בהזמנה הראשונה למצטרפות חדשות למועדון ✦</span>
   </div>
-
-<div id="main-wrapper">
 
   <!-- Navigation -->
   <header class="navbar">
@@ -40,7 +24,7 @@
         <ul class="nav-links">
           <li><a href="index.html">דף הבית</a></li>
           <li><a href="workshops.html">סדנאות</a></li>
-          <li><a href="#" data-view="shop">חנות</a></li>
+          <li><a href="shop.html">חנות</a></li>
           <li><a href="workshops.html#faq">שאלות ותשובות</a></li>
           <li><a href="workshops.html#signup">צור קשר</a></li>
           <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a></li>
@@ -63,6 +47,8 @@
     </div>
   </header>
 
+<div id="main-wrapper">
+
   <div id="view-home" class="v-section">
 
   <!-- ===== HERO ===== -->
@@ -71,11 +57,8 @@
       <img src="images/logo/IMG_0993.jpg" alt="Charming by Vik — לוגו" class="hero-logo-img" />
     </div>
     <div class="hero-content">
-      <p class="hero-eyebrow">תכשיטים בעבודת יד</p>
-      <h1 class="hero-title">פריטים ייחודיים ומעוצבים</h1>
-      <p class="hero-description">
-        ברוכה הבאה לעולם שבו כל תכשיט הוא יצירה — מעוצבת באהבה, מיוצרת ביד, ומספרת סיפור שרק שלך.
-      </p>
+      <h1 class="hero-title">Make your own charms jewelry</h1>
+      <p class="hero-subtitle">ברוכה הבאה לעולם שבו כל תכשיט הוא יצירה ייחודית , מעוצבת , ומספרת את הסיפור שלך !</p>
       <div class="hero-cta-group">
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A7%D7%95%D7%9D%20%D7%91%D7%A1%D7%93%D7%A0%D7%94%21" target="_blank" rel="noopener noreferrer" class="btn">הזמיני סדנה</a>
         <a href="#" class="btn btn-outline" onclick="goToShop();return false;">לחנות שלנו</a>
@@ -86,12 +69,10 @@
   <!-- ===== CATEGORIES ===== -->
   <section class="categories-section">
     <div class="container">
-      <span class="section-eyebrow">קולקציות</span>
-      <h2 class="section-title">קנה לפי קטגוריה</h2>
       <div class="categories-grid">
 
         <!-- שרשראות -->
-        <button class="category-card" onclick="goToShop('שרשראות')" aria-label="קנה שרשראות">
+        <button class="category-card" onclick="window.location.href='shop.html?cat=שרשראות'" aria-label="קנה שרשראות">
           <img
             src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=600&h=600&fit=crop&q=80"
             alt="שרשראות"
@@ -103,7 +84,7 @@
         </button>
 
         <!-- צמידים -->
-        <button class="category-card" onclick="goToShop('צמידים')" aria-label="קנה צמידים">
+        <button class="category-card" onclick="window.location.href='shop.html?cat=צמידים'" aria-label="קנה צמידים">
           <img
             src="https://images.unsplash.com/photo-1573408301185-9519f94f836c?w=600&h=600&fit=crop&q=80"
             alt="צמידים"
@@ -115,7 +96,7 @@
         </button>
 
         <!-- עגילים -->
-        <button class="category-card" onclick="goToShop('עגילים')" aria-label="קנה עגילים">
+        <button class="category-card" onclick="window.location.href='shop.html?cat=עגילים'" aria-label="קנה עגילים">
           <img
             src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=600&fit=crop&q=80"
             alt="עגילים"
@@ -127,7 +108,7 @@
         </button>
 
         <!-- טבעות -->
-        <button class="category-card" onclick="goToShop('טבעות')" aria-label="קנה טבעות">
+        <button class="category-card" onclick="window.location.href='shop.html?cat=טבעות'" aria-label="קנה טבעות">
           <img
             src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&h=600&fit=crop&q=80"
             alt="טבעות"
@@ -139,7 +120,7 @@
         </button>
 
         <!-- מארזי צ'ארמינג -->
-        <button class="category-card" onclick="goToShop('מארזים')" aria-label="מארזי צ'ארמינג">
+        <button class="category-card" onclick="window.location.href='shop.html?cat=מארזי Charming ביתיים'" aria-label="מארזי צ'ארמינג">
           <img
             src="https://images.unsplash.com/photo-1596073419667-9d77d59f1d0a?w=600&h=600&fit=crop&q=80"
             alt="מארזי צ'ארמינג"
@@ -151,7 +132,7 @@
         </button>
 
         <!-- מוצרים נבחרים -->
-        <button class="category-card" onclick="goToShop('', true)" aria-label="מוצרים נבחרים">
+        <button class="category-card" onclick="window.location.href='shop.html?featured=1'" aria-label="מוצרים נבחרים">
           <img
             src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop&q=80"
             alt="מוצרים נבחרים"
@@ -194,21 +175,14 @@
   <section class="journey-section">
     <div class="container">
       <div class="journey-header">
-        <span class="section-eyebrow">מסע הסדנה</span>
-        <h2 class="section-title">מהרגע הראשון — ועד התכשיט המוגמר</h2>
-        <p class="section-desc">
-          חוויה שמגיעה עד אליכן — ציוד מקצועי, הדרכה צמודה ותכשיט יחודי שכל אחת מכינה בעצמה.
-        </p>
+        <h2 class="section-title">מסע הסדנה</h2>
+        <p class="journey-subtitle">מהרגע הראשון ועד התכשיט המוגמר</p>
       </div>
 
       <div class="journey-steps">
 
         <!-- Step 1 -->
         <div class="journey-step">
-          <div class="journey-step-img">
-            <img src="images/workshop/IMG_7607.jpeg" alt="שלב ראשון — היכרות עם עולם התכשיטים" loading="lazy" />
-            <span class="journey-step-badge">01</span>
-          </div>
           <div class="journey-step-text">
             <span class="step-label">שלב ראשון</span>
             <h3>היכרות וגילוי</h3>
@@ -216,35 +190,54 @@
               מתחילים באווירה טובה עם היכרות קצרה עם עולם התכשיטים — ההבדלים בין כסף לזהב, ואיך בוחרים את הסגנון שמתאים ביותר. כאן מתחיל הקסם.
             </p>
           </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/IMG_7607.jpeg" alt="שלב ראשון — היכרות עם עולם התכשיטים" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">01</span>
+          </div>
         </div>
 
         <!-- Step 2 -->
         <div class="journey-step journey-step--flip">
-          <div class="journey-step-img">
-            <img src="images/workshop/1112.png" alt="שלב שני — יצירה ועיצוב אישי" loading="lazy" />
-            <span class="journey-step-badge">02</span>
-          </div>
           <div class="journey-step-text">
             <span class="step-label">שלב שני</span>
-            <h3>יצירה ועיצוב</h3>
+            <h3>בחירה ועיצוב</h3>
             <p>
-              כל אחת בוחרת את הצ'ארמים, החרוזים, והחוטים שמדברים אליה — ומתחילה ליצור בהנחיה אישית. אין דרך נכונה ואין דרך שגויה, רק שלך.
+              כל אחת בוחרת את סוג השרשרת והצ'ארמים שהיא הכי אוהבת - ומתחילה לסדר את הצארמים לפי הסדר שהיא רוצה
             </p>
+          </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/1112.png" alt="שלב שני — בחירה ועיצוב" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">02</span>
           </div>
         </div>
 
         <!-- Step 3 -->
         <div class="journey-step">
-          <div class="journey-step-img">
-            <img src="images/workshop/IMG_7968.jpg" alt="שלב שלישי — הגמר והתכשיט המוגמר" loading="lazy" />
-            <span class="journey-step-badge">03</span>
-          </div>
           <div class="journey-step-text">
             <span class="step-label">שלב שלישי</span>
-            <h3>הגמר — והתכשיט שלך</h3>
+            <h3>הרכבת התכשיט</h3>
             <p>
-              גומרות, מברקות, ומסיימות. כל משתתפת יוצאת עם תכשיט שיצרה בידיה — ועם חיוך שלא נשכח.
+              זה השלב שכולנו חיכינו לו! המשתתפות שלנו יקבלו הסבר מפורט איך להרכיב את התכשיט וירכיבו את התכשיטים בלווי הצוות שלנו עד לתוצאה הסופית
             </p>
+          </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/IMG_7968.jpg" alt="שלב שלישי — הרכבת התכשיט" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">03</span>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="journey-step journey-step--flip">
+          <div class="journey-step-text">
+            <span class="step-label">שלב אחרון</span>
+            <h3>התוצאה הסופית</h3>
+            <p>
+              כל משתתפת יוצאת עם תכשיט שיצרה במו ידיה , תכשיט ייחודי שאין לאף אחת אחרת- מזכרת לכל החיים
+            </p>
+          </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/IMG_8573.jpeg" alt="התוצאה הסופית — תכשיט ייחודי" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">04</span>
           </div>
         </div>
 
@@ -259,7 +252,7 @@
           <span class="gift-badge">🎁</span>
           <h3>בונוס — מתנת הפתעה לכולן!</h3>
           <p>
-            כל משתתפת יוצאת עם התכשיט שיצרה — וגם עם מתנה מיוחדת ומפנקת מאיתנו. כי רגע שנוצר ביחד ראוי לציון.
+            כל משתתפת יוצאת עם התכשיט שיצרה — וגם עם מתנה מיוחדת ומפנקת מאיתנו.
           </p>
         </div>
       </div>
@@ -283,8 +276,7 @@
   <!-- ===== TESTIMONIALS ===== -->
   <section class="testimonials-section">
     <div class="container">
-      <span class="section-eyebrow">מה אומרות עלינו</span>
-      <h2 class="section-title">לקוחות מרוצות — בלשונן</h2>
+      <h2 class="section-title">לקוחות ממליצות</h2>
     </div>
 
     <div class="testimonials-outer">
@@ -664,8 +656,7 @@
   <!-- ===== GALLERY COLLAGE ===== -->
   <section class="collage-section">
     <div class="container collage-header">
-      <span class="section-eyebrow">גלריית יצירות</span>
-      <h2 class="section-title">מה שיוצאות איתו מהסדנה</h2>
+      <h2 class="section-title">תמונות מהסדנאות שלנו</h2>
     </div>
     <div class="collage-grid">
       <div class="collage-item collage-item--tall">
@@ -696,13 +687,9 @@
   </section>
 
   <!-- ===== SHOP — FEATURED PRODUCTS ===== -->
-  <section id="home-featured" class="shop-section">
+  <section id="shop" class="shop-section">
     <div class="container">
-      <span class="section-eyebrow">מוצרים נבחרים</span>
-      <h2 class="section-title">הפריטים המומלצים שלנו</h2>
-      <p class="section-desc">
-        לחצי על מוצר לפרטים נוספים, הוספה לסל, או קנייה מהירה.
-      </p>
+      <h2 class="section-title">מוצרים נבחרים</h2>
 
       <div id="home-catalog-grid" class="shop-grid">
         <div id="home-catalog-loading" class="catalog-loading">
@@ -715,7 +702,7 @@
       </div>
 
       <div style="text-align:center;margin-top:40px;">
-        <button id="home-all-products-btn" class="btn btn-outline">לכל הקולקציה ←</button>
+        <a href="shop.html" class="btn btn-outline">לכל הקולקציה ←</a>
       </div>
     </div>
   </section>
@@ -753,7 +740,7 @@
         <h4>ניווט מהיר</h4>
         <ul>
           <li><a href="index.html">דף הבית</a></li>
-          <li><a href="#" onclick="goToShop();return false;">החנות</a></li>
+          <li><a href="shop.html">החנות</a></li>
           <li><a href="workshops.html">סדנאות</a></li>
           <li><a href="#footer-contact">צור קשר</a></li>
           <li><a href="terms.html">תקנון ומדיניות פרטיות</a></li>

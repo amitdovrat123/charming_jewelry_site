@@ -6,6 +6,8 @@
   <title>סדנאות | Charming by Vik</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { corePlugins: { preflight: false } }</script>
 </head>
 <body>
 
@@ -17,7 +19,7 @@
         <ul class="nav-links">
           <li><a href="index.html">דף הבית</a></li>
           <li><a href="workshops.html">סדנאות</a></li>
-          <li><a href="index.html#shop">חנות</a></li>
+          <li><a href="shop.html">חנות</a></li>
           <li><a href="workshops.html#faq">שאלות ותשובות</a></li>
           <li><a href="workshops.html#signup">צור קשר</a></li>
           <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a></li>
@@ -41,11 +43,11 @@
   </header>
 
   <!-- Page Hero -->
-  <section class="page-hero">
+  <section class="page-hero page-hero--with-bg">
     <p class="hero-eyebrow">חוויה שלא תישכח</p>
     <h1 class="hero-title">סדנאות צ'ארמינג</h1>
     <p class="hero-description">
-      הפעילות המושלמת ליום הולדת או בת מצווה — סדנה חוויתית שמגיעה עד אליכן, בכולל ציוד מקצועי, הדרכה צמודה ומתנה יקרתית שכל משתתפת מכינה בעצמה.
+      הפעילות המושלמת ליום הולדת או בת מצווה — סדנה חוויתית שמגיעה עד אליכן, הכוללת ציוד מקצועי, הדרכה צמודה ותכשיט יוקרתי שכל משתתפת מכינה בעצמה
     </p>
   </section>
 
@@ -53,21 +55,14 @@
   <section class="journey-section">
     <div class="container">
       <div class="journey-header">
-        <span class="section-eyebrow">מסע הסדנה</span>
-        <h2 class="section-title">מהרגע הראשון — ועד התכשיט המוגמר</h2>
-        <p class="section-desc">
-          חוויה שמגיעה עד אליכן — ציוד מקצועי, הדרכה צמודה ותכשיט יחודי שכל אחת מכינה בעצמה.
-        </p>
+        <h2 class="section-title">מסע הסדנה</h2>
+        <p class="journey-subtitle">מהרגע הראשון ועד התכשיט המוגמר</p>
       </div>
 
       <div class="journey-steps">
 
         <!-- Step 1 -->
         <div class="journey-step">
-          <div class="journey-step-img">
-            <img src="images/workshop/IMG_7607.jpeg" alt="שלב ראשון — היכרות עם עולם התכשיטים" loading="lazy" />
-            <span class="journey-step-badge">01</span>
-          </div>
           <div class="journey-step-text">
             <span class="step-label">שלב ראשון</span>
             <h3>היכרות וגילוי</h3>
@@ -75,35 +70,54 @@
               מתחילים באווירה טובה עם היכרות קצרה עם עולם התכשיטים — ההבדלים בין כסף לזהב, ואיך בוחרים את הסגנון שמתאים ביותר. כאן מתחיל הקסם.
             </p>
           </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/IMG_7607.jpeg" alt="שלב ראשון — היכרות עם עולם התכשיטים" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">01</span>
+          </div>
         </div>
 
         <!-- Step 2 -->
         <div class="journey-step journey-step--flip">
-          <div class="journey-step-img">
-            <img src="images/workshop/1112.png" alt="שלב שני — יצירה ועיצוב אישי" loading="lazy" />
-            <span class="journey-step-badge">02</span>
-          </div>
           <div class="journey-step-text">
             <span class="step-label">שלב שני</span>
-            <h3>יצירה ועיצוב</h3>
+            <h3>בחירה ועיצוב</h3>
             <p>
-              כל אחת בוחרת את הצ'ארמים, החרוזים, והחוטים שמדברים אליה — ומתחילה ליצור בהנחיה אישית. אין דרך נכונה ואין דרך שגויה, רק שלך.
+              כל אחת בוחרת את סוג השרשרת והצ'ארמים שהיא הכי אוהבת - ומתחילה לסדר את הצארמים לפי הסדר שהיא רוצה
             </p>
+          </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/1112.png" alt="שלב שני — בחירה ועיצוב" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">02</span>
           </div>
         </div>
 
         <!-- Step 3 -->
         <div class="journey-step">
-          <div class="journey-step-img">
-            <img src="images/workshop/IMG_7968.jpg" alt="שלב שלישי — הגמר והתכשיט המוגמר" loading="lazy" />
-            <span class="journey-step-badge">03</span>
-          </div>
           <div class="journey-step-text">
             <span class="step-label">שלב שלישי</span>
-            <h3>הגמר — והתכשיט שלך</h3>
+            <h3>הרכבת התכשיט</h3>
             <p>
-              גומרות, מברקות, ומסיימות. כל משתתפת יוצאת עם תכשיט שיצרה בידיה — ועם חיוך שלא נשכח.
+              זה השלב שכולנו חיכינו לו! המשתתפות שלנו יקבלו הסבר מפורט איך להרכיב את התכשיט וירכיבו את התכשיטים בלווי הצוות שלנו עד לתוצאה הסופית
             </p>
+          </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/IMG_7968.jpg" alt="שלב שלישי — הרכבת התכשיט" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">03</span>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="journey-step journey-step--flip">
+          <div class="journey-step-text">
+            <span class="step-label">שלב אחרון</span>
+            <h3>התוצאה הסופית</h3>
+            <p>
+              כל משתתפת יוצאת עם תכשיט שיצרה במו ידיה , תכשיט ייחודי שאין לאף אחת אחרת- מזכרת לכל החיים
+            </p>
+          </div>
+          <div class="journey-step-img">
+            <img src="images/workshop/IMG_8573.jpeg" alt="התוצאה הסופית — תכשיט ייחודי" loading="lazy" class="object-cover rounded-lg" />
+            <span class="journey-step-badge">04</span>
           </div>
         </div>
 
@@ -118,7 +132,7 @@
           <span class="gift-badge">🎁</span>
           <h3>בונוס — מתנת הפתעה לכולן!</h3>
           <p>
-            כל משתתפת יוצאת עם התכשיט שיצרה — וגם עם מתנה מיוחדת ומפנקת מאיתנו. כי רגע שנוצר ביחד ראוי לציון.
+            כל משתתפת יוצאת עם התכשיט שיצרה — וגם עם מתנה מיוחדת ומפנקת מאיתנו.
           </p>
         </div>
       </div>
@@ -392,7 +406,7 @@
         <h4>ניווט מהיר</h4>
         <ul>
           <li><a href="index.html">דף הבית</a></li>
-          <li><a href="index.html#shop">הקולקציה</a></li>
+          <li><a href="shop.html">הקולקציה</a></li>
           <li><a href="workshops.html">סדנאות</a></li>
           <li><a href="#signup">הרשמה</a></li>
           <li><a href="terms.html">תקנון ומדיניות פרטיות</a></li>

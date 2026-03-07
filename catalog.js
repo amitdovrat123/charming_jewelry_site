@@ -18,6 +18,10 @@ const FREE_SHIP_THRESHOLD = 400;
 const COL_PATH            = 'artifacts/charming-3dd6f/public/data/products';
 const USERS_ROOT          = 'artifacts/charming-3dd6f/users';
 
+// Shop predefined filter lists
+const SHOP_CATEGORIES = ['שרשראות', 'צמידים', 'עגילים', 'טבעות', 'מארזי Charming'];
+const SHOP_COLORS     = ['זהב', 'כסף'];
+
 // ── State ──────────────────────────────────────────────────────
 let cart                 = loadCart();
 let currentUser          = null;
@@ -32,6 +36,7 @@ let checkoutDelivery     = 'delivery';
 let isQuickBuy           = false;
 let pendingCheckoutAfterAuth = false;   // redirect-after-login flag
 let _checkoutStartAtStep2   = false;   // skip step-1 init after auth redirect
+let pendingProductId         = null;   // ?product=ID from shop.html card click
 
 // Product gallery
 let pvImages   = [];
@@ -41,6 +46,7 @@ let pvSlideIdx = 0;
 let shopFilterCat      = '';
 let shopFilterColor    = '';
 let shopFilterFeatured = false;
+let shopFilterSort     = 'default';
 
 // View state
 let currentView  = 'home';
@@ -191,6 +197,67 @@ function bindCardClicks(container) {
   });
 }
 
+// ── Shop-specific card HTML (larger, with metal chip + add-to-cart) ─────────
+function shopCardHTML(product) {
+  const { data, id } = product;
+  const imgs  = getImages(data);
+  const price = getPrice(data);
+  const sale  = getSale(data);
+  const sp    = sellPrice(data);
+  const badge = getBadge(data);
+  const oos   = isOOS(data);
+
+  const imgHtml = imgs[0]
+    ? `<img src="${esc(imgs[0])}" alt="${esc(data.name)}" loading="lazy" />`
+    : `<div class="sp-card-img-placeholder">💎</div>`;
+
+  const badgeHtml = (badge && !oos)
+    ? `<span class="sp-card-badge">${esc(badge)}</span>` : '';
+  const oosBadge = oos
+    ? `<span class="sp-card-badge sp-card-badge--oos">אזל</span>` : '';
+
+  const priceHtml = (sale > 0 && sale < price)
+    ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
+    : `<span class="sp-card-price">${price} ₪</span>`;
+
+  const metalChip = data.color
+    ? `<span class="sp-card-metal">${esc(data.color)}</span>` : '';
+
+  const actionBtn = oos
+    ? `<button class="sp-card-add sp-card-add--oos" disabled>אזל מהמלאי</button>`
+    : `<button class="sp-card-add" data-product-id="${esc(id)}">הוסיפי לסל</button>`;
+
+  return `
+    <div class="sp-shop-card fadein" data-product-id="${esc(id)}" role="button" tabindex="0" aria-label="${esc(data.name)}">
+      <div class="sp-card-img-wrap">
+        ${imgHtml}${badgeHtml || oosBadge}
+      </div>
+      <div class="sp-card-body">
+        <h3 class="sp-card-name">${esc(data.name)}</h3>
+        <div class="sp-card-price-row">${priceHtml}${metalChip}</div>
+        ${actionBtn}
+      </div>
+    </div>`;
+}
+
+function bindShopCardClicks(container) {
+  container.querySelectorAll('.sp-shop-card').forEach(card => {
+    const viewHandler = () => {
+      const product = allProducts.find(p => p.id === card.dataset.productId);
+      if (product) showProduct(product);
+    };
+    card.addEventListener('click', viewHandler);
+    card.addEventListener('keydown', e => { if (e.key === 'Enter') viewHandler(); });
+  });
+  container.querySelectorAll('.sp-card-add:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const product = allProducts.find(p => p.id === btn.dataset.productId);
+      if (product) addToCart(product);
+    });
+  });
+}
+
 // ── Free-ship banner helper ────────────────────────────────────
 function freeShipBannerHTML(subtotal) {
   if (subtotal >= FREE_SHIP_THRESHOLD) {
@@ -228,66 +295,121 @@ function renderShop() {
   const el = document.getElementById('view-shop');
   if (!el) return;
 
-  const published  = allProducts.filter(p => p.data.status === 'published');
-  const categories = [...new Set(published.map(p => p.data.category).filter(Boolean))];
-  const colors     = [...new Set(published.map(p => p.data.color).filter(Boolean))];
+  const published = allProducts.filter(p => p.data.status === 'published');
 
-  const subtotal = getCartSubtotal();
-  const bannerHtml = freeShipBannerHTML(subtotal);
+  // Merge predefined lists with any extra values from Firestore data
+  const dataCats   = [...new Set(published.map(p => p.data.category).filter(Boolean))];
+  const dataColors = [...new Set(published.map(p => p.data.color).filter(Boolean))];
+  const allCats    = [...new Set([...SHOP_CATEGORIES, ...dataCats])];
+  const allColors  = [...new Set([...SHOP_COLORS, ...dataColors])];
 
-  const catPills = [
-    `<button class="shop-filter-pill${!shopFilterCat ? ' active' : ''}" data-filter-cat="">הכל</button>`,
-    ...categories.map(c => `<button class="shop-filter-pill${shopFilterCat === c ? ' active' : ''}" data-filter-cat="${esc(c)}">${esc(c)}</button>`),
-  ].join('');
-
-  const colorPills = colors.map(c =>
-    `<button class="shop-filter-pill${shopFilterColor === c ? ' active' : ''}" data-filter-color="${esc(c)}">${esc(c)}</button>`
-  ).join('');
-
-  const featPill = `<button class="shop-filter-pill${shopFilterFeatured ? ' active' : ''}" data-filter-featured="${!shopFilterFeatured}">⭐ מומלצים</button>`;
-
+  // Apply filters
   let filtered = published;
   if (shopFilterCat)      filtered = filtered.filter(p => p.data.category === shopFilterCat);
   if (shopFilterColor)    filtered = filtered.filter(p => p.data.color     === shopFilterColor);
   if (shopFilterFeatured) filtered = filtered.filter(p => p.data.isFeatured);
 
+  // Sort
+  if (shopFilterSort === 'price-asc')  filtered = [...filtered].sort((a, b) => sellPrice(a.data) - sellPrice(b.data));
+  if (shopFilterSort === 'price-desc') filtered = [...filtered].sort((a, b) => sellPrice(b.data) - sellPrice(a.data));
+
+  const subtotal = getCartSubtotal();
+
+  // ── Category pills (right side in RTL) ───────────────────────
+  const isAllActive = !shopFilterCat && !shopFilterFeatured;
+  const catPillsHTML = [
+    `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">הכל</button>`,
+    ...allCats.map(c =>
+      `<button class="sp-pill${shopFilterCat === c ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
+    ),
+  ].join('');
+
+  // ── Color pills ───────────────────────────────────────────────
+  const colorPillsHTML = [
+    `<button class="sp-pill${!shopFilterColor ? ' sp-pill--active' : ''}" data-filter-color="">הכל</button>`,
+    ...allColors.map(c =>
+      `<button class="sp-pill${shopFilterColor === c ? ' sp-pill--active' : ''}" data-filter-color="${esc(c)}">${esc(c)}</button>`
+    ),
+  ].join('');
+
+  // ── Grid content ──────────────────────────────────────────────
   const gridContent = filtered.length
-    ? filtered.map(cardHTML).join('')
-    : `<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:60px 0;font-size:0.95rem;">אין מוצרים לפי הסינון הנוכחי.</p>`;
+    ? filtered.map(shopCardHTML).join('')
+    : `<div class="sp-empty"><p>לא נמצאו מוצרים התואמים את הסינון שנבחר</p><button class="btn btn-outline sp-reset-btn">איפוס פילטרים</button></div>`;
+
+  const hasActiveFilter = shopFilterCat || shopFilterColor || shopFilterFeatured;
 
   el.innerHTML = `
-    <section style="min-height:80vh;padding:80px 0 110px;background:var(--sand);">
+    <section class="sp-section">
       <div class="container">
-        <button id="shop-back-btn" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:20px;">← חזרה לדף הבית</button>
-        <span class="section-eyebrow">כל הקולקציה</span>
-        <h2 class="section-title" style="margin-bottom:8px;">החנות שלנו</h2>
-        <p class="section-desc" style="margin-bottom:28px;">כל הפריטים הזמינים — סנני לפי קטגוריה, גוון, או מוצרים מומלצים.</p>
-        ${bannerHtml}
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;align-items:center;">
-          ${catPills}
-          ${colors.length ? `<div style="width:1px;height:24px;background:var(--sand-dark);flex-shrink:0;"></div>${colorPills}` : ''}
-          <div style="margin-right:auto;">${featPill}</div>
+
+        <button id="shop-back-btn" class="sp-back-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          חזרה לדף הבית
+        </button>
+
+        <div class="sp-hero">
+          <span class="section-eyebrow">כל הקולקציה</span>
+          <h1 class="sp-title">החנות המלאה</h1>
+          <p class="sp-subtitle">כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.</p>
         </div>
-        <div id="shop-grid" class="shop-grid">${gridContent}</div>
+
+        ${freeShipBannerHTML(subtotal)}
+
+        <div class="sp-filter-bar">
+
+          <div class="sp-filter-row">
+            <div class="sp-pills-row">${catPillsHTML}</div>
+            <button class="sp-pill sp-pill--star${shopFilterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">מוצרים נבחרים ⭐</button>
+          </div>
+
+          <div class="sp-filter-row sp-filter-row--secondary">
+            <span class="sp-filter-label">גוון</span>
+            <div class="sp-pills-row">${colorPillsHTML}</div>
+          </div>
+
+        </div>
+
+        <div class="sp-results-row">
+          <p class="sp-results-count">מציגה <strong>${filtered.length}</strong> מוצרים</p>
+          ${hasActiveFilter ? `<button class="sp-clear-btn" id="shop-clear-filters">× נקי פילטרים</button>` : ''}
+        </div>
+
+        <div id="shop-grid" class="sp-shop-grid">${gridContent}</div>
+
       </div>
     </section>`;
 
+  // ── Event listeners ───────────────────────────────────────────
   el.querySelector('#shop-back-btn').addEventListener('click', () => switchView('home'));
 
   el.querySelectorAll('[data-filter-cat]').forEach(btn => {
-    btn.addEventListener('click', () => { shopFilterCat = btn.dataset.filterCat; renderShop(); });
+    btn.addEventListener('click', () => {
+      shopFilterCat      = btn.dataset.filterCat;
+      shopFilterFeatured = btn.dataset.filterFeat === 'true';
+      renderShop();
+    });
   });
+
   el.querySelectorAll('[data-filter-color]').forEach(btn => {
     btn.addEventListener('click', () => {
       shopFilterColor = shopFilterColor === btn.dataset.filterColor ? '' : btn.dataset.filterColor;
       renderShop();
     });
   });
-  el.querySelectorAll('[data-filter-featured]').forEach(btn => {
-    btn.addEventListener('click', () => { shopFilterFeatured = btn.dataset.filterFeatured === 'true'; renderShop(); });
+
+  el.querySelector('#shop-clear-filters')?.addEventListener('click', () => {
+    shopFilterCat = ''; shopFilterColor = ''; shopFilterFeatured = false;
+    renderShop();
   });
+
+  el.querySelector('.sp-reset-btn')?.addEventListener('click', () => {
+    shopFilterCat = ''; shopFilterColor = ''; shopFilterFeatured = false;
+    renderShop();
+  });
+
   const shopGrid = el.querySelector('#shop-grid');
-  if (shopGrid) bindCardClicks(shopGrid);
+  if (shopGrid) bindShopCardClicks(shopGrid);
 }
 
 // ── Product view ───────────────────────────────────────────────
@@ -994,6 +1116,12 @@ function subscribeProducts() {
   onSnapshot(q, snap => {
     productsLoaded = true;
     allProducts    = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+    // Handle ?product=ID redirect from shop.html
+    if (pendingProductId) {
+      const _pending = allProducts.find(p => p.id === pendingProductId);
+      pendingProductId = null;
+      if (_pending) { showProduct(_pending); return; }
+    }
     if      (currentView === 'home')                        renderHome();
     else if (currentView === 'shop')                        renderShop();
     else if (currentView === 'product' && currentProduct) {
@@ -1045,10 +1173,6 @@ function setupNav() {
   document.getElementById('nav-cart-btn')?.addEventListener('click', () => switchView('checkout'));
   document.getElementById('nav-user-btn')?.addEventListener('click', () => switchView('profile'));
 
-  document.querySelector('[data-view="shop"]')?.addEventListener('click', e => {
-    e.preventDefault();
-    goToShop();
-  });
 
   document.querySelector('.logo')?.addEventListener('click', e => {
     if (currentView !== 'home') { e.preventDefault(); switchView('home'); }
@@ -1057,8 +1181,6 @@ function setupNav() {
   document.querySelector('.nav-links a[href="index.html"]')?.addEventListener('click', e => {
     if (window.location.pathname.match(/index\.html$|\/$/) ) { e.preventDefault(); switchView('home'); }
   });
-
-  document.getElementById('home-all-products-btn')?.addEventListener('click', () => goToShop());
 
   // Footer SPA links — navigate without full page reload
   document.querySelectorAll('a[href="index.html#shop"]').forEach(a => {
@@ -1159,10 +1281,24 @@ function init() {
   subscribeAuth();
 
   // Handle redirect from other pages: index.html?view=profile / checkout / shop
-  const _viewParam = new URLSearchParams(window.location.search).get('view');
+  const _params    = new URLSearchParams(window.location.search);
+  const _viewParam = _params.get('view');
   if (_viewParam && ['shop', 'profile', 'checkout'].includes(_viewParam)) {
     window.history.replaceState({}, '', window.location.pathname);
     switchView(_viewParam);
+  }
+
+  // Handle ?product=ID redirect from shop.html card click
+  const _productParam = _params.get('product');
+  if (_productParam) {
+    window.history.replaceState({}, '', window.location.pathname);
+    pendingProductId = _productParam;
+    // Products may not be loaded yet — subscribeProducts will resolve it
+    // If already loaded, try immediately
+    if (productsLoaded) {
+      const _p = allProducts.find(p => p.id === _productParam);
+      if (_p) { pendingProductId = null; showProduct(_p); }
+    }
   }
 
   // Promotional popup — 5 s delay, once per 7 days
