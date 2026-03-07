@@ -3623,6 +3623,190 @@ ul { list-style: none; }
   .sp-card-name { font-size: 0.85rem; }
 }
 
+/* ===== V14: Sidebar Drawer, Card Enhancements, Slim Freeship ===== */
+
+/* Slim free-ship bar */
+.sp-freeship-slim {
+  font-size: 0.82rem;
+  padding: 7px 16px;
+  text-align: center;
+  background: var(--pink-light);
+  border-bottom: 1px solid var(--sand-dark);
+  margin-bottom: 20px;
+  border-radius: 10px;
+  color: var(--ink-soft);
+}
+
+/* Filter trigger row */
+.sp-filter-trigger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.sp-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sand-light);
+  border: 1.5px solid var(--sand-dark);
+  border-radius: 50px;
+  padding: 9px 20px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.sp-filter-trigger:hover {
+  border-color: var(--pink);
+  background: var(--pink-light);
+}
+
+/* Sidebar drawer backdrop */
+.sp-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.sp-drawer-backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sidebar drawer panel */
+.sp-drawer {
+  position: fixed;
+  top: 0;
+  right: -340px;
+  width: 300px;
+  max-width: 88vw;
+  height: 100vh;
+  background: var(--sand-light);
+  z-index: 401;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+  box-shadow: -6px 0 28px rgba(44, 42, 41, 0.14);
+  display: flex;
+  flex-direction: column;
+}
+.sp-drawer--open {
+  right: 0;
+}
+
+.sp-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--sand-dark);
+  position: sticky;
+  top: 0;
+  background: var(--sand-light);
+  z-index: 1;
+}
+.sp-drawer-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.sp-drawer-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.sp-drawer-close-btn:hover { background: var(--pink-light); }
+
+.sp-drawer-body {
+  padding: 8px 0 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-drawer-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--sand-dark);
+}
+.sp-drawer-section-title {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sp-drawer-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  margin-top: auto;
+  border-top: 1px solid var(--sand-dark);
+  position: sticky;
+  bottom: 0;
+  background: var(--sand-light);
+}
+
+/* Card quick-view button */
+.sp-card-quickview {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  z-index: 2;
+}
+.sp-shop-card:hover .sp-card-quickview {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Customization badge */
+.sp-custom-badge {
+  font-size: 0.72rem;
+  color: var(--pink-deep);
+  background: var(--pink-light);
+  padding: 6px 12px;
+  text-align: center;
+  line-height: 1.5;
+  border-top: 1px solid var(--sand-dark);
+}
+
+/* Material chip */
+.sp-card-material {
+  font-size: 0.7rem;
+  color: var(--muted);
+  border: 1px solid var(--sand-dark);
+  padding: 2px 8px;
+  border-radius: 50px;
+}
+
 /* Product view — 2-col on desktop, 1-col on mobile */
 .pv-layout {
   display: grid;

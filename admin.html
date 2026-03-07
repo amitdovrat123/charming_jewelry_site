@@ -333,6 +333,13 @@
           </label>
           <span class="text-sm text-gray-600 font-semibold">מוצר מומלץ ⭐</span>
         </div>
+        <div class="flex items-center gap-2 pb-1">
+          <label class="tog flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="p-customizable" />
+            <span class="tog-track"></span>
+          </label>
+          <span class="text-sm text-gray-600 font-semibold">ניתן לביצוע שינויים (Customizable)</span>
+        </div>
       </div>
 
       <!-- Image upload (multiple) -->
@@ -558,7 +565,8 @@ function openModal(mode, product = null) {
     document.getElementById('p-stock').value   = product.stockCount ?? product.stock ?? '';
     document.getElementById('p-badge').value   = product.badge || '';
     document.getElementById('p-status').value  = product.status || 'published';
-    document.getElementById('p-featured').checked = !!product.isFeatured;
+    document.getElementById('p-featured').checked     = !!product.isFeatured;
+    document.getElementById('p-customizable').checked = !!product.isCustomizable;
     document.getElementById('p-color').value   = product.color || '';
     document.getElementById('p-desc').value    = product.description || '';
 
@@ -594,7 +602,8 @@ function clearForm() {
   document.getElementById('p-mat').value    = 'פלדת אל-חלד';
   document.getElementById('p-color').value  = '';
   document.getElementById('p-status').value = 'published';
-  document.getElementById('p-featured').checked = false;
+  document.getElementById('p-featured').checked     = false;
+  document.getElementById('p-customizable').checked = false;
   uploadedImages = [];
   document.getElementById('p-imgs').value = '[]';
   document.getElementById('img-grid').innerHTML = '';
@@ -649,6 +658,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     name, sku, category: cat, collection: col || null, material: mat || null, color: color || null,
     priceOriginal: priceOrig, priceSale, stockCount,
     badge: badge || null, status, isFeatured,
+    isCustomizable: document.getElementById('p-customizable').checked,
     images: imagesArr,
     imageUrl: imagesArr[0] || null,   // backward compat for existing catalog
     description: description || null,

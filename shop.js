@@ -24,6 +24,8 @@ let filterCat      = _p.get('cat')   || '';
 let filterColor    = _p.get('color') || '';
 let filterFeatured = _p.has('featured');
 let filterSearch   = '';
+let filterPriceMax = parseInt(_p.get('price') || '0') || 0;
+let filterOnSale   = _p.has('sale');
 
 // ── Cart ───────────────────────────────────────────────────────
 function loadCart() {
@@ -112,7 +114,10 @@ function cardHTML(product) {
     ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
     : `<span class="sp-card-price">${sp} ₪</span>`;
 
-  const metalChip = data.color ? `<span class="sp-card-metal">${esc(data.color)}</span>` : '';
+  const metalChip    = data.color    ? `<span class="sp-card-metal">${esc(data.color)}</span>`    : '';
+  const matChip      = data.material ? `<span class="sp-card-material">${esc(data.material)}</span>` : '';
+  const customBadge  = data.isCustomizable
+    ? `<div class="sp-custom-badge">✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה</div>` : '';
 
   const actionBtn = oos
     ? `<button class="sp-card-add sp-card-add--oos" disabled>אזל מהמלאי</button>`
@@ -122,13 +127,16 @@ function cardHTML(product) {
     <div class="sp-shop-card fadein" data-view-id="${sid}" role="button" tabindex="0" aria-label="${esc(data.name)}">
       <div class="sp-card-img-wrap">
         ${imgHtml}${badgeHtml || oosBadge}
+        <button class="sp-card-quickview" data-view-id="${sid}" aria-label="צפייה מהירה">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
       </div>
       <div class="sp-card-body">
         <h3 class="sp-card-name">${esc(data.name)}</h3>
-        ${data.sku ? `<p class="sp-card-sku">SKU: ${esc(data.sku)}</p>` : ''}
-        <div class="sp-card-price-row">${priceHtml}${metalChip}</div>
+        <div class="sp-card-price-row">${priceHtml}${metalChip}${matChip}</div>
         ${actionBtn}
       </div>
+      ${customBadge}
     </div>`;
 }
 
@@ -157,25 +165,31 @@ function render() {
       (p.data.sku  || '').toLowerCase().includes(s)
     );
   }
+  if (filterPriceMax) filtered = filtered.filter(p => sellPrice(p.data) <= filterPriceMax);
+  if (filterOnSale)   filtered = filtered.filter(p => {
+    const s = getSale(p.data), pr = getPrice(p.data);
+    return s > 0 && s < pr;
+  });
 
-  const hasFilter = filterCat || filterColor || filterFeatured || filterSearch;
+  const hasFilter   = filterCat || filterColor || filterFeatured || filterSearch || filterPriceMax || filterOnSale;
   const isAllActive = !filterCat && !filterFeatured;
 
-  // Free-ship banner
+  // Free-ship bar (slim)
   const cartSubtotal = loadCart().reduce((s, i) => s + i.price * (i.qty || 1), 0);
-  const freeShipHtml = cartSubtotal >= FREE_SHIP_THRESHOLD
-    ? `<div class="sp-freeship sp-freeship--done">✅ מזל טוב! הגעת ל-${FREE_SHIP_THRESHOLD} ₪ — <strong>משלוח חינם!</strong></div>`
-    : `<div class="sp-freeship">🚚 משלוח חינם בקנייה מעל <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${cartSubtotal > 0 ? ` — עוד <strong>${FREE_SHIP_THRESHOLD - cartSubtotal} ₪</strong>!` : ''}</div>`;
+  const freeShipLine = cartSubtotal >= FREE_SHIP_THRESHOLD
+    ? `✅ זכאית למשלוח חינם!`
+    : `🚚 משלוח חינם בקנייה מעל <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${cartSubtotal > 0 ? ` — עוד <strong>${FREE_SHIP_THRESHOLD - cartSubtotal} ₪</strong>` : ''}`;
 
-  // Category pills
+  // Category pills for drawer
   const catPillsHTML = [
     `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">הכל</button>`,
     ...allCats.map(c =>
       `<button class="sp-pill${filterCat === c && !filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
     ),
+    `<button class="sp-pill sp-pill--star${filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">מוצרים נבחרים ⭐</button>`,
   ].join('');
 
-  // Color pills
+  // Color pills for drawer
   const colorPillsHTML = [
     `<button class="sp-pill${!filterColor ? ' sp-pill--active' : ''}" data-filter-color="">הכל</button>`,
     ...allColors.map(c =>
@@ -195,48 +209,71 @@ function render() {
 
       <div class="sp-hero">
         <span class="section-eyebrow">כל הקולקציה</span>
-        <h1 class="sp-title">החנות המלאה</h1>
+        <h1 class="sp-title">החנות שלנו</h1>
         <p class="sp-subtitle">כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.</p>
       </div>
 
-      ${freeShipHtml}
+      <div class="sp-freeship-slim">${freeShipLine}</div>
 
-      <div class="sp-filter-bar">
-
-        <div class="sp-filter-row">
-          <div class="sp-pills-row">${catPillsHTML}</div>
-          <button class="sp-pill sp-pill--star${filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">מוצרים נבחרים ⭐</button>
-        </div>
-
-        <div class="sp-filter-row sp-filter-row--secondary">
-          <span class="sp-filter-label">גוון</span>
-          <div class="sp-pills-row">${colorPillsHTML}</div>
-        </div>
-
-        <div class="sp-filter-row sp-filter-row--secondary">
-          <span class="sp-filter-label">חיפוש</span>
-          <input
-            type="text"
-            id="search-input"
-            class="sp-search-input"
-            placeholder="חפשי לפי שם מוצר או SKU..."
-            value="${esc(filterSearch)}"
-            autocomplete="off"
-          />
-        </div>
-
+      <div class="sp-filter-trigger-row">
+        <button id="sp-filter-btn" class="sp-filter-trigger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          סינון ומיון
+        </button>
+        <p class="sp-results-count">מציגה <strong>${productsLoaded ? filtered.length : '...'}</strong> מוצרים${hasFilter ? ` &nbsp;<button class="sp-clear-btn" id="clear-filters">× נקי</button>` : ''}</p>
       </div>
 
-      <div class="sp-results-row">
-        <p class="sp-results-count">מציגה <strong>${productsLoaded ? filtered.length : '...'}</strong> מוצרים</p>
-        ${hasFilter ? `<button class="sp-clear-btn" id="clear-filters">× נקי פילטרים</button>` : ''}
-      </div>
+      <div id="sp-backdrop" class="sp-drawer-backdrop"></div>
+      <aside id="sp-drawer" class="sp-drawer" role="dialog" aria-label="פילטרים">
+        <div class="sp-drawer-header">
+          <h3>סינון ומיון</h3>
+          <button id="sp-drawer-close" class="sp-drawer-close-btn" aria-label="סגור">✕</button>
+        </div>
+        <div class="sp-drawer-body">
+          <div class="sp-drawer-section">
+            <h4 class="sp-drawer-section-title">קטגוריה</h4>
+            <div class="sp-pills-row">${catPillsHTML}</div>
+          </div>
+          <div class="sp-drawer-section">
+            <h4 class="sp-drawer-section-title">גוון</h4>
+            <div class="sp-pills-row">${colorPillsHTML}</div>
+          </div>
+          <div class="sp-drawer-section">
+            <h4 class="sp-drawer-section-title">חיפוש</h4>
+            <input type="text" id="search-input" class="sp-search-input" placeholder="חפשי לפי שם מוצר או SKU..." value="${esc(filterSearch)}" autocomplete="off" />
+          </div>
+          <div class="sp-drawer-section">
+            <h4 class="sp-drawer-section-title">מחיר</h4>
+            <div class="sp-pills-row">
+              ${[0, 100, 250, 500].map(v =>
+                `<button class="sp-pill${filterPriceMax === v ? ' sp-pill--active' : ''}" data-filter-price="${v}">${v === 0 ? 'הכל' : `עד ${v} ₪`}</button>`
+              ).join('')}
+            </div>
+          </div>
+          <div class="sp-drawer-section">
+            <h4 class="sp-drawer-section-title">מבצעים</h4>
+            <button class="sp-pill${filterOnSale ? ' sp-pill--active' : ''}" id="shop-sale-toggle">מוצרים במבצע</button>
+          </div>
+          <div class="sp-drawer-footer">
+            <button class="btn btn-outline" id="shop-drawer-reset" style="flex:1;">איפוס</button>
+            <button class="btn" id="shop-drawer-apply" style="flex:2;">הצגי תוצאות (${productsLoaded ? filtered.length : '...'})</button>
+          </div>
+        </div>
+      </aside>
 
       <div id="shop-grid" class="sp-shop-grid">${gridHtml}</div>
 
     </div>`;
 
   // ── Bind events ──────────────────────────────────────────────
+
+  const openDrawer  = () => { el.querySelector('#sp-drawer').classList.add('sp-drawer--open'); el.querySelector('#sp-backdrop').classList.add('sp-drawer-backdrop--open'); };
+  const closeDrawer = () => { el.querySelector('#sp-drawer').classList.remove('sp-drawer--open'); el.querySelector('#sp-backdrop').classList.remove('sp-drawer-backdrop--open'); };
+
+  el.querySelector('#sp-filter-btn').addEventListener('click', openDrawer);
+  el.querySelector('#sp-drawer-close').addEventListener('click', closeDrawer);
+  el.querySelector('#sp-backdrop').addEventListener('click', closeDrawer);
+  el.querySelector('#shop-drawer-apply').addEventListener('click', closeDrawer);
 
   // Category + featured pills
   el.querySelectorAll('[data-filter-cat]').forEach(btn => {
@@ -255,6 +292,20 @@ function render() {
     });
   });
 
+  // Price pills
+  el.querySelectorAll('[data-filter-price]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterPriceMax = parseInt(btn.dataset.filterPrice) || 0;
+      render();
+    });
+  });
+
+  // Sale toggle
+  el.querySelector('#shop-sale-toggle')?.addEventListener('click', () => {
+    filterOnSale = !filterOnSale;
+    render();
+  });
+
   // Search
   el.querySelector('#search-input')?.addEventListener('input', e => {
     filterSearch = e.target.value;
@@ -262,14 +313,14 @@ function render() {
   });
 
   // Clear all filters
-  el.querySelector('#clear-filters')?.addEventListener('click', () => {
-    filterCat = ''; filterColor = ''; filterFeatured = false; filterSearch = '';
+  const resetAll = () => {
+    filterCat = ''; filterColor = ''; filterFeatured = false;
+    filterSearch = ''; filterPriceMax = 0; filterOnSale = false;
     render();
-  });
-  el.querySelector('#reset-filters-btn')?.addEventListener('click', () => {
-    filterCat = ''; filterColor = ''; filterFeatured = false; filterSearch = '';
-    render();
-  });
+  };
+  el.querySelector('#clear-filters')?.addEventListener('click', resetAll);
+  el.querySelector('#shop-drawer-reset')?.addEventListener('click', resetAll);
+  el.querySelector('#reset-filters-btn')?.addEventListener('click', resetAll);
 
   // Card click → product detail on index.html
   el.querySelectorAll('.sp-shop-card').forEach(card => {
@@ -278,6 +329,14 @@ function render() {
     };
     card.addEventListener('click', go);
     card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  });
+
+  // Quick-view (same navigation as card click)
+  el.querySelectorAll('.sp-card-quickview').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      window.location.href = 'index.html?product=' + encodeURIComponent(btn.dataset.viewId);
+    });
   });
 
   // Add-to-cart buttons

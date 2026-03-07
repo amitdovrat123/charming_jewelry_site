@@ -36,6 +36,7 @@ let checkoutDelivery     = 'delivery';
 let isQuickBuy           = false;
 let pendingCheckoutAfterAuth = false;   // redirect-after-login flag
 let _checkoutStartAtStep2   = false;   // skip step-1 init after auth redirect
+let _authInitialized        = false;   // true after first onAuthStateChanged fires
 let pendingProductId         = null;   // ?product=ID from shop.html card click
 
 // Product gallery
@@ -47,6 +48,8 @@ let shopFilterCat      = '';
 let shopFilterColor    = '';
 let shopFilterFeatured = false;
 let shopFilterSort     = 'default';
+let shopFilterPriceMax = 0;    // 0 = no limit; 100 / 250 / 500
+let shopFilterOnSale   = false;
 
 // View state
 let currentView  = 'home';
@@ -76,6 +79,8 @@ function goToShop(cat, featured) {
   shopFilterCat      = cat      ?? '';
   shopFilterColor    = '';
   shopFilterFeatured = featured ?? false;
+  shopFilterPriceMax = 0;
+  shopFilterOnSale   = false;
   switchView('shop');
 }
 window.goToShop = goToShop;
@@ -200,6 +205,7 @@ function bindCardClicks(container) {
 // ── Shop-specific card HTML (larger, with metal chip + add-to-cart) ─────────
 function shopCardHTML(product) {
   const { data, id } = product;
+  const sid   = esc(id);
   const imgs  = getImages(data);
   const price = getPrice(data);
   const sale  = getSale(data);
@@ -223,20 +229,30 @@ function shopCardHTML(product) {
   const metalChip = data.color
     ? `<span class="sp-card-metal">${esc(data.color)}</span>` : '';
 
+  const matChip = data.material
+    ? `<span class="sp-card-material">${esc(data.material)}</span>` : '';
+
+  const customBadge = data.isCustomizable
+    ? `<div class="sp-custom-badge">✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה</div>` : '';
+
   const actionBtn = oos
     ? `<button class="sp-card-add sp-card-add--oos" disabled>אזל מהמלאי</button>`
-    : `<button class="sp-card-add" data-product-id="${esc(id)}">הוסיפי לסל</button>`;
+    : `<button class="sp-card-add" data-product-id="${sid}">הוסיפי לסל</button>`;
 
   return `
-    <div class="sp-shop-card fadein" data-product-id="${esc(id)}" role="button" tabindex="0" aria-label="${esc(data.name)}">
+    <div class="sp-shop-card fadein" data-product-id="${sid}" role="button" tabindex="0" aria-label="${esc(data.name)}">
       <div class="sp-card-img-wrap">
         ${imgHtml}${badgeHtml || oosBadge}
+        <button class="sp-card-quickview" data-view-id="${sid}" aria-label="צפייה מהירה">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
       </div>
       <div class="sp-card-body">
         <h3 class="sp-card-name">${esc(data.name)}</h3>
-        <div class="sp-card-price-row">${priceHtml}${metalChip}</div>
+        <div class="sp-card-price-row">${priceHtml}${metalChip}${matChip}</div>
         ${actionBtn}
       </div>
+      ${customBadge}
     </div>`;
 }
 
@@ -254,6 +270,13 @@ function bindShopCardClicks(container) {
       e.stopPropagation();
       const product = allProducts.find(p => p.id === btn.dataset.productId);
       if (product) addToCart(product);
+    });
+  });
+  container.querySelectorAll('.sp-card-quickview').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const product = allProducts.find(p => p.id === btn.dataset.viewId);
+      if (product) showProduct(product);
     });
   });
 }
@@ -308,6 +331,11 @@ function renderShop() {
   if (shopFilterCat)      filtered = filtered.filter(p => p.data.category === shopFilterCat);
   if (shopFilterColor)    filtered = filtered.filter(p => p.data.color     === shopFilterColor);
   if (shopFilterFeatured) filtered = filtered.filter(p => p.data.isFeatured);
+  if (shopFilterPriceMax) filtered = filtered.filter(p => sellPrice(p.data) <= shopFilterPriceMax);
+  if (shopFilterOnSale)   filtered = filtered.filter(p => {
+    const s = getSale(p.data), pr = getPrice(p.data);
+    return s > 0 && s < pr;
+  });
 
   // Sort
   if (shopFilterSort === 'price-asc')  filtered = [...filtered].sort((a, b) => sellPrice(a.data) - sellPrice(b.data));
@@ -315,16 +343,16 @@ function renderShop() {
 
   const subtotal = getCartSubtotal();
 
-  // ── Category pills (right side in RTL) ───────────────────────
+  // ── Drawer pill HTML ─────────────────────────────────────────
   const isAllActive = !shopFilterCat && !shopFilterFeatured;
   const catPillsHTML = [
     `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">הכל</button>`,
     ...allCats.map(c =>
       `<button class="sp-pill${shopFilterCat === c ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
     ),
+    `<button class="sp-pill sp-pill--star${shopFilterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">מוצרים נבחרים ⭐</button>`,
   ].join('');
 
-  // ── Color pills ───────────────────────────────────────────────
   const colorPillsHTML = [
     `<button class="sp-pill${!shopFilterColor ? ' sp-pill--active' : ''}" data-filter-color="">הכל</button>`,
     ...allColors.map(c =>
@@ -337,7 +365,10 @@ function renderShop() {
     ? filtered.map(shopCardHTML).join('')
     : `<div class="sp-empty"><p>לא נמצאו מוצרים התואמים את הסינון שנבחר</p><button class="btn btn-outline sp-reset-btn">איפוס פילטרים</button></div>`;
 
-  const hasActiveFilter = shopFilterCat || shopFilterColor || shopFilterFeatured;
+  const hasActiveFilter = shopFilterCat || shopFilterColor || shopFilterFeatured || shopFilterPriceMax || shopFilterOnSale;
+  const freeShipLine = subtotal >= FREE_SHIP_THRESHOLD
+    ? `✅ זכאית למשלוח חינם!`
+    : `🚚 משלוח חינם בקנייה מעל <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — עוד <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>` : ''}`;
 
   el.innerHTML = `
     <section class="sp-section">
@@ -350,30 +381,53 @@ function renderShop() {
 
         <div class="sp-hero">
           <span class="section-eyebrow">כל הקולקציה</span>
-          <h1 class="sp-title">החנות המלאה</h1>
+          <h1 class="sp-title">החנות שלנו</h1>
           <p class="sp-subtitle">כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.</p>
         </div>
 
-        ${freeShipBannerHTML(subtotal)}
+        <div class="sp-freeship-slim">${freeShipLine}</div>
 
-        <div class="sp-filter-bar">
-
-          <div class="sp-filter-row">
-            <div class="sp-pills-row">${catPillsHTML}</div>
-            <button class="sp-pill sp-pill--star${shopFilterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">מוצרים נבחרים ⭐</button>
-          </div>
-
-          <div class="sp-filter-row sp-filter-row--secondary">
-            <span class="sp-filter-label">גוון</span>
-            <div class="sp-pills-row">${colorPillsHTML}</div>
-          </div>
-
+        <div class="sp-filter-trigger-row">
+          <button id="sp-filter-btn" class="sp-filter-trigger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+            סינון ומיון
+          </button>
+          <p class="sp-results-count">מציגה <strong>${filtered.length}</strong> מוצרים${hasActiveFilter ? ` &nbsp;<button class="sp-clear-btn" id="shop-clear-filters">× נקי</button>` : ''}</p>
         </div>
 
-        <div class="sp-results-row">
-          <p class="sp-results-count">מציגה <strong>${filtered.length}</strong> מוצרים</p>
-          ${hasActiveFilter ? `<button class="sp-clear-btn" id="shop-clear-filters">× נקי פילטרים</button>` : ''}
-        </div>
+        <div id="sp-backdrop" class="sp-drawer-backdrop"></div>
+        <aside id="sp-drawer" class="sp-drawer" role="dialog" aria-label="פילטרים">
+          <div class="sp-drawer-header">
+            <h3>סינון ומיון</h3>
+            <button id="sp-drawer-close" class="sp-drawer-close-btn" aria-label="סגור">✕</button>
+          </div>
+          <div class="sp-drawer-body">
+            <div class="sp-drawer-section">
+              <h4 class="sp-drawer-section-title">קטגוריה</h4>
+              <div class="sp-pills-row">${catPillsHTML}</div>
+            </div>
+            <div class="sp-drawer-section">
+              <h4 class="sp-drawer-section-title">גוון</h4>
+              <div class="sp-pills-row">${colorPillsHTML}</div>
+            </div>
+            <div class="sp-drawer-section">
+              <h4 class="sp-drawer-section-title">מחיר</h4>
+              <div class="sp-pills-row">
+                ${[0, 100, 250, 500].map(v =>
+                  `<button class="sp-pill${shopFilterPriceMax === v ? ' sp-pill--active' : ''}" data-filter-price="${v}">${v === 0 ? 'הכל' : `עד ${v} ₪`}</button>`
+                ).join('')}
+              </div>
+            </div>
+            <div class="sp-drawer-section">
+              <h4 class="sp-drawer-section-title">מבצעים</h4>
+              <button class="sp-pill${shopFilterOnSale ? ' sp-pill--active' : ''}" id="shop-sale-toggle">מוצרים במבצע</button>
+            </div>
+            <div class="sp-drawer-footer">
+              <button class="btn btn-outline" id="shop-drawer-reset" style="flex:1;">איפוס</button>
+              <button class="btn" id="shop-drawer-apply" style="flex:2;">הצגי תוצאות (${filtered.length})</button>
+            </div>
+          </div>
+        </aside>
 
         <div id="shop-grid" class="sp-shop-grid">${gridContent}</div>
 
@@ -382,6 +436,20 @@ function renderShop() {
 
   // ── Event listeners ───────────────────────────────────────────
   el.querySelector('#shop-back-btn').addEventListener('click', () => switchView('home'));
+
+  const openDrawer  = () => {
+    el.querySelector('#sp-drawer').classList.add('sp-drawer--open');
+    el.querySelector('#sp-backdrop').classList.add('sp-drawer-backdrop--open');
+  };
+  const closeDrawer = () => {
+    el.querySelector('#sp-drawer').classList.remove('sp-drawer--open');
+    el.querySelector('#sp-backdrop').classList.remove('sp-drawer-backdrop--open');
+  };
+
+  el.querySelector('#sp-filter-btn').addEventListener('click', openDrawer);
+  el.querySelector('#sp-drawer-close').addEventListener('click', closeDrawer);
+  el.querySelector('#sp-backdrop').addEventListener('click', closeDrawer);
+  el.querySelector('#shop-drawer-apply').addEventListener('click', closeDrawer);
 
   el.querySelectorAll('[data-filter-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -398,15 +466,27 @@ function renderShop() {
     });
   });
 
-  el.querySelector('#shop-clear-filters')?.addEventListener('click', () => {
-    shopFilterCat = ''; shopFilterColor = ''; shopFilterFeatured = false;
+  el.querySelectorAll('[data-filter-price]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      shopFilterPriceMax = parseInt(btn.dataset.filterPrice) || 0;
+      renderShop();
+    });
+  });
+
+  el.querySelector('#shop-sale-toggle')?.addEventListener('click', () => {
+    shopFilterOnSale = !shopFilterOnSale;
     renderShop();
   });
 
-  el.querySelector('.sp-reset-btn')?.addEventListener('click', () => {
+  const resetAll = () => {
     shopFilterCat = ''; shopFilterColor = ''; shopFilterFeatured = false;
+    shopFilterPriceMax = 0; shopFilterOnSale = false;
     renderShop();
-  });
+  };
+
+  el.querySelector('#shop-clear-filters')?.addEventListener('click', resetAll);
+  el.querySelector('#shop-drawer-reset')?.addEventListener('click', resetAll);
+  el.querySelector('.sp-reset-btn')?.addEventListener('click', resetAll);
 
   const shopGrid = el.querySelector('#shop-grid');
   if (shopGrid) bindShopCardClicks(shopGrid);
@@ -486,9 +566,6 @@ function renderProductView() {
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">${priceHtml}</div>
             ${metaChips ? `<div style="display:flex;gap:8px;flex-wrap:wrap;">${metaChips}</div>` : ''}
             ${data.description ? `<p style="font-size:0.97rem;color:var(--ink-soft);line-height:1.75;margin:0;">${esc(data.description)}</p>` : ''}
-            <div style="padding:12px 16px;background:var(--sand-light);border-radius:12px;border:1px solid var(--sand-dark);font-size:0.85rem;color:var(--ink-soft);line-height:1.6;">
-              🚚 משלוח עד הבית (35 ₪) — תוך 3–5 ימי עסקים. איסוף עצמי מראשון לציון בחינם — בתיאום מראש.
-            </div>
             ${actionHtml}
           </div>
         </div>
@@ -550,11 +627,11 @@ function renderProfileView() {
         <button id="profile-back-btn" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">← חזרה</button>
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">האזור האישי שלי</h2>
         <div style="display:flex;gap:0;border-bottom:2px solid var(--sand-dark);margin-bottom:32px;">
-          <button class="profile-tab" data-tab="orders" style="background:none;border:none;border-bottom:3px solid var(--pink);margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--ink);transition:.2s;">הזמנות שלי</button>
-          <button class="profile-tab" data-tab="info" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">פרטים אישיים</button>
+          <button class="profile-tab" data-tab="info" style="background:none;border:none;border-bottom:3px solid var(--pink);margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--ink);transition:.2s;">פרטים אישיים</button>
+          <button class="profile-tab" data-tab="orders" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">הזמנות שלי</button>
         </div>
 
-        <div id="profile-pane-orders">
+        <div id="profile-pane-orders" style="display:none;">
           <div id="orders-loading" style="text-align:center;padding:40px 0;color:var(--muted);">טוענת הזמנות...</div>
           <div id="orders-list" style="display:flex;flex-direction:column;gap:14px;"></div>
           <div id="orders-empty" style="display:none;text-align:center;padding:60px 0;">
@@ -563,7 +640,7 @@ function renderProfileView() {
           </div>
         </div>
 
-        <div id="profile-pane-info" style="display:none;flex-direction:column;gap:18px;">
+        <div id="profile-pane-info" style="display:flex;flex-direction:column;gap:18px;">
           <div style="padding:16px 20px;background:var(--pink-light);border-radius:14px;border:1px solid var(--sand-dark);">
             <p style="margin:0 0 4px;font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;">חשבון</p>
             <p style="margin:0;font-size:0.97rem;color:var(--ink);font-weight:600;">${esc(currentUser.displayName || '')}</p>
@@ -646,8 +723,6 @@ function renderProfileView() {
     signOut(auth);
     switchView('home');
   });
-
-  loadOrders();
 
   function loadOrders() {
     const loadingEl = el.querySelector('#orders-loading');
@@ -1151,6 +1226,9 @@ function subscribeAuth() {
         if (snap.exists()) userProfile = snap.data();
       } catch {}
 
+      // Bug 1: re-render profile view if already open (profile data now loaded)
+      if (currentView === 'profile') renderProfileView();
+
       // After login: proceed to checkout step 2 if the user was blocked
       if (pendingCheckoutAfterAuth) {
         pendingCheckoutAfterAuth = false;
@@ -1160,11 +1238,16 @@ function subscribeAuth() {
         } else {
           switchView('checkout');
         }
+      } else if (_authInitialized) {
+        // Bug 2: actual new login with no pending checkout → navigate to profile
+        switchView('profile');
       }
     } else {
       userProfile = {};
       if (currentView === 'profile') renderProfileView();
     }
+
+    _authInitialized = true;
   });
 }
 
