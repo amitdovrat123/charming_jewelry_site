@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendPasswordResetEmail,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   doc,
@@ -37,7 +38,7 @@ const MODAL_HTML = `
 
     <div class="auth-tabs" role="tablist">
       <button class="auth-tab auth-tab--active" data-tab="login"    role="tab" aria-selected="true">התחברות</button>
-      <button class="auth-tab"                  data-tab="register" role="tab" aria-selected="false">הרשמה למועדון</button>
+      <button class="auth-tab"                  data-tab="register" role="tab" aria-selected="false">הרשם עכשיו</button>
     </div>
 
     <!-- ── LOGIN PANEL ─────────────────────────────────────── -->
@@ -53,11 +54,30 @@ const MODAL_HTML = `
         </div>
         <div class="auth-field">
           <label for="login-password">סיסמה</label>
-          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required />
+          <div style="position:relative">
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required style="padding-left:40px;width:100%" />
+            <button type="button" onclick="window._authTogglePass('login-password',this)" tabindex="-1"
+              style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9a8e8a;padding:0;line-height:1">
+              <i class="fa fa-eye" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
         <p class="auth-error" id="login-error" aria-live="polite"></p>
         <button type="submit" class="btn auth-submit-btn" id="login-submit">התחברות</button>
       </form>
+      <div style="text-align:center;margin-top:10px">
+        <button type="button" id="forgot-btn" style="background:none;border:none;color:#9a8e8a;font-size:0.82rem;cursor:pointer;text-decoration:underline;font-family:inherit">שכחתי סיסמה</button>
+      </div>
+      <div id="forgot-section" style="display:none;margin-top:12px;padding:14px;background:#fdf6ee;border-radius:12px;border:1px solid #f0dfc0">
+        <p style="font-size:0.8rem;color:#4a3f3c;margin-bottom:8px;font-weight:600">הזיני את כתובת הדוא"ל שלך ונשלח לך קישור לאיפוס:</p>
+        <input type="email" id="forgot-email" placeholder="your@email.com"
+          style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:0.85rem;background:#fff;margin-bottom:8px;box-sizing:border-box;font-family:inherit" />
+        <button type="button" id="forgot-send-btn"
+          style="width:100%;background:#d4a373;color:#fff;border:none;border-radius:50px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:inherit">
+          שליחת קישור לאיפוס
+        </button>
+        <p id="forgot-msg" aria-live="polite" style="font-size:0.8rem;margin-top:8px;min-height:1rem;text-align:center"></p>
+      </div>
       <div class="auth-divider"><span>או</span></div>
       <button class="auth-google-btn" id="google-login-btn" type="button">
         ${GOOGLE_ICON}
@@ -88,7 +108,13 @@ const MODAL_HTML = `
         </div>
         <div class="auth-field">
           <label for="reg-password">סיסמה</label>
-          <input type="password" id="reg-password" placeholder="לפחות 6 תווים" autocomplete="new-password" required minlength="6" />
+          <div style="position:relative">
+            <input type="password" id="reg-password" placeholder="לפחות 6 תווים" autocomplete="new-password" required minlength="6" style="padding-left:40px;width:100%" />
+            <button type="button" onclick="window._authTogglePass('reg-password',this)" tabindex="-1"
+              style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9a8e8a;padding:0;line-height:1">
+              <i class="fa fa-eye" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
         <div class="auth-checkboxes">
           <label class="auth-checkbox-label">
@@ -97,11 +123,11 @@ const MODAL_HTML = `
           </label>
           <label class="auth-checkbox-label">
             <input type="checkbox" id="reg-terms" />
-            <span class="auth-checkbox-text">קראתי ואני מסכים/ה ל<a href="terms.html" target="_blank" rel="noopener">תקנון ומדיניות פרטיות</a></span>
+            <span class="auth-checkbox-text">אני מאשר/ת את <a href="terms.html" target="_blank" rel="noopener">תקנון האתר, תנאי השימוש ומדיניות הפרטיות</a></span>
           </label>
         </div>
         <p class="auth-error" id="reg-error" aria-live="polite"></p>
-        <button type="submit" class="btn auth-submit-btn" id="reg-submit">הרשמה למועדון</button>
+        <button type="submit" class="btn auth-submit-btn" id="reg-submit">הרשם עכשיו</button>
       </form>
       <div class="auth-divider"><span>או</span></div>
       <button class="auth-google-btn" id="google-reg-btn" type="button">
@@ -134,6 +160,42 @@ let isLoading    = false;
 // (used during registration and new Google sign-up so the success
 // panel can remain visible).
 let skipAutoClose = false;
+
+// ── Password toggle (exposed globally so onclick="" works in module) ──
+window._authTogglePass = function(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  const isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  const icon = btn.querySelector('i');
+  if (icon) {
+    icon.classList.toggle('fa-eye',      !isHidden);
+    icon.classList.toggle('fa-eye-slash', isHidden);
+  }
+};
+
+// ── Forgot password ───────────────────────────────────────────
+async function handleForgotPassword() {
+  const email  = document.getElementById('forgot-email')?.value.trim();
+  const msgEl  = document.getElementById('forgot-msg');
+  const sendBtn = document.getElementById('forgot-send-btn');
+  if (!msgEl) return;
+  if (!email) { msgEl.style.color = '#ef4444'; msgEl.textContent = 'יש להזין כתובת דוא"ל.'; return; }
+
+  sendBtn.disabled = true;
+  msgEl.style.color = '#9a8e8a';
+  msgEl.textContent = 'שולח...';
+  try {
+    await sendPasswordResetEmail(auth, email);
+    msgEl.style.color = '#22c55e';
+    msgEl.textContent = 'מייל לאיפוס סיסמה נשלח אליך ברגע זה';
+  } catch(err) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = getErrorMsg(err.code);
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
 
 // ── Helpers ───────────────────────────────────────────────────
 function getErrorMsg(code) {
@@ -390,6 +452,14 @@ function setupEvents() {
 
   document.getElementById('auth-success-close')
     .addEventListener('click', closeModal);
+
+  document.getElementById('forgot-btn').addEventListener('click', () => {
+    const sec = document.getElementById('forgot-section');
+    if (sec) sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.getElementById('forgot-send-btn')
+    .addEventListener('click', handleForgotPassword);
 }
 
 // ── Boot (modules are deferred — DOM is ready here) ──────────
