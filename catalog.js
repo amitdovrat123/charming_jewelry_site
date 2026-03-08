@@ -1132,10 +1132,26 @@ function renderCheckoutForm(el) {
                 <span>משלוח</span>
                 <span id="co-ship-cost-el">${shipInit === 0 ? 'חינם' : shipInit + ' ₪'}</span>
               </div>
+              <div class="co-summary-row" id="co-discount-row" style="display:none;color:#16a34a;">
+                <span>הנחת קופון</span>
+                <span id="co-discount-el"></span>
+              </div>
               <div class="co-summary-divider"></div>
               <div class="co-summary-row co-summary-total">
                 <span>סה"כ לתשלום</span>
                 <span id="co-grand-total-el">${totalInit} ₪</span>
+              </div>
+            </div>
+            <div class="co-coupon-box" style="margin-top:14px;">
+              <label style="font-size:0.82rem;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:6px;">קוד קופון</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="co-coupon-input" placeholder="הזיני קוד קופון" style="flex:1;padding:9px 14px;border:1px solid var(--sand-dark);border-radius:12px;font-size:0.88rem;font-family:inherit;direction:ltr;text-align:center;" />
+                <button type="button" id="co-coupon-apply" style="padding:9px 18px;border:none;border-radius:12px;background:var(--pink);color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.2s;">החל</button>
+              </div>
+              <p id="co-coupon-msg" style="font-size:0.8rem;margin:6px 0 0;min-height:1rem;" aria-live="polite"></p>
+              <div id="co-coupon-applied" style="display:none;margin-top:6px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:0.82rem;color:#16a34a;">
+                <span id="co-coupon-applied-text"></span>
+                <button type="button" id="co-coupon-remove" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:0.82rem;font-weight:600;margin-right:8px;">הסרה</button>
               </div>
             </div>
             <div id="co-freeship-note" class="co-freeship-note"${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? '' : ' style="display:none;"'}>
@@ -1147,13 +1163,29 @@ function renderCheckoutForm(el) {
       </div>
     </section>`;
 
+  // ── Coupon state ──
+  let appliedCoupon = null; // { docId, code, discount, type, value }
+
   // Dynamic pricing update
   function updateSummaryPricing() {
     const ship      = document.querySelector('[name="co-ship"]:checked')?.value || 'delivery';
     checkoutDelivery = ship;
     const isFree    = ship === 'pickup' || subtotal >= FREE_SHIP_THRESHOLD;
     const shipCost  = (ship === 'delivery' && !isFree) ? SHIPPING : 0;
-    const total     = subtotal + shipCost;
+    const discountAmt = appliedCoupon ? appliedCoupon.discount : 0;
+    const total     = Math.max(0, subtotal + shipCost - discountAmt);
+
+    // Discount row
+    const discountRow = document.getElementById('co-discount-row');
+    const discountEl  = document.getElementById('co-discount-el');
+    if (discountRow) {
+      if (appliedCoupon) {
+        discountRow.style.display = '';
+        discountEl.textContent = `- ${discountAmt} ₪`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+    }
 
     el.querySelectorAll('.co-delivery-option').forEach(opt => {
       opt.classList.toggle('co-delivery-option--active', opt.querySelector('input').value === ship);
@@ -1187,6 +1219,89 @@ function renderCheckoutForm(el) {
   // Radio change listeners
   el.querySelectorAll('[name="co-ship"]').forEach(r => {
     r.addEventListener('change', updateSummaryPricing);
+  });
+
+  // ── Coupon apply / remove ──
+  const couponInput   = document.getElementById('co-coupon-input');
+  const couponApplyBtn = document.getElementById('co-coupon-apply');
+  const couponMsg     = document.getElementById('co-coupon-msg');
+  const couponApplied = document.getElementById('co-coupon-applied');
+  const couponAppliedText = document.getElementById('co-coupon-applied-text');
+  const couponRemove  = document.getElementById('co-coupon-remove');
+
+  function showCouponMsg(text, isError) {
+    couponMsg.textContent = text;
+    couponMsg.style.color = isError ? '#ef4444' : '#16a34a';
+  }
+
+  function setCouponApplied(coupon) {
+    appliedCoupon = coupon;
+    if (coupon) {
+      couponInput.style.display = 'none';
+      couponApplyBtn.style.display = 'none';
+      couponMsg.textContent = '';
+      couponApplied.style.display = 'flex';
+      const label = coupon.type === 'percent' ? `${coupon.value}%` : `${coupon.value} ₪`;
+      couponAppliedText.textContent = `קופון ${coupon.code} — הנחה ${label} (${coupon.discount} ₪)`;
+    } else {
+      couponInput.style.display = '';
+      couponApplyBtn.style.display = '';
+      couponInput.value = '';
+      couponApplied.style.display = 'none';
+    }
+    updateSummaryPricing();
+  }
+
+  if (couponApplyBtn) couponApplyBtn.addEventListener('click', async () => {
+    const code = couponInput.value.trim();
+    if (!code) { showCouponMsg('יש להזין קוד קופון.', true); return; }
+    if (appliedCoupon) { showCouponMsg('כבר הוחל קופון על ההזמנה.', true); return; }
+
+    couponApplyBtn.disabled = true;
+    couponApplyBtn.textContent = '...';
+    showCouponMsg('', false);
+
+    try {
+      const result = await validateCoupon(code, subtotal);
+
+      if (!result.valid) {
+        const msgMap = {
+          'תוקף הקופון פג.': 'קוד קופון לא בתוקף.',
+          'הקופון הגיע למגבלת השימוש.': 'קוד זה כבר מומש.',
+        };
+        showCouponMsg(msgMap[result.reason] || result.reason, true);
+        couponApplyBtn.disabled = false;
+        couponApplyBtn.textContent = 'החל';
+        return;
+      }
+
+      // Check per-user usage for single-use coupons
+      if (currentUser && result.docId) {
+        try {
+          const usageSnap = await getDocs(
+            query(collection(db, COUPONS_COL_PATH, result.docId, 'userUsage'),
+                  where('uid', '==', currentUser.uid), limit(1))
+          );
+          if (!usageSnap.empty) {
+            showCouponMsg('קוד זה כבר מומש.', true);
+            couponApplyBtn.disabled = false;
+            couponApplyBtn.textContent = 'החל';
+            return;
+          }
+        } catch (_) { /* sub-collection may not exist yet — that's fine */ }
+      }
+
+      setCouponApplied({ docId: result.docId, code: code.trim().toUpperCase(), discount: result.discount, type: result.type, value: result.value });
+    } catch (ex) {
+      console.error('[coupon apply]', ex);
+      showCouponMsg('שגיאה בבדיקת הקופון.', true);
+    }
+    couponApplyBtn.disabled = false;
+    couponApplyBtn.textContent = 'החל';
+  });
+
+  if (couponRemove) couponRemove.addEventListener('click', () => {
+    setCouponApplied(null);
   });
 
   // Input persistence
@@ -1237,8 +1352,21 @@ function renderCheckoutForm(el) {
 
       const isFree2   = ship === 'pickup' || subtotal >= FREE_SHIP_THRESHOLD;
       const shipCost2 = (ship === 'delivery' && !isFree2) ? SHIPPING : 0;
-      const total2    = subtotal + shipCost2;
+      const discountAmt = appliedCoupon ? appliedCoupon.discount : 0;
+      const total2    = Math.max(0, subtotal + shipCost2 - discountAmt);
       const orderId   = generateOrderId();
+
+      // Redeem coupon + record per-user usage
+      if (appliedCoupon) {
+        await redeemCoupon(appliedCoupon.docId);
+        if (currentUser) {
+          try {
+            await addDoc(collection(db, COUPONS_COL_PATH, appliedCoupon.docId, 'userUsage'), {
+              uid: currentUser.uid, orderId, usedAt: serverTimestamp()
+            });
+          } catch (_) {}
+        }
+      }
 
       // Public orders collection (for Make.com)
       await setDoc(doc(db, ORDERS_COL, orderId), {
@@ -1250,6 +1378,7 @@ function renderCheckoutForm(el) {
           address:        { city, street, house, apt },
           shippingMethod: ship,
         },
+        coupon: appliedCoupon ? { code: appliedCoupon.code, type: appliedCoupon.type, value: appliedCoupon.value, discount: discountAmt } : null,
         items: checkoutItems.map(i => ({
           productId:         i.id,
           name:              i.name,
@@ -1258,7 +1387,7 @@ function renderCheckoutForm(el) {
           customizationNote: i.customizationNote || null,
           image:             i.imageUrl || '',
         })),
-        summary: { subtotal, shipping: shipCost2, total: total2, currency: 'ILS' },
+        summary: { subtotal, shipping: shipCost2, discount: discountAmt, total: total2, currency: 'ILS' },
         timestamp: serverTimestamp(),
       });
 
