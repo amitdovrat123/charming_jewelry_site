@@ -650,7 +650,6 @@ function renderProfileView() {
   el.innerHTML = `
     <section style="min-height:80vh;padding:80px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:680px;">
-        <button id="profile-back-btn" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">← חזרה</button>
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">האזור האישי שלי</h2>
         <div style="display:flex;gap:0;border-bottom:2px solid var(--sand-dark);margin-bottom:32px;">
           <button class="profile-tab" data-tab="info" style="background:none;border:none;border-bottom:3px solid var(--pink);margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--ink);transition:.2s;">פרטים אישיים</button>
