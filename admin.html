@@ -873,7 +873,7 @@ document.getElementById('admin-reset-send').addEventListener('click', async () =
   try {
     await sendPasswordResetEmail(auth, email);
     msgEl.style.color = '#22c55e';
-    msgEl.textContent = 'מייל לאיפוס סיסמה נשלח אליך ברגע זה';
+    msgEl.innerHTML = 'מייל לאיפוס סיסמה נשלח אליך ברגע זה.<br><span style="color:#9a8e8a;font-size:0.75rem;">אם אינכם מוצאים את המייל לאיפוס, בדקו בתיקיית דואר הספאם.</span>';
   } catch(ex) {
     msgEl.style.color = '#ef4444';
     const errMap = { 'auth/user-not-found': 'כתובת הדוא"ל לא נמצאה.', 'auth/invalid-email': 'כתובת דוא"ל לא תקינה.' };

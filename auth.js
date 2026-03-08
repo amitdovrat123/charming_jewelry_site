@@ -188,7 +188,7 @@ async function handleForgotPassword() {
   try {
     await sendPasswordResetEmail(auth, email);
     msgEl.style.color = '#22c55e';
-    msgEl.textContent = 'מייל לאיפוס סיסמה נשלח אליך ברגע זה';
+    msgEl.innerHTML = 'מייל לאיפוס סיסמה נשלח אליך ברגע זה.<br><span style="color:#9a8e8a;font-size:0.75rem;">אם אינכם מוצאים את המייל לאיפוס, בדקו בתיקיית דואר הספאם.</span>';
   } catch(err) {
     msgEl.style.color = '#ef4444';
     msgEl.textContent = getErrorMsg(err.code);
