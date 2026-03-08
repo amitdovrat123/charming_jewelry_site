@@ -22,6 +22,8 @@
   <style>
     * { font-family: 'Assistant', sans-serif; }
     [data-v] { display: none !important; }
+    [data-erp-tab] { display: none !important; }
+    .erp-nav-item--active { background: #fdf6ee; color: #d4a373; font-weight: 700; }
     .spin  { animation: spin  .8s linear infinite; }
     .fadein{ animation: fadein .28s ease; }
     @keyframes spin   { to { transform: rotate(360deg); } }
@@ -54,6 +56,12 @@
 
     /* Modal scroll */
     #product-modal .modal-inner { max-height: 90vh; overflow-y: auto; }
+
+    /* ERP content margin on desktop */
+    @media (min-width: 640px) { #erp-content { margin-right: 220px; } }
+
+    /* Mobile bottom nav padding */
+    @media (max-width: 639px) { #erp-content { padding-bottom: 72px; } }
   </style>
 </head>
 <body class="bg-[#fcf8f3] min-h-screen text-gray-800">
@@ -103,8 +111,8 @@
   </div>
 </div>
 
-<!-- ════ DASHBOARD ════ -->
-<div id="v-dash" data-v class="fadein min-h-screen">
+<!-- ════ DASHBOARD (ERP) ════ -->
+<div id="v-dash" data-v class="fadein flex flex-col min-h-screen">
 
   <!-- Header -->
   <header class="bg-white border-b border-[#f0dfc0] sticky top-0 z-30">
@@ -127,104 +135,284 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+  <div class="flex flex-1 overflow-hidden relative">
 
-    <!-- Stats -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">סה"כ מוצרים</p>
-        <p id="s-total" class="text-3xl font-black text-[#d4a373]">—</p>
+    <!-- ════ SIDEBAR ════ -->
+    <aside id="erp-sidebar" class="hidden sm:flex flex-col fixed right-0 top-16 bottom-0 w-[220px] bg-white border-l border-[#f0dfc0] z-20 overflow-y-auto">
+      <div class="p-4">
+        <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-3">ניהול</p>
+        <nav class="space-y-1">
+          <button data-tab="dashboard" onclick="showTab('dashboard')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">📊</span> דאשבורד
+          </button>
+          <button data-tab="orders" onclick="showTab('orders')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">📦</span> הזמנות
+          </button>
+          <button data-tab="inventory" onclick="showTab('inventory')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">💎</span> מלאי
+          </button>
+          <button data-tab="customers" onclick="showTab('customers')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">👥</span> לקוחות
+          </button>
+          <button data-tab="coupons" onclick="showTab('coupons')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">🏷️</span> קופונים
+          </button>
+          <button data-tab="inquiries" onclick="showTab('inquiries')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">💬</span> פניות
+          </button>
+        </nav>
       </div>
-      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">פורסם</p>
-        <p id="s-pub" class="text-3xl font-black text-emerald-500">—</p>
-      </div>
-      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">אזל מלאי</p>
-        <p id="s-oos" class="text-3xl font-black text-red-400">—</p>
-      </div>
-      <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">מוצרים מומלצים</p>
-        <p id="s-feat" class="text-3xl font-black text-amber-500">—</p>
-      </div>
-    </div>
+    </aside>
 
-    <!-- Controls bar -->
-    <div class="bg-white border border-[#f0dfc0] rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3 shadow-sm">
-      <input id="search-inp" type="search" placeholder="חיפוש לפי שם / SKU..."
-        class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 flex-1 min-w-[180px]" />
+    <!-- ════ MAIN CONTENT ════ -->
+    <main id="erp-content" class="flex-1 overflow-y-auto">
 
-      <select id="filter-cat" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
-        <option value="">כל הקטגוריות</option>
-        <option>צמידים</option><option>שרשראות</option><option>עגילים</option><option>טבעות</option><option>ערכות</option>
-      </select>
+      <!-- ─── TAB: DASHBOARD ─── -->
+      <section id="tab-dashboard" data-erp-tab class="p-6 space-y-6">
+        <!-- KPI grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">הכנסות</p>
+            <p id="kpi-revenue" class="text-2xl font-black text-[#d4a373]">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">הזמנות</p>
+            <p id="kpi-orders" class="text-2xl font-black text-emerald-500">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">לקוחות</p>
+            <p id="kpi-customers" class="text-2xl font-black text-blue-500">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">המרה</p>
+            <p id="kpi-conversion" class="text-2xl font-black text-amber-500">—</p>
+          </div>
+        </div>
 
-      <select id="filter-col" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
-        <option value="">כל האוספים</option>
-        <option>קיץ 2025</option><option>חגים</option><option>יומיום</option><option>מתנות</option>
-      </select>
+        <!-- Chart + Top products -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <h3 class="font-bold text-sm text-gray-800 mb-4">הזמנות — 6 חודשים אחרונים</h3>
+            <div id="bar-chart" class="flex items-end gap-2 h-[120px]"></div>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <h3 class="font-bold text-sm text-gray-800 mb-4">מוצרים מובילים</h3>
+            <div id="top-products-list" class="space-y-1"></div>
+          </div>
+        </div>
 
-      <select id="filter-stat" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
-        <option value="">כל הסטטוסים</option>
-        <option value="published">פורסם</option>
-        <option value="draft">טיוטה</option>
-      </select>
+        <!-- Inventory quick stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">סה"כ מוצרים</p>
+            <p id="s-total" class="text-3xl font-black text-[#d4a373]">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">פורסם</p>
+            <p id="s-pub" class="text-3xl font-black text-emerald-500">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">אזל מלאי</p>
+            <p id="s-oos" class="text-3xl font-black text-red-400">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">מוצרים מומלצים</p>
+            <p id="s-feat" class="text-3xl font-black text-amber-500">—</p>
+          </div>
+        </div>
+      </section>
 
-      <button id="add-btn"
-        class="mr-auto bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-1.5">
-        <span class="text-base leading-none">+</span> מוצר חדש
-      </button>
-    </div>
+      <!-- ─── TAB: ORDERS ─── -->
+      <section id="tab-orders" data-erp-tab class="p-6 space-y-4">
+        <div class="flex flex-wrap items-center gap-3 bg-white border border-[#f0dfc0] rounded-2xl px-5 py-4 shadow-sm">
+          <input id="orders-search" type="search" placeholder="חיפוש לפי מזהה / שם..."
+            class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 flex-1 min-w-[180px]" />
+          <select id="orders-status-filter" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+            <option value="">כל הסטטוסים</option>
+            <option value="pending_payment">ממתין לתשלום</option>
+            <option value="paid">שולם</option>
+            <option value="processing">בעיבוד</option>
+            <option value="shipped">נשלח</option>
+            <option value="delivered">נמסר</option>
+            <option value="cancelled">בוטל</option>
+          </select>
+        </div>
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#f0dfc0] bg-[#fdf6ee]">
+              <tr>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">מזהה</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">לקוח</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden sm:table-cell">תאריך</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">סכום</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">סטטוס</th>
+                <th class="px-4 py-3 w-20"></th>
+              </tr>
+            </thead>
+            <tbody id="orders-body" class="divide-y divide-[#fdf6ee]"></tbody>
+          </table>
+        </div>
+      </section>
 
-    <!-- Table -->
-    <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
-      <div class="px-6 py-3 border-b border-[#f0dfc0] flex items-center justify-between">
-        <h2 class="font-bold text-gray-800 text-sm">רשימת מוצרים</h2>
-        <span id="tbl-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">טוען...</span>
-      </div>
+      <!-- ─── TAB: INVENTORY ─── -->
+      <section id="tab-inventory" data-erp-tab class="p-6 space-y-5">
 
-      <!-- Loading -->
-      <div id="tbl-loading" class="py-14 text-center">
-        <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
-        <p class="text-gray-300 text-sm">טוען מוצרים...</p>
-      </div>
+        <!-- Controls bar -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3 shadow-sm">
+          <input id="search-inp" type="search" placeholder="חיפוש לפי שם / SKU..."
+            class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 flex-1 min-w-[180px]" />
+          <select id="filter-cat" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+            <option value="">כל הקטגוריות</option>
+            <option>צמידים</option><option>שרשראות</option><option>עגילים</option><option>טבעות</option><option>ערכות</option>
+          </select>
+          <select id="filter-col" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+            <option value="">כל האוספים</option>
+            <option>קיץ 2025</option><option>חגים</option><option>יומיום</option><option>מתנות</option>
+          </select>
+          <select id="filter-stat" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+            <option value="">כל הסטטוסים</option>
+            <option value="published">פורסם</option>
+            <option value="draft">טיוטה</option>
+          </select>
+          <button id="add-btn"
+            class="mr-auto bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-1.5">
+            <span class="text-base leading-none">+</span> מוצר חדש
+          </button>
+        </div>
 
-      <!-- Empty -->
-      <div id="tbl-empty" data-v class="py-20 text-center">
-        <p class="text-5xl mb-3">💎</p>
-        <p class="text-gray-500 font-semibold text-sm">אין מוצרים</p>
-        <p class="text-gray-300 text-xs mt-1">הוסיפי מוצר ראשון בלחיצה על "מוצר חדש"</p>
-      </div>
+        <!-- Table -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <div class="px-6 py-3 border-b border-[#f0dfc0] flex items-center justify-between">
+            <h2 class="font-bold text-gray-800 text-sm">רשימת מוצרים</h2>
+            <span id="tbl-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">טוען...</span>
+          </div>
+          <div id="tbl-loading" class="py-14 text-center">
+            <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
+            <p class="text-gray-300 text-sm">טוען מוצרים...</p>
+          </div>
+          <div id="tbl-empty" data-v class="py-20 text-center">
+            <p class="text-5xl mb-3">💎</p>
+            <p class="text-gray-500 font-semibold text-sm">אין מוצרים</p>
+            <p class="text-gray-300 text-xs mt-1">הוסיפי מוצר ראשון בלחיצה על "מוצר חדש"</p>
+          </div>
+          <div id="tbl-wrap" data-v class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="border-b border-[#f0dfc0] bg-[#fdf6ee]">
+                <tr>
+                  <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide w-16">תמונה</th>
+                  <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh" data-sort="name">מוצר <span class="arr"></span></th>
+                  <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh hidden sm:table-cell" data-sort="category">קטגוריה <span class="arr"></span></th>
+                  <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh" data-sort="priceOriginal">מחיר <span class="arr"></span></th>
+                  <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh hidden md:table-cell" data-sort="stockCount">מלאי <span class="arr"></span></th>
+                  <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden lg:table-cell">תג</th>
+                  <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">סטטוס</th>
+                  <th class="px-4 py-3 w-28"></th>
+                </tr>
+              </thead>
+              <tbody id="tbl-body" class="divide-y divide-[#fdf6ee]"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-      <!-- Table itself -->
-      <div id="tbl-wrap" data-v class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="border-b border-[#f0dfc0] bg-[#fdf6ee]">
-            <tr>
-              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide w-16">תמונה</th>
-              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh" data-sort="name">
-                מוצר <span class="arr"></span>
-              </th>
-              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh hidden sm:table-cell" data-sort="category">
-                קטגוריה <span class="arr"></span>
-              </th>
-              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh" data-sort="priceOriginal">
-                מחיר <span class="arr"></span>
-              </th>
-              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide sh hidden md:table-cell" data-sort="stockCount">
-                מלאי <span class="arr"></span>
-              </th>
-              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden lg:table-cell">תג</th>
-              <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">סטטוס</th>
-              <th class="px-4 py-3 w-28"></th>
-            </tr>
-          </thead>
-          <tbody id="tbl-body" class="divide-y divide-[#fdf6ee]"></tbody>
-        </table>
-      </div>
-    </div>
+      <!-- ─── TAB: CUSTOMERS ─── -->
+      <section id="tab-customers" data-erp-tab class="p-6 space-y-4">
+        <div class="flex flex-wrap items-center gap-3 bg-white border border-[#f0dfc0] rounded-2xl px-5 py-4 shadow-sm">
+          <input id="customers-search" type="search" placeholder="חיפוש לפי שם / אימייל / טלפון..."
+            class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 flex-1 min-w-[180px]" />
+          <button onclick="exportCustomersCSV()"
+            class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-5 py-2 rounded-full font-bold text-sm transition-colors">
+            ייצא CSV
+          </button>
+        </div>
+        <div id="customers-loading" class="hidden text-center py-6">
+          <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
+          <p class="text-gray-300 text-sm">טוען לקוחות...</p>
+        </div>
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#f0dfc0] bg-[#fdf6ee]">
+              <tr>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">שם</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden sm:table-cell">אימייל</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden md:table-cell">טלפון</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">הזמנות</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">LTV</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden sm:table-cell">מועדון</th>
+              </tr>
+            </thead>
+            <tbody id="customers-body" class="divide-y divide-[#fdf6ee]"></tbody>
+          </table>
+        </div>
+      </section>
 
-  </main>
+      <!-- ─── TAB: COUPONS ─── -->
+      <section id="tab-coupons" data-erp-tab class="p-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="font-black text-gray-800 text-lg">קופונים</h2>
+          <button onclick="openCouponModal()"
+            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            + קופון חדש
+          </button>
+        </div>
+        <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- ─── TAB: INQUIRIES ─── -->
+      <section id="tab-inquiries" data-erp-tab class="p-6 space-y-4">
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="border-b border-[#f0dfc0] bg-[#fdf6ee]">
+              <tr>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">שם</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden sm:table-cell">טלפון</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">הודעה</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden sm:table-cell">תאריך</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">סטטוס</th>
+              </tr>
+            </thead>
+            <tbody id="inquiries-body" class="divide-y divide-[#fdf6ee]"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main><!-- /erp-content -->
+  </div><!-- /flex -->
+
+  <!-- Mobile bottom nav -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#f0dfc0] z-20 flex justify-around py-2">
+    <button data-tab="dashboard" onclick="showTab('dashboard')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">📊</span> דאשבורד
+    </button>
+    <button data-tab="orders" onclick="showTab('orders')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">📦</span> הזמנות
+    </button>
+    <button data-tab="inventory" onclick="showTab('inventory')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">💎</span> מלאי
+    </button>
+    <button data-tab="customers" onclick="showTab('customers')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">👥</span> לקוחות
+    </button>
+    <button data-tab="coupons" onclick="showTab('coupons')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">🏷️</span> קופונים
+    </button>
+    <button data-tab="inquiries" onclick="showTab('inquiries')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">💬</span> פניות
+    </button>
+  </nav>
+
 </div><!-- /v-dash -->
 
 
@@ -247,13 +435,11 @@
       <div class="grid grid-cols-3 gap-4">
         <div class="col-span-2">
           <label class="lbl">שם המוצר *</label>
-          <input id="p-name" type="text" placeholder="שרשרת לב זהב ורוד"
-            class="inp" required />
+          <input id="p-name" type="text" placeholder="שרשרת לב זהב ורוד" class="inp" required />
         </div>
         <div>
           <label class="lbl">SKU</label>
-          <input id="p-sku" type="text" placeholder="CHR-001"
-            class="inp" />
+          <input id="p-sku" type="text" placeholder="CHR-001" class="inp" />
         </div>
       </div>
 
@@ -298,7 +484,7 @@
         </div>
       </div>
 
-      <!-- Row 4: Badge + Status + Color + isFeatured -->
+      <!-- Row 4: Badge + Status + Color + toggles -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end">
         <div>
           <label class="lbl">תג</label>
@@ -338,11 +524,11 @@
             <input type="checkbox" id="p-customizable" />
             <span class="tog-track"></span>
           </label>
-          <span class="text-sm text-gray-600 font-semibold">ניתן לביצוע שינויים (Customizable)</span>
+          <span class="text-sm text-gray-600 font-semibold">ניתן לביצוע שינויים</span>
         </div>
       </div>
 
-      <!-- Image upload (multiple) -->
+      <!-- Image upload -->
       <div>
         <label class="lbl">תמונות מוצר</label>
         <input id="p-imgs" type="hidden" value="[]" />
@@ -404,6 +590,71 @@
 </div>
 
 
+<!-- ════ ORDER MODAL ════ -->
+<div id="order-modal" data-v
+  class="fixed inset-0 z-[9000] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto fadein">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0] sticky top-0 bg-white z-10">
+      <h2 class="font-black text-gray-800">פרטי הזמנה</h2>
+      <button onclick="closeOrderModal()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+    </div>
+    <div id="order-modal-body" class="px-6 py-5"></div>
+  </div>
+</div>
+
+
+<!-- ════ COUPON MODAL ════ -->
+<div id="coupon-modal" data-v
+  class="fixed inset-0 z-[9000] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md fadein">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0]">
+      <h2 id="coupon-modal-title" class="font-black text-gray-800">קופון חדש</h2>
+      <button id="coupon-close" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+    </div>
+    <div class="px-6 py-5 space-y-4">
+      <div>
+        <label class="lbl">קוד קופון *</label>
+        <input id="cp-code" type="text" placeholder="SUMMER20" class="inp" />
+      </div>
+      <div>
+        <label class="lbl">סוג הנחה *</label>
+        <div class="flex gap-4 mt-1">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="cp-type" id="cp-type-fixed" value="fixed" class="accent-[#d4a373]" />
+            <span class="text-sm font-semibold">קבוע (₪)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="cp-type" id="cp-type-percent" value="percent" class="accent-[#d4a373]" />
+            <span class="text-sm font-semibold">אחוז (%)</span>
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="lbl">ערך *</label>
+          <input id="cp-value" type="number" placeholder="20" min="1" class="inp" />
+        </div>
+        <div>
+          <label class="lbl">מגבלת שימוש</label>
+          <input id="cp-limit" type="number" placeholder="ריק = ללא הגבלה" min="1" class="inp" />
+        </div>
+      </div>
+      <div>
+        <label class="lbl">תאריך תפוגה</label>
+        <input id="cp-expiry" type="date" class="inp" />
+      </div>
+      <p id="coupon-err" class="text-red-400 text-xs min-h-[1rem]"></p>
+    </div>
+    <div class="px-6 py-4 border-t border-[#f0dfc0] flex gap-3 justify-end">
+      <button id="coupon-cancel" class="border border-gray-200 text-gray-500 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
+      <button id="coupon-save" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-8 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">שמרי</button>
+    </div>
+  </div>
+</div>
+
+
 <style>
   .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
   .inp { width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s; font-family:inherit; }
@@ -412,20 +663,24 @@
 </style>
 
 <script type="module">
-import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc,
-  doc, onSnapshot, query, orderBy, serverTimestamp,
+  doc, onSnapshot, query, orderBy, serverTimestamp, getDocs, Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── Config ──────────────────────────────────────────────────────
 const ADMIN_EMAIL    = 'amitdovrat123@gmail.com';
-const GEMINI_API_KEY = '';   // ← הכניסי את מפתח Gemini API כאן
+const GEMINI_API_KEY = '';
 const GEMINI_MODEL   = 'gemini-2.5-flash-preview-05-20';
 const COL_PATH       = 'artifacts/charming-3dd6f/public/data/products';
+const ORDERS_COL     = 'artifacts/charming-3dd6f/public/data/orders';
+const CUSTOMERS_COL  = 'artifacts/charming-3dd6f/users';
+const COUPONS_COL    = 'artifacts/charming-3dd6f/public/data/coupons';
+const INQUIRIES_COL  = 'artifacts/charming-3dd6f/public/data/inquiries';
 
 const app  = initializeApp({
   apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
@@ -439,18 +694,44 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 // ── State ────────────────────────────────────────────────────────
-let allProducts      = [];
-let uploadedImages   = [];   // URLs for the current modal session
-let sortField        = 'createdAt';
-let sortDir          = 'desc';
-let searchQ          = '';
-let filterCat        = '';
-let filterCol        = '';
-let filterStat       = '';
-let modalMode        = 'add';   // 'add' | 'edit' | 'duplicate'
-let editId           = null;
-let pendingDeleteId  = null;
-let unsubProducts    = null;
+// Products (inventory)
+let allProducts     = [];
+let uploadedImages  = [];
+let sortField       = 'createdAt';
+let sortDir         = 'desc';
+let searchQ         = '';
+let filterCat       = '';
+let filterCol       = '';
+let filterStat      = '';
+let modalMode       = 'add';
+let editId          = null;
+let pendingDeleteId = null;
+
+// Orders
+let allOrders          = [];
+let ordersSearchQ      = '';
+let ordersStatusFilter = '';
+
+// Customers
+let allCustomers     = [];
+let customersSearchQ = '';
+
+// Coupons
+let allCoupons   = [];
+let editCouponId = null;
+
+// Inquiries
+let allInquiries = [];
+
+// Listeners
+let unsubProducts  = null;
+let unsubOrders    = null;
+let unsubCoupons   = null;
+let unsubInquiries = null;
+
+// Lazy-init tracking
+const tabsInited = {};
+let inventoryListenersAttached = false;
 
 // ── View switcher ────────────────────────────────────────────────
 const VIEWS = ['v-loading','v-denied','v-login','v-dash'];
@@ -466,7 +747,7 @@ function show(id) {
 onAuthStateChanged(auth, user => {
   if (!user)                      { show('v-login');  return; }
   if (user.email !== ADMIN_EMAIL) { show('v-denied'); return; }
-  initDashboard(user);
+  initERP(user);
 });
 
 document.getElementById('login-form').addEventListener('submit', async e => {
@@ -493,7 +774,10 @@ document.getElementById('login-form').addEventListener('submit', async e => {
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
-  if (unsubProducts) unsubProducts();
+  if (unsubProducts)  unsubProducts();
+  if (unsubOrders)    unsubOrders();
+  if (unsubCoupons)   unsubCoupons();
+  if (unsubInquiries) unsubInquiries();
   signOut(auth);
 });
 
@@ -529,7 +813,11 @@ document.getElementById('upload-btn').addEventListener('click', () => cloudWidge
 function renderImageGrid() {
   const grid = document.getElementById('img-grid');
   if (!grid) return;
-  if (!uploadedImages.length) { grid.innerHTML = ''; document.getElementById('upload-btn-label').textContent = 'העלי תמונות מהמחשב'; return; }
+  if (!uploadedImages.length) {
+    grid.innerHTML = '';
+    document.getElementById('upload-btn-label').textContent = 'העלי תמונות מהמחשב';
+    return;
+  }
   document.getElementById('upload-btn-label').textContent = `✓ ${uploadedImages.length} תמונה/ות — לחצי להוספה`;
   grid.innerHTML = uploadedImages.map((url, i) => `
     <div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid #f0dfc0;">
@@ -546,243 +834,302 @@ function renderImageGrid() {
   });
 }
 
-// ── Modal open/close ─────────────────────────────────────────────
-function openModal(mode, product = null) {
-  modalMode = mode;
-  editId    = (mode === 'edit' && product) ? product.id : null;
+// ── Tab switcher ─────────────────────────────────────────────────
+function showTab(name) {
+  ['dashboard','orders','inventory','customers','coupons','inquiries'].forEach(t => {
+    document.getElementById('tab-'+t)?.setAttribute('data-erp-tab','');
+  });
+  document.getElementById('tab-'+name)?.removeAttribute('data-erp-tab');
+  document.querySelectorAll('[data-tab]').forEach(btn =>
+    btn.classList.toggle('erp-nav-item--active', btn.dataset.tab === name));
 
-  // Reset form
-  clearForm();
-
-  if (product) {
-    document.getElementById('p-name').value    = mode === 'duplicate' ? product.name + ' (עותק)' : product.name || '';
-    document.getElementById('p-sku').value     = mode === 'duplicate' ? '' : product.sku || '';
-    document.getElementById('p-cat').value     = product.category || '';
-    document.getElementById('p-col').value     = product.collection || '';
-    document.getElementById('p-mat').value     = product.material || '';
-    document.getElementById('p-price').value   = product.priceOriginal ?? product.price ?? '';
-    document.getElementById('p-sale').value    = product.priceSale ?? product.salePrice ?? '';
-    document.getElementById('p-stock').value   = product.stockCount ?? product.stock ?? '';
-    document.getElementById('p-badge').value   = product.badge || '';
-    document.getElementById('p-status').value  = product.status || 'published';
-    document.getElementById('p-featured').checked     = !!product.isFeatured;
-    document.getElementById('p-customizable').checked = !!product.isCustomizable;
-    document.getElementById('p-color').value   = product.color || '';
-    document.getElementById('p-desc').value    = product.description || '';
-
-    const imgs = Array.isArray(product.images) && product.images.length
-      ? product.images
-      : (product.imageUrl ? [product.imageUrl] : []);
-    uploadedImages = [...imgs];
-    document.getElementById('p-imgs').value = JSON.stringify(uploadedImages);
-    renderImageGrid();
+  if (!tabsInited[name]) {
+    tabsInited[name] = true;
+    if      (name === 'dashboard') initDashboardTab();
+    else if (name === 'orders')    initOrdersTab();
+    else if (name === 'inventory') initInventoryTab();
+    else if (name === 'customers') initCustomersTab();
+    else if (name === 'coupons')   initCouponsTab();
+    else if (name === 'inquiries') initInquiriesTab();
+  } else {
+    if (name === 'orders')    renderOrdersTable();
+    if (name === 'inventory') { updateInventoryStats(); renderTable(); }
+    if (name === 'customers') renderCustomersTable();
+    if (name === 'coupons')   renderCouponsGrid();
+    if (name === 'inquiries') renderInquiriesTable();
   }
+}
+window.showTab = showTab;
 
-  const titles = { add: 'מוצר חדש', edit: 'עריכת מוצר', duplicate: 'שכפול מוצר' };
-  const saveLabels = { add: 'שמרי מוצר', edit: 'עדכני מוצר', duplicate: 'שמרי עותק' };
-  document.getElementById('modal-title').textContent = titles[mode];
-  document.getElementById('save-btn').textContent    = saveLabels[mode];
+// ── ERP init (called once after auth) ────────────────────────────
+function initERP(user) {
+  show('v-dash');
+  document.getElementById('admin-name').textContent = user.displayName || user.email;
 
-  document.getElementById('product-modal').removeAttribute('data-v');
+  // Register delegations ONCE
+  document.getElementById('tbl-body').addEventListener('click', handleRowAction);
+  document.getElementById('orders-body').addEventListener('change', handleOrderStatusChange);
+  document.getElementById('orders-body').addEventListener('click', handleOrdersClick);
+  document.getElementById('inquiries-body').addEventListener('change', handleInquiryStatusChange);
+  document.getElementById('coupons-grid').addEventListener('click', handleCouponsGridClick);
+
+  showTab('dashboard');
+}
+
+// ── Firestore listeners ───────────────────────────────────────────
+function startProductsListener() {
+  if (unsubProducts) return;
+  const q = query(collection(db, COL_PATH), orderBy('createdAt','desc'));
+  unsubProducts = onSnapshot(q, snap => {
+    allProducts = snap.docs.map(d => ({id:d.id,...d.data()}));
+    updateInventoryStats();
+    if (tabsInited.inventory) renderTable();
+    if (tabsInited.dashboard) { updateDashboardKPIs(); renderTopProducts(); }
+  }, err => console.error('products:', err));
+}
+
+function startOrdersListener() {
+  if (unsubOrders) return;
+  const q = query(collection(db, ORDERS_COL), orderBy('timestamp','desc'));
+  unsubOrders = onSnapshot(q, snap => {
+    allOrders = snap.docs.map(d => ({id:d.id,...d.data()}));
+    if (tabsInited.dashboard) { updateDashboardKPIs(); renderTopProducts(); renderBarChart(); }
+    if (tabsInited.orders)    renderOrdersTable();
+  }, err => console.error('orders:', err));
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────
+function initDashboardTab() {
+  startProductsListener();
+  startOrdersListener();
+}
+
+function updateInventoryStats() {
+  const el = id => document.getElementById(id);
+  if (el('s-total')) el('s-total').textContent = allProducts.length;
+  if (el('s-pub'))   el('s-pub').textContent   = allProducts.filter(p => p.status === 'published').length;
+  if (el('s-oos'))   el('s-oos').textContent   = allProducts.filter(p => (p.stockCount ?? p.stock) === 0).length;
+  if (el('s-feat'))  el('s-feat').textContent  = allProducts.filter(p => p.isFeatured).length;
+}
+
+function updateDashboardKPIs() {
+  const nc = allOrders.filter(o => o.status !== 'cancelled');
+  const revenue = nc.reduce((s,o) => s+(o.summary?.total||0), 0);
+  const el = id => document.getElementById(id);
+  if (el('kpi-revenue'))    el('kpi-revenue').textContent    = revenue.toLocaleString('he-IL')+' ₪';
+  if (el('kpi-orders'))     el('kpi-orders').textContent     = nc.length;
+  if (el('kpi-customers'))  el('kpi-customers').textContent  = new Set(nc.map(o=>o.customer?.email).filter(Boolean)).size || '—';
+  if (el('kpi-conversion')) el('kpi-conversion').textContent = '3.2%';
+  renderTopProducts();
+  renderBarChart();
+}
+
+function renderTopProducts() {
+  const counts = {};
+  allOrders.filter(o=>o.status!=='cancelled').forEach(o=>{
+    (o.items||[]).forEach(item=>{counts[item.name]=(counts[item.name]||0)+(item.qty||1);});
+  });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max = sorted[0]?.[1]||1;
+  const c = document.getElementById('top-products-list');
+  if (!c) return;
+  if (!sorted.length) {
+    c.innerHTML = '<p class="text-gray-300 text-sm text-center py-4">אין נתונים עדיין</p>';
+    return;
+  }
+  c.innerHTML = sorted.map(([name,count],i) => `
+    <div class="flex items-center gap-3 py-2">
+      <span class="text-[#d4a373] font-black text-sm w-5">${i+1}</span>
+      <div class="flex-1">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-sm font-semibold text-gray-700">${esc(name)}</span>
+          <span class="text-xs text-gray-400 font-bold">${count}</span>
+        </div>
+        <div class="h-1.5 bg-[#f0dfc0] rounded-full overflow-hidden">
+          <div class="h-full bg-[#d4a373] rounded-full" style="width:${Math.round(count/max*100)}%"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderBarChart() {
+  const c = document.getElementById('bar-chart');
+  if (!c) return;
+  const now = new Date();
+  const months = Array.from({length:6},(_,i)=>{
+    const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
+    return {y:d.getFullYear(),m:d.getMonth(),lbl:d.toLocaleDateString('he-IL',{month:'short'}),count:0};
+  });
+  allOrders.forEach(o=>{
+    const ts = o.timestamp?.seconds ? new Date(o.timestamp.seconds*1000) : null;
+    if (!ts) return;
+    const mo = months.find(m=>m.y===ts.getFullYear()&&m.m===ts.getMonth());
+    if (mo) mo.count++;
+  });
+  const max = Math.max(...months.map(m=>m.count),1);
+  c.innerHTML = months.map(m=>`
+    <div class="flex flex-col items-center gap-1 flex-1">
+      <span class="text-xs font-bold text-[#d4a373]">${m.count||''}</span>
+      <div class="w-full flex items-end justify-center" style="height:80px">
+        <div class="w-full max-w-[32px] bg-[#d4a373] rounded-t-md"
+             style="height:${m.count?Math.max(6,Math.round(m.count/max*80)):2}px;opacity:${m.count?1:0.2}"></div>
+      </div>
+      <span class="text-[10px] text-gray-400">${m.lbl}</span>
+    </div>`).join('');
+}
+
+// ── Orders ────────────────────────────────────────────────────────
+const STATUS_COLORS = {
+  pending_payment:'bg-amber-50 text-amber-600',
+  paid:'bg-blue-50 text-blue-500',
+  processing:'bg-blue-50 text-blue-600',
+  shipped:'bg-purple-50 text-purple-500',
+  delivered:'bg-emerald-50 text-emerald-600',
+  cancelled:'bg-red-50 text-red-400',
+};
+const STATUS_LABELS = {
+  pending_payment:'ממתין לתשלום', paid:'שולם', processing:'בעיבוד',
+  shipped:'נשלח', delivered:'נמסר', cancelled:'בוטל',
+};
+
+function initOrdersTab() {
+  document.getElementById('orders-search').addEventListener('input', e=>{
+    ordersSearchQ = e.target.value.trim().toLowerCase(); renderOrdersTable();
+  });
+  document.getElementById('orders-status-filter').addEventListener('change', e=>{
+    ordersStatusFilter = e.target.value; renderOrdersTable();
+  });
+  startOrdersListener();
+  renderOrdersTable();
+}
+
+function renderOrdersTable() {
+  const list = allOrders.filter(o=>{
+    if (ordersSearchQ && !((o.orderId||'').toLowerCase().includes(ordersSearchQ)||(o.customer?.name||'').toLowerCase().includes(ordersSearchQ))) return false;
+    if (ordersStatusFilter && o.status!==ordersStatusFilter) return false;
+    return true;
+  });
+  const body = document.getElementById('orders-body');
+  if (!body) return;
+  if (!list.length) {
+    body.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-300 text-sm">אין הזמנות</td></tr>`;
+    return;
+  }
+  body.innerHTML = list.map(o=>{
+    const date = o.timestamp?.seconds ? new Date(o.timestamp.seconds*1000).toLocaleDateString('he-IL') : '—';
+    return `<tr class="hover:bg-[#fdf6ee] transition-colors" data-id="${o.id}">
+      <td class="px-4 py-3 font-mono text-xs text-gray-500">${esc(o.orderId||o.id.slice(0,8))}</td>
+      <td class="px-4 py-3 font-semibold text-sm">${esc(o.customer?.name||'—')}</td>
+      <td class="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">${date}</td>
+      <td class="px-4 py-3 font-bold text-[#d4a373]">${o.summary?.total||0} ₪</td>
+      <td class="px-4 py-3">
+        <select data-ord-status="${o.id}" class="text-xs border border-gray-200 rounded-lg px-2 py-1 ${STATUS_COLORS[o.status]||'bg-gray-100 text-gray-400'} font-bold cursor-pointer">
+          ${Object.entries(STATUS_LABELS).map(([v,l])=>`<option value="${v}"${o.status===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+      </td>
+      <td class="px-4 py-3">
+        <button data-open-order="${o.id}" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">פרטים</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function handleOrderStatusChange(e) {
+  const sel = e.target.closest('[data-ord-status]');
+  if (!sel) return;
+  try { await updateDoc(doc(db,ORDERS_COL,sel.dataset.ordStatus),{status:sel.value}); }
+  catch(ex) { console.error(ex); }
+}
+
+function handleOrdersClick(e) {
+  const btn = e.target.closest('[data-open-order]');
+  if (!btn) return;
+  openOrderModal(btn.dataset.openOrder);
+}
+
+function openOrderModal(orderId) {
+  const o = allOrders.find(x=>x.id===orderId);
+  if (!o) return;
+  const date = o.timestamp?.seconds ? new Date(o.timestamp.seconds*1000).toLocaleString('he-IL') : '—';
+  const addr = o.customer?.address;
+  const addrText = addr ? [addr.street,addr.house,addr.apt?'דירה '+addr.apt:'',addr.city].filter(Boolean).join(' ') : '—';
+  const itemsHtml = (o.items||[]).map(item=>`
+    <div class="flex items-center gap-3 py-2 border-b border-[#fdf6ee] last:border-0">
+      ${item.image
+        ?`<img src="${esc(item.image)}" class="w-12 h-12 rounded-lg object-cover border border-[#f0dfc0]" onerror="this.style.display='none'" />`
+        :'<div class="w-12 h-12 rounded-lg bg-[#fdf6ee] flex items-center justify-center">💎</div>'}
+      <div class="flex-1">
+        <p class="font-semibold text-sm">${esc(item.name)}</p>
+        ${item.customizationNote?`<p class="text-xs text-gray-400">${esc(item.customizationNote)}</p>`:''}
+        <p class="text-xs text-gray-400">כמות: ${item.qty||1}</p>
+      </div>
+      <p class="font-bold text-[#d4a373]">${(item.price||0)*(item.qty||1)} ₪</p>
+    </div>`).join('');
+
+  document.getElementById('order-modal-body').innerHTML = `
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-[#fdf6ee] rounded-xl p-4">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">פרטי לקוח</p>
+          <p class="font-semibold text-sm">${esc(o.customer?.name||'—')}</p>
+          <p class="text-xs text-gray-500 mt-0.5">${esc(o.customer?.email||'')}</p>
+          <p class="text-xs text-gray-500">${esc(o.customer?.phone||'')}</p>
+        </div>
+        <div class="bg-[#fdf6ee] rounded-xl p-4">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">כתובת</p>
+          <p class="text-xs text-gray-600">${esc(addrText)}</p>
+          <p class="text-xs text-gray-400 mt-1">${o.customer?.shippingMethod==='pickup'?'איסוף עצמי':'משלוח'}</p>
+        </div>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">פריטים</p>
+        <div>${itemsHtml||'<p class="text-gray-300 text-sm text-center py-3">אין פריטים</p>'}</div>
+      </div>
+      <div class="bg-[#fdf6ee] rounded-xl p-4 space-y-1.5">
+        <div class="flex justify-between text-sm"><span class="text-gray-500">מוצרים</span><span>${o.summary?.subtotal||0} ₪</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">משלוח</span><span>${o.summary?.shipping||0} ₪</span></div>
+        <div class="flex justify-between font-black text-base border-t border-[#e8cfc4] pt-2 mt-1"><span>סה"כ</span><span class="text-[#d4a373]">${o.summary?.total||0} ₪</span></div>
+      </div>
+      <p class="text-xs text-gray-400 text-center">${date}</p>
+    </div>`;
+
+  document.getElementById('order-modal').removeAttribute('data-v');
   document.body.style.overflow = 'hidden';
 }
 
-function closeModal() {
-  document.getElementById('product-modal').setAttribute('data-v','');
+function closeOrderModal() {
+  document.getElementById('order-modal').setAttribute('data-v','');
   document.body.style.overflow = '';
 }
+window.closeOrderModal = closeOrderModal;
 
-function clearForm() {
-  ['p-name','p-sku','p-price','p-sale','p-stock','p-desc'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  ['p-cat','p-col','p-badge'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('p-mat').value    = 'פלדת אל-חלד';
-  document.getElementById('p-color').value  = '';
-  document.getElementById('p-status').value = 'published';
-  document.getElementById('p-featured').checked     = false;
-  document.getElementById('p-customizable').checked = false;
-  uploadedImages = [];
-  document.getElementById('p-imgs').value = '[]';
-  document.getElementById('img-grid').innerHTML = '';
-  document.getElementById('upload-btn-label').textContent = 'העלי תמונות מהמחשב';
-  document.getElementById('form-err').textContent = '';
-  document.getElementById('ai-err').textContent  = '';
+document.getElementById('order-modal').addEventListener('click', e=>{
+  if (e.target===e.currentTarget) closeOrderModal();
+});
+
+// ── Inventory ─────────────────────────────────────────────────────
+function initInventoryTab() {
+  startProductsListener();
+  if (!inventoryListenersAttached) {
+    inventoryListenersAttached = true;
+    document.getElementById('search-inp').addEventListener('input', e=>{searchQ=e.target.value.trim().toLowerCase();renderTable();});
+    document.getElementById('filter-cat').addEventListener('change', e=>{filterCat=e.target.value;renderTable();});
+    document.getElementById('filter-col').addEventListener('change', e=>{filterCol=e.target.value;renderTable();});
+    document.getElementById('filter-stat').addEventListener('change', e=>{filterStat=e.target.value;renderTable();});
+    document.querySelectorAll('.sh').forEach(th=>{
+      th.addEventListener('click',()=>{
+        const f=th.dataset.sort;
+        if(sortField===f) sortDir=sortDir==='asc'?'desc':'asc';
+        else { sortField=f; sortDir='asc'; }
+        document.querySelectorAll('.sh').forEach(h=>h.classList.remove('asc','desc'));
+        th.classList.add(sortDir);
+        renderTable();
+      });
+    });
+  }
+  if (allProducts.length) { updateInventoryStats(); renderTable(); }
 }
 
-document.getElementById('modal-close').addEventListener('click', closeModal);
-document.getElementById('modal-cancel').addEventListener('click', closeModal);
-document.getElementById('add-btn').addEventListener('click', () => openModal('add'));
-
-// Close on backdrop click
-document.getElementById('product-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
-});
-
-// ── Save product (add / edit / duplicate) ────────────────────────
-document.getElementById('save-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('save-btn');
-  const err = document.getElementById('form-err');
-
-  const name       = document.getElementById('p-name').value.trim();
-  const sku        = document.getElementById('p-sku').value.trim() || autoSKU();
-  const cat        = document.getElementById('p-cat').value;
-  const col        = document.getElementById('p-col').value;
-  const mat        = document.getElementById('p-mat').value;
-  const priceOrig  = parseFloat(document.getElementById('p-price').value);
-  const saleRaw    = document.getElementById('p-sale').value.trim();
-  const priceSale  = saleRaw !== '' ? parseFloat(saleRaw) : null;
-  const stockRaw   = document.getElementById('p-stock').value.trim();
-  const stockCount = stockRaw !== '' ? parseInt(stockRaw) : null;
-  const badge      = document.getElementById('p-badge').value;
-  const status     = document.getElementById('p-status').value;
-  const isFeatured  = document.getElementById('p-featured').checked;
-  const color       = document.getElementById('p-color').value;
-  const description = document.getElementById('p-desc').value.trim();
-  let imagesArr = [];
-  try { imagesArr = JSON.parse(document.getElementById('p-imgs').value || '[]') || []; } catch { imagesArr = []; }
-
-  if (!name)               { err.textContent = 'יש להזין שם מוצר.'; return; }
-  if (!priceOrig || priceOrig <= 0) { err.textContent = 'יש להזין מחיר תקין.'; return; }
-  if (!cat)                { err.textContent = 'יש לבחור קטגוריה.'; return; }
-  if (priceSale !== null && priceSale >= priceOrig) {
-    err.textContent = 'מחיר המבצע חייב להיות נמוך מהמחיר המקורי.'; return;
-  }
-
-  err.textContent = '';
-  btn.disabled = true;
-
-  const data = {
-    name, sku, category: cat, collection: col || null, material: mat || null, color: color || null,
-    priceOriginal: priceOrig, priceSale, stockCount,
-    badge: badge || null, status, isFeatured,
-    isCustomizable: document.getElementById('p-customizable').checked,
-    images: imagesArr,
-    imageUrl: imagesArr[0] || null,   // backward compat for existing catalog
-    description: description || null,
-    updatedAt: serverTimestamp(),
-  };
-
-  try {
-    if (modalMode === 'edit' && editId) {
-      await updateDoc(doc(db, COL_PATH, editId), data);
-    } else {
-      data.createdAt = serverTimestamp();
-      await addDoc(collection(db, COL_PATH), data);
-    }
-    closeModal();
-  } catch(ex) {
-    err.textContent = 'שגיאה בשמירה. נסי שנית.';
-    console.error(ex);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// ── Delete ───────────────────────────────────────────────────────
-function openDelete(id, name) {
-  pendingDeleteId = id;
-  document.getElementById('del-name').textContent = name;
-  document.getElementById('del-modal').removeAttribute('data-v');
-}
-function closeDelete() {
-  pendingDeleteId = null;
-  document.getElementById('del-modal').setAttribute('data-v','');
-}
-document.getElementById('del-cancel').addEventListener('click', closeDelete);
-document.getElementById('del-confirm').addEventListener('click', async () => {
-  if (!pendingDeleteId) return;
-  try { await deleteDoc(doc(db, COL_PATH, pendingDeleteId)); }
-  catch(ex) { console.error('Delete failed:', ex); }
-  closeDelete();
-});
-
-// ── AI Description Generator ─────────────────────────────────────
-document.getElementById('ai-btn').addEventListener('click', async () => {
-  const aiBtn   = document.getElementById('ai-btn');
-  const label   = document.getElementById('ai-btn-label');
-  const aiErr   = document.getElementById('ai-err');
-  const textarea = document.getElementById('p-desc');
-
-  if (!GEMINI_API_KEY) {
-    aiErr.textContent = 'מפתח Gemini API חסר. הכניסי אותו ב-GEMINI_API_KEY.';
-    return;
-  }
-
-  const name = document.getElementById('p-name').value.trim();
-  const cat  = document.getElementById('p-cat').value;
-  const mat  = document.getElementById('p-mat').value;
-
-  if (!name) { aiErr.textContent = 'יש להזין שם מוצר לפני יצירת תיאור.'; return; }
-
-  aiBtn.disabled = true;
-  label.textContent = 'מייצרת תיאור...';
-  aiBtn.classList.add('ai-loading');
-  aiErr.textContent = '';
-
-  const systemPrompt = `אתה קופירייטר מקצועי של המותג "Charming by Vik" — מותג תכשיטים יוקרתי בסגנון קיץ.
-כתוב תיאור מוצר בעברית בלבד. אסור להשתמש בשום מילה באנגלית.
-הטון: אלגנטי, חם, מזמין ומקצועי — שירי אך ברור.
-אסור: ז'רגון, שפה מכירתית אגרסיבית, קלישאות זולות.
-מבנה חובה:
-1. כותרת קליטה (שורה אחת, ללא נקודתיים)
-2. 2-3 משפטי תיאור עשירים
-3. משפט סיום אחד על עמידות
-מילות מפתח שחובה לשלב: "ניצוץ", "צ'ארמינג", "קיץ", "פלדת אל-חלד", "עמיד במים".`;
-
-  const userPrompt = `צרי תיאור מוצר עבור:
-שם: ${name}
-קטגוריה: ${cat || 'תכשיט'}
-חומר: ${mat || 'פלדת אל-חלד'}`;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ parts: [{ text: userPrompt }] }],
-          generationConfig: { temperature: 0.9, maxOutputTokens: 300 },
-        }),
-      }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error('תגובה ריקה');
-    textarea.value = text.trim();
-  } catch(ex) {
-    aiErr.textContent = 'שגיאה בחיבור ל-AI. בדקי את המפתח.';
-    console.error('Gemini error:', ex);
-  } finally {
-    aiBtn.disabled = false;
-    label.textContent = 'צרי תיאור ב-AI';
-    aiBtn.classList.remove('ai-loading');
-  }
-});
-
-// ── Filters & Sort ───────────────────────────────────────────────
-document.getElementById('search-inp').addEventListener('input', e => { searchQ = e.target.value.trim().toLowerCase(); renderTable(); });
-document.getElementById('filter-cat').addEventListener('change', e => { filterCat = e.target.value; renderTable(); });
-document.getElementById('filter-col').addEventListener('change', e => { filterCol = e.target.value; renderTable(); });
-document.getElementById('filter-stat').addEventListener('change', e => { filterStat = e.target.value; renderTable(); });
-
-document.querySelectorAll('.sh').forEach(th => {
-  th.addEventListener('click', () => {
-    const field = th.dataset.sort;
-    if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-    else { sortField = field; sortDir = 'asc'; }
-    document.querySelectorAll('.sh').forEach(h => h.classList.remove('asc','desc'));
-    th.classList.add(sortDir);
-    renderTable();
-  });
-});
-
-// ── Category badge colours ────────────────────────────────────────
 const CAT_COLOR = {
   'צמידים':'bg-pink-50 text-pink-500','שרשראות':'bg-amber-50 text-amber-600',
   'עגילים':'bg-purple-50 text-purple-500','טבעות':'bg-emerald-50 text-emerald-600','ערכות':'bg-blue-50 text-blue-500',
@@ -793,33 +1140,29 @@ const BADGE_CLASS = {
   'מבצע':'bg-red-50 text-red-500 border border-red-200',
 };
 
-// ── Render Table ─────────────────────────────────────────────────
 function renderTable() {
   let list = allProducts.filter(p => {
-    if (searchQ && !(p.name?.toLowerCase().includes(searchQ) || p.sku?.toLowerCase().includes(searchQ))) return false;
+    if (searchQ && !(p.name?.toLowerCase().includes(searchQ)||p.sku?.toLowerCase().includes(searchQ))) return false;
     if (filterCat  && p.category   !== filterCat)  return false;
     if (filterCol  && p.collection !== filterCol)   return false;
     if (filterStat && p.status     !== filterStat)  return false;
     return true;
   });
 
-  // Sort
-  list.sort((a, b) => {
-    let va = a[sortField], vb = b[sortField];
-    if (va == null) va = sortDir === 'asc' ? Infinity : -Infinity;
-    if (vb == null) vb = sortDir === 'asc' ? Infinity : -Infinity;
-    if (typeof va === 'string') va = va.toLowerCase();
-    if (typeof vb === 'string') vb = vb.toLowerCase();
-    // Handle Firestore Timestamps
-    if (va?.seconds) va = va.seconds;
-    if (vb?.seconds) vb = vb.seconds;
-    if (va < vb) return sortDir === 'asc' ? -1 : 1;
-    if (va > vb) return sortDir === 'asc' ? 1  : -1;
+  list.sort((a,b) => {
+    let va=a[sortField], vb=b[sortField];
+    if (va==null) va=sortDir==='asc'?Infinity:-Infinity;
+    if (vb==null) vb=sortDir==='asc'?Infinity:-Infinity;
+    if (typeof va==='string') va=va.toLowerCase();
+    if (typeof vb==='string') vb=vb.toLowerCase();
+    if (va?.seconds) va=va.seconds;
+    if (vb?.seconds) vb=vb.seconds;
+    if (va<vb) return sortDir==='asc'?-1:1;
+    if (va>vb) return sortDir==='asc'?1:-1;
     return 0;
   });
 
   document.getElementById('tbl-count').textContent = `${list.length} מוצרים`;
-
   const tblEmpty = document.getElementById('tbl-empty');
   const tblWrap  = document.getElementById('tbl-wrap');
 
@@ -833,46 +1176,46 @@ function renderTable() {
   tblWrap.removeAttribute('data-v');
 
   document.getElementById('tbl-body').innerHTML = list.map(p => {
-    const thumbSrc = (Array.isArray(p.images) && p.images[0]) ? p.images[0] : (p.imageUrl || '');
+    const thumbSrc = (Array.isArray(p.images)&&p.images[0])?p.images[0]:(p.imageUrl||'');
     const thumb = thumbSrc
-      ? `<img src="${thumbSrc}" class="w-11 h-11 rounded-lg object-cover border border-[#f0dfc0]" onerror="this.style.display='none'" />`
-      : `<div class="w-11 h-11 rounded-lg bg-[#fdf6ee] flex items-center justify-center text-lg">💎</div>`;
+      ?`<img src="${thumbSrc}" class="w-11 h-11 rounded-lg object-cover border border-[#f0dfc0]" onerror="this.style.display='none'" />`
+      :`<div class="w-11 h-11 rounded-lg bg-[#fdf6ee] flex items-center justify-center text-lg">💎</div>`;
 
     const catBadge = p.category
-      ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full ${CAT_COLOR[p.category] ?? 'bg-gray-50 text-gray-400'}">${esc(p.category)}</span>`
-      : '';
+      ?`<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full ${CAT_COLOR[p.category]??'bg-gray-50 text-gray-400'}">${esc(p.category)}</span>`
+      :'';
 
-    const price = p.priceOriginal ?? p.price ?? 0;
-    const sale  = p.priceSale ?? p.salePrice ?? null;
-    const hasSale = sale && sale > 0 && sale < price;
+    const price = p.priceOriginal??p.price??0;
+    const sale  = p.priceSale??p.salePrice??null;
+    const hasSale = sale&&sale>0&&sale<price;
     const priceHTML = hasSale
-      ? `<span class="text-gray-300 line-through text-xs">${price}₪</span> <span class="text-[#d4a373] font-bold text-sm">${sale}₪</span>`
-      : `<span class="text-gray-700 font-semibold text-sm">${price}₪</span>`;
+      ?`<span class="text-gray-300 line-through text-xs">${price}₪</span> <span class="text-[#d4a373] font-bold text-sm">${sale}₪</span>`
+      :`<span class="text-gray-700 font-semibold text-sm">${price}₪</span>`;
 
-    const stock = p.stockCount ?? p.stock ?? null;
-    const stockHTML = stock === 0
-      ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400">אזל</span>`
-      : stock !== null
-        ? `<span class="text-xs text-gray-600 font-semibold">${stock}</span>`
-        : `<span class="text-xs text-gray-300">∞</span>`;
+    const stock = p.stockCount??p.stock??null;
+    const stockHTML = stock===0
+      ?`<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400">אזל</span>`
+      :stock!==null
+        ?`<span class="text-xs text-gray-600 font-semibold">${stock}</span>`
+        :`<span class="text-xs text-gray-300">∞</span>`;
 
     const badgeHTML = p.badge
-      ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${BADGE_CLASS[p.badge] ?? ''}">${esc(p.badge)}</span>`
-      : '<span class="text-gray-200 text-xs">—</span>';
+      ?`<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${BADGE_CLASS[p.badge]??''}">${esc(p.badge)}</span>`
+      :'<span class="text-gray-200 text-xs">—</span>';
 
-    const statusHTML = p.status === 'published'
-      ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">פורסם</span>`
-      : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">טיוטה</span>`;
+    const statusHTML = p.status==='published'
+      ?`<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">פורסם</span>`
+      :`<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">טיוטה</span>`;
 
-    const featStar = p.isFeatured ? `<span class="text-amber-400 text-sm">⭐</span>` : '';
+    const featStar = p.isFeatured?`<span class="text-amber-400 text-sm">⭐</span>`:'';
 
     return `<tr class="hover:bg-[#fdf6ee] transition-colors" data-id="${p.id}">
       <td class="px-4 py-3">${thumb}</td>
       <td class="px-4 py-3">
         <p class="font-semibold text-gray-800 text-sm leading-tight flex items-center gap-1">${esc(p.name)} ${featStar}</p>
-        ${p.sku ? `<p class="text-[10px] text-gray-400 font-mono mt-0.5">${esc(p.sku)}</p>` : ''}
+        ${p.sku?`<p class="text-[10px] text-gray-400 font-mono mt-0.5">${esc(p.sku)}</p>`:''}
       </td>
-      <td class="px-4 py-3 hidden sm:table-cell">${catBadge}${p.collection ? `<p class="text-[10px] text-gray-400 mt-0.5">${esc(p.collection)}</p>` : ''}</td>
+      <td class="px-4 py-3 hidden sm:table-cell">${catBadge}${p.collection?`<p class="text-[10px] text-gray-400 mt-0.5">${esc(p.collection)}</p>`:''}</td>
       <td class="px-4 py-3">${priceHTML}</td>
       <td class="px-4 py-3 hidden md:table-cell">${stockHTML}</td>
       <td class="px-4 py-3 hidden lg:table-cell">${badgeHTML}</td>
@@ -895,66 +1238,400 @@ function renderTable() {
       </td>
     </tr>`;
   }).join('');
-
-  // Event delegation for row actions
-  document.getElementById('tbl-body').addEventListener('click', e => {
-    const btn = e.target.closest('[data-act]');
-    if (!btn) return;
-    const id = btn.dataset.id;
-    const product = allProducts.find(p => p.id === id);
-    if (!product) return;
-    if (btn.dataset.act === 'edit') openModal('edit', product);
-    if (btn.dataset.act === 'dup')  openModal('duplicate', product);
-    if (btn.dataset.act === 'del')  openDelete(id, btn.dataset.name);
-  }, { once: true }); // re-attached each render — use delegated approach below
-}
-
-// ── Dashboard init ────────────────────────────────────────────────
-function initDashboard(user) {
-  show('v-dash');
-  document.getElementById('admin-name').textContent = user.displayName || user.email;
-
-  const q = query(collection(db, COL_PATH), orderBy('createdAt', 'desc'));
-
-  unsubProducts = onSnapshot(q, snap => {
-    allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    // Stats
-    document.getElementById('s-total').textContent = allProducts.length;
-    document.getElementById('s-pub').textContent   = allProducts.filter(p => p.status === 'published').length;
-    document.getElementById('s-oos').textContent   = allProducts.filter(p => (p.stockCount ?? p.stock) === 0).length;
-    document.getElementById('s-feat').textContent  = allProducts.filter(p => p.isFeatured).length;
-
-    document.getElementById('tbl-loading').setAttribute('data-v','');
-    renderTable();
-  }, err => {
-    console.error(err);
-    document.getElementById('tbl-loading').setAttribute('data-v','');
-  });
-
-  // Re-attach delegation after each render by using document-level delegation
-  document.getElementById('tbl-body').addEventListener('click', handleRowAction);
 }
 
 function handleRowAction(e) {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
   const id = btn.dataset.id;
-  const product = allProducts.find(p => p.id === id);
+  const product = allProducts.find(p=>p.id===id);
   if (!product) return;
-  if (btn.dataset.act === 'edit') openModal('edit', product);
-  if (btn.dataset.act === 'dup')  openModal('duplicate', product);
-  if (btn.dataset.act === 'del')  openDelete(id, btn.dataset.name || product.name);
+  if (btn.dataset.act==='edit') openModal('edit', product);
+  if (btn.dataset.act==='dup')  openModal('duplicate', product);
+  if (btn.dataset.act==='del')  openDelete(id, btn.dataset.name||product.name);
+}
+
+// ── Product Modal ─────────────────────────────────────────────────
+function openModal(mode, product=null) {
+  modalMode = mode;
+  editId    = (mode==='edit'&&product)?product.id:null;
+  clearForm();
+
+  if (product) {
+    document.getElementById('p-name').value    = mode==='duplicate'?product.name+' (עותק)':product.name||'';
+    document.getElementById('p-sku').value     = mode==='duplicate'?'':product.sku||'';
+    document.getElementById('p-cat').value     = product.category||'';
+    document.getElementById('p-col').value     = product.collection||'';
+    document.getElementById('p-mat').value     = product.material||'';
+    document.getElementById('p-price').value   = product.priceOriginal??product.price??'';
+    document.getElementById('p-sale').value    = product.priceSale??product.salePrice??'';
+    document.getElementById('p-stock').value   = product.stockCount??product.stock??'';
+    document.getElementById('p-badge').value   = product.badge||'';
+    document.getElementById('p-status').value  = product.status||'published';
+    document.getElementById('p-featured').checked     = !!product.isFeatured;
+    document.getElementById('p-customizable').checked = !!product.isCustomizable;
+    document.getElementById('p-color').value   = product.color||'';
+    document.getElementById('p-desc').value    = product.description||'';
+    const imgs = Array.isArray(product.images)&&product.images.length
+      ?product.images:(product.imageUrl?[product.imageUrl]:[]);
+    uploadedImages = [...imgs];
+    document.getElementById('p-imgs').value = JSON.stringify(uploadedImages);
+    renderImageGrid();
+  }
+
+  const titles     = {add:'מוצר חדש',edit:'עריכת מוצר',duplicate:'שכפול מוצר'};
+  const saveLabels = {add:'שמרי מוצר',edit:'עדכני מוצר',duplicate:'שמרי עותק'};
+  document.getElementById('modal-title').textContent = titles[mode];
+  document.getElementById('save-btn').textContent    = saveLabels[mode];
+  document.getElementById('product-modal').removeAttribute('data-v');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('product-modal').setAttribute('data-v','');
+  document.body.style.overflow = '';
+}
+
+function clearForm() {
+  ['p-name','p-sku','p-price','p-sale','p-stock','p-desc'].forEach(id=>{document.getElementById(id).value='';});
+  ['p-cat','p-col','p-badge'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('p-mat').value    = 'פלדת אל-חלד';
+  document.getElementById('p-color').value  = '';
+  document.getElementById('p-status').value = 'published';
+  document.getElementById('p-featured').checked     = false;
+  document.getElementById('p-customizable').checked = false;
+  uploadedImages = [];
+  document.getElementById('p-imgs').value = '[]';
+  document.getElementById('img-grid').innerHTML = '';
+  document.getElementById('upload-btn-label').textContent = 'העלי תמונות מהמחשב';
+  document.getElementById('form-err').textContent = '';
+  document.getElementById('ai-err').textContent   = '';
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('add-btn').addEventListener('click', ()=>openModal('add'));
+document.getElementById('product-modal').addEventListener('click', e=>{if(e.target===e.currentTarget)closeModal();});
+
+document.getElementById('save-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('save-btn');
+  const err = document.getElementById('form-err');
+  const name      = document.getElementById('p-name').value.trim();
+  const sku       = document.getElementById('p-sku').value.trim()||autoSKU();
+  const cat       = document.getElementById('p-cat').value;
+  const col       = document.getElementById('p-col').value;
+  const mat       = document.getElementById('p-mat').value;
+  const priceOrig = parseFloat(document.getElementById('p-price').value);
+  const saleRaw   = document.getElementById('p-sale').value.trim();
+  const priceSale = saleRaw!==''?parseFloat(saleRaw):null;
+  const stockRaw  = document.getElementById('p-stock').value.trim();
+  const stockCount= stockRaw!==''?parseInt(stockRaw):null;
+  const badge     = document.getElementById('p-badge').value;
+  const status    = document.getElementById('p-status').value;
+  const isFeatured= document.getElementById('p-featured').checked;
+  const color     = document.getElementById('p-color').value;
+  const description=document.getElementById('p-desc').value.trim();
+  let imagesArr=[];
+  try{imagesArr=JSON.parse(document.getElementById('p-imgs').value||'[]')||[];}catch{imagesArr=[];}
+
+  if (!name)            {err.textContent='יש להזין שם מוצר.';return;}
+  if (!priceOrig||priceOrig<=0){err.textContent='יש להזין מחיר תקין.';return;}
+  if (!cat)             {err.textContent='יש לבחור קטגוריה.';return;}
+  if (priceSale!==null&&priceSale>=priceOrig){err.textContent='מחיר המבצע חייב להיות נמוך מהמחיר המקורי.';return;}
+
+  err.textContent='';
+  btn.disabled=true;
+
+  const data={
+    name,sku,category:cat,collection:col||null,material:mat||null,color:color||null,
+    priceOriginal:priceOrig,priceSale,stockCount,
+    badge:badge||null,status,isFeatured,
+    isCustomizable:document.getElementById('p-customizable').checked,
+    images:imagesArr,imageUrl:imagesArr[0]||null,
+    description:description||null,
+    updatedAt:serverTimestamp(),
+  };
+
+  try {
+    if (modalMode==='edit'&&editId) {await updateDoc(doc(db,COL_PATH,editId),data);}
+    else {data.createdAt=serverTimestamp();await addDoc(collection(db,COL_PATH),data);}
+    closeModal();
+  } catch(ex) {
+    err.textContent='שגיאה בשמירה. נסי שנית.';console.error(ex);
+  } finally {btn.disabled=false;}
+});
+
+// ── Delete ────────────────────────────────────────────────────────
+function openDelete(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('del-name').textContent = name;
+  document.getElementById('del-modal').removeAttribute('data-v');
+}
+function closeDelete() {
+  pendingDeleteId = null;
+  document.getElementById('del-modal').setAttribute('data-v','');
+}
+document.getElementById('del-cancel').addEventListener('click', closeDelete);
+document.getElementById('del-confirm').addEventListener('click', async ()=>{
+  if (!pendingDeleteId) return;
+  try{await deleteDoc(doc(db,COL_PATH,pendingDeleteId));}
+  catch(ex){console.error('Delete failed:',ex);}
+  closeDelete();
+});
+
+// ── AI Description ────────────────────────────────────────────────
+document.getElementById('ai-btn').addEventListener('click', async ()=>{
+  const aiBtn   = document.getElementById('ai-btn');
+  const label   = document.getElementById('ai-btn-label');
+  const aiErr   = document.getElementById('ai-err');
+  const textarea= document.getElementById('p-desc');
+  if (!GEMINI_API_KEY){aiErr.textContent='מפתח Gemini API חסר.';return;}
+  const name=document.getElementById('p-name').value.trim();
+  const cat =document.getElementById('p-cat').value;
+  const mat =document.getElementById('p-mat').value;
+  if (!name){aiErr.textContent='יש להזין שם מוצר לפני יצירת תיאור.';return;}
+  aiBtn.disabled=true;label.textContent='מייצרת תיאור...';aiBtn.classList.add('ai-loading');aiErr.textContent='';
+  const systemPrompt=`אתה קופירייטר מקצועי של המותג "Charming by Vik" — מותג תכשיטים יוקרתי בסגנון קיץ.
+כתוב תיאור מוצר בעברית בלבד. אסור להשתמש בשום מילה באנגלית.
+הטון: אלגנטי, חם, מזמין ומקצועי — שירי אך ברור.
+אסור: ז'רגון, שפה מכירתית אגרסיבית, קלישאות זולות.
+מבנה חובה:
+1. כותרת קליטה (שורה אחת, ללא נקודתיים)
+2. 2-3 משפטי תיאור עשירים
+3. משפט סיום אחד על עמידות
+מילות מפתח שחובה לשלב: "ניצוץ", "צ'ארמינג", "קיץ", "פלדת אל-חלד", "עמיד במים".`;
+  const userPrompt=`צרי תיאור מוצר עבור:\nשם: ${name}\nקטגוריה: ${cat||'תכשיט'}\nחומר: ${mat||'פלדת אל-חלד'}`;
+  try {
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system_instruction:{parts:[{text:systemPrompt}]},contents:[{parts:[{text:userPrompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:300}}),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    const text=data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error('תגובה ריקה');
+    textarea.value=text.trim();
+  } catch(ex){aiErr.textContent='שגיאה בחיבור ל-AI.';console.error('Gemini error:',ex);}
+  finally{aiBtn.disabled=false;label.textContent='צרי תיאור ב-AI';aiBtn.classList.remove('ai-loading');}
+});
+
+// ── Customers ─────────────────────────────────────────────────────
+async function initCustomersTab() {
+  const loadingEl=document.getElementById('customers-loading');
+  if (loadingEl) loadingEl.style.display='block';
+  try {
+    const snap=await getDocs(collection(db,CUSTOMERS_COL));
+    allCustomers=snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(ex){console.error(ex);allCustomers=[];}
+  if (loadingEl) loadingEl.style.display='none';
+  renderCustomersTable();
+  document.getElementById('customers-search').addEventListener('input', e=>{
+    customersSearchQ=e.target.value.trim().toLowerCase();renderCustomersTable();
+  });
+}
+
+function renderCustomersTable() {
+  const list=allCustomers.filter(c=>{
+    if (!customersSearchQ) return true;
+    return (c.displayName||c.fullName||'').toLowerCase().includes(customersSearchQ)||
+           (c.email||'').toLowerCase().includes(customersSearchQ)||
+           (c.phone||'').includes(customersSearchQ);
+  });
+  const body=document.getElementById('customers-body');
+  if (!body) return;
+  if (!list.length){body.innerHTML=`<tr><td colspan="6" class="text-center py-10 text-gray-300 text-sm">אין לקוחות</td></tr>`;return;}
+  body.innerHTML=list.map(c=>{
+    const userOrders=allOrders.filter(o=>o.customer?.email===c.email&&o.status!=='cancelled');
+    const ltv=userOrders.reduce((s,o)=>s+(o.summary?.total||0),0);
+    return `<tr class="hover:bg-[#fdf6ee] transition-colors border-b border-[#fdf6ee]">
+      <td class="px-4 py-3 font-semibold text-sm">${esc(c.displayName||c.fullName||'—')}</td>
+      <td class="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">${esc(c.email||'—')}</td>
+      <td class="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">${esc(c.phone||'—')}</td>
+      <td class="px-4 py-3 text-center font-bold text-gray-700">${userOrders.length}</td>
+      <td class="px-4 py-3 font-bold text-[#d4a373]">${ltv>0?ltv+' ₪':'—'}</td>
+      <td class="px-4 py-3 hidden sm:table-cell">${c.isClubMember?'<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0]">✦ מועדון</span>':'<span class="text-gray-300">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportCustomersCSV() {
+  const BOM='\uFEFF';
+  const rows=[['שם','אימייל','טלפון','הזמנות','LTV','מועדון']];
+  allCustomers.forEach(c=>{
+    const orders=allOrders.filter(o=>o.customer?.email===c.email&&o.status!=='cancelled');
+    rows.push([c.displayName||c.fullName||'',c.email||'',c.phone||'',orders.length,orders.reduce((s,o)=>s+(o.summary?.total||0),0),c.isClubMember?'כן':'לא']);
+  });
+  const csv=BOM+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='charming-customers.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+window.exportCustomersCSV=exportCustomersCSV;
+
+// ── Coupons ───────────────────────────────────────────────────────
+function initCouponsTab() {
+  const q=query(collection(db,COUPONS_COL),orderBy('createdAt','desc'));
+  unsubCoupons=onSnapshot(q, snap=>{
+    allCoupons=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderCouponsGrid();
+  }, err=>console.error('coupons:',err));
+}
+
+function getCouponStatus(c) {
+  if (c.expiryDate?.seconds&&c.expiryDate.seconds*1000<Date.now()) return 'expired';
+  if (c.usageLimit!=null&&(c.usedCount||0)>=c.usageLimit) return 'maxed';
+  return 'active';
+}
+
+function renderCouponsGrid() {
+  const container=document.getElementById('coupons-grid');
+  if (!container) return;
+  if (!allCoupons.length) {
+    container.innerHTML='<p class="text-gray-300 text-sm text-center py-8 col-span-3">אין קופונים — לחצי על "+ קופון חדש"</p>';
+    return;
+  }
+  const STATUS_BADGE={active:'bg-emerald-50 text-emerald-600',expired:'bg-gray-100 text-gray-400',maxed:'bg-amber-50 text-amber-600'};
+  const STATUS_TEXT ={active:'פעיל',expired:'פג תוקף',maxed:'הגיע למקסימום'};
+  container.innerHTML=allCoupons.map(c=>{
+    const s=getCouponStatus(c);
+    const discount=c.type==='percent'?`${c.value}%`:`${c.value} ₪`;
+    const expiry=c.expiryDate?.seconds?new Date(c.expiryDate.seconds*1000).toLocaleDateString('he-IL'):'ללא הגבלה';
+    const usagePct=c.usageLimit?Math.min(100,Math.round((c.usedCount||0)/c.usageLimit*100)):0;
+    return `<div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <p class="font-black text-lg text-gray-800 font-mono tracking-wider">${esc(c.code)}</p>
+          <p class="text-[#d4a373] font-bold text-sm">${discount} הנחה</p>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-1 rounded-full ${STATUS_BADGE[s]||''}">${STATUS_TEXT[s]||s}</span>
+      </div>
+      ${c.usageLimit?`
+      <div class="mb-3">
+        <div class="flex justify-between text-xs text-gray-400 mb-1"><span>שימוש</span><span>${c.usedCount||0}/${c.usageLimit}</span></div>
+        <div class="h-1.5 bg-[#f0dfc0] rounded-full overflow-hidden"><div class="h-full bg-[#d4a373] rounded-full" style="width:${usagePct}%"></div></div>
+      </div>`:`<p class="text-xs text-gray-400 mb-3">שימוש: ${c.usedCount||0} פעמים</p>`}
+      <p class="text-xs text-gray-400 mb-4">תוקף: ${expiry}</p>
+      <div class="flex gap-2">
+        <button data-coupon-edit="${c.id}" class="flex-1 text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-2 rounded-full font-bold transition-colors">עריכה</button>
+        <button data-coupon-del="${c.id}" class="flex-1 text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-2 rounded-full font-bold transition-colors">מחיקה</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function handleCouponsGridClick(e) {
+  const editBtn=e.target.closest('[data-coupon-edit]');
+  const delBtn =e.target.closest('[data-coupon-del]');
+  if (editBtn) {
+    const coupon=allCoupons.find(c=>c.id===editBtn.dataset.couponEdit);
+    if (coupon) openCouponModal(coupon);
+  }
+  if (delBtn) {
+    const id=delBtn.dataset.couponDel;
+    const coupon=allCoupons.find(c=>c.id===id);
+    if (coupon&&confirm(`למחוק את הקופון "${coupon.code}"?`))
+      deleteDoc(doc(db,COUPONS_COL,id)).catch(ex=>console.error(ex));
+  }
+}
+
+function openCouponModal(coupon=null) {
+  editCouponId=coupon?coupon.id:null;
+  document.getElementById('coupon-modal-title').textContent=coupon?'עריכת קופון':'קופון חדש';
+  document.getElementById('cp-code').value =coupon?.code||'';
+  document.getElementById('cp-type-fixed').checked  =!coupon||coupon.type==='fixed';
+  document.getElementById('cp-type-percent').checked=coupon?.type==='percent';
+  document.getElementById('cp-value').value=coupon?.value??'';
+  document.getElementById('cp-limit').value=coupon?.usageLimit??'';
+  document.getElementById('cp-expiry').value=coupon?.expiryDate?.seconds
+    ?new Date(coupon.expiryDate.seconds*1000).toISOString().split('T')[0]:'';
+  document.getElementById('coupon-err').textContent='';
+  document.getElementById('coupon-modal').removeAttribute('data-v');
+  document.body.style.overflow='hidden';
+}
+window.openCouponModal=openCouponModal;
+
+function closeCouponModal() {
+  document.getElementById('coupon-modal').setAttribute('data-v','');
+  document.body.style.overflow='';
+}
+
+document.getElementById('coupon-close').addEventListener('click',  closeCouponModal);
+document.getElementById('coupon-cancel').addEventListener('click', closeCouponModal);
+document.getElementById('coupon-modal').addEventListener('click',  e=>{if(e.target===e.currentTarget)closeCouponModal();});
+document.getElementById('coupon-save').addEventListener('click', async ()=>{
+  const code =document.getElementById('cp-code').value.trim().toUpperCase();
+  const type =document.querySelector('[name="cp-type"]:checked')?.value;
+  const value=parseFloat(document.getElementById('cp-value').value);
+  const limit=document.getElementById('cp-limit').value.trim();
+  const expiry=document.getElementById('cp-expiry').value;
+  const errEl=document.getElementById('coupon-err');
+  if (!code)       {errEl.textContent='יש להזין קוד.';return;}
+  if (!type)       {errEl.textContent='יש לבחור סוג.';return;}
+  if (!value||value<=0){errEl.textContent='יש להזין ערך תקין.';return;}
+  errEl.textContent='';
+  const data={
+    code,type,value,
+    usageLimit:limit!==''?parseInt(limit):null,
+    expiryDate:expiry?Timestamp.fromDate(new Date(expiry+'T23:59:59')):null,
+    updatedAt:serverTimestamp(),
+  };
+  try {
+    if (editCouponId){await updateDoc(doc(db,COUPONS_COL,editCouponId),data);}
+    else{data.usedCount=0;data.createdAt=serverTimestamp();await addDoc(collection(db,COUPONS_COL),data);}
+    closeCouponModal();
+  } catch(ex){errEl.textContent='שגיאה בשמירה.';console.error(ex);}
+});
+
+// ── Inquiries ─────────────────────────────────────────────────────
+function initInquiriesTab() {
+  const q=query(collection(db,INQUIRIES_COL),orderBy('createdAt','desc'));
+  unsubInquiries=onSnapshot(q, snap=>{
+    allInquiries=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderInquiriesTable();
+  }, err=>console.error('inquiries:',err));
+}
+
+const INQ_STATUS_COLORS={new:'bg-amber-50 text-amber-600',handled:'bg-emerald-50 text-emerald-600',archived:'bg-gray-100 text-gray-400'};
+const INQ_STATUS_LABELS={new:'חדש',handled:'טופל',archived:'בארכיון'};
+
+function renderInquiriesTable() {
+  const body=document.getElementById('inquiries-body');
+  if (!body) return;
+  if (!allInquiries.length){body.innerHTML=`<tr><td colspan="5" class="text-center py-10 text-gray-300 text-sm">אין פניות</td></tr>`;return;}
+  body.innerHTML=allInquiries.map(i=>{
+    const date=i.createdAt?.seconds?new Date(i.createdAt.seconds*1000).toLocaleDateString('he-IL'):'—';
+    const msg=(i.message||'').length>80?(i.message||'').slice(0,80)+'...':(i.message||'');
+    return `<tr class="hover:bg-[#fdf6ee] transition-colors border-b border-[#fdf6ee]${i.status==='new'?' font-semibold':''}">
+      <td class="px-4 py-3 text-sm">${esc(i.name||'—')}</td>
+      <td class="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">${esc(i.phone||'—')}</td>
+      <td class="px-4 py-3 text-sm text-gray-500 max-w-[240px] truncate">${esc(msg)}</td>
+      <td class="px-4 py-3 text-sm text-gray-400 hidden sm:table-cell">${date}</td>
+      <td class="px-4 py-3">
+        <select data-inq-status="${i.id}" class="text-xs border border-gray-200 rounded-lg px-2 py-1 ${INQ_STATUS_COLORS[i.status]||''} font-bold cursor-pointer">
+          ${Object.entries(INQ_STATUS_LABELS).map(([v,l])=>`<option value="${v}"${i.status===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function handleInquiryStatusChange(e) {
+  const sel=e.target.closest('[data-inq-status]');
+  if (!sel) return;
+  try{await updateDoc(doc(db,INQUIRIES_COL,sel.dataset.inqStatus),{status:sel.value});}
+  catch(ex){console.error(ex);}
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
 function autoSKU() {
-  return 'CHR-' + Math.random().toString(36).substring(2,6).toUpperCase();
+  return 'CHR-'+Math.random().toString(36).substring(2,6).toUpperCase();
 }
 
 function esc(str) {
-  const d = document.createElement('div');
-  d.textContent = String(str ?? '');
+  const d=document.createElement('div');
+  d.textContent=String(str??'');
   return d.innerHTML;
 }
 </script>

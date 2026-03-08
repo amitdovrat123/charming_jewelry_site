@@ -1,7 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import {
   collection, query, orderBy, onSnapshot,
-  addDoc, serverTimestamp, doc, getDoc, setDoc, getDocs,
+  addDoc, serverTimestamp, doc, getDoc, setDoc, getDocs, where, limit, updateDoc,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
   onAuthStateChanged, signOut,
@@ -1778,3 +1778,75 @@ function init() {
 }
 
 init();
+
+// ── Coupon & Inquiry helpers (exposed to window for HTML event handlers) ──
+
+const COUPONS_COL_PATH   = 'artifacts/charming-3dd6f/public/data/coupons';
+const INQUIRIES_COL_PATH = 'artifacts/charming-3dd6f/public/data/inquiries';
+
+/**
+ * validateCoupon(code, subtotal) → Promise<{ valid, discount, type, value, docId } | { valid: false, reason }>
+ * Validates a coupon code against Firestore. Does NOT redeem it.
+ */
+async function validateCoupon(code, subtotal) {
+  if (!code || typeof code !== 'string') return { valid: false, reason: 'קוד קופון חסר.' };
+  const normalized = code.trim().toUpperCase();
+  try {
+    const snap = await getDocs(
+      query(collection(db, COUPONS_COL_PATH), where('code', '==', normalized), limit(1))
+    );
+    if (snap.empty) return { valid: false, reason: 'קוד קופון לא נמצא.' };
+
+    const docSnap = snap.docs[0];
+    const c = docSnap.data();
+
+    if (c.expiryDate?.seconds && c.expiryDate.seconds * 1000 < Date.now())
+      return { valid: false, reason: 'תוקף הקופון פג.' };
+
+    if (c.usageLimit != null && (c.usedCount || 0) >= c.usageLimit)
+      return { valid: false, reason: 'הקופון הגיע למגבלת השימוש.' };
+
+    const discount = c.type === 'percent'
+      ? Math.round(subtotal * c.value / 100)
+      : Math.min(c.value, subtotal);
+
+    return { valid: true, discount, type: c.type, value: c.value, docId: docSnap.id };
+  } catch (ex) {
+    console.error('[validateCoupon]', ex);
+    return { valid: false, reason: 'שגיאה בבדיקת הקופון.' };
+  }
+}
+window.validateCoupon = validateCoupon;
+
+/**
+ * redeemCoupon(docId) → Promise<void>
+ * Increments usedCount by 1. Call once at order submission.
+ */
+async function redeemCoupon(docId) {
+  if (!docId) return;
+  try {
+    const ref = doc(db, COUPONS_COL_PATH, docId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    await updateDoc(ref, { usedCount: (snap.data().usedCount || 0) + 1 });
+  } catch (ex) {
+    console.error('[redeemCoupon]', ex);
+  }
+}
+window.redeemCoupon = redeemCoupon;
+
+/**
+ * submitInquiry({ name, phone, message }) → Promise<void>
+ * Writes a new inquiry to Firestore with status 'new'.
+ */
+async function submitInquiry({ name, phone, message }) {
+  if (!name && !message) throw new Error('שם או הודעה נדרשים.');
+  await addDoc(collection(db, INQUIRIES_COL_PATH), {
+    name:      name    || '',
+    phone:     phone   || '',
+    message:   message || '',
+    status:    'new',
+    createdAt: serverTimestamp(),
+  });
+}
+window.submitInquiry = submitInquiry;
