@@ -458,20 +458,43 @@
   <script src="nav.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="accessibility.js"></script>
-  <script>
-    (function() {
-      var form = document.querySelector('.signup-section form');
-      if (!form) return;
-      form.addEventListener('submit', function(e) {
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const INQUIRIES_COL = 'artifacts/charming-3dd6f/public/data/inquiries';
+    const form = document.querySelector('.signup-section form');
+    if (form) {
+      form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        var name  = form.querySelector('#name').value.trim();
-        var phone = form.querySelector('#phone').value.trim();
-        var email = form.querySelector('#email').value.trim();
+        const name  = form.querySelector('#name').value.trim();
+        const phone = form.querySelector('#phone').value.trim();
+        const email = form.querySelector('#email').value.trim();
         if (!name || !phone || !email) return;
+
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'שולח...';
+
+        try {
+          await addDoc(collection(db, INQUIRIES_COL), {
+            name, phone, email,
+            participants: form.querySelector('#participants')?.value || '',
+            workshopType: form.querySelector('#workshop-type')?.value || '',
+            date: form.querySelector('#date')?.value || '',
+            notes: form.querySelector('#notes')?.value || '',
+            source: 'workshops-contact-form',
+            status: 'new',
+            createdAt: serverTimestamp()
+          });
+        } catch (ex) {
+          console.error('Inquiry submit error:', ex);
+        }
+
         form.style.display = 'none';
         document.getElementById('signup-success').style.display = '';
       });
-    })();
+    }
   </script>
 </body>
 </html>
