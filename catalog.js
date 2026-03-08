@@ -17,6 +17,8 @@ const SHIPPING            = 35;
 const FREE_SHIP_THRESHOLD = 400;
 const COL_PATH            = 'artifacts/charming-3dd6f/public/data/products';
 const USERS_ROOT          = 'artifacts/charming-3dd6f/users';
+const ORDERS_COL          = 'artifacts/charming-3dd6f/public/data/orders';
+const FORM_KEY            = 'charming-checkout-form';
 
 // Shop predefined filter lists
 const SHOP_CATEGORIES = ['שרשראות', 'צמידים', 'עגילים', 'טבעות', 'מארזי Charming'];
@@ -34,6 +36,7 @@ let checkoutItems        = [];
 let checkoutCartItems    = [];
 let checkoutDelivery     = 'delivery';
 let isQuickBuy           = false;
+let orderIdGenerated     = null;   // set on successful order, used in thank-you view
 let pendingCheckoutAfterAuth = false;   // redirect-after-login flag
 let _checkoutStartAtStep2   = false;   // skip step-1 init after auth redirect
 let _authInitialized        = false;   // true after first onAuthStateChanged fires
@@ -64,11 +67,12 @@ function switchView(view) {
   const el = document.getElementById('view-' + view);
   if (el) el.style.display = 'block';
   window.scrollTo(0, 0);
-  if (view === 'home')     renderHome();
-  if (view === 'shop')     renderShop();
-  if (view === 'product')  renderProductView();
-  if (view === 'profile')  renderProfileView();
-  if (view === 'checkout') initCheckoutView();
+  if (view === 'home')       renderHome();
+  if (view === 'shop')       renderShop();
+  if (view === 'product')    renderProductView();
+  if (view === 'profile')    renderProfileView();
+  if (view === 'checkout')   initCheckoutView();
+  if (view === 'thank-you')  renderThankYouView();
 }
 
 window.switchView = switchView; // expose to HTML event listeners (module scope isolation)
@@ -806,12 +810,13 @@ function initCheckoutView() {
 
 function renderCheckoutStep(el) {
   if (checkoutStep === 1) renderCheckoutStep1(el);
-  else if (checkoutStep === 2) renderCheckoutStep2(el);
-  else if (checkoutStep === 3) renderCheckoutStep3(el);
+  else if (checkoutStep === 2) renderCheckoutForm(el);
 }
 
-function stepIndicator(active) {
-  const steps = ['עגלת קניות', 'פרטי משלוח', 'אישור הזמנה'];
+function stepIndicator(active, total = 2) {
+  const steps = total === 2
+    ? ['עגלת קניות', 'פרטי תשלום']
+    : ['עגלת קניות', 'פרטי משלוח', 'אישור הזמנה'];
   return `
     <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px;" role="list" aria-label="שלבי תשלום">
       ${steps.map((label, i) => {
@@ -877,7 +882,7 @@ function renderCheckoutStep1(el) {
       <div class="container" style="max-width:640px;">
         <button id="co-back1" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">← המשיכי בקניות</button>
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">העגלה שלי</h2>
-        ${stepIndicator(1)}
+        ${stepIndicator(1, 2)}
         ${bannerHtml}
         <div>${itemsHtml}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0 0;">
@@ -965,13 +970,370 @@ function renderCheckoutStep1(el) {
   }
 }
 
-function renderCheckoutStep2(el) {
+// ── Form persistence ───────────────────────────────────────────
+function saveFormToStorage() {
+  const d = {
+    name:   document.getElementById('co-name')?.value   || '',
+    email:  document.getElementById('co-email')?.value  || '',
+    phone:  document.getElementById('co-phone')?.value  || '',
+    city:   document.getElementById('co-city')?.value   || '',
+    street: document.getElementById('co-street')?.value || '',
+    house:  document.getElementById('co-house')?.value  || '',
+    apt:    document.getElementById('co-apt')?.value    || '',
+    ship:   document.querySelector('[name="co-ship"]:checked')?.value || 'delivery',
+  };
+  localStorage.setItem(FORM_KEY, JSON.stringify(d));
+}
+function loadFormFromStorage() {
+  try { return JSON.parse(localStorage.getItem(FORM_KEY) || '{}'); } catch { return {}; }
+}
+function clearFormStorage() { localStorage.removeItem(FORM_KEY); }
+
+// ── Order ID generator ─────────────────────────────────────────
+function generateOrderId() {
+  const now   = new Date();
+  const dd    = String(now.getDate()).padStart(2, '0');
+  const mm    = String(now.getMonth() + 1).padStart(2, '0');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const rand  = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `CH-${dd}${mm}-${rand}`;
+}
+
+// ── V15.3 New checkout form (step 2) ──────────────────────────
+function renderCheckoutForm(el) {
+  const saved = loadFormFromStorage();
+  const pre = {
+    name:   saved.name   || userProfile.fullName || currentUser?.displayName || '',
+    email:  saved.email  || userProfile.email    || currentUser?.email        || '',
+    phone:  saved.phone  || userProfile.phone    || '',
+    city:   saved.city   || userProfile.city     || '',
+    street: saved.street || userProfile.street   || '',
+    house:  saved.house  || '',
+    apt:    saved.apt    || userProfile.apt       || '',
+    ship:   saved.ship   || 'delivery',
+  };
+
+  const subtotal = checkoutItems.reduce((s, i) => s + i.price * (i.qty || 1), 0);
+  const isFreeInit  = pre.ship === 'pickup' || subtotal >= FREE_SHIP_THRESHOLD;
+  const shipInit    = (pre.ship === 'delivery' && !isFreeInit) ? SHIPPING : 0;
+  const totalInit   = subtotal + shipInit;
+
+  const itemsSummaryHtml = checkoutItems.map(item => `
+    <div class="co-summary-item">
+      <div class="co-summary-item-img">
+        ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" alt="${esc(item.name)}" />` : ''}
+        <span class="co-summary-item-qty">${item.qty || 1}</span>
+      </div>
+      <div class="co-summary-item-info">
+        <span class="co-summary-item-name">${esc(item.name)}</span>
+        ${item.customizationNote ? `<span class="co-summary-item-note">${esc(item.customizationNote)}</span>` : ''}
+      </div>
+      <span class="co-summary-item-price">${item.price * (item.qty || 1)} ₪</span>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <section class="co-section">
+      <div class="container">
+        <button id="co-back2" class="sp-back-btn">← חזרה לעגלה</button>
+
+        <div class="co-secure-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          רכישה מאובטחת
+        </div>
+
+        <div class="co-form-layout">
+
+          <!-- LEFT PANEL: Form -->
+          <div class="co-form-panel">
+
+            <div class="co-field-group">
+              <div class="co-section-title">אופן קבלה</div>
+              <div class="co-delivery-selector">
+                <label class="co-delivery-option${pre.ship === 'delivery' ? ' co-delivery-option--active' : ''}">
+                  <input type="radio" name="co-ship" value="delivery" ${pre.ship === 'delivery' ? 'checked' : ''} />
+                  <span class="co-delivery-name">משלוח עד הבית</span>
+                  <span class="co-delivery-cost" id="co-dlv-cost">${isFreeInit && pre.ship === 'delivery' ? 'חינם ✅' : pre.ship === 'delivery' ? `${SHIPPING} ₪` : `${SHIPPING} ₪`}</span>
+                </label>
+                <label class="co-delivery-option${pre.ship === 'pickup' ? ' co-delivery-option--active' : ''}">
+                  <input type="radio" name="co-ship" value="pickup" ${pre.ship === 'pickup' ? 'checked' : ''} />
+                  <span class="co-delivery-name">איסוף עצמי מהסטודיו</span>
+                  <span class="co-delivery-cost co-free-badge">חינם</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="co-field-group">
+              <div class="co-section-title">פרטים אישיים</div>
+              <div class="co-field">
+                <label class="co-label" for="co-name">שם מלא *</label>
+                <input id="co-name" class="co-input" type="text" value="${esc(pre.name)}" autocomplete="name" />
+              </div>
+              <div class="co-field">
+                <label class="co-label" for="co-email">אימייל *</label>
+                <input id="co-email" class="co-input" type="email" value="${esc(pre.email)}" autocomplete="email" />
+              </div>
+              <div class="co-field">
+                <label class="co-label" for="co-phone">טלפון (10 ספרות) *</label>
+                <input id="co-phone" class="co-input" type="tel" value="${esc(pre.phone)}" autocomplete="tel" inputmode="numeric" />
+              </div>
+            </div>
+
+            <div class="co-field-group" id="co-addr-group"${pre.ship === 'pickup' ? ' style="display:none;"' : ''}>
+              <div class="co-section-title">כתובת למשלוח</div>
+              <div class="co-field">
+                <label class="co-label" for="co-city">עיר *</label>
+                <input id="co-city" class="co-input" type="text" value="${esc(pre.city)}" autocomplete="address-level2" />
+              </div>
+              <div class="co-fields-row">
+                <div class="co-field">
+                  <label class="co-label" for="co-street">רחוב *</label>
+                  <input id="co-street" class="co-input" type="text" value="${esc(pre.street)}" autocomplete="street-address" />
+                </div>
+                <div class="co-field co-field--narrow">
+                  <label class="co-label" for="co-house">מספר *</label>
+                  <input id="co-house" class="co-input" type="text" value="${esc(pre.house)}" />
+                </div>
+              </div>
+              <div class="co-field">
+                <label class="co-label" for="co-apt">קומה / דירה</label>
+                <input id="co-apt" class="co-input" type="text" value="${esc(pre.apt)}" />
+              </div>
+            </div>
+
+            <div class="co-terms-row">
+              <input type="checkbox" id="co-terms" />
+              <label for="co-terms">קראתי ואני מסכימה ל<a href="terms.html" target="_blank">תנאי השימוש</a></label>
+            </div>
+
+            <p id="co-form-err" class="co-form-err" aria-live="polite"></p>
+
+            <button id="co-submit" class="btn co-submit-btn">
+              <span id="co-submit-label">אשרי הזמנה</span>
+              <span id="co-submit-spinner" style="display:none;" aria-label="טוענת...">שולחת...</span>
+            </button>
+
+            <div class="co-trust-icons">
+              <span class="co-trust-badge">Visa</span>
+              <span class="co-trust-badge">Mastercard</span>
+              <span class="co-trust-badge">Bit</span>
+              <span class="co-trust-badge">🔒 מאובטח</span>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: Sticky Order Summary -->
+          <aside class="co-summary-panel">
+            <div class="co-summary-header">סיכום הזמנה</div>
+            <div class="co-summary-items">${itemsSummaryHtml}</div>
+            <div class="co-summary-totals">
+              <div class="co-summary-row">
+                <span>מוצרים</span>
+                <span>${subtotal} ₪</span>
+              </div>
+              <div class="co-summary-row" id="co-ship-row">
+                <span>משלוח</span>
+                <span id="co-ship-cost-el">${shipInit === 0 ? 'חינם' : shipInit + ' ₪'}</span>
+              </div>
+              <div class="co-summary-divider"></div>
+              <div class="co-summary-row co-summary-total">
+                <span>סה"כ לתשלום</span>
+                <span id="co-grand-total-el">${totalInit} ₪</span>
+              </div>
+            </div>
+            <div id="co-freeship-note" class="co-freeship-note"${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? '' : ' style="display:none;"'}>
+              ${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? `🚚 עוד ${FREE_SHIP_THRESHOLD - subtotal} ₪ למשלוח חינם!` : ''}
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>`;
+
+  // Dynamic pricing update
+  function updateSummaryPricing() {
+    const ship      = document.querySelector('[name="co-ship"]:checked')?.value || 'delivery';
+    checkoutDelivery = ship;
+    const isFree    = ship === 'pickup' || subtotal >= FREE_SHIP_THRESHOLD;
+    const shipCost  = (ship === 'delivery' && !isFree) ? SHIPPING : 0;
+    const total     = subtotal + shipCost;
+
+    el.querySelectorAll('.co-delivery-option').forEach(opt => {
+      opt.classList.toggle('co-delivery-option--active', opt.querySelector('input').value === ship);
+    });
+
+    const dlvCostEl = document.getElementById('co-dlv-cost');
+    if (dlvCostEl) dlvCostEl.textContent = ship === 'pickup' ? 'חינם' : (isFree ? 'חינם ✅' : `${SHIPPING} ₪`);
+
+    const shipEl = document.getElementById('co-ship-cost-el');
+    if (shipEl) shipEl.textContent = shipCost === 0 ? 'חינם' : `${shipCost} ₪`;
+
+    const totalEl = document.getElementById('co-grand-total-el');
+    if (totalEl) totalEl.textContent = `${total} ₪`;
+
+    const noteEl = document.getElementById('co-freeship-note');
+    if (noteEl) {
+      if (ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD) {
+        noteEl.textContent = `🚚 עוד ${FREE_SHIP_THRESHOLD - subtotal} ₪ למשלוח חינם!`;
+        noteEl.style.display = '';
+      } else {
+        noteEl.style.display = 'none';
+      }
+    }
+
+    const addrGroup = document.getElementById('co-addr-group');
+    if (addrGroup) addrGroup.style.display = ship === 'delivery' ? '' : 'none';
+
+    saveFormToStorage();
+  }
+
+  // Radio change listeners
+  el.querySelectorAll('[name="co-ship"]').forEach(r => {
+    r.addEventListener('change', updateSummaryPricing);
+  });
+
+  // Input persistence
+  ['co-name', 'co-email', 'co-phone', 'co-city', 'co-street', 'co-house', 'co-apt'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', saveFormToStorage);
+  });
+
+  // Back button
+  el.querySelector('#co-back2').addEventListener('click', () => { checkoutStep = 1; renderCheckoutStep(el); });
+
+  // Submit
+  el.querySelector('#co-submit').addEventListener('click', async () => {
+    const errEl  = document.getElementById('co-form-err');
+    const btn    = document.getElementById('co-submit');
+    const label  = document.getElementById('co-submit-label');
+    const spinner = document.getElementById('co-submit-spinner');
+
+    const ship   = document.querySelector('[name="co-ship"]:checked')?.value || 'delivery';
+    const name   = document.getElementById('co-name').value.trim();
+    const email  = document.getElementById('co-email').value.trim();
+    const phone  = document.getElementById('co-phone').value.trim();
+    const terms  = document.getElementById('co-terms').checked;
+
+    // Validate
+    if (!name)                              { errEl.textContent = 'יש למלא שם מלא.'; return; }
+    if (!email || !email.includes('@') || !email.includes('.'))
+                                            { errEl.textContent = 'יש למלא כתובת אימייל תקינה.'; return; }
+    if (!/^\d{10}$/.test(phone))            { errEl.textContent = 'יש למלא מספר טלפון בן 10 ספרות.'; return; }
+    if (ship === 'delivery') {
+      const city   = document.getElementById('co-city')?.value.trim()   || '';
+      const street = document.getElementById('co-street')?.value.trim() || '';
+      const house  = document.getElementById('co-house')?.value.trim()  || '';
+      if (!city || !street || !house) { errEl.textContent = 'יש למלא עיר, רחוב ומספר בית.'; return; }
+    }
+    if (!terms) { errEl.textContent = 'יש לאשר את תנאי השימוש.'; return; }
+    errEl.textContent = '';
+
+    // Anti-double-click
+    btn.disabled    = true;
+    label.style.display   = 'none';
+    spinner.style.display = '';
+
+    try {
+      const city   = document.getElementById('co-city')?.value.trim()   || '';
+      const street = document.getElementById('co-street')?.value.trim() || '';
+      const house  = document.getElementById('co-house')?.value.trim()  || '';
+      const apt    = document.getElementById('co-apt')?.value.trim()    || '';
+
+      const isFree2   = ship === 'pickup' || subtotal >= FREE_SHIP_THRESHOLD;
+      const shipCost2 = (ship === 'delivery' && !isFree2) ? SHIPPING : 0;
+      const total2    = subtotal + shipCost2;
+      const orderId   = generateOrderId();
+
+      // Public orders collection (for Make.com)
+      await setDoc(doc(db, ORDERS_COL, orderId), {
+        orderId,
+        status:            'pending_payment',
+        isProcessedByMake: false,
+        customer: {
+          name, email, phone,
+          address:        { city, street, house, apt },
+          shippingMethod: ship,
+        },
+        items: checkoutItems.map(i => ({
+          productId:         i.id,
+          name:              i.name,
+          price:             i.price,
+          quantity:          i.qty || 1,
+          customizationNote: i.customizationNote || null,
+          image:             i.imageUrl || '',
+        })),
+        summary: { subtotal, shipping: shipCost2, total: total2, currency: 'ILS' },
+        timestamp: serverTimestamp(),
+      });
+
+      // User-scoped orders (for profile "My Orders" tab)
+      if (currentUser) {
+        await addDoc(collection(db, `${USERS_ROOT}/${currentUser.uid}/orders`), {
+          orderId,
+          items:    checkoutItems,
+          delivery: ship,
+          total:    total2,
+          fullName: name,
+          phone,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // Cleanup
+      cart = []; saveCart(); updateCartBadge();
+      isQuickBuy = false; checkoutItems = [];
+      clearFormStorage();
+      orderIdGenerated = orderId;
+
+      switchView('thank-you');
+    } catch (ex) {
+      console.error('Order submit failed:', ex);
+      errEl.textContent = 'שגיאה בשליחת ההזמנה. נסי שוב.';
+      btn.disabled    = false;
+      label.style.display   = '';
+      spinner.style.display = 'none';
+    }
+  });
+}
+
+// ── Thank-you view ─────────────────────────────────────────────
+function renderThankYouView() {
+  const el = document.getElementById('view-thank-you');
+  if (!el) return;
+
+  const oid   = orderIdGenerated || '—';
+  const waMsg = encodeURIComponent(`היי ויק! ביצעתי הזמנה באתר שמספרה ${oid}. מחכה לעדכון!`);
+
+  el.innerHTML = `
+    <section class="co-ty-section">
+      <div class="co-ty-confetti" aria-hidden="true">
+        ${Array.from({length: 12}, (_, i) => `<span class="co-confetti-piece co-confetti-${i+1}"></span>`).join('')}
+      </div>
+      <div class="co-ty-wrap">
+        <div class="co-ty-checkmark" aria-hidden="true">✓</div>
+        <h2 class="co-ty-title">ההזמנה התקבלה!</h2>
+        <p class="co-ty-subtitle">תודה רבה. נציגה תיצור איתך קשר בהקדם לתיאום פרטי התשלום.</p>
+        <div class="co-ty-order-id">
+          מספר הזמנה: <strong>${esc(oid)}</strong>
+        </div>
+        <a href="https://wa.me/${WA_NUMBER}?text=${waMsg}"
+           target="_blank" rel="noopener noreferrer"
+           class="btn btn-whatsapp co-ty-wa-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          עדכני את ויק בוואטסאפ על ההזמנה
+        </a>
+        <button class="btn btn-outline co-ty-shop-btn" onclick="window.switchView('shop')">
+          המשיכי בקניות
+        </button>
+      </div>
+    </section>`;
+}
+
+// ── (Old step 2 & 3 removed in V15.3 — replaced by renderCheckoutForm) ────
+function _unused_renderCheckoutStep2(el) {
   const addr = userProfile || {};
   el.innerHTML = `
     <section style="padding:80px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:640px;">
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">פרטי משלוח</h2>
-        ${stepIndicator(2)}
+        ${stepIndicator(2, 3)}
 
         <!-- Shipping method -->
         <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px;" role="radiogroup" aria-label="אופן קבלת ההזמנה">
@@ -1103,7 +1465,7 @@ function renderCheckoutStep2(el) {
   });
 }
 
-function renderCheckoutStep3(el) {
+function _unused_renderCheckoutStep3(el) {
   const itemsSubtotal = checkoutItems.reduce((s, i) => s + i.price * (i.qty || 1), 0);
   const freeShipping  = checkoutDelivery === 'delivery' && itemsSubtotal >= FREE_SHIP_THRESHOLD;
   const shippingCost  = checkoutDelivery === 'delivery' ? (freeShipping ? 0 : SHIPPING) : 0;
@@ -1370,7 +1732,7 @@ function injectViews() {
   // does not break fixed-position elements outside of it.
   const wrapper = document.getElementById('main-wrapper') || document.body;
   const footer  = wrapper.querySelector('footer');
-  ['shop', 'product', 'profile', 'checkout'].forEach(v => {
+  ['shop', 'product', 'profile', 'checkout', 'thank-you'].forEach(v => {
     const div     = document.createElement('div');
     div.id        = 'view-' + v;
     div.className = 'v-section';
