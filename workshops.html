@@ -275,8 +275,13 @@
           </div>
 
           <div class="form-submit">
-            <button type="submit" class="btn">שלחי לי פרטים</button>
+            <button type="submit" class="btn">שלח פניה</button>
             <p class="form-note">* שדות חובה. נחזור אלייך בהקדם.</p>
+          </div>
+
+          <div id="signup-success" style="display:none;text-align:center;padding:32px 0;">
+            <p style="font-size:1.15rem;font-weight:600;color:var(--ink);margin:0 0 8px;">תודה רבה שפנית אלינו</p>
+            <p style="font-size:0.95rem;color:var(--ink-soft);margin:0;">נדאג לחזור אלייך בהקדם.</p>
           </div>
 
         </form>
@@ -453,5 +458,20 @@
   <script src="nav.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="accessibility.js"></script>
+  <script>
+    (function() {
+      var form = document.querySelector('.signup-section form');
+      if (!form) return;
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var name  = form.querySelector('#name').value.trim();
+        var phone = form.querySelector('#phone').value.trim();
+        var email = form.querySelector('#email').value.trim();
+        if (!name || !phone || !email) return;
+        form.style.display = 'none';
+        document.getElementById('signup-success').style.display = '';
+      });
+    })();
+  </script>
 </body>
 </html>
