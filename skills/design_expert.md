@@ -151,7 +151,61 @@ The primary audience is smartphone users. Every design decision must pass the mo
 - On mobile: `width/height: 54px`, moved to `right: 16px; bottom: 20px` to avoid overlap with content.
 - `z-index: 90` — below navbar (z-index: 100) but above all page content.
 
-## 8. New Components Checklist
+## 8. Navbar & Footer — Identical Across All Pages (MANDATORY)
+
+### Navbar (copy-paste template — never deviate)
+Every page must have **exactly** this navbar structure inside `<header class="navbar">`:
+
+```html
+<header class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">CHARMING <span>by Vik</span></a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html">דף הבית</a></li>
+        <li><a href="workshops.html">סדנאות</a></li>
+        <li><a href="shop.html">חנות</a></li>
+        <li><a href="workshops.html#faq">שאלות ותשובות</a></li>
+        <li><a href="workshops.html#signup">צור קשר</a></li>
+        <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button id="nav-user-btn" class="nav-icon-btn" aria-label="אזור אישי" title="אזור אישי" data-logged-in="0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <button id="nav-cart-btn" class="nav-icon-btn" aria-label="עגלת קניות" title="עגלת קניות" style="position:relative;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-badge" style="display:none;">0</span>
+      </button>
+    </div>
+    <button class="nav-hamburger" aria-label="פתח תפריט" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+```
+
+**Required elements — must appear on every page:**
+- Logo link → `index.html`
+- All 6 nav links (exact order and text above)
+- `#nav-user-btn` — user/profile icon (with `data-logged-in="0"`)
+- `#nav-cart-btn` — cart icon with `.cart-badge` span
+- `.nav-hamburger` — 3 spans for mobile menu
+
+### Footer — Identical Across All Pages (MANDATORY)
+The footer `<footer class="site-footer">` must contain `<div class="container footer-grid">` with **4 columns** (`grid-template-columns: 2fr 1fr 1fr 1fr`):
+
+1. **`.footer-brand`** — logo, tagline, social icons (TikTok, Instagram, Facebook, WhatsApp)
+2. **`.footer-links` — ניווט מהיר** — pill links (`footer-policy-btn`) to: דף הבית, הקולקציה/החנות, סדנאות, צור קשר
+3. **`.footer-links` — מדיניות פרטיות ותנאי האתר** — pill links to: `legal.html#returns`, `legal.html#warranty`, `legal.html#shipping`, `legal.html#terms`, `legal.html#disclaimer`
+4. **`.footer-contact`** — contact section with WhatsApp link, TikTok link, shipping note
+
+**When creating a new page**, always copy the navbar and footer from an existing up-to-date page (e.g. `index.html` or `workshops.html`) and update only the active nav link if needed.
+
+---
+
+## 9. New Components Checklist
 
 Before adding any new UI component:
 
