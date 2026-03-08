@@ -15,15 +15,17 @@
       <a href="index.html" class="logo">CHARMING <span>by Vik</span></a>
       <nav>
         <ul class="nav-links">
-          <li><a href="index.html">דף הבית</a></li>
-          <li><a href="workshops.html">סדנאות</a></li>
-          <li><a href="shop.html">חנות</a></li>
-          <li><a href="workshops.html#faq">שאלות ותשובות</a></li>
-          <li><a href="workshops.html#signup">צור קשר</a></li>
-          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a></li>
+          <li><a href="index.html" data-i18n="nav_home">דף הבית</a></li>
+          <li><a href="workshops.html" data-i18n="nav_workshops">סדנאות</a></li>
+          <li><a href="shop.html" data-i18n="nav_shop">חנות</a></li>
+          <li><a href="workshops.html#faq" data-i18n="nav_faq">שאלות ותשובות</a></li>
+          <li><a href="workshops.html#signup" data-i18n="nav_contact">צור קשר</a></li>
+          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn" data-i18n="nav_login">התחברות / הרשמה</a></li>
+          <li class="lang-toggle-mobile"><button class="lang-toggle" aria-label="Switch to English">EN</button></li>
         </ul>
       </nav>
       <div class="nav-actions">
+        <button class="lang-toggle lang-toggle-desktop" aria-label="Switch to English">EN</button>
         <button id="nav-user-btn" class="nav-icon-btn" aria-label="אזור אישי" title="אזור אישי" data-logged-in="0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
@@ -43,8 +45,8 @@
   <!-- ===== PAGE HEADER ===== -->
   <section class="terms-hero">
     <div class="container">
-      <span class="section-eyebrow">מידע משפטי</span>
-      <h1 class="terms-hero-title">תקנון ומדיניות פרטיות</h1>
+      <span class="section-eyebrow" data-i18n="terms_eyebrow">מידע משפטי</span>
+      <h1 class="terms-hero-title" data-i18n="terms_title">תקנון ומדיניות פרטיות</h1>
       <p class="terms-hero-subtitle">Charming by Vik</p>
     </div>
   </section>
@@ -53,38 +55,38 @@
   <section class="terms-toc-section">
     <div class="container">
       <nav class="terms-toc" aria-label="תוכן עניינים">
-        <h2 class="terms-toc-title">תוכן עניינים</h2>
+        <h2 class="terms-toc-title" data-i18n="terms_toc">תוכן עניינים</h2>
 
         <div class="terms-toc-group">
-          <p class="terms-toc-group-label">תנאי שימוש</p>
+          <p class="terms-toc-group-label" data-i18n="terms_group_a">תנאי שימוש</p>
           <ol class="terms-toc-list">
-            <li><a href="#intro">מבוא והסכמה לתנאים</a></li>
-            <li><a href="#business">פרטי העסק</a></li>
-            <li><a href="#usage">שימוש באתר</a></li>
-            <li><a href="#registration">הרשמה לאתר ומועדון לקוחות</a></li>
-            <li><a href="#purchasing">רכישת מוצרים באתר</a></li>
-            <li><a href="#payment">תשלום וסליקה</a></li>
-            <li><a href="#availability">זמינות מוצרים ושגיאות באתר</a></li>
-            <li><a href="#shipping">מדיניות משלוחים</a></li>
-            <li><a href="#returns">מדיניות ביטולים והחזרות — תכשיטים</a></li>
-            <li><a href="#workshops">הזמנת סדנאות תכשיטנות</a></li>
-            <li><a href="#workshop-cancellation">ביטול סדנאות</a></li>
-            <li><a href="#warranty">אחריות על תכשיטים</a></li>
-            <li><a href="#workshop-liability">אחריות במהלך סדנאות</a></li>
-            <li><a href="#photography">צילום ויחסי ציבור</a></li>
+            <li><a href="#intro" data-i18n="terms_1">מבוא והסכמה לתנאים</a></li>
+            <li><a href="#business" data-i18n="terms_2">פרטי העסק</a></li>
+            <li><a href="#usage" data-i18n="terms_3">שימוש באתר</a></li>
+            <li><a href="#registration" data-i18n="terms_4">הרשמה לאתר ומועדון לקוחות</a></li>
+            <li><a href="#purchasing" data-i18n="terms_5">רכישת מוצרים באתר</a></li>
+            <li><a href="#payment" data-i18n="terms_6">תשלום וסליקה</a></li>
+            <li><a href="#availability" data-i18n="terms_7">זמינות מוצרים ושגיאות באתר</a></li>
+            <li><a href="#shipping" data-i18n="terms_8">מדיניות משלוחים</a></li>
+            <li><a href="#returns" data-i18n="terms_9">מדיניות ביטולים והחזרות — תכשיטים</a></li>
+            <li><a href="#workshops" data-i18n="terms_10">הזמנת סדנאות תכשיטנות</a></li>
+            <li><a href="#workshop-cancellation" data-i18n="terms_11">ביטול סדנאות</a></li>
+            <li><a href="#warranty" data-i18n="terms_12">אחריות על תכשיטים</a></li>
+            <li><a href="#workshop-liability" data-i18n="terms_13">אחריות במהלך סדנאות</a></li>
+            <li><a href="#photography" data-i18n="terms_14">צילום ויחסי ציבור</a></li>
           </ol>
         </div>
 
         <div class="terms-toc-group">
-          <p class="terms-toc-group-label">מדיניות פרטיות</p>
+          <p class="terms-toc-group-label" data-i18n="terms_group_b">מדיניות פרטיות</p>
           <ol class="terms-toc-list" start="15">
-            <li><a href="#data-collection">איסוף ושימוש במידע</a></li>
-            <li><a href="#data-security">אבטחת מידע והעברה לצד שלישי</a></li>
-            <li><a href="#cookies">שימוש בעוגיות (Cookies)</a></li>
-            <li><a href="#newsletter">דיוור ישיר וניוזלטר</a></li>
-            <li><a href="#ip">קניין רוחני</a></li>
-            <li><a href="#liability">הגבלת אחריות וכוח עליון</a></li>
-            <li><a href="#jurisdiction">שינוי התקנון וסמכות שיפוט</a></li>
+            <li><a href="#data-collection" data-i18n="terms_15">איסוף ושימוש במידע</a></li>
+            <li><a href="#data-security" data-i18n="terms_16">אבטחת מידע והעברה לצד שלישי</a></li>
+            <li><a href="#cookies" data-i18n="terms_17">שימוש בעוגיות (Cookies)</a></li>
+            <li><a href="#newsletter" data-i18n="terms_18">דיוור ישיר וניוזלטר</a></li>
+            <li><a href="#ip" data-i18n="terms_19">קניין רוחני</a></li>
+            <li><a href="#liability" data-i18n="terms_20">הגבלת אחריות וכוח עליון</a></li>
+            <li><a href="#jurisdiction" data-i18n="terms_21">שינוי התקנון וסמכות שיפוט</a></li>
           </ol>
         </div>
       </nav>
@@ -98,181 +100,181 @@
 
         <!-- Part heading: Terms of Use -->
         <div class="terms-part-heading">
-          <span class="terms-part-label">חלק א׳</span>
-          <h2 class="terms-part-title">תנאי שימוש</h2>
+          <span class="terms-part-label" data-i18n="terms_part_a">חלק א׳</span>
+          <h2 class="terms-part-title" data-i18n="terms_part_a_title">תנאי שימוש</h2>
         </div>
 
         <!-- 1 -->
         <div class="terms-block" id="intro">
-          <h2>1. מבוא והסכמה לתנאים</h2>
-          <p>ברוכים הבאים לאתר Charming by Vik (להלן: "האתר"). האתר משמש כחנות מקוונת למכירת תכשיטים וכפלטפורמה להזמנת סדנאות תכשיטנות פרטיות. השימוש באתר, לרבות גלישה, הרשמה למועדון לקוחות, ביצוע הזמנה או רכישה, מהווים הסכמה מלאה מצד המשתמש לכל תנאי התקנון ומדיניות הפרטיות המפורטים במסמך זה. במידה ואינך מסכים לתנאים אלו, הנך מתבקש להימנע משימוש באתר.</p>
+          <h2 data-i18n="terms_s1_title">1. מבוא והסכמה לתנאים</h2>
+          <p data-i18n="terms_s1_text">ברוכים הבאים לאתר Charming by Vik (להלן: "האתר"). האתר משמש כחנות מקוונת למכירת תכשיטים וכפלטפורמה להזמנת סדנאות תכשיטנות פרטיות. השימוש באתר, לרבות גלישה, הרשמה למועדון לקוחות, ביצוע הזמנה או רכישה, מהווים הסכמה מלאה מצד המשתמש לכל תנאי התקנון ומדיניות הפרטיות המפורטים במסמך זה. במידה ואינך מסכים לתנאים אלו, הנך מתבקש להימנע משימוש באתר.</p>
         </div>
 
         <!-- 2 -->
         <div class="terms-block" id="business">
-          <h2>2. פרטי העסק</h2>
+          <h2 data-i18n="terms_s2_title">2. פרטי העסק</h2>
           <ul>
-            <li><strong>שם העסק:</strong> Charming by Vik</li>
-            <li><strong>תחום פעילות:</strong> מכירת תכשיטים והפעלת סדנאות תכשיטנות.</li>
+            <li><strong data-i18n="terms_s2_name">שם העסק:</strong> Charming by Vik</li>
+            <li><strong data-i18n="terms_s2_activity">תחום פעילות:</strong> מכירת תכשיטים והפעלת סדנאות תכשיטנות.</li>
           </ul>
-          <p>הנהלת האתר רשאית לעדכן את פרטי הקשר מעת לעת. ניתן ליצור עמנו קשר דרך עמוד "צור קשר" באתר.</p>
+          <p data-i18n="terms_s2_update">הנהלת האתר רשאית לעדכן את פרטי הקשר מעת לעת. ניתן ליצור עמנו קשר דרך עמוד "צור קשר" באתר.</p>
         </div>
 
         <!-- 3 -->
         <div class="terms-block" id="usage">
-          <h2>3. שימוש באתר</h2>
-          <p>רכישה באתר מותרת לבני 18 ומעלה בלבד. קטין מתחת לגיל 18 רשאי להשתמש באתר או לבצע הזמנה רק באישור הורה או אפוטרופוס. המשתמש מתחייב לעשות שימוש באתר בהתאם לחוק, בתום לב, וללא פגיעה בזכויות האתר או צדדים שלישיים.</p>
+          <h2 data-i18n="terms_s3_title">3. שימוש באתר</h2>
+          <p data-i18n="terms_s3_text">רכישה באתר מותרת לבני 18 ומעלה בלבד. קטין מתחת לגיל 18 רשאי להשתמש באתר או לבצע הזמנה רק באישור הורה או אפוטרופוס. המשתמש מתחייב לעשות שימוש באתר בהתאם לחוק, בתום לב, וללא פגיעה בזכויות האתר או צדדים שלישיים.</p>
         </div>
 
         <!-- 4 -->
         <div class="terms-block" id="registration">
-          <h2>4. הרשמה לאתר ומועדון לקוחות</h2>
-          <p>האתר מאפשר פתיחת חשבון משתמש לצורך נוחות הרכישה וקבלת הטבות מועדון.</p>
+          <h2 data-i18n="terms_s4_title">4. הרשמה לאתר ומועדון לקוחות</h2>
+          <p data-i18n="terms_s4_text">האתר מאפשר פתיחת חשבון משתמש לצורך נוחות הרכישה וקבלת הטבות מועדון.</p>
           <ul>
-            <li>המשתמש מתחייב למסור מידע נכון, מדויק ועדכני.</li>
-            <li>המשתמש אחראי לשמור על סודיות פרטי הגישה לחשבונו.</li>
-            <li>הנהלת האתר רשאית להשעות או למחוק חשבון משתמש במקרה של שימוש בלתי חוקי, מסירת מידע כוזב או הפרת תנאי התקנון.</li>
+            <li data-i18n="terms_s4_li1">המשתמש מתחייב למסור מידע נכון, מדויק ועדכני.</li>
+            <li data-i18n="terms_s4_li2">המשתמש אחראי לשמור על סודיות פרטי הגישה לחשבונו.</li>
+            <li data-i18n="terms_s4_li3">הנהלת האתר רשאית להשעות או למחוק חשבון משתמש במקרה של שימוש בלתי חוקי, מסירת מידע כוזב או הפרת תנאי התקנון.</li>
           </ul>
         </div>
 
         <!-- 5 -->
         <div class="terms-block" id="purchasing">
-          <h2>5. רכישת מוצרים באתר</h2>
-          <p>האתר מאפשר רכישת תכשיטים המוצגים בקטלוג. תמונות המוצרים נועדו להמחשה בלבד. מאחר שמדובר בתכשיטים בעבודת יד, ייתכנו הבדלים קלים בין התמונה למוצר בפועל. הנהלת האתר שומרת לעצמה את הזכות לעדכן מחירים, מבצעים ומלאי בכל עת.</p>
+          <h2 data-i18n="terms_s5_title">5. רכישת מוצרים באתר</h2>
+          <p data-i18n="terms_s5_text">האתר מאפשר רכישת תכשיטים המוצגים בקטלוג. תמונות המוצרים נועדו להמחשה בלבד. מאחר שמדובר בתכשיטים בעבודת יד, ייתכנו הבדלים קלים בין התמונה למוצר בפועל. הנהלת האתר שומרת לעצמה את הזכות לעדכן מחירים, מבצעים ומלאי בכל עת.</p>
         </div>
 
         <!-- 6 -->
         <div class="terms-block" id="payment">
-          <h2>6. תשלום וסליקה</h2>
-          <p>התשלום באתר מתבצע באמצעות כרטיס אשראי או אמצעי תשלום אחרים המוצגים באתר. סליקת האשראי מתבצעת באמצעות חברת סליקה חיצונית ומאובטחת בתקן PCI-DSS. פרטי האשראי אינם נשמרים בשרתי האתר בשום שלב.</p>
+          <h2 data-i18n="terms_s6_title">6. תשלום וסליקה</h2>
+          <p data-i18n="terms_s6_text">התשלום באתר מתבצע באמצעות כרטיס אשראי או אמצעי תשלום אחרים המוצגים באתר. סליקת האשראי מתבצעת באמצעות חברת סליקה חיצונית ומאובטחת בתקן PCI-DSS. פרטי האשראי אינם נשמרים בשרתי האתר בשום שלב.</p>
         </div>
 
         <!-- 7 -->
         <div class="terms-block" id="availability">
-          <h2>7. זמינות מוצרים ושגיאות באתר</h2>
-          <p>הנהלת האתר עושה מאמצים להציג מידע מדויק ועדכני. עם זאת, ייתכנו טעויות בתיאור מוצר, במחיר או בזמינות. במקרה של טעות כאמור, הנהלת האתר תהיה רשאית לבטל את העסקה ולהשיב ללקוח את כספו במלואו.</p>
+          <h2 data-i18n="terms_s7_title">7. זמינות מוצרים ושגיאות באתר</h2>
+          <p data-i18n="terms_s7_text">הנהלת האתר עושה מאמצים להציג מידע מדויק ועדכני. עם זאת, ייתכנו טעויות בתיאור מוצר, במחיר או בזמינות. במקרה של טעות כאמור, הנהלת האתר תהיה רשאית לבטל את העסקה ולהשיב ללקוח את כספו במלואו.</p>
         </div>
 
         <!-- 8 -->
         <div class="terms-block" id="shipping">
-          <h2>8. מדיניות משלוחים</h2>
-          <p>משלוחי המוצרים מתבצעים באמצעות חברת שילוח חיצונית.</p>
+          <h2 data-i18n="terms_s8_title">8. מדיניות משלוחים</h2>
+          <p data-i18n="terms_s8_text">משלוחי המוצרים מתבצעים באמצעות חברת שילוח חיצונית.</p>
           <ul>
-            <li>זמן אספקה משוער: 3–7 ימי עסקים (ימי עסקים אינם כוללים שישי, שבת, ערבי חג וחגים).</li>
-            <li>ייתכנו עיכובים שאינם בשליטת האתר, כגון עיכובים של חברת השילוח או נסיבות חיצוניות.</li>
+            <li data-i18n="terms_s8_li1">זמן אספקה משוער: 3–7 ימי עסקים (ימי עסקים אינם כוללים שישי, שבת, ערבי חג וחגים).</li>
+            <li data-i18n="terms_s8_li2">ייתכנו עיכובים שאינם בשליטת האתר, כגון עיכובים של חברת השילוח או נסיבות חיצוניות.</li>
           </ul>
         </div>
 
         <!-- 9 -->
         <div class="terms-block" id="returns">
-          <h2>9. מדיניות ביטולים והחזרות — תכשיטים</h2>
+          <h2 data-i18n="terms_s9_title">9. מדיניות ביטולים והחזרות — תכשיטים</h2>
 
-          <h3>תכשיטי קטלוג</h3>
-          <p>ניתן לבטל עסקה תוך 14 ימים מיום קבלת המוצר בהתאם לחוק הגנת הצרכן. התנאים לביטול הם שהמוצר לא נעשה בו שימוש והוא מוחזר באריזתו המקורית. דמי הביטול יהיו 5% מערך העסקה או 100 ש"ח (הנמוך מביניהם). עלות משלוח החזרה חלה על הלקוח.</p>
+          <h3 data-i18n="terms_s9_h3a">תכשיטי קטלוג</h3>
+          <p data-i18n="terms_s9_text_a">ניתן לבטל עסקה תוך 14 ימים מיום קבלת המוצר בהתאם לחוק הגנת הצרכן. התנאים לביטול הם שהמוצר לא נעשה בו שימוש והוא מוחזר באריזתו המקורית. דמי הביטול יהיו 5% מערך העסקה או 100 ש"ח (הנמוך מביניהם). עלות משלוח החזרה חלה על הלקוח.</p>
 
-          <h3>תכשיטים בעיצוב אישי</h3>
-          <p>תכשיטים שיוצרו בהתאמה אישית ללקוח (לדוגמה חריטה, בחירת צ'ארמים ספציפית או התאמה מיוחדת) אינם ניתנים לביטול או החזרה בהתאם לחוק הגנת הצרכן.</p>
+          <h3 data-i18n="terms_s9_h3b">תכשיטים בעיצוב אישי</h3>
+          <p data-i18n="terms_s9_text_b">תכשיטים שיוצרו בהתאמה אישית ללקוח (לדוגמה חריטה, בחירת צ'ארמים ספציפית או התאמה מיוחדת) אינם ניתנים לביטול או החזרה בהתאם לחוק הגנת הצרכן.</p>
         </div>
 
         <!-- 10 -->
         <div class="terms-block" id="workshops">
-          <h2>10. הזמנת סדנאות תכשיטנות</h2>
+          <h2 data-i18n="terms_s10_title">10. הזמנת סדנאות תכשיטנות</h2>
 
-          <h3>אופי השירות</h3>
-          <p>הסדנאות מועברות בבית הלקוח או במקום שיבחר על ידי הלקוח, בתיאום מראש.</p>
+          <h3 data-i18n="terms_s10_h3a">אופי השירות</h3>
+          <p data-i18n="terms_s10_text_a">הסדנאות מועברות בבית הלקוח או במקום שיבחר על ידי הלקוח, בתיאום מראש.</p>
 
-          <h3>אזורי פעילות</h3>
-          <p>הגעה לסדנאות באזור המרכז כלולה במחיר. הגעה לאזורים מחוץ לאזור המרכז עשויה להיות כרוכה בתוספת תשלום שתסוכם מראש.</p>
+          <h3 data-i18n="terms_s10_h3b">אזורי פעילות</h3>
+          <p data-i18n="terms_s10_text_b">הגעה לסדנאות באזור המרכז כלולה במחיר. הגעה לאזורים מחוץ לאזור המרכז עשויה להיות כרוכה בתוספת תשלום שתסוכם מראש.</p>
 
-          <h3>תמחור הסדנה</h3>
-          <p>מחיר הסדנה נקבע לפי מדרגות משתתפות שנקבעות מראש. במידה וביום הסדנה הגיעו פחות משתתפות מהכמות שסוכמה, לא יינתן החזר או שינוי במחיר, עקב היערכות מראש הכוללת ציוד, חומרים וצוות.</p>
+          <h3 data-i18n="terms_s10_h3c">תמחור הסדנה</h3>
+          <p data-i18n="terms_s10_text_c">מחיר הסדנה נקבע לפי מדרגות משתתפות שנקבעות מראש. במידה וביום הסדנה הגיעו פחות משתתפות מהכמות שסוכמה, לא יינתן החזר או שינוי במחיר, עקב היערכות מראש הכוללת ציוד, חומרים וצוות.</p>
         </div>
 
         <!-- 11 -->
         <div class="terms-block" id="workshop-cancellation">
-          <h2>11. ביטול סדנאות</h2>
+          <h2 data-i18n="terms_s11_title">11. ביטול סדנאות</h2>
           <ul>
-            <li>ביטול סדנה עד 7 ימי עסקים לפני מועד הסדנה יתבצע ללא דמי ביטול (למעט מקדמה אם נגבתה).</li>
-            <li>ביטול בפחות מ-7 ימים לפני הסדנה יחויב בדמי ביטול של 20% מעלות הסדנה הכוללת.</li>
+            <li data-i18n="terms_s11_li1">ביטול סדנה עד 7 ימי עסקים לפני מועד הסדנה יתבצע ללא דמי ביטול (למעט מקדמה אם נגבתה).</li>
+            <li data-i18n="terms_s11_li2">ביטול בפחות מ-7 ימים לפני הסדנה יחויב בדמי ביטול של 20% מעלות הסדנה הכוללת.</li>
           </ul>
         </div>
 
         <!-- 12 -->
         <div class="terms-block" id="warranty">
-          <h2>12. אחריות על תכשיטים</h2>
-          <p>התכשיטים עשויים מפלדת אל-חלד (Stainless Steel) הידועה כחומר עמיד והיפואלרגני. האחריות תקפה למשך 3 חודשים מיום הרכישה וחלה על פגמי ייצור בלבד.</p>
-          <p>האחריות אינה מכסה:</p>
+          <h2 data-i18n="terms_s12_title">12. אחריות על תכשיטים</h2>
+          <p data-i18n="terms_s12_text_a">התכשיטים עשויים מפלדת אל-חלד (Stainless Steel) הידועה כחומר עמיד והיפואלרגני. האחריות תקפה למשך 3 חודשים מיום הרכישה וחלה על פגמי ייצור בלבד.</p>
+          <p data-i18n="terms_s12_text_b">האחריות אינה מכסה:</p>
           <ul>
-            <li>קרע בשרשרת, שבר, שריטות</li>
-            <li>אובדן</li>
-            <li>בלאי טבעי</li>
-            <li>נזק כתוצאה משימוש לא סביר או מגע עם כימיקלים חזקים</li>
+            <li data-i18n="terms_s12_li1">קרע בשרשרת, שבר, שריטות</li>
+            <li data-i18n="terms_s12_li2">אובדן</li>
+            <li data-i18n="terms_s12_li3">בלאי טבעי</li>
+            <li data-i18n="terms_s12_li4">נזק כתוצאה משימוש לא סביר או מגע עם כימיקלים חזקים</li>
           </ul>
         </div>
 
         <!-- 13 -->
         <div class="terms-block" id="workshop-liability">
-          <h2>13. אחריות במהלך סדנאות</h2>
-          <p>הסדנאות מיועדות לפעילות יצירה חווייתית. האחריות על המשתתפות (בפרט קטינות) במהלך הסדנה חלה על ההורים או המבוגרים האחראים הנוכחים במקום. מזמין הסדנה אחראי לספק סביבת עבודה בטוחה ומתאימה לפעילות.</p>
+          <h2 data-i18n="terms_s13_title">13. אחריות במהלך סדנאות</h2>
+          <p data-i18n="terms_s13_text">הסדנאות מיועדות לפעילות יצירה חווייתית. האחריות על המשתתפות (בפרט קטינות) במהלך הסדנה חלה על ההורים או המבוגרים האחראים הנוכחים במקום. מזמין הסדנה אחראי לספק סביבת עבודה בטוחה ומתאימה לפעילות.</p>
         </div>
 
         <!-- 14 -->
         <div class="terms-block" id="photography">
-          <h2>14. צילום ויחסי ציבור — תיעוד סדנאות</h2>
-          <p>במהלך הסדנאות, ייתכן ויצולמו תמונות או סרטונים המיועדים לשימוש ברשתות החברתיות של צ'ארמינג (Instagram, TikTok וכו') ובאתר לצורכי שיווק. משתתפת שאינה מעוניינת להצטלם או שילדיה יצולמו, מתבקשת להודיע על כך לצוות בתחילת הסדנה, ובקשתה תכובד במלואה.</p>
+          <h2 data-i18n="terms_s14_title">14. צילום ויחסי ציבור — תיעוד סדנאות</h2>
+          <p data-i18n="terms_s14_text">במהלך הסדנאות, ייתכן ויצולמו תמונות או סרטונים המיועדים לשימוש ברשתות החברתיות של צ'ארמינג (Instagram, TikTok וכו') ובאתר לצורכי שיווק. משתתפת שאינה מעוניינת להצטלם או שילדיה יצולמו, מתבקשת להודיע על כך לצוות בתחילת הסדנה, ובקשתה תכובד במלואה.</p>
         </div>
 
         <!-- Divider: Privacy Policy -->
         <div class="terms-part-heading terms-part-heading--privacy">
-          <span class="terms-part-label">חלק ב׳</span>
-          <h2 class="terms-part-title">מדיניות פרטיות</h2>
+          <span class="terms-part-label" data-i18n="terms_part_b">חלק ב׳</span>
+          <h2 class="terms-part-title" data-i18n="terms_part_b_title">מדיניות פרטיות</h2>
         </div>
 
         <!-- 15 -->
         <div class="terms-block" id="data-collection">
-          <h2>15. איסוף ושימוש במידע</h2>
-          <p>בעת הרשמה לאתר, הצטרפות למועדון או ביצוע הזמנה, המשתמש מוסר מרצונו החופשי מידע אישי (כגון שם, כתובת, טלפון ודוא"ל). המידע נשמר במאגרי האתר ומשמש לצורך תפעול ההזמנות, מתן שירות לקוחות, ושיפור חוויית המשתמש.</p>
+          <h2 data-i18n="terms_s15_title">15. איסוף ושימוש במידע</h2>
+          <p data-i18n="terms_s15_text">בעת הרשמה לאתר, הצטרפות למועדון או ביצוע הזמנה, המשתמש מוסר מרצונו החופשי מידע אישי (כגון שם, כתובת, טלפון ודוא"ל). המידע נשמר במאגרי האתר ומשמש לצורך תפעול ההזמנות, מתן שירות לקוחות, ושיפור חוויית המשתמש.</p>
         </div>
 
         <!-- 16 -->
         <div class="terms-block" id="data-security">
-          <h2>16. אבטחת מידע והעברה לצד שלישי</h2>
-          <p>הנהלת האתר נוקטת באמצעי זהירות מקובלים על מנת לשמור, ככל האפשר, על סודיות המידע. הנהלת האתר מתחייבת לא להעביר את פרטי הלקוחות לצד שלישי (חברות פרסום וכו'), למעט גורמים הנדרשים לצורך השלמת הרכישה ואספקת השירות (כגון חברת האשראי וחברת השליחויות), או במקרה של דרישה חוקית (צו בית משפט).</p>
+          <h2 data-i18n="terms_s16_title">16. אבטחת מידע והעברה לצד שלישי</h2>
+          <p data-i18n="terms_s16_text">הנהלת האתר נוקטת באמצעי זהירות מקובלים על מנת לשמור, ככל האפשר, על סודיות המידע. הנהלת האתר מתחייבת לא להעביר את פרטי הלקוחות לצד שלישי (חברות פרסום וכו'), למעט גורמים הנדרשים לצורך השלמת הרכישה ואספקת השירות (כגון חברת האשראי וחברת השליחויות), או במקרה של דרישה חוקית (צו בית משפט).</p>
         </div>
 
         <!-- 17 -->
         <div class="terms-block" id="cookies">
-          <h2>17. שימוש בעוגיות (Cookies)</h2>
-          <p>האתר עשוי לעשות שימוש ב"עוגיות" (Cookies) לצורך תפעולו השוטף והתקין, ובכלל זה כדי לאסוף נתונים סטטיסטיים אודות השימוש באתר, לאימות פרטים, ולהתאמת האתר להעדפות האישיות של המשתמש. ניתן להימנע מכך על ידי שינוי ההגדרות בדפדפן.</p>
+          <h2 data-i18n="terms_s17_title">17. שימוש בעוגיות (Cookies)</h2>
+          <p data-i18n="terms_s17_text">האתר עשוי לעשות שימוש ב"עוגיות" (Cookies) לצורך תפעולו השוטף והתקין, ובכלל זה כדי לאסוף נתונים סטטיסטיים אודות השימוש באתר, לאימות פרטים, ולהתאמת האתר להעדפות האישיות של המשתמש. ניתן להימנע מכך על ידי שינוי ההגדרות בדפדפן.</p>
         </div>
 
         <!-- 18 -->
         <div class="terms-block" id="newsletter">
-          <h2>18. דיוור ישיר וניוזלטר</h2>
-          <p>הרשמה למועדון הלקוחות או סימון התיבה המתאימה בתהליך הרכישה, מהווים הסכמה מפורשת לקבלת דיוור ישיר, ניוזלטר, דברי פרסומת, מבצעים ועדכונים מצ'ארמינג באמצעות דוא"ל, SMS או WhatsApp, וזאת בהתאם לחוק התקשורת (בזק ושידורים), סעיף 30א. המשתמש רשאי לחזור בו מהסכמתו ולהסיר את עצמו מרשימת התפוצה בכל עת, באמצעות לחיצה על קישור "הסר" המופיע בהודעות או בפנייה לשירות הלקוחות.</p>
+          <h2 data-i18n="terms_s18_title">18. דיוור ישיר וניוזלטר</h2>
+          <p data-i18n="terms_s18_text">הרשמה למועדון הלקוחות או סימון התיבה המתאימה בתהליך הרכישה, מהווים הסכמה מפורשת לקבלת דיוור ישיר, ניוזלטר, דברי פרסומת, מבצעים ועדכונים מצ'ארמינג באמצעות דוא"ל, SMS או WhatsApp, וזאת בהתאם לחוק התקשורת (בזק ושידורים), סעיף 30א. המשתמש רשאי לחזור בו מהסכמתו ולהסיר את עצמו מרשימת התפוצה בכל עת, באמצעות לחיצה על קישור "הסר" המופיע בהודעות או בפנייה לשירות הלקוחות.</p>
         </div>
 
         <!-- 19 -->
         <div class="terms-block" id="ip">
-          <h2>19. קניין רוחני</h2>
-          <p>כל זכויות הקניין הרוחני באתר שייכות באופן בלעדי ל-Charming by Vik. הדבר כולל בין היתר: עיצובי התכשיטים, התמונות, הטקסטים, הלוגו, מבנה הסדנאות ועיצוב האתר. אין להעתיק, לשכפל, להפיץ או להשתמש במידע מהאתר ללא אישור מפורש בכתב.</p>
+          <h2 data-i18n="terms_s19_title">19. קניין רוחני</h2>
+          <p data-i18n="terms_s19_text">כל זכויות הקניין הרוחני באתר שייכות באופן בלעדי ל-Charming by Vik. הדבר כולל בין היתר: עיצובי התכשיטים, התמונות, הטקסטים, הלוגו, מבנה הסדנאות ועיצוב האתר. אין להעתיק, לשכפל, להפיץ או להשתמש במידע מהאתר ללא אישור מפורש בכתב.</p>
         </div>
 
         <!-- 20 -->
         <div class="terms-block" id="liability">
-          <h2>20. הגבלת אחריות וכוח עליון</h2>
-          <p>האתר לא יהיה אחראי לנזקים ישירים או עקיפים הנובעים משימוש באתר או במוצרים, מעבר לאחריות הקבועה בחוק. הנהלת האתר לא תהיה אחראית לעיכובים או אי יכולת לספק שירותים עקב נסיבות של כוח עליון (כגון מלחמה, מגפה, מצבי חירום, שביתות וכו').</p>
+          <h2 data-i18n="terms_s20_title">20. הגבלת אחריות וכוח עליון</h2>
+          <p data-i18n="terms_s20_text">האתר לא יהיה אחראי לנזקים ישירים או עקיפים הנובעים משימוש באתר או במוצרים, מעבר לאחריות הקבועה בחוק. הנהלת האתר לא תהיה אחראית לעיכובים או אי יכולת לספק שירותים עקב נסיבות של כוח עליון (כגון מלחמה, מגפה, מצבי חירום, שביתות וכו').</p>
         </div>
 
         <!-- 21 -->
         <div class="terms-block" id="jurisdiction">
-          <h2>21. שינוי התקנון וסמכות שיפוט</h2>
-          <p>הנהלת האתר רשאית לעדכן את התקנון ומדיניות הפרטיות מעת לעת. על מסמך זה יחולו דיני מדינת ישראל בלבד. סמכות השיפוט הבלעדית תהיה לבתי המשפט במחוז תל אביב.</p>
+          <h2 data-i18n="terms_s21_title">21. שינוי התקנון וסמכות שיפוט</h2>
+          <p data-i18n="terms_s21_text">הנהלת האתר רשאית לעדכן את התקנון ומדיניות הפרטיות מעת לעת. על מסמך זה יחולו דיני מדינת ישראל בלבד. סמכות השיפוט הבלעדית תהיה לבתי המשפט במחוז תל אביב.</p>
         </div>
 
         <!-- Back to top -->
         <div class="terms-back-top">
-          <a href="#" class="terms-back-top-link">חזרה לראש העמוד</a>
+          <a href="#" class="terms-back-top-link" data-i18n="terms_back_top">חזרה לראש העמוד</a>
         </div>
 
       </div>
@@ -284,8 +286,8 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <h3 class="footer-logo">CHARMING by Vik</h3>
-        <p>תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
-        <span class="footer-tagline">עיצוב • יצירה • אהבה</span>
+        <p data-i18n="footer_desc">תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
+        <span class="footer-tagline" data-i18n="footer_tagline">עיצוב • יצירה • אהבה</span>
         <div class="footer-social">
           <!-- TikTok -->
           <a href="https://www.tiktok.com/@charming.by.vik" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="TikTok">
@@ -307,45 +309,45 @@
       </div>
 
       <div class="footer-links">
-        <h4>ניווט מהיר</h4>
+        <h4 data-i18n="footer_nav">ניווט מהיר</h4>
         <div class="footer-policy-btns">
-          <a href="index.html"      class="footer-policy-btn">דף הבית</a>
-          <a href="shop.html"       class="footer-policy-btn">החנות</a>
-          <a href="workshops.html"  class="footer-policy-btn">סדנאות</a>
-          <a href="#footer-contact" class="footer-policy-btn">צור קשר</a>
+          <a href="index.html"      class="footer-policy-btn" data-i18n="footer_home">דף הבית</a>
+          <a href="shop.html"       class="footer-policy-btn" data-i18n="footer_shop">החנות</a>
+          <a href="workshops.html"  class="footer-policy-btn" data-i18n="footer_workshops">סדנאות</a>
+          <a href="#footer-contact" class="footer-policy-btn" data-i18n="footer_contact_link">צור קשר</a>
         </div>
       </div>
 
       <div class="footer-links">
-        <h4>מדיניות פרטיות ותנאי האתר</h4>
+        <h4 data-i18n="footer_policy_title">מדיניות פרטיות ותנאי האתר</h4>
         <div class="footer-policy-btns">
-          <a href="legal.html#returns"    class="footer-policy-btn">מדיניות ביטולים</a>
-          <a href="legal.html#warranty"   class="footer-policy-btn">אחריות ותחזוקה</a>
-          <a href="legal.html#shipping"   class="footer-policy-btn">מדיניות משלוחים</a>
-          <a href="legal.html#terms"      class="footer-policy-btn">תנאי האתר</a>
-          <a href="legal.html#disclaimer" class="footer-policy-btn">מדיניות פרטיות</a>
+          <a href="legal.html#returns"    class="footer-policy-btn" data-i18n="footer_returns">מדיניות ביטולים</a>
+          <a href="legal.html#warranty"   class="footer-policy-btn" data-i18n="footer_warranty">אחריות ותחזוקה</a>
+          <a href="legal.html#shipping"   class="footer-policy-btn" data-i18n="footer_shipping">מדיניות משלוחים</a>
+          <a href="legal.html#terms"      class="footer-policy-btn" data-i18n="footer_terms">תנאי האתר</a>
+          <a href="legal.html#disclaimer" class="footer-policy-btn" data-i18n="footer_privacy">מדיניות פרטיות</a>
         </div>
       </div>
 
       <div class="footer-contact">
-        <h4>יצרו קשר</h4>
-        <p>לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
+        <h4 data-i18n="footer_contact_heading">יצרו קשר</h4>
+        <p data-i18n="footer_contact_text">לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%94%D7%92%D7%A2%D7%AA%D7%99%20%D7%9E%D7%94%D7%90%D7%AA%D7%A8%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="footer-wa-link">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-          דברי איתנו בוואצאפ
+          <span data-i18n="footer_wa">דברי איתנו בוואצאפ</span>
         </a>
         <a href="https://www.tiktok.com/@charming.by.vik" target="_blank" rel="noopener noreferrer" class="tiktok-link">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.83 1.55V6.79a4.85 4.85 0 0 1-1.06-.1z"/></svg>
           @charming.by.vik
         </a>
         <div class="footer-shipping">
-          <p>משלוח עד הבית: תוך 3 ימי עסקים</p>
-          <p>איסוף עצמי: מהסטודיו שלנו בראשון לציון</p>
+          <p data-i18n="footer_ship_note1">משלוח עד הבית: תוך 3 ימי עסקים</p>
+          <p data-i18n="footer_ship_note2">איסוף עצמי: מהסטודיו שלנו בראשון לציון</p>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
+      <p data-i18n="footer_copyright">© 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
     </div>
   </footer>
 
@@ -356,6 +358,7 @@
     </svg>
   </a>
 
+  <script src="lang.js"></script>
   <script src="main.js"></script>
   <script src="nav.js"></script>
   <script type="module" src="auth.js"></script>

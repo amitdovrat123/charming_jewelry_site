@@ -14,7 +14,7 @@
 
   <!-- ===== ANNOUNCEMENT BANNER ===== -->
   <div class="ticker-bar" role="banner" aria-label="הודעה">
-    <span class="announcement-text">✦ 10% הנחה בהזמנה הראשונה למצטרפות חדשות למועדון ✦</span>
+    <span class="announcement-text" data-i18n="announcement">✦ 10% הנחה בהזמנה הראשונה למצטרפות חדשות למועדון ✦</span>
   </div>
 
   <!-- Navigation -->
@@ -23,15 +23,17 @@
       <a href="index.html" class="logo">CHARMING <span>by Vik</span></a>
       <nav>
         <ul class="nav-links">
-          <li><a href="index.html">דף הבית</a></li>
-          <li><a href="workshops.html">סדנאות</a></li>
-          <li><a href="shop.html">חנות</a></li>
-          <li><a href="workshops.html#faq">שאלות ותשובות</a></li>
-          <li><a href="workshops.html#signup">צור קשר</a></li>
-          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a></li>
+          <li><a href="index.html" data-i18n="nav_home">דף הבית</a></li>
+          <li><a href="workshops.html" data-i18n="nav_workshops">סדנאות</a></li>
+          <li><a href="shop.html" data-i18n="nav_shop">חנות</a></li>
+          <li><a href="workshops.html#faq" data-i18n="nav_faq">שאלות ותשובות</a></li>
+          <li><a href="workshops.html#signup" data-i18n="nav_contact">צור קשר</a></li>
+          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn" data-i18n="nav_login">התחברות / הרשמה</a></li>
+          <li class="lang-toggle-mobile"><button class="lang-toggle" aria-label="Switch to English">EN</button></li>
         </ul>
       </nav>
       <div class="nav-actions">
+        <button class="lang-toggle lang-toggle-desktop" aria-label="Switch to English">EN</button>
         <button id="nav-user-btn" class="nav-icon-btn" aria-label="אזור אישי" title="אזור אישי" data-logged-in="0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
@@ -59,10 +61,10 @@
     </div>
     <div class="hero-content">
       <h1 class="hero-title">Make your own charms jewelry</h1>
-      <p class="hero-subtitle">ברוכה הבאה לעולם שבו כל תכשיט הוא יצירה ייחודית , מעוצבת , ומספרת את הסיפור שלך !</p>
+      <p class="hero-subtitle" data-i18n="hero_subtitle">ברוכה הבאה לעולם שבו כל תכשיט הוא יצירה ייחודית , מעוצבת , ומספרת את הסיפור שלך !</p>
       <div class="hero-cta-group">
-        <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A7%D7%95%D7%9D%20%D7%91%D7%A1%D7%93%D7%A0%D7%94%21" target="_blank" rel="noopener noreferrer" class="btn">הזמיני סדנה</a>
-        <a href="#" class="btn btn-outline" onclick="goToShop();return false;">לחנות שלנו</a>
+        <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A7%D7%95%D7%9D%20%D7%91%D7%A1%D7%93%D7%A0%D7%94%21" target="_blank" rel="noopener noreferrer" class="btn" data-i18n="hero_btn_workshop">הזמיני סדנה</a>
+        <a href="#" class="btn btn-outline" onclick="goToShop();return false;" data-i18n="hero_btn_shop">לחנות שלנו</a>
       </div>
     </div>
   </section>
@@ -80,7 +82,7 @@
             loading="lazy"
           />
           <div class="category-card-overlay">
-            <span class="category-card-label">שרשראות</span>
+            <span class="category-card-label" data-i18n="cat_necklaces">שרשראות</span>
           </div>
         </button>
 
@@ -92,7 +94,7 @@
             loading="lazy"
           />
           <div class="category-card-overlay">
-            <span class="category-card-label">צמידים</span>
+            <span class="category-card-label" data-i18n="cat_bracelets">צמידים</span>
           </div>
         </button>
 
@@ -104,7 +106,7 @@
             loading="lazy"
           />
           <div class="category-card-overlay">
-            <span class="category-card-label">עגילים</span>
+            <span class="category-card-label" data-i18n="cat_earrings">עגילים</span>
           </div>
         </button>
 
@@ -116,7 +118,7 @@
             loading="lazy"
           />
           <div class="category-card-overlay">
-            <span class="category-card-label">טבעות</span>
+            <span class="category-card-label" data-i18n="cat_rings">טבעות</span>
           </div>
         </button>
 
@@ -128,7 +130,7 @@
             loading="lazy"
           />
           <div class="category-card-overlay">
-            <span class="category-card-label">מארזי צ׳ארמינג</span>
+            <span class="category-card-label" data-i18n="cat_sets">מארזי צ׳ארמינג</span>
           </div>
         </button>
 
@@ -140,7 +142,7 @@
             loading="lazy"
           />
           <div class="category-card-overlay">
-            <span class="category-card-label">מוצרים נבחרים</span>
+            <span class="category-card-label" data-i18n="cat_featured">מוצרים נבחרים</span>
           </div>
         </button>
 
@@ -156,17 +158,17 @@
           <img src="images/צילום מסך 2026-03-08 ב-0.12.47.png" alt="ויק — Charming by Vik" loading="lazy" />
         </div>
         <div class="about-text">
-          <span class="section-eyebrow">קצת עלינו</span>
-          <h2 class="section-title">היי, אני ויק.</h2>
-          <p class="about-sub">המותג שלנו נולד מתוך אהבה עמוקה לאסתטיקה, לאנשים וליצירה.</p>
+          <span class="section-eyebrow" data-i18n="about_eyebrow">קצת עלינו</span>
+          <h2 class="section-title" data-i18n="about_title">היי, אני ויק.</h2>
+          <p class="about-sub" data-i18n="about_subtitle">המותג שלנו נולד מתוך אהבה עמוקה לאסתטיקה, לאנשים וליצירה.</p>
           <div class="about-divider"></div>
-          <p>
+          <p data-i18n="about_p1">
             במסעותיי באירופה נחשפתי לקונספט ייחודי של <strong>עיצוב תכשיטים אישי</strong> — צ'ארמים שכל אחד נושא משמעות, זיכרון, ורגש. החלטתי להביא את הרעיון הזה לישראל, אבל בסטנדרט אחר לגמרי.
           </p>
-          <p>
+          <p data-i18n="about_p2">
             <strong>איכות ללא פשרות.</strong> אנחנו משתמשים בשרשראות וצמידים עמידים מנירוסטה, מציפוי זהב ורוד וכסף — כדי להבטיח שתקבלי את התמורה הטובה ביותר.
           </p>
-          <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="btn">דברי איתנו</a>
+          <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="btn" data-i18n="about_btn">דברי איתנו</a>
         </div>
       </div>
     </div>
@@ -176,8 +178,8 @@
   <section class="journey-section">
     <div class="container">
       <div class="journey-header">
-        <h2 class="section-title">מסע הסדנה</h2>
-        <p class="journey-subtitle">מהרגע הראשון ועד התכשיט המוגמר</p>
+        <h2 class="section-title" data-i18n="journey_title">מסע הסדנה</h2>
+        <p class="journey-subtitle" data-i18n="journey_subtitle">מהרגע הראשון ועד התכשיט המוגמר</p>
       </div>
 
       <div class="journey-steps">
@@ -185,9 +187,9 @@
         <!-- Step 1 -->
         <div class="journey-step">
           <div class="journey-step-text">
-            <span class="step-label">שלב ראשון</span>
-            <h3>היכרות וגילוי</h3>
-            <p>
+            <span class="step-label" data-i18n="step1_label">שלב ראשון</span>
+            <h3 data-i18n="step1_title">היכרות וגילוי</h3>
+            <p data-i18n="step1_desc">
               מתחילים באווירה טובה עם היכרות קצרה עם עולם התכשיטים — ההבדלים בין כסף לזהב, ואיך בוחרים את הסגנון שמתאים ביותר. כאן מתחיל הקסם.
             </p>
           </div>
@@ -200,9 +202,9 @@
         <!-- Step 2 -->
         <div class="journey-step journey-step--flip">
           <div class="journey-step-text">
-            <span class="step-label">שלב שני</span>
-            <h3>בחירה ועיצוב</h3>
-            <p>
+            <span class="step-label" data-i18n="step2_label">שלב שני</span>
+            <h3 data-i18n="step2_title">בחירה ועיצוב</h3>
+            <p data-i18n="step2_desc">
               כל אחת בוחרת את סוג השרשרת והצ'ארמים שהיא הכי אוהבת - ומתחילה לסדר את הצארמים לפי הסדר שהיא רוצה
             </p>
           </div>
@@ -215,9 +217,9 @@
         <!-- Step 3 -->
         <div class="journey-step">
           <div class="journey-step-text">
-            <span class="step-label">שלב שלישי</span>
-            <h3>הרכבת התכשיט</h3>
-            <p>
+            <span class="step-label" data-i18n="step3_label">שלב שלישי</span>
+            <h3 data-i18n="step3_title">הרכבת התכשיט</h3>
+            <p data-i18n="step3_desc">
               זה השלב שכולנו חיכינו לו! המשתתפות שלנו יקבלו הסבר מפורט איך להרכיב את התכשיט וירכיבו את התכשיטים בלווי הצוות שלנו עד לתוצאה הסופית
             </p>
           </div>
@@ -230,9 +232,9 @@
         <!-- Step 4 -->
         <div class="journey-step journey-step--flip">
           <div class="journey-step-text">
-            <span class="step-label">שלב אחרון</span>
-            <h3>התוצאה הסופית</h3>
-            <p>
+            <span class="step-label" data-i18n="step4_label">שלב אחרון</span>
+            <h3 data-i18n="step4_title">התוצאה הסופית</h3>
+            <p data-i18n="step4_desc">
               כל משתתפת יוצאת עם תכשיט שיצרה במו ידיה , תכשיט ייחודי שאין לאף אחת אחרת- מזכרת לכל החיים
             </p>
           </div>
@@ -251,8 +253,8 @@
         </div>
         <div class="journey-gift-text">
           <span class="gift-badge">🎁</span>
-          <h3>בונוס — מתנת הפתעה לכולן!</h3>
-          <p>
+          <h3 data-i18n="gift_title">בונוס — מתנת הפתעה לכולן!</h3>
+          <p data-i18n="gift_desc">
             כל משתתפת יוצאת עם התכשיט שיצרה — וגם עם מתנה מיוחדת ומפנקת מאיתנו.
           </p>
         </div>
@@ -260,7 +262,7 @@
 
       <!-- Journey CTA -->
       <div class="journey-cta">
-        <p class="journey-cta-lead">מוכנה לחוויה שלא תשכחי?</p>
+        <p class="journey-cta-lead" data-i18n="journey_cta">מוכנה לחוויה שלא תשכחי?</p>
         <a
           href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A7%D7%95%D7%9D%20%D7%91%D7%A1%D7%93%D7%A0%D7%94%21"
           target="_blank"
@@ -268,7 +270,7 @@
           class="btn btn-whatsapp"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-          הזמיני סדנה בוואצאפ
+          <span data-i18n="journey_btn">הזמיני סדנה בוואצאפ</span>
         </a>
       </div>
     </div>
@@ -277,18 +279,18 @@
   <!-- ===== TESTIMONIALS ===== -->
   <section class="testimonials-section">
     <div class="container">
-      <h2 class="section-title">לקוחות ממליצות</h2>
+      <h2 class="section-title" data-i18n="testimonials_title">לקוחות ממליצות</h2>
     </div>
 
     <div class="testimonials-outer">
-      <button class="testimonials-arrow testimonials-prev" aria-label="הקודם">&#8250;</button>
+      <button class="testimonials-arrow testimonials-prev" aria-label="הקודם">&#8249;</button>
 
       <div class="testimonials-viewport" id="testimonialsViewport">
         <div class="testimonials-track" id="testimonialsTrack">
           <!-- Set 1 — 20 unique testimonials -->
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>לא ידעתי לצפות לזה. יצאתי מהסדנה עם צמיד ועם משהו קצת יותר עמוק — ביטחון שאני יכולה ליצור דברים יפים בידיים שלי ✨</p>
+              <p data-i18n="test_1">לא ידעתי לצפות לזה. יצאתי מהסדנה עם צמיד ועם משהו קצת יותר עמוק — ביטחון שאני יכולה ליצור דברים יפים בידיים שלי ✨</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">ניצן ש.</span>
@@ -297,7 +299,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>קניתי ערכת בית לאחותי ליום הולדת. היא פשוט התאהבה בזה. האריזה הייתה כל כך יפה שהיא לא רצתה לפתוח 😍</p>
+              <p data-i18n="test_2">קניתי ערכת בית לאחותי ליום הולדת. היא פשוט התאהבה בזה. האריזה הייתה כל כך יפה שהיא לא רצתה לפתוח 😍</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">מיכל ד.</span>
@@ -306,7 +308,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>השרשרת עם האות הגיעה מהר, עטופה יפה, ממש עדינה ונוצצת. בדיוק מה שתיארתי. ויק הבינה אותי מהר מאוד</p>
+              <p data-i18n="test_3">השרשרת עם האות הגיעה מהר, עטופה יפה, ממש עדינה ונוצצת. בדיוק מה שתיארתי. ויק הבינה אותי מהר מאוד</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">נועה א.</span>
@@ -315,7 +317,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הגעתי בלי שום ניסיון ויצאתי עם הצמיד הכי יפה שיש לי. ויק סבלנית בטירוף, גם כשפירקתי הכל פעמיים 😂</p>
+              <p data-i18n="test_4">הגעתי בלי שום ניסיון ויצאתי עם הצמיד הכי יפה שיש לי. ויק סבלנית בטירוף, גם כשפירקתי הכל פעמיים 😂</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">גלי מ.</span>
@@ -324,7 +326,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הפעלה לצוות שלנו בעבודה ✔️ כולם יצאו מרוצים וחיוכיים. ממליצה בחום על סדנת הקבוצה לכל מנהלת שמחפשת חוויה שונה</p>
+              <p data-i18n="test_5">הפעלה לצוות שלנו בעבודה ✔️ כולם יצאו מרוצים וחיוכיים. ממליצה בחום על סדנת הקבוצה לכל מנהלת שמחפשת חוויה שונה</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">דנה ב.</span>
@@ -333,7 +335,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הזמנתי צמיד לעצמי אחרי תקופה קשה. לא ידעתי שתכשיט יכול לגרום לי לבכות מרוב שמחה. מאוד ממליצה 💕</p>
+              <p data-i18n="test_6">הזמנתי צמיד לעצמי אחרי תקופה קשה. לא ידעתי שתכשיט יכול לגרום לי לבכות מרוב שמחה. מאוד ממליצה 💕</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">רינה ת.</span>
@@ -342,7 +344,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>שעתיים שעברו כמו רגע. ויק מסבירה בצורה ברורה, מראה, עוזרת, ובסוף — יצירה שלמה בידיים שלך. חוויה שלא אשכח</p>
+              <p data-i18n="test_7">שעתיים שעברו כמו רגע. ויק מסבירה בצורה ברורה, מראה, עוזרת, ובסוף — יצירה שלמה בידיים שלך. חוויה שלא אשכח</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">אורית כ.</span>
@@ -351,7 +353,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>קניתי לבתי ל-16 בלי לדעת בדיוק מה. קיבלתי ערכה עם הסבר, חומרים ו... היא כבר עשתה שלושה צמידים 😂❤️</p>
+              <p data-i18n="test_8">קניתי לבתי ל-16 בלי לדעת בדיוק מה. קיבלתי ערכה עם הסבר, חומרים ו... היא כבר עשתה שלושה צמידים 😂❤️</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">שרית פ.</span>
@@ -360,7 +362,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>גם ההזמנה דרך ווטסאפ הייתה חוויה — ויק מגיבה מהר, קשובה, לא לוחצת. פשוט קל ונעים לסגור איתה</p>
+              <p data-i18n="test_9">גם ההזמנה דרך ווטסאפ הייתה חוויה — ויק מגיבה מהר, קשובה, לא לוחצת. פשוט קל ונעים לסגור איתה</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">ליאור ב.</span>
@@ -369,7 +371,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>ביקשתי מהחברות שלי סדנת יצירה ליום הולדת. זאת הייתה ההפתעה הכי טובה שקיבלתי ✨ כולנו יצאנו עם משהו ייחודי שלנו</p>
+              <p data-i18n="test_10">ביקשתי מהחברות שלי סדנת יצירה ליום הולדת. זאת הייתה ההפתעה הכי טובה שקיבלתי ✨ כולנו יצאנו עם משהו ייחודי שלנו</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">הדס ר.</span>
@@ -378,7 +380,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>עוברות כבר 4 חודשים והצמיד לא התקלקל, לא השחיר, לא איבד אפילו חרוז אחד. זה לא מובן מאליו. איכות אמיתית</p>
+              <p data-i18n="test_11">עוברות כבר 4 חודשים והצמיד לא התקלקל, לא השחיר, לא איבד אפילו חרוז אחד. זה לא מובן מאליו. איכות אמיתית</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">מורן ג.</span>
@@ -387,7 +389,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הגעתי מפוחדת כי אני לא יצירתית בכלל. ויק הרגיעה אותי תוך דקות. בסוף זה יצא יפה וזה בדיוק אני 🌸</p>
+              <p data-i18n="test_12">הגעתי מפוחדת כי אני לא יצירתית בכלל. ויק הרגיעה אותי תוך דקות. בסוף זה יצא יפה וזה בדיוק אני 🌸</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">תמר א.</span>
@@ -396,7 +398,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הזמנתי שרשרת בזהב ורוד כמתנה לאחות שלי לחתונה. היא לבשה אותה ביום האירוסין שלה ונראתה מושלמת</p>
+              <p data-i18n="test_13">הזמנתי שרשרת בזהב ורוד כמתנה לאחות שלי לחתונה. היא לבשה אותה ביום האירוסין שלה ונראתה מושלמת</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">אביגיל ש.</span>
@@ -405,7 +407,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הגעתי עם הבת שלי בת ה-14. שעתיים של חיבור אמיתי בינינו. ויק יצרה אווירה כל כך חמה ומרגיעה. תודה מכל הלב</p>
+              <p data-i18n="test_14">הגעתי עם הבת שלי בת ה-14. שעתיים של חיבור אמיתי בינינו. ויק יצרה אווירה כל כך חמה ומרגיעה. תודה מכל הלב</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">שרה כ.</span>
@@ -414,7 +416,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>ערכת הבית הפרימיום הייתה בדיוק מה שחיפשתי. הכל מסודר, מוסבר, ומספיק לכמה יצירות. כיף גם לאחיין שלי ✨</p>
+              <p data-i18n="test_15">ערכת הבית הפרימיום הייתה בדיוק מה שחיפשתי. הכל מסודר, מוסבר, ומספיק לכמה יצירות. כיף גם לאחיין שלי ✨</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">כרמית ה.</span>
@@ -423,7 +425,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>שלחתי הודעה בווטסאפ ביום ב׳ בבוקר, קיבלתי אישור תוך שעה, ועד סוף השבוע הצמיד כבר אצלי. מהיר ויעיל 💎</p>
+              <p data-i18n="test_16">שלחתי הודעה בווטסאפ ביום ב׳ בבוקר, קיבלתי אישור תוך שעה, ועד סוף השבוע הצמיד כבר אצלי. מהיר ויעיל 💎</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">לירן ד.</span>
@@ -432,7 +434,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>זאת כבר ההזמנה השלישית שלי מ-Charming by Vik. בכל פעם זה מגיע עטוף יפה ומדויק. אני פשוט לא יכולה לעצור</p>
+              <p data-i18n="test_17">זאת כבר ההזמנה השלישית שלי מ-Charming by Vik. בכל פעם זה מגיע עטוף יפה ומדויק. אני פשוט לא יכולה לעצור</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">נטלי ו.</span>
@@ -441,7 +443,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הסדנה הייתה מתנה שנתתי לעצמי — ספונטנית ב-100%. ויק כל כך אנושית ונלהבת, מרגישים שזה אמיתי עבורה. גם עבורנו</p>
+              <p data-i18n="test_18">הסדנה הייתה מתנה שנתתי לעצמי — ספונטנית ב-100%. ויק כל כך אנושית ונלהבת, מרגישים שזה אמיתי עבורה. גם עבורנו</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">שני מ.</span>
@@ -450,7 +452,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>הצ'ארם עם הפרפר זה בדיוק אני. כאילו ויק הכירה אותי שנים. השרשרת עדינה ויפה ולא מתנגשת עם שאר התכשיטים שלי</p>
+              <p data-i18n="test_19">הצ'ארם עם הפרפר זה בדיוק אני. כאילו ויק הכירה אותי שנים. השרשרת עדינה ויפה ולא מתנגשת עם שאר התכשיטים שלי</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">יעל ד.</span>
@@ -459,7 +461,7 @@
           </div>
           <div class="testimonial-card">
             <div class="testimonial-bubble">
-              <p>ציפיתי לסדנה בינונית. קיבלתי משהו הרבה יותר טוב — שעתיים שמחות, נשים נהדרות, ותכשיט שעשיתי בידיים שלי 💪🏼</p>
+              <p data-i18n="test_20">ציפיתי לסדנה בינונית. קיבלתי משהו הרבה יותר טוב — שעתיים שמחות, נשים נהדרות, ותכשיט שעשיתי בידיים שלי 💪🏼</p>
             </div>
             <div class="testimonial-meta">
               <span class="testimonial-name">ענת ב.</span>
@@ -650,14 +652,14 @@
         </div>
       </div>
 
-      <button class="testimonials-arrow testimonials-next" aria-label="הבא">&#8249;</button>
+      <button class="testimonials-arrow testimonials-next" aria-label="הבא">&#8250;</button>
     </div>
   </section>
 
   <!-- ===== GALLERY COLLAGE ===== -->
   <section class="collage-section">
     <div class="container collage-header">
-      <h2 class="section-title">תמונות מהסדנאות שלנו</h2>
+      <h2 class="section-title" data-i18n="collage_title">תמונות מהסדנאות שלנו</h2>
     </div>
     <div class="collage-grid">
       <div class="collage-item collage-item--tall">
@@ -690,7 +692,7 @@
   <!-- ===== SHOP — FEATURED PRODUCTS ===== -->
   <section id="shop" class="shop-section">
     <div class="container">
-      <h2 class="section-title">מוצרים נבחרים</h2>
+      <h2 class="section-title" data-i18n="shop_preview_title">מוצרים נבחרים</h2>
 
       <div id="home-catalog-grid" class="shop-grid">
         <div id="home-catalog-loading" class="catalog-loading">
@@ -715,8 +717,8 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <h3 class="footer-logo">CHARMING by Vik</h3>
-        <p>תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
-        <span class="footer-tagline">עיצוב • יצירה • אהבה</span>
+        <p data-i18n="footer_desc">תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
+        <span class="footer-tagline" data-i18n="footer_tagline">עיצוב • יצירה • אהבה</span>
         <div class="footer-social">
           <!-- TikTok -->
           <a href="https://www.tiktok.com/@charming.by.vik" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="TikTok">
@@ -738,45 +740,45 @@
       </div>
 
       <div class="footer-links">
-        <h4>ניווט מהיר</h4>
+        <h4 data-i18n="footer_nav">ניווט מהיר</h4>
         <div class="footer-policy-btns">
-          <a href="index.html"       class="footer-policy-btn">דף הבית</a>
-          <a href="shop.html"        class="footer-policy-btn">החנות</a>
-          <a href="workshops.html"   class="footer-policy-btn">סדנאות</a>
-          <a href="#footer-contact"  class="footer-policy-btn">צור קשר</a>
+          <a href="index.html"       class="footer-policy-btn" data-i18n="footer_home">דף הבית</a>
+          <a href="shop.html"        class="footer-policy-btn" data-i18n="footer_shop">החנות</a>
+          <a href="workshops.html"   class="footer-policy-btn" data-i18n="footer_workshops">סדנאות</a>
+          <a href="#footer-contact"  class="footer-policy-btn" data-i18n="footer_contact_link">צור קשר</a>
         </div>
       </div>
 
       <div class="footer-links">
-        <h4>מדיניות פרטיות ותנאי האתר</h4>
+        <h4 data-i18n="footer_policy_title">מדיניות פרטיות ותנאי האתר</h4>
         <div class="footer-policy-btns">
-          <a href="legal.html#returns"    class="footer-policy-btn">מדיניות ביטולים</a>
-          <a href="legal.html#warranty"   class="footer-policy-btn">אחריות ותחזוקה</a>
-          <a href="legal.html#shipping"   class="footer-policy-btn">מדיניות משלוחים</a>
-          <a href="legal.html#terms"      class="footer-policy-btn">תנאי האתר</a>
-          <a href="legal.html#disclaimer" class="footer-policy-btn">מדיניות פרטיות</a>
+          <a href="legal.html#returns"    class="footer-policy-btn" data-i18n="footer_returns">מדיניות ביטולים</a>
+          <a href="legal.html#warranty"   class="footer-policy-btn" data-i18n="footer_warranty">אחריות ותחזוקה</a>
+          <a href="legal.html#shipping"   class="footer-policy-btn" data-i18n="footer_shipping">מדיניות משלוחים</a>
+          <a href="legal.html#terms"      class="footer-policy-btn" data-i18n="footer_terms">תנאי האתר</a>
+          <a href="legal.html#disclaimer" class="footer-policy-btn" data-i18n="footer_privacy">מדיניות פרטיות</a>
         </div>
       </div>
 
       <div class="footer-contact">
-        <h4>יצרו קשר</h4>
-        <p>לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
+        <h4 data-i18n="footer_contact_heading">יצרו קשר</h4>
+        <p data-i18n="footer_contact_text">לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%94%D7%92%D7%A2%D7%AA%D7%99%20%D7%9E%D7%94%D7%90%D7%AA%D7%A8%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="footer-wa-link">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-          דברי איתנו בוואצאפ
+          <span data-i18n="footer_wa">דברי איתנו בוואצאפ</span>
         </a>
         <a href="https://www.tiktok.com/@charming.by.vik" target="_blank" rel="noopener noreferrer" class="tiktok-link">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.83 1.55V6.79a4.85 4.85 0 0 1-1.06-.1z"/></svg>
           @charming.by.vik
         </a>
         <div class="footer-shipping">
-          <p>🚚 משלוח עד הבית: תוך 3 ימי עסקים</p>
-          <p>📍 איסוף עצמי: מהסטודיו שלנו בראשון לציון</p>
+          <p data-i18n="footer_ship_note1">🚚 משלוח עד הבית: תוך 3 ימי עסקים</p>
+          <p data-i18n="footer_ship_note2">📍 איסוף עצמי: מהסטודיו שלנו בראשון לציון</p>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
+      <p data-i18n="footer_copyright">© 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
       <a href="admin.html" class="footer-admin-link" aria-label="ניהול">✦</a>
     </div>
   </footer>
@@ -798,6 +800,7 @@
     <button class="lightbox-arrow lightbox-arrow--next" id="lightboxNext" aria-label="תמונה הבאה">&#8249;</button>
   </div>
 
+  <script src="lang.js"></script>
   <script src="main.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="catalog.js"></script>

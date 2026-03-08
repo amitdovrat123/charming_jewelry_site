@@ -15,15 +15,17 @@
       <a href="index.html" class="logo">CHARMING <span>by Vik</span></a>
       <nav>
         <ul class="nav-links">
-          <li><a href="index.html">דף הבית</a></li>
-          <li><a href="workshops.html">סדנאות</a></li>
-          <li><a href="shop.html">חנות</a></li>
-          <li><a href="workshops.html#faq">שאלות ותשובות</a></li>
-          <li><a href="workshops.html#signup">צור קשר</a></li>
-          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a></li>
+          <li><a href="index.html" data-i18n="nav_home">דף הבית</a></li>
+          <li><a href="workshops.html" data-i18n="nav_workshops">סדנאות</a></li>
+          <li><a href="shop.html" data-i18n="nav_shop">חנות</a></li>
+          <li><a href="workshops.html#faq" data-i18n="nav_faq">שאלות ותשובות</a></li>
+          <li><a href="workshops.html#signup" data-i18n="nav_contact">צור קשר</a></li>
+          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn" data-i18n="nav_login">התחברות / הרשמה</a></li>
+          <li class="lang-toggle-mobile"><button class="lang-toggle" aria-label="Switch to English">EN</button></li>
         </ul>
       </nav>
       <div class="nav-actions">
+        <button class="lang-toggle lang-toggle-desktop" aria-label="Switch to English">EN</button>
         <button id="nav-user-btn" class="nav-icon-btn" aria-label="אזור אישי" title="אזור אישי" data-logged-in="0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
@@ -44,8 +46,8 @@
   <section class="legal-hero">
     <div class="container">
       <p class="legal-hero-eyebrow">Charming by Vik</p>
-      <h1 class="legal-hero-title">תנאי שירות ומידע משפטי</h1>
-      <p class="legal-hero-sub">עדכון אחרון: מרץ 2026 &nbsp;|&nbsp; כל התנאים כתובים בשפה ברורה ושקופה</p>
+      <h1 class="legal-hero-title" data-i18n="legal_hero_title">תנאי שירות ומידע משפטי</h1>
+      <p class="legal-hero-sub" data-i18n="legal_hero_sub">עדכון אחרון: מרץ 2026 &nbsp;|&nbsp; כל התנאים כתובים בשפה ברורה ושקופה</p>
     </div>
   </section>
 
@@ -53,11 +55,11 @@
   <nav class="legal-subnav" aria-label="ניווט בין סעיפים">
     <div class="container">
       <ul class="legal-subnav-list">
-        <li><a href="#shipping"  class="legal-subnav-link">משלוחים</a></li>
-        <li><a href="#warranty"  class="legal-subnav-link">אחריות ותחזוקה</a></li>
-        <li><a href="#returns"   class="legal-subnav-link">החזרות וביטולים</a></li>
-        <li><a href="#terms"     class="legal-subnav-link">תקנון ושימוש</a></li>
-        <li><a href="#disclaimer" class="legal-subnav-link">מידע משפטי</a></li>
+        <li><a href="#shipping"  class="legal-subnav-link" data-i18n="legal_nav_shipping">משלוחים</a></li>
+        <li><a href="#warranty"  class="legal-subnav-link" data-i18n="legal_nav_warranty">אחריות ותחזוקה</a></li>
+        <li><a href="#returns"   class="legal-subnav-link" data-i18n="legal_nav_returns">החזרות וביטולים</a></li>
+        <li><a href="#terms"     class="legal-subnav-link" data-i18n="legal_nav_terms">תקנון ושימוש</a></li>
+        <li><a href="#disclaimer" class="legal-subnav-link" data-i18n="legal_nav_disclaimer">מידע משפטי</a></li>
       </ul>
     </div>
   </nav>
@@ -70,32 +72,32 @@
       <section id="shipping" class="legal-section">
         <div class="legal-section-header">
           <span class="legal-section-number">01</span>
-          <h2 class="legal-section-title">מדיניות משלוחים</h2>
+          <h2 class="legal-section-title" data-i18n="legal_s1_title">מדיניות משלוחים</h2>
         </div>
         <div class="legal-section-body">
 
-          <h3 class="legal-h3">זמני טיפול ואספקה</h3>
-          <p>אנו עושים את מירב המאמצים כדי שהתכשיטים החדשים שלך יגיעו אלייך במהירות ובבטחה. מאחר שרוב הפריטים שלנו מורכבים בעבודת יד ובהתאמה אישית, זמן הכנת ההזמנה עומד על <strong>1–3 ימי עסקים</strong> מרגע אישור התשלום.</p>
-          <p>לאחר יציאת החבילה מהסטודיו, זמן האספקה המשוער הוא <strong>3–7 ימי עסקים</strong>, בהתאם לאזור המגורים.</p>
-          <div class="legal-note">ימי עסקים אינם כוללים ימי שישי, שבת, ערבי חג וחגים.</div>
+          <h3 class="legal-h3" data-i18n="legal_s1_h3_1">זמני טיפול ואספקה</h3>
+          <p data-i18n="legal_s1_p1">אנו עושים את מירב המאמצים כדי שהתכשיטים החדשים שלך יגיעו אלייך במהירות ובבטחה. מאחר שרוב הפריטים שלנו מורכבים בעבודת יד ובהתאמה אישית, זמן הכנת ההזמנה עומד על <strong>1–3 ימי עסקים</strong> מרגע אישור התשלום.</p>
+          <p data-i18n="legal_s1_p2">לאחר יציאת החבילה מהסטודיו, זמן האספקה המשוער הוא <strong>3–7 ימי עסקים</strong>, בהתאם לאזור המגורים.</p>
+          <div class="legal-note" data-i18n="legal_s1_note">ימי עסקים אינם כוללים ימי שישי, שבת, ערבי חג וחגים.</div>
 
-          <h3 class="legal-h3">אפשרויות משלוח</h3>
+          <h3 class="legal-h3" data-i18n="legal_s1_h3_2">אפשרויות משלוח</h3>
           <div class="legal-grid-2">
             <div class="legal-card">
-              <strong>משלוח עד הבית</strong>
-              <p>35 ש"ח. משלוח חינם בקניה מעל 400 ש"ח.</p>
+              <strong data-i18n="legal_s1_home">משלוח עד הבית</strong>
+              <p data-i18n="legal_s1_home_cost">35 ש"ח. משלוח חינם בקניה מעל 400 ש"ח.</p>
             </div>
             <div class="legal-card">
-              <strong>איסוף עצמי מהסטודיו</strong>
-              <p>ראשון לציון, בתיאום מראש בלבד. ללא עלות.</p>
+              <strong data-i18n="legal_s1_pickup">איסוף עצמי מהסטודיו</strong>
+              <p data-i18n="legal_s1_pickup_loc">ראשון לציון, בתיאום מראש בלבד. ללא עלות.</p>
             </div>
           </div>
 
-          <h3 class="legal-h3">אחריות לפרטי משלוח</h3>
-          <p>האחריות על הזנת כתובת נכונה ומלאה חלה על הלקוחה. במקרה של כתובת שגויה, לא נוכל לשאת באחריות לעיכוב או אי-מסירה. משלוח חוזר כתוצאה מפרטים שגויים יחויב בעלות משלוח נוספת.</p>
+          <h3 class="legal-h3" data-i18n="legal_s1_h3_3">אחריות לפרטי משלוח</h3>
+          <p data-i18n="legal_s1_addr">האחריות על הזנת כתובת נכונה ומלאה חלה על הלקוחה. במקרה של כתובת שגויה, לא נוכל לשאת באחריות לעיכוב או אי-מסירה. משלוח חוזר כתוצאה מפרטים שגויים יחויב בעלות משלוח נוספת.</p>
 
-          <h3 class="legal-h3">אובדן או נזק במשלוח</h3>
-          <p>בכל מקרה של נזק לחבילה בעת ההגעה, או אי-הגעתה בזמן הקבוע, יש לפנות אלינו בוואצאפ לבירור מיידי מול חברת השילוח.</p>
+          <h3 class="legal-h3" data-i18n="legal_s1_h3_4">אובדן או נזק במשלוח</h3>
+          <p data-i18n="legal_s1_damage">בכל מקרה של נזק לחבילה בעת ההגעה, או אי-הגעתה בזמן הקבוע, יש לפנות אלינו בוואצאפ לבירור מיידי מול חברת השילוח.</p>
 
         </div>
       </section>
@@ -104,46 +106,46 @@
       <section id="warranty" class="legal-section">
         <div class="legal-section-header">
           <span class="legal-section-number">02</span>
-          <h2 class="legal-section-title">אחריות ותחזוקה</h2>
+          <h2 class="legal-section-title" data-i18n="legal_s2_title">אחריות ותחזוקה</h2>
         </div>
         <div class="legal-section-body">
 
-          <h3 class="legal-h3">תקופת האחריות</h3>
-          <p>התכשיטים שלנו מיוצרים בעבודת יד מפלדת אל-חלד איכותית. אנו מעניקים אחריות למשך <strong>3 חודשים</strong> מיום הרכישה.</p>
+          <h3 class="legal-h3" data-i18n="legal_s2_h3_1">תקופת האחריות</h3>
+          <p data-i18n="legal_s2_period">התכשיטים שלנו מיוצרים בעבודת יד מפלדת אל-חלד איכותית. אנו מעניקים אחריות למשך <strong>3 חודשים</strong> מיום הרכישה.</p>
 
-          <h3 class="legal-h3">מה האחריות מכסה</h3>
-          <p>האחריות תקפה אך ורק על ליקויי ייצור שהתגלו בשימוש סביר:</p>
+          <h3 class="legal-h3" data-i18n="legal_s2_h3_2">מה האחריות מכסה</h3>
+          <p data-i18n="legal_s2_covers_intro">האחריות תקפה אך ורק על ליקויי ייצור שהתגלו בשימוש סביר:</p>
           <ul class="legal-list">
-            <li>פגמים בחיבורי הסוגרים או השרשרת.</li>
-            <li>נפילת אבן או צ'ארם עקב פגם בהרכבה.</li>
+            <li data-i18n="legal_s2_cover1">פגמים בחיבורי הסוגרים או השרשרת.</li>
+            <li data-i18n="legal_s2_cover2">נפילת אבן או צ'ארם עקב פגם בהרכבה.</li>
           </ul>
 
           <div class="legal-warning">
-            <strong>מה האחריות אינה מכסה — סייגים קריטיים</strong>
-            <p>האחריות תבוטל באופן מיידי אם התכשיט נחשף לאחד מהגורמים הבאים:</p>
+            <strong data-i18n="legal_s2_h3_3">מה האחריות אינה מכסה — סייגים קריטיים</strong>
+            <p data-i18n="legal_s2_excludes_intro">האחריות תבוטל באופן מיידי אם התכשיט נחשף לאחד מהגורמים הבאים:</p>
             <ul class="legal-list">
-              <li><strong>מגע עם מים:</strong> רחצה בים, בריכה (כלור) או מקלחת.</li>
-              <li><strong>פעילות גופנית:</strong> נזק שנגרם באימון ספורטיבי או ממגע עם זיעה.</li>
-              <li><strong>חומרים כימיים:</strong> בושם, קרמים, אלכוהול וחומרי ניקוי.</li>
-              <li><strong>נזק פיזי:</strong> שריטות, קרע עקב משיכה, שבירה, עיקום או אובדן התכשיט וחלקיו.</li>
+              <li data-i18n="legal_s2_ex1"><strong>מגע עם מים:</strong> רחצה בים, בריכה (כלור) או מקלחת.</li>
+              <li data-i18n="legal_s2_ex2"><strong>פעילות גופנית:</strong> נזק שנגרם באימון ספורטיבי או ממגע עם זיעה.</li>
+              <li data-i18n="legal_s2_ex3"><strong>חומרים כימיים:</strong> בושם, קרמים, אלכוהול וחומרי ניקוי.</li>
+              <li data-i18n="legal_s2_ex4"><strong>נזק פיזי:</strong> שריטות, קרע עקב משיכה, שבירה, עיקום או אובדן התכשיט וחלקיו.</li>
             </ul>
           </div>
 
-          <h3 class="legal-h3">מדריך טיפול ותחזוקה</h3>
-          <p>כדי לשמור על הניצוץ של תכשיטי Charming לאורך שנים, ריכזנו עבורך כמה המלצות:</p>
+          <h3 class="legal-h3" data-i18n="legal_s2_h3_4">מדריך טיפול ותחזוקה</h3>
+          <p data-i18n="legal_s2_care_intro">כדי לשמור על הניצוץ של תכשיטי Charming לאורך שנים, ריכזנו עבורך כמה המלצות:</p>
 
-          <h4 class="legal-h4">שמירה נכונה</h4>
+          <h4 class="legal-h4" data-i18n="legal_s2_h4_storage">שמירה נכונה</h4>
           <ul class="legal-list">
-            <li>התבשמי והתאפרי לפני ענידת התכשיט — כימיקלים בבשמים וקרמים עלולים לפגוע בציפוי.</li>
-            <li>הסירי את התכשיטים לפני רחצה, אימון גופני ושינה.</li>
-            <li>אחסני את התכשיטים בקופסה המקורית, במקום יבש וקריר — לא באמבטיה.</li>
-            <li>הפרידי בין התכשיטים כדי למנוע חיכוך ושריטות.</li>
+            <li data-i18n="legal_s2_store1">התבשמי והתאפרי לפני ענידת התכשיט — כימיקלים בבשמים וקרמים עלולים לפגוע בציפוי.</li>
+            <li data-i18n="legal_s2_store2">הסירי את התכשיטים לפני רחצה, אימון גופני ושינה.</li>
+            <li data-i18n="legal_s2_store3">אחסני את התכשיטים בקופסה המקורית, במקום יבש וקריר — לא באמבטיה.</li>
+            <li data-i18n="legal_s2_store4">הפרידי בין התכשיטים כדי למנוע חיכוך ושריטות.</li>
           </ul>
 
-          <h4 class="legal-h4">ניקוי</h4>
+          <h4 class="legal-h4" data-i18n="legal_s2_h4_clean">ניקוי</h4>
           <ul class="legal-list">
-            <li>לניקוי השתמשי במטלית רכה ויבשה בלבד (מיקרופייבר עדינה).</li>
-            <li>אין להשתמש בחומרי ניקוי כימיים, מברשות גסות או חומרים ייעודיים לכסף ולזהב.</li>
+            <li data-i18n="legal_s2_clean1">לניקוי השתמשי במטלית רכה ויבשה בלבד (מיקרופייבר עדינה).</li>
+            <li data-i18n="legal_s2_clean2">אין להשתמש בחומרי ניקוי כימיים, מברשות גסות או חומרים ייעודיים לכסף ולזהב.</li>
           </ul>
 
         </div>
@@ -153,41 +155,41 @@
       <section id="returns" class="legal-section">
         <div class="legal-section-header">
           <span class="legal-section-number">03</span>
-          <h2 class="legal-section-title">החזרות וביטולים</h2>
+          <h2 class="legal-section-title" data-i18n="legal_s3_title">החזרות וביטולים</h2>
         </div>
         <div class="legal-section-body">
 
-          <p>ב-Charming by Vik אנו שואפים לשקיפות מלאה. להלן מדיניות הביטולים וההחזרות הרשמית שלנו, המחולקת לפי סוגי השירות.</p>
+          <p data-i18n="legal_s3_intro">ב-Charming by Vik אנו שואפים לשקיפות מלאה. להלן מדיניות הביטולים וההחזרות הרשמית שלנו, המחולקת לפי סוגי השירות.</p>
 
-          <h3 class="legal-h3">מוצרים — תכשיטים</h3>
-          <p>ניתן לבטל עסקה בתוך <strong>14 ימים</strong> מיום קבלת המוצר, בהתאם לחוק הגנת הצרכן. על המוצר להיות:</p>
+          <h3 class="legal-h3" data-i18n="legal_s3_h3_1">מוצרים — תכשיטים</h3>
+          <p data-i18n="legal_s3_cancel_desc">ניתן לבטל עסקה בתוך <strong>14 ימים</strong> מיום קבלת המוצר, בהתאם לחוק הגנת הצרכן. על המוצר להיות:</p>
           <ul class="legal-list">
-            <li>באריזתו המקורית, ללא סימני שימוש.</li>
-            <li>ללא פגם, עם תווית המחיר מחוברת.</li>
+            <li data-i18n="legal_s3_cond1">באריזתו המקורית, ללא סימני שימוש.</li>
+            <li data-i18n="legal_s3_cond2">ללא פגם, עם תווית המחיר מחוברת.</li>
           </ul>
 
-          <p>ההחזר יבוצע לאמצעי התשלום המקורי, בניכוי דמי ביטול של 5% ממחיר העסקה או 100 ש"ח (לפי הנמוך מביניהם). דמי המשלוח המקוריים אינם ניתנים להחזר.</p>
+          <p data-i18n="legal_s3_refund">ההחזר יבוצע לאמצעי התשלום המקורי, בניכוי דמי ביטול של 5% ממחיר העסקה או 100 ש"ח (לפי הנמוך מביניהם). דמי המשלוח המקוריים אינם ניתנים להחזר.</p>
 
           <div class="legal-warning legal-warning--critical">
-            <strong>סייג מהותי — פריטים בהתאמה אישית</strong>
-            <p>כל תכשיט שעבר התאמה אישית לבקשת הלקוחה — לרבות בחירת צ'ארמים, החלפת צ'ארם, או כל שינוי אחר שנוצר במיוחד עבורך — <strong>אינו ניתן להחזרה או להחלפה.</strong> פריטים אלה יוצרו אישית ואין באפשרותנו למוכרם לאחרים.</p>
+            <strong data-i18n="legal_s3_warn_title">סייג מהותי — פריטים בהתאמה אישית</strong>
+            <p data-i18n="legal_s3_warn_text">כל תכשיט שעבר התאמה אישית לבקשת הלקוחה — לרבות בחירת צ'ארמים, החלפת צ'ארם, או כל שינוי אחר שנוצר במיוחד עבורך — <strong>אינו ניתן להחזרה או להחלפה.</strong> פריטים אלה יוצרו אישית ואין באפשרותנו למוכרם לאחרים.</p>
           </div>
 
-          <h3 class="legal-h3">אופן ביצוע ההחזרה</h3>
-          <p>עלות משלוח ההחזרה חלה על הלקוחה. ניתן להחזיר את המוצר בדואר רשום, או בתיאום מראש לאיסוף עצמי מהסטודיו בראשון לציון.</p>
+          <h3 class="legal-h3" data-i18n="legal_s3_h3_2">אופן ביצוע ההחזרה</h3>
+          <p data-i18n="legal_s3_return">עלות משלוח ההחזרה חלה על הלקוחה. ניתן להחזיר את המוצר בדואר רשום, או בתיאום מראש לאיסוף עצמי מהסטודיו בראשון לציון.</p>
 
-          <h3 class="legal-h3">סדנאות תכשיטנות</h3>
+          <h3 class="legal-h3" data-i18n="legal_s3_h3_ws">סדנאות תכשיטנות</h3>
           <div class="legal-grid-2">
             <div class="legal-card">
-              <strong>ביטול מוקדם</strong>
-              <p>ביטול עד <strong>7 ימי עסקים</strong> לפני מועד הסדנה — החזר כספי מלא (למעט מקדמה שנגבתה).</p>
+              <strong data-i18n="legal_s3_early">ביטול מוקדם</strong>
+              <p data-i18n="legal_s3_early_text">ביטול עד <strong>7 ימי עסקים</strong> לפני מועד הסדנה — החזר כספי מלא (למעט מקדמה שנגבתה).</p>
             </div>
             <div class="legal-card">
-              <strong>ביטול מאוחר</strong>
-              <p>ביטול בפחות מ-7 ימי עסקים לפני הסדנה — דמי ביטול בשיעור של <strong>20%</strong> מעלות הסדנה הכוללת.</p>
+              <strong data-i18n="legal_s3_late">ביטול מאוחר</strong>
+              <p data-i18n="legal_s3_late_text">ביטול בפחות מ-7 ימי עסקים לפני הסדנה — דמי ביטול בשיעור של <strong>20%</strong> מעלות הסדנה הכוללת.</p>
             </div>
           </div>
-          <p style="margin-top:1rem">מחיר הסדנה נקבע לפי מדרגות משתתפות שסוכמו מראש. אם ביום הסדנה הגיעו פחות משתתפות מהכמות שסוכמה, לא יינתן החזר או זיכוי על היעדרותן, עקב ההיערכות הלוגיסטית הכוללת ציוד וחומרים מראש.</p>
+          <p style="margin-top:1rem" data-i18n="legal_s3_ws_note">מחיר הסדנה נקבע לפי מדרגות משתתפות שסוכמו מראש. אם ביום הסדנה הגיעו פחות משתתפות מהכמות שסוכמה, לא יינתן החזר או זיכוי על היעדרותן, עקב ההיערכות הלוגיסטית הכוללת ציוד וחומרים מראש.</p>
 
         </div>
       </section>
@@ -196,25 +198,25 @@
       <section id="terms" class="legal-section">
         <div class="legal-section-header">
           <span class="legal-section-number">04</span>
-          <h2 class="legal-section-title">תקנון ותנאי שימוש</h2>
+          <h2 class="legal-section-title" data-i18n="legal_s4_title">תקנון ותנאי שימוש</h2>
         </div>
         <div class="legal-section-body">
 
-          <h3 class="legal-h3">שימוש כללי באתר</h3>
-          <p>הגלישה והשימוש באתר Charming by Vik מהווים הסכמה לכל התנאים המפורטים בדף זה. האתר מיועד לשימוש אישי, לא-מסחרי. אין לעשות שימוש בתוכן האתר, בתמונות או בטקסטים לכל מטרה אחרת ללא אישור בכתב מראש.</p>
+          <h3 class="legal-h3" data-i18n="legal_s4_h3_1">שימוש כללי באתר</h3>
+          <p data-i18n="legal_s4_use">הגלישה והשימוש באתר Charming by Vik מהווים הסכמה לכל התנאים המפורטים בדף זה. האתר מיועד לשימוש אישי, לא-מסחרי. אין לעשות שימוש בתוכן האתר, בתמונות או בטקסטים לכל מטרה אחרת ללא אישור בכתב מראש.</p>
 
-          <h3 class="legal-h3">הגבלות גיל</h3>
-          <p>האתר מיועד לבני 18 ומעלה. רכישה על-ידי קטינים מחייבת הסכמת הורה או אפוטרופוס. מסירת פרטי תשלום על-ידי קטינה ללא אישור הורה עשויה לגרור ביטול ההזמנה.</p>
+          <h3 class="legal-h3" data-i18n="legal_s4_h3_2">הגבלות גיל</h3>
+          <p data-i18n="legal_s4_age">האתר מיועד לבני 18 ומעלה. רכישה על-ידי קטינים מחייבת הסכמת הורה או אפוטרופוס. מסירת פרטי תשלום על-ידי קטינה ללא אישור הורה עשויה לגרור ביטול ההזמנה.</p>
 
-          <h3 class="legal-h3">מועדון לקוחות Charming</h3>
-          <p>ההצטרפות למועדון הלקוחות היא ללא עלות ומעניקה גישה להטבות, מבצעים ועדכונים. חברות במועדון מותנית ברישום עם פרטים אמיתיים ומדויקים. אנו שומרים לעצמנו את הזכות לבטל חברות במקרה של שימוש לרעה.</p>
-          <p>ניתן לבטל את החברות בכל עת על-ידי פנייה אלינו בוואצאפ.</p>
+          <h3 class="legal-h3" data-i18n="legal_s4_h3_3">מועדון לקוחות Charming</h3>
+          <p data-i18n="legal_s4_club1">ההצטרפות למועדון הלקוחות היא ללא עלות ומעניקה גישה להטבות, מבצעים ועדכונים. חברות במועדון מותנית ברישום עם פרטים אמיתיים ומדויקים. אנו שומרים לעצמנו את הזכות לבטל חברות במקרה של שימוש לרעה.</p>
+          <p data-i18n="legal_s4_club2">ניתן לבטל את החברות בכל עת על-ידי פנייה אלינו בוואצאפ.</p>
 
-          <h3 class="legal-h3">קניין רוחני</h3>
-          <p>כל תוכן האתר — לרבות תמונות, טקסטים, עיצוב ולוגו — הוא רכושה הבלעדי של Charming by Vik ומוגן בזכויות יוצרים. אין להעתיק, לשכפל או להפיץ תוכן זה ללא אישור מפורש בכתב.</p>
+          <h3 class="legal-h3" data-i18n="legal_s4_h3_4">קניין רוחני</h3>
+          <p data-i18n="legal_s4_ip">כל תוכן האתר — לרבות תמונות, טקסטים, עיצוב ולוגו — הוא רכושה הבלעדי של Charming by Vik ומוגן בזכויות יוצרים. אין להעתיק, לשכפל או להפיץ תוכן זה ללא אישור מפורש בכתב.</p>
 
-          <h3 class="legal-h3">שינויים בתקנון</h3>
-          <p>אנו שומרים לעצמנו את הזכות לעדכן תנאים אלה בכל עת. שינויים מהותיים יפורסמו באתר. המשך השימוש באתר לאחר פרסום השינויים מהווה הסכמה לתנאים המעודכנים.</p>
+          <h3 class="legal-h3" data-i18n="legal_s4_h3_5">שינויים בתקנון</h3>
+          <p data-i18n="legal_s4_changes">אנו שומרים לעצמנו את הזכות לעדכן תנאים אלה בכל עת. שינויים מהותיים יפורסמו באתר. המשך השימוש באתר לאחר פרסום השינויים מהווה הסכמה לתנאים המעודכנים.</p>
 
         </div>
       </section>
@@ -223,40 +225,40 @@
       <section id="disclaimer" class="legal-section">
         <div class="legal-section-header">
           <span class="legal-section-number">05</span>
-          <h2 class="legal-section-title">הצהרה משפטית ומדיניות Cookies</h2>
+          <h2 class="legal-section-title" data-i18n="legal_s5_title">הצהרה משפטית ומדיניות Cookies</h2>
         </div>
         <div class="legal-section-body">
 
-          <h3 class="legal-h3">הגבלת אחריות</h3>
-          <p>המידע המופיע באתר ניתן למטרות מידע כללי בלבד. אנו עושים מאמצים לדייק ולעדכן את התוכן, אך איננו מתחייבים שהמידע יהיה נקי לחלוטין מטעויות סופר או אי-דיוקים.</p>
+          <h3 class="legal-h3" data-i18n="legal_s5_h3_1">הגבלת אחריות</h3>
+          <p data-i18n="legal_s5_liability">המידע המופיע באתר ניתן למטרות מידע כללי בלבד. אנו עושים מאמצים לדייק ולעדכן את התוכן, אך איננו מתחייבים שהמידע יהיה נקי לחלוטין מטעויות סופר או אי-דיוקים.</p>
 
-          <h3 class="legal-h3">דיוק התמונות</h3>
-          <p>התמונות באתר נועדו להמחשה בלבד. מאחר שהתכשיטים מיוצרים בעבודת יד, ייתכנו הבדלים קלים בגוונים או בפרטים הקטנים בין התמונה למוצר בפועל. הבדלים אלה אינם מהווים עילה להחזרה.</p>
+          <h3 class="legal-h3" data-i18n="legal_s5_h3_2">דיוק התמונות</h3>
+          <p data-i18n="legal_s5_images">התמונות באתר נועדו להמחשה בלבד. מאחר שהתכשיטים מיוצרים בעבודת יד, ייתכנו הבדלים קלים בגוונים או בפרטים הקטנים בין התמונה למוצר בפועל. הבדלים אלה אינם מהווים עילה להחזרה.</p>
 
-          <h3 class="legal-h3">שימוש במוצרים</h3>
-          <p>השימוש במוצרים הנמכרים באתר הוא באחריות הלקוחה בלבד. החברה לא תישא באחריות לנזקים עקיפים הנובעים משימוש לא תקין. יש לשמור את התכשיטים הרחק מהישג ידם של ילדים קטנים.</p>
+          <h3 class="legal-h3" data-i18n="legal_s5_h3_3">שימוש במוצרים</h3>
+          <p data-i18n="legal_s5_use">השימוש במוצרים הנמכרים באתר הוא באחריות הלקוחה בלבד. החברה לא תישא באחריות לנזקים עקיפים הנובעים משימוש לא תקין. יש לשמור את התכשיטים הרחק מהישג ידם של ילדים קטנים.</p>
 
-          <h3 class="legal-h3">קובצי Cookies</h3>
-          <p>האתר עושה שימוש בקובצי Cookies כדי להעניק לך חוויית גלישה מותאמת אישית.</p>
-          <p>קובצי Cookies הם קבצים קטנים הנשמרים בדפדפן שלך ועוזרים לנו:</p>
+          <h3 class="legal-h3" data-i18n="legal_s5_h3_4">קובצי Cookies</h3>
+          <p data-i18n="legal_s5_cookies1">האתר עושה שימוש בקובצי Cookies כדי להעניק לך חוויית גלישה מותאמת אישית.</p>
+          <p data-i18n="legal_s5_cookies2">קובצי Cookies הם קבצים קטנים הנשמרים בדפדפן שלך ועוזרים לנו:</p>
           <ul class="legal-list">
-            <li>לזכור את הפריטים בסל הקניות שלך.</li>
-            <li>לזהות אם את מחוברת לחשבון.</li>
-            <li>לנתח נתוני שימוש לשיפור השירות.</li>
+            <li data-i18n="legal_s5_cookie_item1">לזכור את הפריטים בסל הקניות שלך.</li>
+            <li data-i18n="legal_s5_cookie_item2">לזהות אם את מחוברת לחשבון.</li>
+            <li data-i18n="legal_s5_cookie_item3">לנתח נתוני שימוש לשיפור השירות.</li>
           </ul>
-          <p>בעצם הגלישה באתר, את מסכימה לשימוש בקבצים אלה. ניתן לחסום או למחוק Cookies דרך הגדרות הדפדפן בכל עת, אך פעולה זו עשויה לפגוע בתפקוד חלק מהאתר.</p>
+          <p data-i18n="legal_s5_cookies3">בעצם הגלישה באתר, את מסכימה לשימוש בקבצים אלה. ניתן לחסום או למחוק Cookies דרך הגדרות הדפדפן בכל עת, אך פעולה זו עשויה לפגוע בתפקוד חלק מהאתר.</p>
 
-          <h3 class="legal-h3">הגנת מידע</h3>
-          <p>המידע האישי שאת מוסרת לנו (שם, דוא"ל, טלפון) משמש אך ורק לצורך מתן השירות, תיאום הזמנות ושליחת עדכונים שאישרת לקבל. איננו מוכרים או מעבירים מידע אישי לצדדים שלישיים ללא הסכמתך.</p>
+          <h3 class="legal-h3" data-i18n="legal_s5_h3_5">הגנת מידע</h3>
+          <p data-i18n="legal_s5_data">המידע האישי שאת מוסרת לנו (שם, דוא"ל, טלפון) משמש אך ורק לצורך מתן השירות, תיאום הזמנות ושליחת עדכונים שאישרת לקבל. איננו מוכרים או מעבירים מידע אישי לצדדים שלישיים ללא הסכמתך.</p>
 
         </div>
       </section>
 
       <!-- Contact CTA -->
       <div class="legal-cta">
-        <p class="legal-cta-text">יש לך שאלה שלא קיבלה מענה כאן?</p>
+        <p class="legal-cta-text" data-i18n="legal_cta_text">יש לך שאלה שלא קיבלה מענה כאן?</p>
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%99%D7%A9%20%D7%9C%D7%99%20%D7%A9%D7%90%D7%9C%D7%94%20%D7%9C%D7%92%D7%91%D7%99%20%D7%94%D7%AA%D7%A7%D7%A0%D7%95%D7%9F%20%D7%95%D7%94%D7%A9%D7%99%D7%A8%D7%95%D7%AA"
-           target="_blank" rel="noopener noreferrer" class="btn">
+           target="_blank" rel="noopener noreferrer" class="btn" data-i18n="legal_cta_btn">
           דברי איתנו בוואצאפ
         </a>
       </div>
@@ -269,8 +271,8 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <h3 class="footer-logo">CHARMING by Vik</h3>
-        <p>תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
-        <span class="footer-tagline">עיצוב &bull; יצירה &bull; אהבה</span>
+        <p data-i18n="footer_desc">תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
+        <span class="footer-tagline" data-i18n="footer_tagline">עיצוב &bull; יצירה &bull; אהבה</span>
         <div class="footer-social">
           <a href="https://www.tiktok.com/@charming.by.vik" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="TikTok">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.83 1.55V6.79a4.85 4.85 0 0 1-1.06-.1z"/></svg>
@@ -288,30 +290,30 @@
       </div>
 
       <div class="footer-links">
-        <h4>ניווט מהיר</h4>
+        <h4 data-i18n="footer_nav">ניווט מהיר</h4>
         <div class="footer-policy-btns">
-          <a href="index.html"           class="footer-policy-btn">דף הבית</a>
-          <a href="shop.html"            class="footer-policy-btn">הקולקציה</a>
-          <a href="workshops.html"       class="footer-policy-btn">סדנאות</a>
-          <a href="workshops.html#signup" class="footer-policy-btn">צור קשר</a>
+          <a href="index.html"           class="footer-policy-btn" data-i18n="footer_home">דף הבית</a>
+          <a href="shop.html"            class="footer-policy-btn" data-i18n="footer_collection">הקולקציה</a>
+          <a href="workshops.html"       class="footer-policy-btn" data-i18n="footer_workshops">סדנאות</a>
+          <a href="workshops.html#signup" class="footer-policy-btn" data-i18n="footer_contact_link">צור קשר</a>
         </div>
       </div>
 
       <div class="footer-links">
-        <h4>מדיניות פרטיות ותנאי האתר</h4>
+        <h4 data-i18n="footer_policy_title">מדיניות פרטיות ותנאי האתר</h4>
         <div class="footer-policy-btns">
-          <a href="#returns"    class="footer-policy-btn">מדיניות ביטולים</a>
-          <a href="#warranty"   class="footer-policy-btn">אחריות ותחזוקה</a>
-          <a href="#shipping"   class="footer-policy-btn">מדיניות משלוחים</a>
-          <a href="#terms"      class="footer-policy-btn">תנאי האתר</a>
-          <a href="#disclaimer" class="footer-policy-btn">מדיניות פרטיות</a>
+          <a href="#returns"    class="footer-policy-btn" data-i18n="footer_returns">מדיניות ביטולים</a>
+          <a href="#warranty"   class="footer-policy-btn" data-i18n="footer_warranty">אחריות ותחזוקה</a>
+          <a href="#shipping"   class="footer-policy-btn" data-i18n="footer_shipping">מדיניות משלוחים</a>
+          <a href="#terms"      class="footer-policy-btn" data-i18n="footer_terms">תנאי האתר</a>
+          <a href="#disclaimer" class="footer-policy-btn" data-i18n="footer_privacy">מדיניות פרטיות</a>
         </div>
       </div>
 
       <div class="footer-contact">
-        <h4>יצרו קשר</h4>
-        <p>לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
-        <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%94%D7%92%D7%A2%D7%AA%D7%99%20%D7%9E%D7%94%D7%90%D7%AA%D7%A8%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="footer-wa-link">
+        <h4 data-i18n="footer_contact_heading">יצרו קשר</h4>
+        <p data-i18n="footer_contact_text">לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
+        <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%94%D7%92%D7%A2%D7%AA%D7%99%20%D7%9E%D7%94%D7%90%D7%AA%D7%A8%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="footer-wa-link" data-i18n="footer_wa">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
           דברי איתנו בוואצאפ
         </a>
@@ -322,7 +324,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
+      <p data-i18n="footer_copyright">&copy; 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
     </div>
   </footer>
 
@@ -336,6 +338,7 @@
   <script src="main.js"></script>
   <script src="nav.js"></script>
   <script type="module" src="auth.js"></script>
+  <script src="lang.js"></script>
 
 </body>
 </html>

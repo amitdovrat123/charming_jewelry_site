@@ -17,15 +17,17 @@
       <a href="index.html" class="logo">CHARMING <span>by Vik</span></a>
       <nav>
         <ul class="nav-links">
-          <li><a href="index.html">דף הבית</a></li>
-          <li><a href="workshops.html">סדנאות</a></li>
-          <li><a href="shop.html">חנות</a></li>
-          <li><a href="workshops.html#faq">שאלות ותשובות</a></li>
-          <li><a href="workshops.html#signup">צור קשר</a></li>
-          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a></li>
+          <li><a href="index.html" data-i18n="nav_home">דף הבית</a></li>
+          <li><a href="workshops.html" data-i18n="nav_workshops">סדנאות</a></li>
+          <li><a href="shop.html" data-i18n="nav_shop">חנות</a></li>
+          <li><a href="workshops.html#faq" data-i18n="nav_faq">שאלות ותשובות</a></li>
+          <li><a href="workshops.html#signup" data-i18n="nav_contact">צור קשר</a></li>
+          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn" data-i18n="nav_login">התחברות / הרשמה</a></li>
+          <li class="lang-toggle-mobile"><button class="lang-toggle" aria-label="Switch to English">EN</button></li>
         </ul>
       </nav>
       <div class="nav-actions">
+        <button class="lang-toggle lang-toggle-desktop" aria-label="Switch to English">EN</button>
         <button id="nav-user-btn" class="nav-icon-btn" aria-label="אזור אישי" title="אזור אישי" data-logged-in="0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
@@ -44,9 +46,9 @@
 
   <!-- Page Hero -->
   <section class="page-hero page-hero--with-bg">
-    <p class="hero-eyebrow">חוויה שלא תישכח</p>
-    <h1 class="hero-title">סדנאות צ'ארמינג</h1>
-    <p class="hero-description">
+    <p class="hero-eyebrow" data-i18n="ws_hero_eyebrow">חוויה שלא תישכח</p>
+    <h1 class="hero-title" data-i18n="ws_hero_title">סדנאות צ'ארמינג</h1>
+    <p class="hero-description" data-i18n="ws_hero_desc">
       הפעילות המושלמת ליום הולדת או בת מצווה — סדנה חוויתית שמגיעה עד אליכן, הכוללת ציוד מקצועי, הדרכה צמודה ותכשיט יוקרתי שכל משתתפת מכינה בעצמה
     </p>
   </section>
@@ -143,9 +145,9 @@
   <!-- ===== WORKSHOP PACKAGES ===== -->
   <section class="gallery-section">
     <div class="container">
-      <span class="section-eyebrow">בחרי את הסדנה שלך</span>
-      <h2 class="section-title">4 מסלולים — חוויה אחת בלתי נשכחת</h2>
-      <p class="section-desc">
+      <span class="section-eyebrow" data-i18n="ws_pkg_eyebrow">בחרי את הסדנה שלך</span>
+      <h2 class="section-title" data-i18n="ws_pkg_title">4 מסלולים — חוויה אחת בלתי נשכחת</h2>
+      <p class="section-desc" data-i18n="ws_pkg_desc">
         כל מסלול כולל הדרכה אישית, חומרים מקצועיים ומתנת הפתעה. בחרי את מה שמדבר אלייך.
       </p>
 
@@ -157,12 +159,12 @@
             <img src="images/jewelry/IMG_7324.jpeg" alt="סדנת שרשרת" loading="lazy" />
           </div>
           <div class="gallery-card-body">
-            <span class="gallery-tag">⏱ שעתיים</span>
-            <h3>סדנת שרשרת</h3>
-            <p>עיצוב שרשרת מנירוסטה עם צ'ארמים לבחירתך — עדינה, נוצצת, ומושלמת לכל לוק.</p>
+            <span class="gallery-tag" data-i18n="ws_pkg1_time">⏱ שעתיים</span>
+            <h3 data-i18n="ws_pkg1_title">סדנת שרשרת</h3>
+            <p data-i18n="ws_pkg1_desc">עיצוב שרשרת מנירוסטה עם צ'ארמים לבחירתך — עדינה, נוצצת, ומושלמת לכל לוק.</p>
             <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A0%D7%95%D7%A1%D7%A4%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%93%D7%A0%D7%AA%20%D7%A9%D7%A8%D7%A9%D7%A8%D7%AA" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
               <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-              הזמיני בוואצאפ
+              <span data-i18n="ws_pkg1_btn">הזמיני בוואצאפ</span>
             </a>
           </div>
         </div>
@@ -173,12 +175,12 @@
             <img src="images/jewelry/IMG_5868.jpeg" alt="סדנת שרשרת ועגילים" loading="lazy" />
           </div>
           <div class="gallery-card-body">
-            <span class="gallery-tag">⏱ שעתיים</span>
-            <h3>סדנת שרשרת ועגילים</h3>
-            <p>שרשרת ועגילים תואמים — סט מושלם שתיצרי בידיים שלך, לכל שמחה ואירוע.</p>
+            <span class="gallery-tag" data-i18n="ws_pkg2_time">⏱ שעתיים</span>
+            <h3 data-i18n="ws_pkg2_title">סדנת שרשרת ועגילים</h3>
+            <p data-i18n="ws_pkg2_desc">שרשרת ועגילים תואמים — סט מושלם שתיצרי בידיים שלך, לכל שמחה ואירוע.</p>
             <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A0%D7%95%D7%A1%D7%A4%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%93%D7%A0%D7%AA%20%D7%A9%D7%A8%D7%A9%D7%A8%D7%AA%20%D7%95%D7%A2%D7%92%D7%99%D7%9C%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
               <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-              הזמיני בוואצאפ
+              <span data-i18n="ws_pkg2_btn">הזמיני בוואצאפ</span>
             </a>
           </div>
         </div>
@@ -187,12 +189,12 @@
         <div class="gallery-card">
           <div class="package-card-header">💎</div>
           <div class="gallery-card-body">
-            <span class="gallery-tag">⏱ שעתיים וחצי</span>
-            <h3>סדנת שרשרת וצמיד</h3>
-            <p>שני תכשיטים ייחודיים — שרשרת וצמיד שנוצרו בידיים שלך, ממש בשבילך.</p>
+            <span class="gallery-tag" data-i18n="ws_pkg3_time">⏱ שעתיים וחצי</span>
+            <h3 data-i18n="ws_pkg3_title">סדנת שרשרת וצמיד</h3>
+            <p data-i18n="ws_pkg3_desc">שני תכשיטים ייחודיים — שרשרת וצמיד שנוצרו בידיים שלך, ממש בשבילך.</p>
             <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A0%D7%95%D7%A1%D7%A4%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%93%D7%A0%D7%AA%20%D7%A9%D7%A8%D7%A9%D7%A8%D7%AA%20%D7%95%D7%A6%D7%9E%D7%99%D7%93" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
               <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-              הזמיני בוואצאפ
+              <span data-i18n="ws_pkg3_btn">הזמיני בוואצאפ</span>
             </a>
           </div>
         </div>
@@ -203,13 +205,13 @@
             <img src="images/workshop/3828f683-2dfb-4a71-9f0d-6b0d15ee7718.jpg" alt="סדנת שרשרת, צמיד ועגילים" loading="lazy" />
           </div>
           <div class="gallery-card-body">
-            <span class="gallery-tag package-popular-badge">הכי פופולרי ⭐</span>
-            <span class="gallery-tag">⏱ שעתיים וחצי</span>
-            <h3>סדנת שרשרת, צמיד ועגילים</h3>
-            <p>הסט המלא — שרשרת, צמיד, ועגילים תואמים. לאישה שרוצה הכי הרבה מהחוויה.</p>
+            <span class="gallery-tag package-popular-badge" data-i18n="ws_pkg4_badge">הכי פופולרי ⭐</span>
+            <span class="gallery-tag" data-i18n="ws_pkg4_time">⏱ שעתיים וחצי</span>
+            <h3 data-i18n="ws_pkg4_title">סדנת שרשרת, צמיד ועגילים</h3>
+            <p data-i18n="ws_pkg4_desc">הסט המלא — שרשרת, צמיד, ועגילים תואמים. לאישה שרוצה הכי הרבה מהחוויה.</p>
             <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%A0%D7%95%D7%A1%D7%A4%D7%99%D7%9D%20%D7%A2%D7%9C%20%D7%A1%D7%93%D7%A0%D7%AA%20%D7%A9%D7%A8%D7%A9%D7%A8%D7%AA%2C%20%D7%A6%D7%9E%D7%99%D7%93%20%D7%95%D7%A2%D7%92%D7%99%D7%9C%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
               <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-              הזמיני בוואצאפ
+              <span data-i18n="ws_pkg4_btn">הזמיני בוואצאפ</span>
             </a>
           </div>
         </div>
@@ -221,9 +223,9 @@
   <!-- Signup / Contact Form -->
   <section id="signup" class="signup-section">
     <div class="container">
-      <span class="section-eyebrow">הרשמה לסדנה</span>
-      <h2 class="section-title">השאירי פרטים ונחזור אלייך</h2>
-      <p class="section-desc">
+      <span class="section-eyebrow" data-i18n="form_eyebrow">הרשמה לסדנה</span>
+      <h2 class="section-title" data-i18n="form_title">השאירי פרטים ונחזור אלייך</h2>
+      <p class="section-desc" data-i18n="form_desc">
         מלאי את הטופס ואנחנו ניצור איתך קשר בהקדם לאישור הפרטים. מחפשת סדנה פרטית לקבוצה? צייני זאת בהערות — נשמח להתאים את החוויה בשבילך.
       </p>
 
@@ -232,56 +234,56 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="name">שם מלא <span class="required">*</span></label>
-              <input type="text" id="name" name="name" placeholder="למשל: נועה כהן" required />
+              <label for="name" data-i18n="form_name">שם מלא <span class="required">*</span></label>
+              <input type="text" id="name" name="name" placeholder="למשל: נועה כהן" data-i18n-ph="ph_name" required />
             </div>
             <div class="form-group">
-              <label for="phone">מספר טלפון <span class="required">*</span></label>
-              <input type="tel" id="phone" name="phone" placeholder="05X-XXXXXXX" required />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="email">כתובת אימייל <span class="required">*</span></label>
-              <input type="email" id="email" name="email" placeholder="your@email.com" required />
-            </div>
-            <div class="form-group">
-              <label for="participants">מספר משתתפות</label>
-              <input type="number" id="participants" name="participants" placeholder="למשל: 4" min="1" max="20" />
+              <label for="phone" data-i18n="form_phone">מספר טלפון <span class="required">*</span></label>
+              <input type="tel" id="phone" name="phone" placeholder="05X-XXXXXXX" data-i18n-ph="ph_phone" required />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="workshop-type">סוג הסדנה</label>
+              <label for="email" data-i18n="form_email">כתובת אימייל <span class="required">*</span></label>
+              <input type="email" id="email" name="email" placeholder="your@email.com" data-i18n-ph="ph_email" required />
+            </div>
+            <div class="form-group">
+              <label for="participants" data-i18n="form_participants">מספר משתתפות</label>
+              <input type="number" id="participants" name="participants" placeholder="למשל: 4" data-i18n-ph="ph_participants" min="1" max="20" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="workshop-type" data-i18n="form_workshop_type">סוג הסדנה</label>
               <select id="workshop-type" name="workshop-type">
-                <option value="" disabled selected>בחרי סדנה...</option>
-                <option value="bracelets">סדנת צמידי צ'ארם</option>
-                <option value="necklaces">סדנת שרשראות ותליונים</option>
-                <option value="party">סדנת מסיבת רווקות</option>
-                <option value="private">סדנה פרטית / מותאמת אישית</option>
+                <option value="" disabled selected data-i18n="form_type_default">בחרי סדנה...</option>
+                <option value="bracelets" data-i18n="form_type_bracelets">סדנת צמידי צ'ארם</option>
+                <option value="necklaces" data-i18n="form_type_necklaces">סדנת שרשראות ותליונים</option>
+                <option value="party" data-i18n="form_type_party">סדנת מסיבת רווקות</option>
+                <option value="private" data-i18n="form_type_private">סדנה פרטית / מותאמת אישית</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="date">תאריך מועדף</label>
+              <label for="date" data-i18n="form_date">תאריך מועדף</label>
               <input type="date" id="date" name="date" />
             </div>
           </div>
 
           <div class="form-group full-width">
-            <label for="notes">הערות נוספות</label>
-            <textarea id="notes" name="notes" placeholder="רוצות סדנה אצלכן? יש אירוע מיוחד? כל פרט שיעזור לנו להתאים את החוויה בשבילכן..."></textarea>
+            <label for="notes" data-i18n="form_notes">הערות נוספות</label>
+            <textarea id="notes" name="notes" placeholder="רוצות סדנה אצלכן? יש אירוע מיוחד? כל פרט שיעזור לנו להתאים את החוויה בשבילכן..." data-i18n-ph="ph_notes"></textarea>
           </div>
 
           <div class="form-submit">
-            <button type="submit" class="btn">שלח פניה</button>
-            <p class="form-note">* שדות חובה. נחזור אלייך בהקדם.</p>
+            <button type="submit" class="btn" data-i18n="form_submit">שלח פניה</button>
+            <p class="form-note" data-i18n="form_note">* שדות חובה. נחזור אלייך בהקדם.</p>
           </div>
 
           <div id="signup-success" style="display:none;text-align:center;padding:32px 0;">
-            <p style="font-size:1.15rem;font-weight:600;color:var(--ink);margin:0 0 8px;">תודה רבה שפנית אלינו</p>
-            <p style="font-size:0.95rem;color:var(--ink-soft);margin:0;">נדאג לחזור אלייך בהקדם.</p>
+            <p style="font-size:1.15rem;font-weight:600;color:var(--ink);margin:0 0 8px;" data-i18n="form_success_title">תודה רבה שפנית אלינו</p>
+            <p style="font-size:0.95rem;color:var(--ink-soft);margin:0;" data-i18n="form_success_text">נדאג לחזור אלייך בהקדם.</p>
           </div>
 
         </form>
@@ -292,93 +294,93 @@
   <!-- ===== FAQ ===== -->
   <section id="faq" class="faq-section">
     <div class="container">
-      <span class="section-eyebrow">שאלות ותשובות</span>
-      <h2 class="section-title">כל מה שרצית לדעת</h2>
-      <p class="section-desc">לא מצאת תשובה? תמיד אפשר לכתוב לנו בוואצאפ.</p>
+      <span class="section-eyebrow" data-i18n="faq_eyebrow">שאלות ותשובות</span>
+      <h2 class="section-title" data-i18n="faq_title">כל מה שרצית לדעת</h2>
+      <p class="section-desc" data-i18n="faq_desc">לא מצאת תשובה? תמיד אפשר לכתוב לנו בוואצאפ.</p>
 
       <div class="faq-list">
 
         <!-- Category 1 -->
         <div class="faq-category">
-          <h3 class="faq-category-title">✨ איכות התכשיטים והזמנות</h3>
+          <h3 class="faq-category-title" data-i18n="faq_cat1">✨ איכות התכשיטים והזמנות</h3>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              האם התכשיטים משחירים במים?
+              <span data-i18n="faq_q1_1">האם התכשיטים משחירים במים?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>כל התכשיטים עשויים מפלדת אל-חלד (Stainless Steel), חומר היפו-אלרגני שלא מחליד, לא משחיר במים וניתן להתקלח איתו ללא חשש.</p>
+              <p data-i18n="faq_a1_1">כל התכשיטים עשויים מפלדת אל-חלד (Stainless Steel), חומר היפו-אלרגני שלא מחליד, לא משחיר במים וניתן להתקלח איתו ללא חשש.</p>
             </div>
           </div>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              איך מקבלים מוצרים מהקטלוג?
+              <span data-i18n="faq_q1_2">איך מקבלים מוצרים מהקטלוג?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>ניתן לבצע איסוף עצמי מהסדנה בראשון לציון (ללא עלות) או משלוח עד הבית תוך 3 ימי עסקים.</p>
+              <p data-i18n="faq_a1_2">ניתן לבצע איסוף עצמי מהסדנה בראשון לציון (ללא עלות) או משלוח עד הבית תוך 3 ימי עסקים.</p>
             </div>
           </div>
         </div>
 
         <!-- Category 2 -->
         <div class="faq-category">
-          <h3 class="faq-category-title">🔨 על הסדנאות שלנו</h3>
+          <h3 class="faq-category-title" data-i18n="faq_cat2">🔨 על הסדנאות שלנו</h3>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              איפה הסדנא מתקיימת?
+              <span data-i18n="faq_q2_1">איפה הסדנא מתקיימת?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>אנחנו מגיעים לכל מקום בארץ! אין לנו סטודיו פיזי, אנחנו מביאים את כל הציוד והחוויה עד אליכם.</p>
+              <p data-i18n="faq_a2_1">אנחנו מגיעים לכל מקום בארץ! אין לנו סטודיו פיזי, אנחנו מביאים את כל הציוד והחוויה עד אליכם.</p>
             </div>
           </div>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              מה מכינים וכמה זמן זה לוקח?
+              <span data-i18n="faq_q2_2">מה מכינים וכמה זמן זה לוקח?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>הסדנה אורכת בין שעתיים לשעתיים וחצי. יש 4 מסלולי בחירה וכל משתתפת מקבלת 5 צ'ארמים לתכשיט ושקית קטיפה יוקרתית.</p>
+              <p data-i18n="faq_a2_2">הסדנה אורכת בין שעתיים לשעתיים וחצי. יש 4 מסלולי בחירה וכל משתתפת מקבלת 5 צ'ארמים לתכשיט ושקית קטיפה יוקרתית.</p>
             </div>
           </div>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              כמה אנשי צוות מגיעים?
+              <span data-i18n="faq_q2_3">כמה אנשי צוות מגיעים?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>תלוי בכמות המשתתפות. אנחנו דואגים שינתן יחס אישי לכל אחת מהמשתתפות ללא התפשרות.</p>
+              <p data-i18n="faq_a2_3">תלוי בכמות המשתתפות. אנחנו דואגים שינתן יחס אישי לכל אחת מהמשתתפות ללא התפשרות.</p>
             </div>
           </div>
         </div>
 
         <!-- Category 3 -->
         <div class="faq-category">
-          <h3 class="faq-category-title">💰 עלויות ולוגיסטיקה</h3>
+          <h3 class="faq-category-title" data-i18n="faq_cat3">💰 עלויות ולוגיסטיקה</h3>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              איך עובד התמחור?
+              <span data-i18n="faq_q3_1">איך עובד התמחור?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>המחיר נקבע לפי מדרגות של כמות משתתפות (עד 10, 15, 20, 25, 30, 35). לא ניתן לשנות מחיר לפי מספר ספציפי כדי למנוע אי נעימות ושמירה על היערכות הצוות.</p>
+              <p data-i18n="faq_a3_1">המחיר נקבע לפי מדרגות של כמות משתתפות (עד 10, 15, 20, 25, 30, 35). לא ניתן לשנות מחיר לפי מספר ספציפי כדי למנוע אי נעימות ושמירה על היערכות הצוות.</p>
             </div>
           </div>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">
-              האם יש תוספת על הגעה?
+              <span data-i18n="faq_q3_2">האם יש תוספת על הגעה?</span>
               <span class="faq-icon" aria-hidden="true"></span>
             </button>
             <div class="faq-answer">
-              <p>באזור המרכז (כפר סבא עד אשדוד) אין תוספת תשלום. מחוץ לאזורים אלו ישנה תוספת — מומלץ לוודא איתנו מול שם העיר.</p>
+              <p data-i18n="faq_a3_2">באזור המרכז (כפר סבא עד אשדוד) אין תוספת תשלום. מחוץ לאזורים אלו ישנה תוספת — מומלץ לוודא איתנו מול שם העיר.</p>
             </div>
           </div>
         </div>
@@ -392,8 +394,8 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <h3 class="footer-logo">CHARMING by Vik</h3>
-        <p>תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
-        <span class="footer-tagline">עיצוב • יצירה • אהבה</span>
+        <p data-i18n="footer_desc">תכשיטים ייחודיים בעבודת יד — כי כל אישה ראויה לתכשיט שנוצר במיוחד בשבילה.</p>
+        <span class="footer-tagline" data-i18n="footer_tagline">עיצוב • יצירה • אהבה</span>
         <div class="footer-social">
           <!-- TikTok -->
           <a href="https://www.tiktok.com/@charming.by.vik" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="TikTok">
@@ -414,36 +416,36 @@
         </div>
       </div>
       <div class="footer-links">
-        <h4>ניווט מהיר</h4>
+        <h4 data-i18n="footer_nav">ניווט מהיר</h4>
         <div class="footer-policy-btns">
-          <a href="index.html"      class="footer-policy-btn">דף הבית</a>
-          <a href="shop.html"       class="footer-policy-btn">הקולקציה</a>
-          <a href="workshops.html"  class="footer-policy-btn">סדנאות</a>
-          <a href="#signup"         class="footer-policy-btn">הרשמה</a>
+          <a href="index.html"      class="footer-policy-btn" data-i18n="footer_home">דף הבית</a>
+          <a href="shop.html"       class="footer-policy-btn" data-i18n="footer_collection">הקולקציה</a>
+          <a href="workshops.html"  class="footer-policy-btn" data-i18n="footer_workshops">סדנאות</a>
+          <a href="#signup"         class="footer-policy-btn" data-i18n="footer_signup">הרשמה</a>
         </div>
       </div>
 
       <div class="footer-links">
-        <h4>מדיניות פרטיות ותנאי האתר</h4>
+        <h4 data-i18n="footer_policy_title">מדיניות פרטיות ותנאי האתר</h4>
         <div class="footer-policy-btns">
-          <a href="legal.html#returns"    class="footer-policy-btn">מדיניות ביטולים</a>
-          <a href="legal.html#warranty"   class="footer-policy-btn">אחריות ותחזוקה</a>
-          <a href="legal.html#shipping"   class="footer-policy-btn">מדיניות משלוחים</a>
-          <a href="legal.html#terms"      class="footer-policy-btn">תנאי האתר</a>
-          <a href="legal.html#disclaimer" class="footer-policy-btn">מדיניות פרטיות</a>
+          <a href="legal.html#returns"    class="footer-policy-btn" data-i18n="footer_returns">מדיניות ביטולים</a>
+          <a href="legal.html#warranty"   class="footer-policy-btn" data-i18n="footer_warranty">אחריות ותחזוקה</a>
+          <a href="legal.html#shipping"   class="footer-policy-btn" data-i18n="footer_shipping">מדיניות משלוחים</a>
+          <a href="legal.html#terms"      class="footer-policy-btn" data-i18n="footer_terms">תנאי האתר</a>
+          <a href="legal.html#disclaimer" class="footer-policy-btn" data-i18n="footer_privacy">מדיניות פרטיות</a>
         </div>
       </div>
       <div class="footer-contact">
-        <h4>יצרו קשר</h4>
-        <p>לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
+        <h4 data-i18n="footer_contact_heading">יצרו קשר</h4>
+        <p data-i18n="footer_contact_text">לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%94%D7%92%D7%A2%D7%AA%D7%99%20%D7%9E%D7%94%D7%90%D7%AA%D7%A8%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A4%D7%A8%D7%98%D7%99%D7%9D" target="_blank" rel="noopener noreferrer" class="footer-wa-link">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-          דברי איתנו בוואצאפ
+          <span data-i18n="footer_wa">דברי איתנו בוואצאפ</span>
         </a>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
+      <p data-i18n="footer_copyright">© 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
     </div>
   </footer>
 
@@ -454,6 +456,7 @@
     </svg>
   </a>
 
+  <script src="lang.js"></script>
   <script src="main.js"></script>
   <script src="nav.js"></script>
   <script type="module" src="auth.js"></script>
