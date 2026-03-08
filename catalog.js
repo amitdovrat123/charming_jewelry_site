@@ -879,7 +879,6 @@ function renderCheckoutStep1(el) {
   el.innerHTML = `
     <section style="padding:80px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:640px;">
-        <button id="co-back1" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">← המשיכי בקניות</button>
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">העגלה שלי</h2>
         ${stepIndicator(1, 2)}
         ${bannerHtml}
