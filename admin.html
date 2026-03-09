@@ -201,7 +201,7 @@
           </button>
           <button data-tab="inventory" onclick="showTab('inventory')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
-            <span class="text-base">💎</span> מלאי
+            <span class="text-base">💎</span> קטלוג ומלאי
           </button>
           <button data-tab="customers" onclick="showTab('customers')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
@@ -446,7 +446,7 @@
     </button>
     <button data-tab="inventory" onclick="showTab('inventory')"
       class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">💎</span> מלאי
+      <span class="text-xl">💎</span> קטלוג
     </button>
     <button data-tab="customers" onclick="showTab('customers')"
       class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
@@ -987,7 +987,15 @@ function initNotifications() {
         .filter(d => d.data().status === 'pending_payment')
         .map(d => ({ id: 'ord-'+d.id, type: 'order', docId: d.id, ...d.data() }));
 
-      notifications = [...newInquiries, ...newOrders];
+      // Out-of-stock products
+      const oosProducts = allProducts
+        .filter(p => {
+          const s = p.stockCount ?? p.stock ?? null;
+          return s !== null && s <= 0 && p.status === 'published';
+        })
+        .map(p => ({ id: 'oos-'+p.id, type: 'stock', docId: p.id, name: p.name }));
+
+      notifications = [...newInquiries, ...newOrders, ...oosProducts];
       renderNotifications();
     });
   });
@@ -1049,6 +1057,16 @@ function renderNotifications() {
           <p class="text-xs font-bold text-gray-700 truncate">הזמנה חדשה — ${n.orderId || ''}</p>
           <p class="text-[11px] text-gray-400 truncate">${n.customer?.name || ''} · ${total} ₪</p>
           <p class="text-[10px] text-gray-300 mt-1">${ts}</p>
+        </div>
+      </button>`;
+    }
+
+    if (n.type === 'stock') {
+      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('inventory');" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
+        ${dot}
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold text-gray-700 truncate">⚠️ נגמר המלאי — ${n.name || ''}</p>
+          <p class="text-[11px] text-gray-400 truncate">יש לעדכן מלאי או לשנות סטטוס</p>
         </div>
       </button>`;
     }
@@ -1362,8 +1380,12 @@ function renderTable() {
   });
 
   document.getElementById('tbl-count').textContent = `${list.length} מוצרים`;
-  const tblEmpty = document.getElementById('tbl-empty');
-  const tblWrap  = document.getElementById('tbl-wrap');
+  const tblLoading = document.getElementById('tbl-loading');
+  const tblEmpty   = document.getElementById('tbl-empty');
+  const tblWrap    = document.getElementById('tbl-wrap');
+
+  // Always hide loading spinner once data is available
+  if (tblLoading) tblLoading.setAttribute('data-v','');
 
   if (!list.length) {
     tblEmpty.removeAttribute('data-v');

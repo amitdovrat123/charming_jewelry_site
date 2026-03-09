@@ -643,7 +643,7 @@ function renderProfileView() {
         </div>
       </section>`;
     el.querySelector('#profile-login-btn').addEventListener('click', () => document.getElementById('auth-nav-btn')?.click());
-    el.querySelector('#profile-back-btn').addEventListener('click', () => switchView(previousView || 'home'));
+    el.querySelector('#profile-back-btn')?.addEventListener('click', () => switchView(previousView || 'home'));
     return;
   }
 
@@ -654,6 +654,16 @@ function renderProfileView() {
         <div style="display:flex;gap:0;border-bottom:2px solid var(--sand-dark);margin-bottom:32px;">
           <button class="profile-tab" data-tab="info" style="background:none;border:none;border-bottom:3px solid var(--pink);margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--ink);transition:.2s;">פרטים אישיים</button>
           <button class="profile-tab" data-tab="orders" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">הזמנות שלי</button>
+          <button class="profile-tab" data-tab="coupons" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">קופונים שלי</button>
+        </div>
+
+        <div id="profile-pane-coupons" style="display:none;">
+          <div id="coupons-loading" style="text-align:center;padding:40px 0;color:var(--muted);">טוענת קופונים...</div>
+          <div id="coupons-list" style="display:flex;flex-direction:column;gap:14px;"></div>
+          <div id="coupons-empty" style="display:none;text-align:center;padding:60px 0;">
+            <div style="font-size:3rem;margin-bottom:14px;">🏷️</div>
+            <p style="color:var(--muted);">אין קופונים זמינים כרגע.</p>
+          </div>
         </div>
 
         <div id="profile-pane-orders" style="display:none;">
@@ -709,13 +719,15 @@ function renderProfileView() {
       });
       tab.style.borderBottomColor = 'var(--pink)';
       tab.style.color = 'var(--ink)';
-      el.querySelector('#profile-pane-orders').style.display = tab.dataset.tab === 'orders' ? '' : 'none';
-      el.querySelector('#profile-pane-info').style.display   = tab.dataset.tab === 'info'   ? 'flex' : 'none';
-      if (tab.dataset.tab === 'orders') loadOrders();
+      el.querySelector('#profile-pane-orders').style.display  = tab.dataset.tab === 'orders'  ? '' : 'none';
+      el.querySelector('#profile-pane-info').style.display    = tab.dataset.tab === 'info'    ? 'flex' : 'none';
+      el.querySelector('#profile-pane-coupons').style.display = tab.dataset.tab === 'coupons' ? '' : 'none';
+      if (tab.dataset.tab === 'orders')  loadOrders();
+      if (tab.dataset.tab === 'coupons') loadMyCoupons();
     });
   });
 
-  el.querySelector('#profile-back-btn').addEventListener('click', () => switchView(previousView || 'home'));
+  el.querySelector('#profile-back-btn')?.addEventListener('click', () => switchView(previousView || 'home'));
   el.querySelector('#go-shop-link')?.addEventListener('click', e => { e.preventDefault(); switchView('shop'); });
 
   el.querySelector('#prof-save-btn').addEventListener('click', async () => {
@@ -782,6 +794,79 @@ function renderProfileView() {
       .catch(() => {
         if (loadingEl) loadingEl.style.display = 'none';
         listEl.innerHTML = '<p style="color:var(--muted);text-align:center;padding:30px 0;">שגיאה בטעינת הזמנות.</p>';
+      });
+  }
+
+  function loadMyCoupons() {
+    const loadingEl = el.querySelector('#coupons-loading');
+    const listEl    = el.querySelector('#coupons-list');
+    const emptyEl   = el.querySelector('#coupons-empty');
+    if (!loadingEl) return;
+    loadingEl.style.display = 'block';
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'none';
+    getDocs(collection(db, `${USERS_ROOT}/${currentUser.uid}/assignedCoupons`))
+      .then(async snap => {
+        loadingEl.style.display = 'none';
+        if (snap.empty) { emptyEl.style.display = 'block'; return; }
+        const coupons = [];
+        snap.forEach(d => coupons.push({ id: d.id, ...d.data() }));
+
+        // Check each coupon's current status from the main coupons collection
+        const couponCards = await Promise.all(coupons.map(async c => {
+          let status = 'active';
+          let statusLabel = 'פעיל';
+          let statusColor = '#16a34a';
+          let statusBg = '#f0fdf4';
+
+          // Check if coupon still exists and is valid
+          try {
+            const couponSnap = await getDocs(
+              query(collection(db, COUPONS_COL_PATH), where('code', '==', c.code), limit(1))
+            );
+            if (!couponSnap.empty) {
+              const couponData = couponSnap.docs[0].data();
+              if (couponData.expiryDate?.seconds && couponData.expiryDate.seconds * 1000 < Date.now()) {
+                status = 'expired'; statusLabel = 'פג תוקף'; statusColor = '#dc2626'; statusBg = '#fef2f2';
+              } else if (couponData.usageLimit != null && (couponData.usedCount || 0) >= couponData.usageLimit) {
+                status = 'maxed'; statusLabel = 'מוצה'; statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+              }
+            } else {
+              status = 'invalid'; statusLabel = 'לא פעיל'; statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+            }
+          } catch {}
+
+          // Check if user already used this coupon
+          if (status === 'active' && c.couponDocId) {
+            try {
+              const usageSnap = await getDocs(
+                query(collection(db, COUPONS_COL_PATH, c.couponDocId, 'userUsage'), where('uid', '==', currentUser.uid), limit(1))
+              );
+              if (!usageSnap.empty) {
+                status = 'used'; statusLabel = 'נוצל'; statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+              }
+            } catch {}
+          }
+
+          const discountLabel = c.type === 'percent' ? `${c.value}%` : `${c.value} ₪`;
+          return `
+            <div style="border:1px solid ${status === 'active' ? 'var(--pink)' : 'var(--sand-dark)'};border-radius:14px;padding:18px 20px;background:var(--sand-light);${status !== 'active' ? 'opacity:0.7;' : ''}">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-size:1.1rem;font-weight:700;color:var(--ink);letter-spacing:2px;font-family:monospace;">${esc(c.code)}</span>
+                <span style="font-size:0.75rem;font-weight:600;padding:3px 10px;border-radius:50px;color:${statusColor};background:${statusBg};">${statusLabel}</span>
+              </div>
+              <p style="margin:0 0 6px;font-size:0.9rem;color:var(--ink-soft);">הנחה: <strong>${discountLabel}</strong>${c.type === 'percent' ? ' מסכום ההזמנה' : ''}</p>
+              ${c.description ? `<p style="margin:0 0 6px;font-size:0.82rem;color:var(--muted);">${esc(c.description)}</p>` : ''}
+              ${c.expiryDate ? `<p style="margin:0;font-size:0.78rem;color:var(--muted);">בתוקף עד: ${new Date(c.expiryDate.seconds ? c.expiryDate.seconds * 1000 : c.expiryDate).toLocaleDateString('he-IL')}</p>` : ''}
+              ${status === 'active' ? `<div style="margin-top:10px;padding:8px 12px;background:var(--pink-light);border-radius:8px;text-align:center;"><p style="margin:0;font-size:0.82rem;color:var(--pink-deep);font-weight:600;">הזיני את הקוד בעגלת הקניות</p></div>` : ''}
+            </div>`;
+        }));
+
+        listEl.innerHTML = couponCards.join('');
+      })
+      .catch(() => {
+        if (loadingEl) loadingEl.style.display = 'none';
+        listEl.innerHTML = '<p style="color:var(--muted);text-align:center;padding:30px 0;">שגיאה בטעינת קופונים.</p>';
       });
   }
 }
