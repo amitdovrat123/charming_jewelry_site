@@ -112,7 +112,7 @@ function addToCart(product, customizationNote) {
   }
   saveCart();
   updateCartBadge();
-  showToast('נוסף לסל!');
+  showToast(t('pv_added_toast','נוסף לסל!'));
 }
 
 function getCartSubtotal() { return cart.reduce((s, i) => s + i.price * (i.qty || 1), 0); }
@@ -178,7 +178,7 @@ function cardHTML(product) {
   const badgeHtml = badge
     ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;">${esc(badge)}</span>` : '';
   const oosHtml = oos
-    ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;background:var(--muted);">אזל</span>` : '';
+    ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;background:var(--muted);">${t('pv_oos_badge','אזל')}</span>` : '';
 
   const priceHtml = (sale > 0 && sale < price)
     ? `<span style="font-weight:700;color:var(--pink-deep);">${sp} ₪</span> <span style="color:var(--muted);text-decoration:line-through;font-size:0.85rem;">${price} ₪</span>`
@@ -192,7 +192,7 @@ function cardHTML(product) {
       <div class="shop-card-body" style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;">
         <h3 style="font-size:0.97rem;font-weight:600;color:var(--ink);margin:0;line-height:1.35;">${esc(data.name)}</h3>
         <div style="display:flex;align-items:center;gap:8px;">${priceHtml}</div>
-        <button class="btn" style="margin-top:6px;min-height:40px;font-size:0.82rem;pointer-events:none;">צפי במוצר</button>
+        <button class="btn" style="margin-top:6px;min-height:40px;font-size:0.82rem;pointer-events:none;">${t('pv_view_product','צפי במוצר')}</button>
       </div>
     </div>`;
 }
@@ -226,7 +226,7 @@ function shopCardHTML(product) {
   const badgeHtml = (badge && !oos)
     ? `<span class="sp-card-badge">${esc(badge)}</span>` : '';
   const oosBadge = oos
-    ? `<span class="sp-card-badge sp-card-badge--oos">אזל</span>` : '';
+    ? `<span class="sp-card-badge sp-card-badge--oos">${t('pv_oos_badge','אזל')}</span>` : '';
 
   const priceHtml = (sale > 0 && sale < price)
     ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
@@ -241,20 +241,20 @@ function shopCardHTML(product) {
   const customField = data.isCustomizable ? `
     <div class="sp-custom-field">
       <div class="sp-custom-field-label-row">
-        <label class="sp-custom-field-label" for="custom-note-${sid}">התאמה אישית של צ'ארמים <span class="sp-custom-optional">(אופציונלי)</span></label>
+        <label class="sp-custom-field-label" for="custom-note-${sid}">${t('sp_custom_label','התאמה אישית של צ\'ארמים')} <span class="sp-custom-optional">(${t('sp_custom_optional','אופציונלי')})</span></label>
         <span class="sp-custom-info-wrap">
-          <button type="button" class="sp-custom-info-btn" aria-label="מידע על מספור הצ'ארמים">?</button>
-          <span class="sp-custom-tooltip" role="tooltip">הצ'ארם הימני ביותר בתמונה נחשב למספר 1, הבא אחריו למספר 2 וכן הלאה.</span>
+          <button type="button" class="sp-custom-info-btn" aria-label="${t('sp_custom_info_aria','מידע על מספור הצ\'ארמים')}">?</button>
+          <span class="sp-custom-tooltip" role="tooltip">${t('sp_custom_tooltip','הצ\'ארם הימני ביותר בתמונה נחשב למספר 1, הבא אחריו למספר 2 וכן הלאה.')}</span>
         </span>
       </div>
       <textarea id="custom-note-${sid}" class="sp-custom-textarea" dir="rtl" rows="2"
-        placeholder="ציינו את מספר הצ'ארם (מימין לשמאל, הימני הוא 1) ואת השינוי. לדוגמה: 2-מזל תאומים"
+        placeholder="${t('sp_custom_ph','ציינו את מספר הצ\'ארם (מימין לשמאל, הימני הוא 1) ואת השינוי. לדוגמה: 2-מזל תאומים')}"
       ></textarea>
     </div>` : '';
 
   const actionBtn = oos
-    ? `<button class="sp-card-add sp-card-add--oos" disabled>אזל מהמלאי</button>`
-    : `<button class="sp-card-add" data-product-id="${sid}">הוסיפי לסל</button>`;
+    ? `<button class="sp-card-add sp-card-add--oos" disabled>${t('sp_oos_btn','אזל מהמלאי')}</button>`
+    : `<button class="sp-card-add" data-product-id="${sid}">${t('sp_add_to_cart','הוסיפי לסל')}</button>`;
 
   return `
     <div class="sp-shop-card fadein" data-product-id="${sid}" role="button" tabindex="0" aria-label="${esc(data.name)}">
@@ -311,11 +311,11 @@ function bindShopCardClicks(container) {
 function freeShipBannerHTML(subtotal) {
   if (subtotal >= FREE_SHIP_THRESHOLD) {
     return `<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:#15803d;margin-bottom:16px;">
-      ✅ מזל טוב! הגעת ל-${FREE_SHIP_THRESHOLD} ₪ — <strong>משלוח חינם!</strong>
+      ✅ ${t('co_free_ship_congrats','מזל טוב! הגעת ל-')}${FREE_SHIP_THRESHOLD} ₪ — <strong>${t('co_free_ship_note','משלוח חינם!')}</strong>
     </div>`;
   }
   return `<div style="background:var(--pink-light);border:1.5px solid var(--sand-dark);border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:var(--ink-soft);margin-bottom:16px;">
-    🚚 משלוח חינם בקנייה מעל <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — עוד <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>!` : ''}
+    🚚 ${t('co_free_ship_over','משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — ${t('co_free_ship_more','עוד')} <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>!` : ''}
   </div>`;
 }
 
@@ -372,15 +372,15 @@ function renderShop() {
   // ── Drawer pill HTML ─────────────────────────────────────────
   const isAllActive = !shopFilterCat && !shopFilterFeatured;
   const catPillsHTML = [
-    `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">הכל</button>`,
+    `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">${t('shop_all','הכל')}</button>`,
     ...allCats.map(c =>
       `<button class="sp-pill${shopFilterCat === c ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
     ),
-    `<button class="sp-pill sp-pill--star${shopFilterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">מוצרים נבחרים ⭐</button>`,
+    `<button class="sp-pill sp-pill--star${shopFilterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">${t('shop_featured','מוצרים נבחרים')} ⭐</button>`,
   ].join('');
 
   const colorPillsHTML = [
-    `<button class="sp-pill${!shopFilterColor ? ' sp-pill--active' : ''}" data-filter-color="">הכל</button>`,
+    `<button class="sp-pill${!shopFilterColor ? ' sp-pill--active' : ''}" data-filter-color="">${t('shop_all','הכל')}</button>`,
     ...allColors.map(c =>
       `<button class="sp-pill${shopFilterColor === c ? ' sp-pill--active' : ''}" data-filter-color="${esc(c)}">${esc(c)}</button>`
     ),
@@ -389,12 +389,12 @@ function renderShop() {
   // ── Grid content ──────────────────────────────────────────────
   const gridContent = filtered.length
     ? filtered.map(shopCardHTML).join('')
-    : `<div class="sp-empty"><p>לא נמצאו מוצרים התואמים את הסינון שנבחר</p><button class="btn btn-outline sp-reset-btn">איפוס פילטרים</button></div>`;
+    : `<div class="sp-empty"><p>${t('shop_no_results','לא נמצאו מוצרים התואמים את הסינון שנבחר')}</p><button class="btn btn-outline sp-reset-btn">${t('shop_reset_filters','איפוס פילטרים')}</button></div>`;
 
   const hasActiveFilter = shopFilterCat || shopFilterColor || shopFilterFeatured || shopFilterPriceMax || shopFilterOnSale;
   const freeShipLine = subtotal >= FREE_SHIP_THRESHOLD
-    ? `✅ זכאית למשלוח חינם!`
-    : `🚚 משלוח חינם בקנייה מעל <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — עוד <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>` : ''}`;
+    ? `✅ ${t('shop_free_ship_eligible','זכאית למשלוח חינם!')}`
+    : `🚚 ${t('co_free_ship_over','משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — ${t('co_free_ship_more','עוד')} <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>` : ''}`;
 
   el.innerHTML = `
     <section class="sp-section">
@@ -402,13 +402,13 @@ function renderShop() {
 
         <button id="shop-back-btn" class="sp-back-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-          חזרה לדף הבית
+          ${t('shop_back_home','חזרה לדף הבית')}
         </button>
 
         <div class="sp-hero">
-          <span class="section-eyebrow">כל הקולקציה</span>
-          <h1 class="sp-title">החנות שלנו</h1>
-          <p class="sp-subtitle">כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.</p>
+          <span class="section-eyebrow">${t('shop_eyebrow','כל הקולקציה')}</span>
+          <h1 class="sp-title">${t('shop_title','החנות שלנו')}</h1>
+          <p class="sp-subtitle">${t('shop_subtitle','כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.')}</p>
         </div>
 
         <div class="sp-freeship-slim">${freeShipLine}</div>
@@ -416,41 +416,41 @@ function renderShop() {
         <div class="sp-filter-trigger-row">
           <button id="sp-filter-btn" class="sp-filter-trigger">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-            סינון ומיון
+            ${t('shop_filter_sort','סינון ומיון')}
           </button>
-          <p class="sp-results-count">מציגה <strong>${filtered.length}</strong> מוצרים${hasActiveFilter ? ` &nbsp;<button class="sp-clear-btn" id="shop-clear-filters">× נקי</button>` : ''}</p>
+          <p class="sp-results-count">${t('shop_showing','מציגה')} <strong>${filtered.length}</strong> ${t('shop_products','מוצרים')}${hasActiveFilter ? ` &nbsp;<button class="sp-clear-btn" id="shop-clear-filters">× ${t('shop_clear','נקי')}</button>` : ''}</p>
         </div>
 
         <div id="sp-backdrop" class="sp-drawer-backdrop"></div>
-        <aside id="sp-drawer" class="sp-drawer" role="dialog" aria-label="פילטרים">
+        <aside id="sp-drawer" class="sp-drawer" role="dialog" aria-label="${t('shop_filters_aria','פילטרים')}">
           <div class="sp-drawer-header">
-            <h3>סינון ומיון</h3>
-            <button id="sp-drawer-close" class="sp-drawer-close-btn" aria-label="סגור">✕</button>
+            <h3>${t('shop_filter_sort','סינון ומיון')}</h3>
+            <button id="sp-drawer-close" class="sp-drawer-close-btn" aria-label="${t('shop_close_aria','סגור')}">✕</button>
           </div>
           <div class="sp-drawer-body">
             <div class="sp-drawer-section">
-              <h4 class="sp-drawer-section-title">קטגוריה</h4>
+              <h4 class="sp-drawer-section-title">${t('shop_category','קטגוריה')}</h4>
               <div class="sp-pills-row">${catPillsHTML}</div>
             </div>
             <div class="sp-drawer-section">
-              <h4 class="sp-drawer-section-title">גוון</h4>
+              <h4 class="sp-drawer-section-title">${t('shop_color','גוון')}</h4>
               <div class="sp-pills-row">${colorPillsHTML}</div>
             </div>
             <div class="sp-drawer-section">
-              <h4 class="sp-drawer-section-title">מחיר</h4>
+              <h4 class="sp-drawer-section-title">${t('shop_price','מחיר')}</h4>
               <div class="sp-pills-row">
                 ${[0, 100, 250, 500].map(v =>
-                  `<button class="sp-pill${shopFilterPriceMax === v ? ' sp-pill--active' : ''}" data-filter-price="${v}">${v === 0 ? 'הכל' : `עד ${v} ₪`}</button>`
+                  `<button class="sp-pill${shopFilterPriceMax === v ? ' sp-pill--active' : ''}" data-filter-price="${v}">${v === 0 ? t('shop_all','הכל') : `${t('shop_up_to','עד')} ${v} ₪`}</button>`
                 ).join('')}
               </div>
             </div>
             <div class="sp-drawer-section">
-              <h4 class="sp-drawer-section-title">מבצעים</h4>
-              <button class="sp-pill${shopFilterOnSale ? ' sp-pill--active' : ''}" id="shop-sale-toggle">מוצרים במבצע</button>
+              <h4 class="sp-drawer-section-title">${t('shop_sales','מבצעים')}</h4>
+              <button class="sp-pill${shopFilterOnSale ? ' sp-pill--active' : ''}" id="shop-sale-toggle">${t('shop_on_sale','מוצרים במבצע')}</button>
             </div>
             <div class="sp-drawer-footer">
-              <button class="btn btn-outline" id="shop-drawer-reset" style="flex:1;">איפוס</button>
-              <button class="btn" id="shop-drawer-apply" style="flex:2;">הצגי תוצאות (${filtered.length})</button>
+              <button class="btn btn-outline" id="shop-drawer-reset" style="flex:1;">${t('shop_reset','איפוס')}</button>
+              <button class="btn" id="shop-drawer-apply" style="flex:2;">${t('shop_show_results','הצגי תוצאות')} (${filtered.length})</button>
             </div>
           </div>
         </aside>
@@ -459,6 +459,8 @@ function renderShop() {
 
       </div>
     </section>`;
+
+  if (typeof applyLang === 'function') applyLang();
 
   // ── Event listeners ───────────────────────────────────────────
   el.querySelector('#shop-back-btn').addEventListener('click', () => switchView('home'));
@@ -569,17 +571,17 @@ function renderProductView() {
     </div>` : '';
 
   const actionHtml = oos
-    ? `<div style="padding:14px 18px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca;font-size:0.9rem;color:#b91c1c;text-align:center;">המוצר אזל מהמלאי — חיזרי בקרוב</div>`
+    ? `<div style="padding:14px 18px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca;font-size:0.9rem;color:#b91c1c;text-align:center;">${t('pv_oos_msg','המוצר אזל מהמלאי — חיזרי בקרוב')}</div>`
     : `<div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="pv-add-cart" class="btn" style="min-height:48px;font-size:0.97rem;">🛒 הוספה לסל</button>
-        <button id="pv-quick-buy" class="btn btn-outline" style="min-height:48px;font-size:0.97rem;">קנייה מהירה</button>
+        <button id="pv-add-cart" class="btn" style="min-height:48px;font-size:0.97rem;">${t('pv_add_cart','🛒 הוספה לסל')}</button>
+        <button id="pv-quick-buy" class="btn btn-outline" style="min-height:48px;font-size:0.97rem;">${t('pv_quick_buy','קנייה מהירה')}</button>
        </div>`;
 
   el.innerHTML = `
     <section style="min-height:80vh;padding:80px 0 110px;background:var(--sand);">
       <div class="container">
         <button id="pv-back-btn" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">
-          ← חזרה ${previousView === 'shop' ? 'לחנות' : 'לדף הבית'}
+          ${previousView === 'shop' ? t('pv_back_shop','← חזרה לחנות') : t('pv_back_home','← חזרה לדף הבית')}
         </button>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;" class="pv-layout">
           <div>
@@ -597,6 +599,8 @@ function renderProductView() {
         </div>
       </div>
     </section>`;
+
+  if (typeof applyLang === 'function') applyLang();
 
   el.querySelector('#pv-back-btn').addEventListener('click', () => switchView(previousView));
 
@@ -636,12 +640,13 @@ function renderProfileView() {
       <section style="min-height:80vh;padding:80px 0;display:flex;align-items:center;justify-content:center;background:var(--sand);">
         <div style="text-align:center;max-width:360px;padding:0 20px;">
           <div style="font-size:4rem;margin-bottom:20px;">🔐</div>
-          <h2 style="font-size:1.4rem;font-weight:700;color:var(--ink);margin:0 0 10px;">נדרשת התחברות</h2>
-          <p style="color:var(--muted);font-size:0.9rem;margin:0 0 28px;">התחברי לחשבונך לצפייה בהזמנות ועריכת פרטים אישיים.</p>
-          <button id="profile-login-btn" class="btn">התחברות / הרשמה</button>
+          <h2 style="font-size:1.4rem;font-weight:700;color:var(--ink);margin:0 0 10px;">${t('profile_login_required','נדרשת התחברות')}</h2>
+          <p style="color:var(--muted);font-size:0.9rem;margin:0 0 28px;">${t('profile_login_desc','התחברי לחשבונך לצפייה בהזמנות ועריכת פרטים אישיים.')}</p>
+          <button id="profile-login-btn" class="btn">${t('profile_login_btn','התחברות / הרשמה')}</button>
           <button id="profile-back-btn" style="display:block;margin:16px auto 0;background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;">← חזרה לקניות</button>
         </div>
       </section>`;
+    if (typeof applyLang === 'function') applyLang();
     el.querySelector('#profile-login-btn').addEventListener('click', () => document.getElementById('auth-nav-btn')?.click());
     el.querySelector('#profile-back-btn')?.addEventListener('click', () => switchView(previousView || 'home'));
     return;
@@ -650,65 +655,67 @@ function renderProfileView() {
   el.innerHTML = `
     <section style="min-height:80vh;padding:80px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:680px;">
-        <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">האזור האישי שלי</h2>
+        <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">${t('profile_title','האזור האישי שלי')}</h2>
         <div style="display:flex;gap:0;border-bottom:2px solid var(--sand-dark);margin-bottom:32px;">
-          <button class="profile-tab" data-tab="info" style="background:none;border:none;border-bottom:3px solid var(--pink);margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--ink);transition:.2s;">פרטים אישיים</button>
-          <button class="profile-tab" data-tab="orders" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">הזמנות שלי</button>
-          <button class="profile-tab" data-tab="coupons" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">קופונים שלי</button>
+          <button class="profile-tab" data-tab="info" style="background:none;border:none;border-bottom:3px solid var(--pink);margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--ink);transition:.2s;">${t('profile_tab_info','פרטים אישיים')}</button>
+          <button class="profile-tab" data-tab="orders" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">${t('profile_tab_orders','הזמנות שלי')}</button>
+          <button class="profile-tab" data-tab="coupons" style="background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 22px;font-size:0.95rem;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s;">${t('profile_tab_coupons','קופונים שלי')}</button>
         </div>
 
         <div id="profile-pane-coupons" style="display:none;">
-          <div id="coupons-loading" style="text-align:center;padding:40px 0;color:var(--muted);">טוענת קופונים...</div>
+          <div id="coupons-loading" style="text-align:center;padding:40px 0;color:var(--muted);">${t('profile_coupons_loading','טוענת קופונים...')}</div>
           <div id="coupons-list" style="display:flex;flex-direction:column;gap:14px;"></div>
           <div id="coupons-empty" style="display:none;text-align:center;padding:60px 0;">
             <div style="font-size:3rem;margin-bottom:14px;">🏷️</div>
-            <p style="color:var(--muted);">אין קופונים זמינים כרגע.</p>
+            <p style="color:var(--muted);">${t('profile_coupons_empty','אין קופונים זמינים כרגע.')}</p>
           </div>
         </div>
 
         <div id="profile-pane-orders" style="display:none;">
-          <div id="orders-loading" style="text-align:center;padding:40px 0;color:var(--muted);">טוענת הזמנות...</div>
+          <div id="orders-loading" style="text-align:center;padding:40px 0;color:var(--muted);">${t('profile_orders_loading','טוענת הזמנות...')}</div>
           <div id="orders-list" style="display:flex;flex-direction:column;gap:14px;"></div>
           <div id="orders-empty" style="display:none;text-align:center;padding:60px 0;">
             <div style="font-size:3rem;margin-bottom:14px;">📦</div>
-            <p style="color:var(--muted);">אין הזמנות עדיין. <a href="#" id="go-shop-link" style="color:var(--pink-deep);">לקניות</a></p>
+            <p style="color:var(--muted);">${t('profile_no_orders_text','אין הזמנות עדיין.')} <a href="#" id="go-shop-link" style="color:var(--pink-deep);">${t('profile_go_shop','לקניות')}</a></p>
           </div>
         </div>
 
         <div id="profile-pane-info" style="display:flex;flex-direction:column;gap:18px;">
           <div style="padding:16px 20px;background:var(--pink-light);border-radius:14px;border:1px solid var(--sand-dark);">
-            <p style="margin:0 0 4px;font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;">חשבון</p>
+            <p style="margin:0 0 4px;font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;">${t('profile_account','חשבון')}</p>
             <p style="margin:0;font-size:0.97rem;color:var(--ink);font-weight:600;">${esc(currentUser.displayName || '')}</p>
             <p style="margin:4px 0 0;font-size:0.88rem;color:var(--muted);">${esc(currentUser.email || '')}</p>
           </div>
           <div>
-            <label style="${LBL}">שם מלא</label>
+            <label style="${LBL}">${t('profile_name','שם מלא')}</label>
             <input id="prof-name" type="text" value="${esc(userProfile.fullName || currentUser.displayName || '')}" style="${INP}" />
           </div>
           <div>
-            <label style="${LBL}">טלפון</label>
+            <label style="${LBL}">${t('profile_phone','טלפון')}</label>
             <input id="prof-phone" type="tel" value="${esc(userProfile.phone || '')}" placeholder="05X-XXXXXXX" style="${INP}" />
           </div>
           <div>
-            <label style="${LBL}">כתובת למשלוח</label>
-            <input id="prof-street" type="text" placeholder="רחוב ומספר" value="${esc(userProfile.street || '')}" style="${INP}margin-bottom:8px;" />
+            <label style="${LBL}">${t('profile_address','כתובת למשלוח')}</label>
+            <input id="prof-street" type="text" placeholder="${t('co_street_ph','רחוב ומספר')}" value="${esc(userProfile.street || '')}" style="${INP}margin-bottom:8px;" />
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-              <input id="prof-floor" type="text" placeholder="קומה" value="${esc(userProfile.floor || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
-              <input id="prof-apt"   type="text" placeholder="דירה / מס' בית" value="${esc(userProfile.apt || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <input id="prof-floor" type="text" placeholder="${t('co_floor_ph','קומה')}" value="${esc(userProfile.floor || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <input id="prof-apt"   type="text" placeholder="${t('co_apt_ph','דירה / מס\' בית')}" value="${esc(userProfile.apt || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              <input id="prof-city" type="text" placeholder="עיר"   value="${esc(userProfile.city || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
-              <input id="prof-zip"  type="text" placeholder="מיקוד" value="${esc(userProfile.zip  || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <input id="prof-city" type="text" placeholder="${t('co_city_ph','עיר')}"   value="${esc(userProfile.city || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
+              <input id="prof-zip"  type="text" placeholder="${t('co_zip_ph','מיקוד')}" value="${esc(userProfile.zip  || '')}" style="padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);" />
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <button id="prof-save-btn" class="btn">שמרי פרטים</button>
-            <button id="prof-logout-btn" class="btn btn-outline" style="color:var(--muted);border-color:var(--sand-dark);">התנתקי</button>
+            <button id="prof-save-btn" class="btn">${t('profile_save','שמרי פרטים')}</button>
+            <button id="prof-logout-btn" class="btn btn-outline" style="color:var(--muted);border-color:var(--sand-dark);">${t('profile_logout','התנתקי')}</button>
           </div>
           <p id="prof-save-msg" style="text-align:center;font-size:0.85rem;color:var(--pink-deep);min-height:1.2rem;"></p>
         </div>
       </div>
     </section>`;
+
+  if (typeof applyLang === 'function') applyLang();
 
   // Tabs
   el.querySelectorAll('.profile-tab').forEach(tab => {
@@ -747,9 +754,9 @@ function renderProfileView() {
     try {
       await setDoc(doc(db, USERS_ROOT, currentUser.uid), profileData, { merge: true });
       userProfile = { ...userProfile, ...profileData };
-      msg.textContent = '✓ הפרטים נשמרו בהצלחה';
+      msg.textContent = t('profile_save_success','✓ הפרטים נשמרו בהצלחה');
     } catch {
-      msg.textContent = 'שגיאה בשמירה. נסי שנית.';
+      msg.textContent = t('profile_save_error','שגיאה בשמירה. נסי שנית.');
     } finally {
       btn.disabled = false;
       setTimeout(() => { msg.textContent = ''; }, 3000);
@@ -779,7 +786,7 @@ function renderProfileView() {
         listEl.innerHTML = orders.map(order => {
           const date         = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('he-IL') : '';
           const itemsSummary = (order.items || []).map(i => `${i.name} ×${i.qty || 1}`).join(', ');
-          const dlvLabel     = order.delivery === 'delivery' ? 'משלוח עד הבית' : 'איסוף עצמי';
+          const dlvLabel     = order.delivery === 'delivery' ? t('profile_delivery','משלוח עד הבית') : t('profile_pickup','איסוף עצמי');
           return `
             <div style="border:1px solid var(--sand-dark);border-radius:14px;padding:16px 20px;background:var(--sand-light);">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
@@ -793,7 +800,7 @@ function renderProfileView() {
       })
       .catch(() => {
         if (loadingEl) loadingEl.style.display = 'none';
-        listEl.innerHTML = '<p style="color:var(--muted);text-align:center;padding:30px 0;">שגיאה בטעינת הזמנות.</p>';
+        listEl.innerHTML = `<p style="color:var(--muted);text-align:center;padding:30px 0;">${t('profile_orders_error','שגיאה בטעינת הזמנות.')}</p>`;
       });
   }
 
@@ -815,7 +822,7 @@ function renderProfileView() {
         // Check each coupon's current status from the main coupons collection
         const couponCards = await Promise.all(coupons.map(async c => {
           let status = 'active';
-          let statusLabel = 'פעיל';
+          let statusLabel = t('profile_coupon_active','פעיל');
           let statusColor = '#16a34a';
           let statusBg = '#f0fdf4';
 
@@ -827,12 +834,12 @@ function renderProfileView() {
             if (!couponSnap.empty) {
               const couponData = couponSnap.docs[0].data();
               if (couponData.expiryDate?.seconds && couponData.expiryDate.seconds * 1000 < Date.now()) {
-                status = 'expired'; statusLabel = 'פג תוקף'; statusColor = '#dc2626'; statusBg = '#fef2f2';
+                status = 'expired'; statusLabel = t('profile_coupon_expired','פג תוקף'); statusColor = '#dc2626'; statusBg = '#fef2f2';
               } else if (couponData.usageLimit != null && (couponData.usedCount || 0) >= couponData.usageLimit) {
-                status = 'maxed'; statusLabel = 'מוצה'; statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+                status = 'maxed'; statusLabel = t('profile_coupon_maxed','מוצה'); statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
               }
             } else {
-              status = 'invalid'; statusLabel = 'לא פעיל'; statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+              status = 'invalid'; statusLabel = t('profile_coupon_inactive','לא פעיל'); statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
             }
           } catch {}
 
@@ -843,7 +850,7 @@ function renderProfileView() {
                 query(collection(db, COUPONS_COL_PATH, c.couponDocId, 'userUsage'), where('uid', '==', currentUser.uid), limit(1))
               );
               if (!usageSnap.empty) {
-                status = 'used'; statusLabel = 'נוצל'; statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+                status = 'used'; statusLabel = t('profile_coupon_used','נוצל'); statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
               }
             } catch {}
           }
@@ -855,10 +862,10 @@ function renderProfileView() {
                 <span style="font-size:1.1rem;font-weight:700;color:var(--ink);letter-spacing:2px;font-family:monospace;">${esc(c.code)}</span>
                 <span style="font-size:0.75rem;font-weight:600;padding:3px 10px;border-radius:50px;color:${statusColor};background:${statusBg};">${statusLabel}</span>
               </div>
-              <p style="margin:0 0 6px;font-size:0.9rem;color:var(--ink-soft);">הנחה: <strong>${discountLabel}</strong>${c.type === 'percent' ? ' מסכום ההזמנה' : ''}</p>
+              <p style="margin:0 0 6px;font-size:0.9rem;color:var(--ink-soft);">${t('profile_coupon_discount','הנחה:')} <strong>${discountLabel}</strong>${c.type === 'percent' ? ` ${t('profile_coupon_of_order','מסכום ההזמנה')}` : ''}</p>
               ${c.description ? `<p style="margin:0 0 6px;font-size:0.82rem;color:var(--muted);">${esc(c.description)}</p>` : ''}
-              ${c.expiryDate ? `<p style="margin:0;font-size:0.78rem;color:var(--muted);">בתוקף עד: ${new Date(c.expiryDate.seconds ? c.expiryDate.seconds * 1000 : c.expiryDate).toLocaleDateString('he-IL')}</p>` : ''}
-              ${status === 'active' ? `<div style="margin-top:10px;padding:8px 12px;background:var(--pink-light);border-radius:8px;text-align:center;"><p style="margin:0;font-size:0.82rem;color:var(--pink-deep);font-weight:600;">הזיני את הקוד בעגלת הקניות</p></div>` : ''}
+              ${c.expiryDate ? `<p style="margin:0;font-size:0.78rem;color:var(--muted);">${t('profile_coupon_valid_until','בתוקף עד:')} ${new Date(c.expiryDate.seconds ? c.expiryDate.seconds * 1000 : c.expiryDate).toLocaleDateString('he-IL')}</p>` : ''}
+              ${status === 'active' ? `<div style="margin-top:10px;padding:8px 12px;background:var(--pink-light);border-radius:8px;text-align:center;"><p style="margin:0;font-size:0.82rem;color:var(--pink-deep);font-weight:600;">${t('profile_coupon_use_hint','הזיני את הקוד בעגלת הקניות')}</p></div>` : ''}
             </div>`;
         }));
 
@@ -866,7 +873,7 @@ function renderProfileView() {
       })
       .catch(() => {
         if (loadingEl) loadingEl.style.display = 'none';
-        listEl.innerHTML = '<p style="color:var(--muted);text-align:center;padding:30px 0;">שגיאה בטעינת קופונים.</p>';
+        listEl.innerHTML = `<p style="color:var(--muted);text-align:center;padding:30px 0;">${t('profile_coupons_error','שגיאה בטעינת קופונים.')}</p>`;
       });
   }
 }
@@ -899,10 +906,10 @@ function renderCheckoutStep(el) {
 
 function stepIndicator(active, total = 2) {
   const steps = total === 2
-    ? ['עגלת קניות', 'פרטי תשלום']
-    : ['עגלת קניות', 'פרטי משלוח', 'אישור הזמנה'];
+    ? [t('cart_step1','עגלת קניות'), t('cart_step2','פרטי תשלום')]
+    : [t('cart_step1','עגלת קניות'), t('cart_step2_shipping','פרטי משלוח'), t('co_confirm_order','אישור הזמנה')];
   return `
-    <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px;" role="list" aria-label="שלבי תשלום">
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px;" role="list" aria-label="${t('co_steps','שלבי תשלום')}">
       ${steps.map((label, i) => {
         const n = i + 1;
         const done   = n < active;
@@ -927,11 +934,12 @@ function renderCheckoutStep1(el) {
       <section style="min-height:80vh;padding:80px 0;display:flex;align-items:center;justify-content:center;background:var(--sand);">
         <div style="text-align:center;max-width:360px;padding:0 20px;">
           <div style="font-size:3.5rem;margin-bottom:16px;">🛒</div>
-          <h2 style="font-size:1.3rem;font-weight:700;color:var(--ink);margin:0 0 10px;">העגלה ריקה</h2>
-          <p style="color:var(--muted);margin:0 0 28px;font-size:0.9rem;">הוסיפי פריטים מהחנות כדי לבצע הזמנה.</p>
-          <button id="co-go-shop" class="btn">לחנות שלנו</button>
+          <h2 style="font-size:1.3rem;font-weight:700;color:var(--ink);margin:0 0 10px;">${t('cart_empty_title','העגלה ריקה')}</h2>
+          <p style="color:var(--muted);margin:0 0 28px;font-size:0.9rem;">${t('cart_empty_desc','הוסיפי פריטים מהחנות כדי לבצע הזמנה.')}</p>
+          <button id="co-go-shop" class="btn">${t('cart_go_shop','לחנות שלנו')}</button>
         </div>
       </section>`;
+    if (typeof applyLang === 'function') applyLang();
     el.querySelector('#co-go-shop').addEventListener('click', () => switchView('shop'));
     return;
   }
@@ -949,14 +957,14 @@ function renderCheckoutStep1(el) {
       <div style="flex:1;min-width:0;">
         <p style="margin:0 0 4px;font-size:0.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(item.name)}</p>
         <p style="margin:0;font-size:0.82rem;color:var(--muted);">${item.price} ₪</p>
-        ${item.customizationNote ? `<p style="margin:3px 0 0;font-size:0.78rem;font-style:italic;color:var(--pink-deep);">בקשת התאמה: ${esc(item.customizationNote)}</p>` : ''}
+        ${item.customizationNote ? `<p style="margin:3px 0 0;font-size:0.78rem;font-style:italic;color:var(--pink-deep);">${t('co_custom_request','בקשת התאמה:')} ${esc(item.customizationNote)}</p>` : ''}
       </div>
       ${!isQuickBuy ? `
         <div style="display:flex;align-items:center;gap:6px;">
           <button class="co-minus" data-idx="${idx}" aria-label="הפחיתי כמות" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--sand-dark);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">−</button>
           <span style="font-size:0.9rem;font-weight:600;min-width:18px;text-align:center;" aria-live="polite">${item.qty || 1}</span>
           <button class="co-plus"  data-idx="${idx}" aria-label="הוסיפי כמות" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--sand-dark);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
-          <button class="co-remove" data-idx="${idx}" aria-label="הסירי פריט" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.8rem;padding:4px 6px;border-radius:6px;flex-shrink:0;">הסר</button>
+          <button class="co-remove" data-idx="${idx}" aria-label="${t('cart_remove_aria','הסירי פריט')}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.8rem;padding:4px 6px;border-radius:6px;flex-shrink:0;">${t('cart_remove_item','הסר')}</button>
         </div>
       ` : `<span style="font-size:0.9rem;font-weight:600;flex-shrink:0;">× ${item.qty || 1}</span>`}
     </div>`).join('');
@@ -964,17 +972,19 @@ function renderCheckoutStep1(el) {
   el.innerHTML = `
     <section style="padding:80px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:640px;">
-        <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">העגלה שלי</h2>
+        <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">${t('cart_my_cart','העגלה שלי')}</h2>
         ${stepIndicator(1, 2)}
         ${bannerHtml}
         <div>${itemsHtml}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0 0;">
-          <span style="font-size:0.97rem;color:var(--ink-soft);">סה"כ (${selItems.length} פריטים)</span>
+          <span style="font-size:0.97rem;color:var(--ink-soft);">${t('co_total','סה"כ')} (${selItems.length} ${t('cart_total_items','פריטים')})</span>
           <span id="co-subtotal" style="font-size:1.2rem;font-weight:700;color:var(--ink);">${subtotal} ₪</span>
         </div>
-        <button id="co-next1" class="btn" style="width:100%;margin-top:18px;min-height:50px;font-size:1rem;${!selItems.length ? 'opacity:0.5;' : ''}">מעבר לתשלום →</button>
+        <button id="co-next1" class="btn" style="width:100%;margin-top:18px;min-height:50px;font-size:1rem;${!selItems.length ? 'opacity:0.5;' : ''}">${t('cart_to_checkout','מעבר לתשלום →')}</button>
       </div>
     </section>`;
+
+  if (typeof applyLang === 'function') applyLang();
 
   const nextBtn = el.querySelector('#co-next1');
   nextBtn.disabled = !selItems.length;
@@ -990,7 +1000,7 @@ function renderCheckoutStep1(el) {
         .filter(i => i._selected !== false)
         .map(i => ({ id: i.id, name: i.name, price: i.price, imageUrl: i.imageUrl, qty: i.qty || 1, customizationNote: i.customizationNote || null }));
     }
-    if (!checkoutItems.length) { showToast('יש לבחור לפחות פריט אחד'); return; }
+    if (!checkoutItems.length) { showToast(t('cart_select_one','יש לבחור לפחות פריט אחד')); return; }
 
     // Login wall: only at the transition to checkout details
     if (!currentUser) {
@@ -1117,11 +1127,11 @@ function renderCheckoutForm(el) {
   el.innerHTML = `
     <section class="co-section">
       <div class="container">
-        <button id="co-back2" class="sp-back-btn">← חזרה לעגלה</button>
+        <button id="co-back2" class="sp-back-btn">${t('co_back_to_cart','← חזרה לעגלה')}</button>
 
         <div class="co-secure-header">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          רכישה מאובטחת
+          ${t('co_secure','רכישה מאובטחת')}
         </div>
 
         <div class="co-form-layout">
@@ -1130,122 +1140,124 @@ function renderCheckoutForm(el) {
           <div class="co-form-panel">
 
             <div class="co-field-group">
-              <div class="co-section-title">אופן קבלה</div>
+              <div class="co-section-title">${t('co_delivery','אופן קבלה')}</div>
               <div class="co-delivery-selector">
                 <label class="co-delivery-option${pre.ship === 'delivery' ? ' co-delivery-option--active' : ''}">
                   <input type="radio" name="co-ship" value="delivery" ${pre.ship === 'delivery' ? 'checked' : ''} />
-                  <span class="co-delivery-name">משלוח עד הבית</span>
-                  <span class="co-delivery-cost" id="co-dlv-cost">${isFreeInit && pre.ship === 'delivery' ? 'חינם ✅' : pre.ship === 'delivery' ? `${SHIPPING} ₪` : `${SHIPPING} ₪`}</span>
+                  <span class="co-delivery-name">${t('co_home_delivery','משלוח עד הבית')}</span>
+                  <span class="co-delivery-cost" id="co-dlv-cost">${isFreeInit && pre.ship === 'delivery' ? t('co_free','חינם') + ' ✅' : pre.ship === 'delivery' ? `${SHIPPING} ₪` : `${SHIPPING} ₪`}</span>
                 </label>
                 <label class="co-delivery-option${pre.ship === 'pickup' ? ' co-delivery-option--active' : ''}">
                   <input type="radio" name="co-ship" value="pickup" ${pre.ship === 'pickup' ? 'checked' : ''} />
-                  <span class="co-delivery-name">איסוף עצמי מהסטודיו</span>
-                  <span class="co-delivery-cost co-free-badge">חינם</span>
+                  <span class="co-delivery-name">${t('co_self_pickup','איסוף עצמי מהסטודיו')}</span>
+                  <span class="co-delivery-cost co-free-badge">${t('co_free','חינם')}</span>
                 </label>
               </div>
             </div>
 
             <div class="co-field-group">
-              <div class="co-section-title">פרטים אישיים</div>
+              <div class="co-section-title">${t('co_personal','פרטים אישיים')}</div>
               <div class="co-field">
-                <label class="co-label" for="co-name">שם מלא *</label>
+                <label class="co-label" for="co-name">${t('co_name_label','שם מלא')} *</label>
                 <input id="co-name" class="co-input" type="text" value="${esc(pre.name)}" autocomplete="name" />
               </div>
               <div class="co-field">
-                <label class="co-label" for="co-email">אימייל *</label>
+                <label class="co-label" for="co-email">${t('co_email_label','אימייל')} *</label>
                 <input id="co-email" class="co-input" type="email" value="${esc(pre.email)}" autocomplete="email" />
               </div>
               <div class="co-field">
-                <label class="co-label" for="co-phone">טלפון (10 ספרות) *</label>
+                <label class="co-label" for="co-phone">${t('co_phone_label','טלפון (10 ספרות)')} *</label>
                 <input id="co-phone" class="co-input" type="tel" value="${esc(pre.phone)}" autocomplete="tel" inputmode="numeric" />
               </div>
             </div>
 
             <div class="co-field-group" id="co-addr-group"${pre.ship === 'pickup' ? ' style="display:none;"' : ''}>
-              <div class="co-section-title">כתובת למשלוח</div>
+              <div class="co-section-title">${t('profile_address','כתובת למשלוח')}</div>
               <div class="co-field">
-                <label class="co-label" for="co-city">עיר *</label>
+                <label class="co-label" for="co-city">${t('co_city_ph','עיר')} *</label>
                 <input id="co-city" class="co-input" type="text" value="${esc(pre.city)}" autocomplete="address-level2" />
               </div>
               <div class="co-fields-row">
                 <div class="co-field">
-                  <label class="co-label" for="co-street">רחוב *</label>
+                  <label class="co-label" for="co-street">${t('co_street_label','רחוב')} *</label>
                   <input id="co-street" class="co-input" type="text" value="${esc(pre.street)}" autocomplete="street-address" />
                 </div>
                 <div class="co-field co-field--narrow">
-                  <label class="co-label" for="co-house">מספר *</label>
+                  <label class="co-label" for="co-house">${t('co_house_label','מספר')} *</label>
                   <input id="co-house" class="co-input" type="text" value="${esc(pre.house)}" />
                 </div>
               </div>
               <div class="co-field">
-                <label class="co-label" for="co-apt">קומה / דירה</label>
+                <label class="co-label" for="co-apt">${t('co_apt_label','קומה / דירה')}</label>
                 <input id="co-apt" class="co-input" type="text" value="${esc(pre.apt)}" />
               </div>
             </div>
 
             <div class="co-terms-row">
               <input type="checkbox" id="co-terms" />
-              <label for="co-terms">קראתי ואני מסכימה ל<a href="terms.html" target="_blank">תנאי השימוש</a></label>
+              <label for="co-terms">${t('co_agree_terms','קראתי ואני מסכימה ל')}<a href="terms.html" target="_blank">${t('co_terms_text','תנאי השימוש')}</a></label>
             </div>
 
             <p id="co-form-err" class="co-form-err" aria-live="polite"></p>
 
             <button id="co-submit" class="btn co-submit-btn">
-              <span id="co-submit-label">אשרי הזמנה</span>
-              <span id="co-submit-spinner" style="display:none;" aria-label="טוענת...">שולחת...</span>
+              <span id="co-submit-label">${t('co_confirm_order','אשרי הזמנה')}</span>
+              <span id="co-submit-spinner" style="display:none;" aria-label="${t('co_loading','טוענת...')}">${t('co_sending','שולחת...')}</span>
             </button>
 
             <div class="co-trust-icons">
               <span class="co-trust-badge">Visa</span>
               <span class="co-trust-badge">Mastercard</span>
               <span class="co-trust-badge">Bit</span>
-              <span class="co-trust-badge">🔒 מאובטח</span>
+              <span class="co-trust-badge">🔒 ${t('co_secured','מאובטח')}</span>
             </div>
           </div>
 
           <!-- RIGHT PANEL: Sticky Order Summary -->
           <aside class="co-summary-panel">
-            <div class="co-summary-header">סיכום הזמנה</div>
+            <div class="co-summary-header">${t('co_summary','סיכום הזמנה')}</div>
             <div class="co-summary-items">${itemsSummaryHtml}</div>
             <div class="co-summary-totals">
               <div class="co-summary-row">
-                <span>מוצרים</span>
+                <span>${t('co_products','מוצרים')}</span>
                 <span>${subtotal} ₪</span>
               </div>
               <div class="co-summary-row" id="co-ship-row">
-                <span>משלוח</span>
-                <span id="co-ship-cost-el">${shipInit === 0 ? 'חינם' : shipInit + ' ₪'}</span>
+                <span>${t('co_shipping','משלוח')}</span>
+                <span id="co-ship-cost-el">${shipInit === 0 ? t('co_free','חינם') : shipInit + ' ₪'}</span>
               </div>
               <div class="co-summary-row" id="co-discount-row" style="display:none;color:#16a34a;">
-                <span>הנחת קופון</span>
+                <span>${t('co_discount','הנחת קופון')}</span>
                 <span id="co-discount-el"></span>
               </div>
               <div class="co-summary-divider"></div>
               <div class="co-summary-row co-summary-total">
-                <span>סה"כ לתשלום</span>
+                <span>${t('co_total','סה"כ לתשלום')}</span>
                 <span id="co-grand-total-el">${totalInit} ₪</span>
               </div>
             </div>
             <div class="co-coupon-box" style="margin-top:14px;">
-              <label style="font-size:0.82rem;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:6px;">קוד קופון</label>
+              <label style="font-size:0.82rem;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:6px;">${t('co_coupon_label','קוד קופון')}</label>
               <div style="display:flex;gap:8px;">
-                <input type="text" id="co-coupon-input" placeholder="הזיני קוד קופון" style="flex:1;padding:9px 14px;border:1px solid var(--sand-dark);border-radius:12px;font-size:0.88rem;font-family:inherit;direction:ltr;text-align:center;" />
-                <button type="button" id="co-coupon-apply" style="padding:9px 18px;border:none;border-radius:12px;background:var(--pink);color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.2s;">החל</button>
+                <input type="text" id="co-coupon-input" placeholder="${t('co_coupon_ph','הזיני קוד קופון')}" style="flex:1;padding:9px 14px;border:1px solid var(--sand-dark);border-radius:12px;font-size:0.88rem;font-family:inherit;direction:ltr;text-align:center;" />
+                <button type="button" id="co-coupon-apply" style="padding:9px 18px;border:none;border-radius:12px;background:var(--pink);color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.2s;">${t('co_coupon_apply','החל')}</button>
               </div>
               <p id="co-coupon-msg" style="font-size:0.8rem;margin:6px 0 0;min-height:1rem;" aria-live="polite"></p>
               <div id="co-coupon-applied" style="display:none;margin-top:6px;padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:0.82rem;color:#16a34a;">
                 <span id="co-coupon-applied-text"></span>
-                <button type="button" id="co-coupon-remove" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:0.82rem;font-weight:600;margin-right:8px;">הסרה</button>
+                <button type="button" id="co-coupon-remove" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:0.82rem;font-weight:600;margin-right:8px;">${t('co_coupon_remove','הסרה')}</button>
               </div>
             </div>
             <div id="co-freeship-note" class="co-freeship-note"${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? '' : ' style="display:none;"'}>
-              ${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? `🚚 עוד ${FREE_SHIP_THRESHOLD - subtotal} ₪ למשלוח חינם!` : ''}
+              ${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? `🚚 ${t('co_free_ship_more','עוד')} ${FREE_SHIP_THRESHOLD - subtotal} ₪ ${t('co_free_ship_goal','למשלוח חינם!')}` : ''}
             </div>
           </aside>
 
         </div>
       </div>
     </section>`;
+
+  if (typeof applyLang === 'function') applyLang();
 
   // ── Coupon state ──
   let appliedCoupon = null; // { docId, code, discount, type, value }
@@ -1276,10 +1288,10 @@ function renderCheckoutForm(el) {
     });
 
     const dlvCostEl = document.getElementById('co-dlv-cost');
-    if (dlvCostEl) dlvCostEl.textContent = ship === 'pickup' ? 'חינם' : (isFree ? 'חינם ✅' : `${SHIPPING} ₪`);
+    if (dlvCostEl) dlvCostEl.textContent = ship === 'pickup' ? t('co_free','חינם') : (isFree ? t('co_free','חינם') + ' ✅' : `${SHIPPING} ₪`);
 
     const shipEl = document.getElementById('co-ship-cost-el');
-    if (shipEl) shipEl.textContent = shipCost === 0 ? 'חינם' : `${shipCost} ₪`;
+    if (shipEl) shipEl.textContent = shipCost === 0 ? t('co_free','חינם') : `${shipCost} ₪`;
 
     const totalEl = document.getElementById('co-grand-total-el');
     if (totalEl) totalEl.textContent = `${total} ₪`;
@@ -1287,7 +1299,7 @@ function renderCheckoutForm(el) {
     const noteEl = document.getElementById('co-freeship-note');
     if (noteEl) {
       if (ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD) {
-        noteEl.textContent = `🚚 עוד ${FREE_SHIP_THRESHOLD - subtotal} ₪ למשלוח חינם!`;
+        noteEl.textContent = `🚚 ${t('co_free_ship_more','עוד')} ${FREE_SHIP_THRESHOLD - subtotal} ₪ ${t('co_free_ship_goal','למשלוח חינם!')}`;
         noteEl.style.display = '';
       } else {
         noteEl.style.display = 'none';
@@ -1326,7 +1338,7 @@ function renderCheckoutForm(el) {
       couponMsg.textContent = '';
       couponApplied.style.display = 'flex';
       const label = coupon.type === 'percent' ? `${coupon.value}%` : `${coupon.value} ₪`;
-      couponAppliedText.textContent = `קופון ${coupon.code} — הנחה ${label} (${coupon.discount} ₪)`;
+      couponAppliedText.textContent = `${t('co_coupon_word','קופון')} ${coupon.code} — ${t('co_coupon_discount_label','הנחה')} ${label} (${coupon.discount} ₪)`;
     } else {
       couponInput.style.display = '';
       couponApplyBtn.style.display = '';
@@ -1338,8 +1350,8 @@ function renderCheckoutForm(el) {
 
   if (couponApplyBtn) couponApplyBtn.addEventListener('click', async () => {
     const code = couponInput.value.trim();
-    if (!code) { showCouponMsg('יש להזין קוד קופון.', true); return; }
-    if (appliedCoupon) { showCouponMsg('כבר הוחל קופון על ההזמנה.', true); return; }
+    if (!code) { showCouponMsg(t('co_coupon_enter','יש להזין קוד קופון.'), true); return; }
+    if (appliedCoupon) { showCouponMsg(t('co_coupon_already_applied','כבר הוחל קופון על ההזמנה.'), true); return; }
 
     couponApplyBtn.disabled = true;
     couponApplyBtn.textContent = '...';
@@ -1350,12 +1362,13 @@ function renderCheckoutForm(el) {
 
       if (!result.valid) {
         const msgMap = {
-          'תוקף הקופון פג.': 'קוד קופון לא בתוקף.',
-          'הקופון הגיע למגבלת השימוש.': 'קוד זה כבר מומש.',
+          'תוקף הקופון פג.': t('co_coupon_expired','קוד קופון לא בתוקף.'),
+          'הקופון הגיע למגבלת השימוש.': t('co_coupon_maxed','קוד זה כבר מומש.'),
+          'קוד קופון לא נמצא.': t('co_coupon_not_found','קוד קופון לא נמצא.'),
         };
         showCouponMsg(msgMap[result.reason] || result.reason, true);
         couponApplyBtn.disabled = false;
-        couponApplyBtn.textContent = 'החל';
+        couponApplyBtn.textContent = t('co_coupon_apply','החל');
         return;
       }
 
@@ -1367,9 +1380,9 @@ function renderCheckoutForm(el) {
                   where('uid', '==', currentUser.uid), limit(1))
           );
           if (!usageSnap.empty) {
-            showCouponMsg('קוד זה כבר מומש.', true);
+            showCouponMsg(t('co_coupon_already_used','קוד זה כבר מומש.'), true);
             couponApplyBtn.disabled = false;
-            couponApplyBtn.textContent = 'החל';
+            couponApplyBtn.textContent = t('co_coupon_apply','החל');
             return;
           }
         } catch (_) { /* sub-collection may not exist yet — that's fine */ }
@@ -1378,10 +1391,10 @@ function renderCheckoutForm(el) {
       setCouponApplied({ docId: result.docId, code: code.trim().toUpperCase(), discount: result.discount, type: result.type, value: result.value });
     } catch (ex) {
       console.error('[coupon apply]', ex);
-      showCouponMsg('שגיאה בבדיקת הקופון.', true);
+      showCouponMsg(t('co_coupon_error','שגיאה בבדיקת הקופון.'), true);
     }
     couponApplyBtn.disabled = false;
-    couponApplyBtn.textContent = 'החל';
+    couponApplyBtn.textContent = t('co_coupon_apply','החל');
   });
 
   if (couponRemove) couponRemove.addEventListener('click', () => {
@@ -1410,17 +1423,17 @@ function renderCheckoutForm(el) {
     const terms  = document.getElementById('co-terms').checked;
 
     // Validate
-    if (!name)                              { errEl.textContent = 'יש למלא שם מלא.'; return; }
+    if (!name)                              { errEl.textContent = t('co_err_name','יש למלא שם מלא.'); return; }
     if (!email || !email.includes('@') || !email.includes('.'))
-                                            { errEl.textContent = 'יש למלא כתובת אימייל תקינה.'; return; }
-    if (!/^\d{10}$/.test(phone))            { errEl.textContent = 'יש למלא מספר טלפון בן 10 ספרות.'; return; }
+                                            { errEl.textContent = t('co_err_email','יש למלא כתובת אימייל תקינה.'); return; }
+    if (!/^\d{10}$/.test(phone))            { errEl.textContent = t('co_err_phone','יש למלא מספר טלפון בן 10 ספרות.'); return; }
     if (ship === 'delivery') {
       const city   = document.getElementById('co-city')?.value.trim()   || '';
       const street = document.getElementById('co-street')?.value.trim() || '';
       const house  = document.getElementById('co-house')?.value.trim()  || '';
-      if (!city || !street || !house) { errEl.textContent = 'יש למלא עיר, רחוב ומספר בית.'; return; }
+      if (!city || !street || !house) { errEl.textContent = t('co_err_address','יש למלא עיר, רחוב ומספר בית.'); return; }
     }
-    if (!terms) { errEl.textContent = 'יש לאשר את תנאי השימוש.'; return; }
+    if (!terms) { errEl.textContent = t('co_err_terms','יש לאשר את תנאי השימוש.'); return; }
     errEl.textContent = '';
 
     // Anti-double-click
@@ -1497,7 +1510,7 @@ function renderCheckoutForm(el) {
       switchView('thank-you');
     } catch (ex) {
       console.error('Order submit failed:', ex);
-      errEl.textContent = 'שגיאה בשליחת ההזמנה. נסי שוב.';
+      errEl.textContent = t('co_err_submit','שגיאה בשליחת ההזמנה. נסי שוב.');
       btn.disabled    = false;
       label.style.display   = '';
       spinner.style.display = 'none';
@@ -1520,22 +1533,24 @@ function renderThankYouView() {
       </div>
       <div class="co-ty-wrap">
         <div class="co-ty-checkmark" aria-hidden="true">✓</div>
-        <h2 class="co-ty-title">ההזמנה התקבלה!</h2>
-        <p class="co-ty-subtitle">תודה רבה. נציגה תיצור איתך קשר בהקדם לתיאום פרטי התשלום.</p>
+        <h2 class="co-ty-title">${t('ty_title','ההזמנה התקבלה!')}</h2>
+        <p class="co-ty-subtitle">${t('ty_subtitle','תודה רבה. נציגה תיצור איתך קשר בהקדם לתיאום פרטי התשלום.')}</p>
         <div class="co-ty-order-id">
-          מספר הזמנה: <strong>${esc(oid)}</strong>
+          ${t('ty_order_id','מספר הזמנה:')} <strong>${esc(oid)}</strong>
         </div>
         <a href="https://wa.me/${WA_NUMBER}?text=${waMsg}"
            target="_blank" rel="noopener noreferrer"
            class="btn btn-whatsapp co-ty-wa-btn">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-          עדכני את ויק בוואטסאפ על ההזמנה
+          ${t('ty_wa_btn','עדכני את ויק בוואטסאפ על ההזמנה')}
         </a>
         <button class="btn btn-outline co-ty-shop-btn" onclick="window.switchView('shop')">
-          המשיכי בקניות
+          ${t('ty_continue','המשיכי בקניות')}
         </button>
       </div>
     </section>`;
+
+  if (typeof applyLang === 'function') applyLang();
 }
 
 // ── (Old step 2 & 3 removed in V15.3 — replaced by renderCheckoutForm) ────
@@ -1690,7 +1705,7 @@ function _unused_renderCheckoutStep3(el) {
       </div>
       <div style="flex:1;">
         <p style="margin:0 0 2px;font-size:0.9rem;font-weight:600;color:var(--ink);">${esc(item.name)}</p>
-        ${item.customizationNote ? `<p style="margin:2px 0;font-size:0.76rem;font-style:italic;color:var(--pink-deep);">בקשת התאמה: ${esc(item.customizationNote)}</p>` : ''}
+        ${item.customizationNote ? `<p style="margin:2px 0;font-size:0.76rem;font-style:italic;color:var(--pink-deep);">${t('co_custom_request','בקשת התאמה:')} ${esc(item.customizationNote)}</p>` : ''}
         <p style="margin:0;font-size:0.8rem;color:var(--muted);">× ${item.qty || 1}</p>
       </div>
       <span style="font-size:0.92rem;font-weight:600;color:var(--ink-soft);flex-shrink:0;">${item.price * (item.qty || 1)} ₪</span>
@@ -1896,12 +1911,12 @@ function injectPromoPopup() {
   popup.innerHTML = `
     <div class="promo-backdrop" aria-hidden="true"></div>
     <div class="promo-card">
-      <button id="promo-close" class="promo-close-btn" aria-label="סגרי חלון">×</button>
+      <button id="promo-close" class="promo-close-btn" aria-label="${t('promo_close_aria','סגרי חלון')}">×</button>
       <div class="promo-deco" aria-hidden="true">💎</div>
-      <h2 id="promo-title" class="promo-title">משהו צ'ארמינג מחכה לך...</h2>
-      <p class="promo-sub">הצטרפי למועדון הלקוחות שלנו עכשיו וקבלי <strong>10% הנחה</strong> על הקנייה הראשונה שלך!</p>
-      <button id="promo-cta" class="btn promo-cta-btn">להרשמה וקבלת ההטבה ✨</button>
-      <button id="promo-later" class="promo-later-btn" type="button">אולי מאוחר יותר</button>
+      <h2 id="promo-title" class="promo-title">${t('promo_title','משהו צ\'ארמינג מחכה לך...')}</h2>
+      <p class="promo-sub">${t('promo_sub','הצטרפי למועדון הלקוחות שלנו עכשיו וקבלי')} <strong>${t('promo_discount','10% הנחה')}</strong> ${t('promo_sub2','על הקנייה הראשונה שלך!')}</p>
+      <button id="promo-cta" class="btn promo-cta-btn">${t('promo_cta','להרשמה וקבלת ההטבה')} ✨</button>
+      <button id="promo-later" class="promo-later-btn" type="button">${t('promo_later','אולי מאוחר יותר')}</button>
     </div>`;
   document.body.appendChild(popup);
 

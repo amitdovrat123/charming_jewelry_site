@@ -395,15 +395,18 @@ function updateNavbar(user) {
     // Extract first name from displayName or email
     const first = (user.displayName || user.email || '')
       .split(' ')[0].split('@')[0];
+    const _g = (typeof getLang === 'function' && getLang() === 'en') ? 'Hello,' : 'שלום,';
+    const _lo = (typeof getLang === 'function' && getLang() === 'en') ? 'Logout' : 'התנתק';
     navItem.innerHTML = `
       <span class="auth-nav-user">
-        שלום, <strong>${first}</strong>
-        <button class="auth-nav-logout" id="auth-logout-btn" type="button">התנתק</button>
+        ${_g} <strong>${first}</strong>
+        <button class="auth-nav-logout" id="auth-logout-btn" type="button">${_lo}</button>
       </span>`;
     document.getElementById('auth-logout-btn')
       .addEventListener('click', () => signOut(auth));
   } else {
-    navItem.innerHTML = `<a href="#" class="auth-nav-link" id="auth-nav-btn">התחברות / הרשמה</a>`;
+    const _loginLabel = (typeof getLang === 'function' && getLang() === 'en') ? 'Login / Sign Up' : 'התחברות / הרשמה';
+    navItem.innerHTML = `<a href="#" class="auth-nav-link" id="auth-nav-btn">${_loginLabel}</a>`;
     document.getElementById('auth-nav-btn')
       .addEventListener('click', e => {
         e.preventDefault();

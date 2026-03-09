@@ -60,7 +60,7 @@ window.addToCartShop = function (productId) {
   }
   saveCart(cart);
   updateCartBadge();
-  showToast('נוסף לסל!');
+  showToast(t('shop_added_toast', 'נוסף לסל!'));
 };
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ function cardHTML(product) {
     : `<div class="sp-card-img-placeholder">💎</div>`;
 
   const badgeHtml = (badge && !oos) ? `<span class="sp-card-badge">${esc(badge)}</span>` : '';
-  const oosBadge  = oos ? `<span class="sp-card-badge sp-card-badge--oos">אזל</span>` : '';
+  const oosBadge  = oos ? `<span class="sp-card-badge sp-card-badge--oos">${t('shop_oos_badge', 'אזל')}</span>` : '';
 
   const priceHtml = (sale > 0 && sale < price)
     ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
@@ -117,17 +117,17 @@ function cardHTML(product) {
   const metalChip    = data.color    ? `<span class="sp-card-metal">${esc(data.color)}</span>`    : '';
   const matChip      = data.material ? `<span class="sp-card-material">${esc(data.material)}</span>` : '';
   const customBadge  = data.isCustomizable
-    ? `<div class="sp-custom-badge">✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה</div>` : '';
+    ? `<div class="sp-custom-badge">${t('shop_customizable', '✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה')}</div>` : '';
 
   const actionBtn = oos
-    ? `<button class="sp-card-add sp-card-add--oos" disabled>אזל מהמלאי</button>`
-    : `<button class="sp-card-add" data-add-id="${sid}">הוסיפי לסל</button>`;
+    ? `<button class="sp-card-add sp-card-add--oos" disabled>${t('shop_oos', 'אזל מהמלאי')}</button>`
+    : `<button class="sp-card-add" data-add-id="${sid}">${t('shop_add_to_cart', 'הוסיפי לסל')}</button>`;
 
   return `
     <div class="sp-shop-card fadein" data-view-id="${sid}" role="button" tabindex="0" aria-label="${esc(data.name)}">
       <div class="sp-card-img-wrap">
         ${imgHtml}${badgeHtml || oosBadge}
-        <button class="sp-card-quickview" data-view-id="${sid}" aria-label="צפייה מהירה">
+        <button class="sp-card-quickview" data-view-id="${sid}" aria-label="${t('shop_quickview', 'צפייה מהירה')}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
@@ -177,21 +177,21 @@ function render() {
   // Free-ship bar (slim)
   const cartSubtotal = loadCart().reduce((s, i) => s + i.price * (i.qty || 1), 0);
   const freeShipLine = cartSubtotal >= FREE_SHIP_THRESHOLD
-    ? `✅ זכאית למשלוח חינם!`
-    : `🚚 משלוח חינם בקנייה מעל <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${cartSubtotal > 0 ? ` — עוד <strong>${FREE_SHIP_THRESHOLD - cartSubtotal} ₪</strong>` : ''}`;
+    ? t('shop_freeship_eligible', '✅ זכאית למשלוח חינם!')
+    : `${t('shop_freeship_over', '🚚 משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${cartSubtotal > 0 ? ` — ${t('shop_freeship_more', 'עוד')} <strong>${FREE_SHIP_THRESHOLD - cartSubtotal} ₪</strong>` : ''}`;
 
   // Category pills for drawer
   const catPillsHTML = [
-    `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">הכל</button>`,
+    `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">${t('shop_all', 'הכל')}</button>`,
     ...allCats.map(c =>
       `<button class="sp-pill${filterCat === c && !filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
     ),
-    `<button class="sp-pill sp-pill--star${filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">מוצרים נבחרים ⭐</button>`,
+    `<button class="sp-pill sp-pill--star${filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">${t('shop_featured_pill', 'מוצרים נבחרים ⭐')}</button>`,
   ].join('');
 
   // Color pills for drawer
   const colorPillsHTML = [
-    `<button class="sp-pill${!filterColor ? ' sp-pill--active' : ''}" data-filter-color="">הכל</button>`,
+    `<button class="sp-pill${!filterColor ? ' sp-pill--active' : ''}" data-filter-color="">${t('shop_all', 'הכל')}</button>`,
     ...allColors.map(c =>
       `<button class="sp-pill${filterColor === c ? ' sp-pill--active' : ''}" data-filter-color="${esc(c)}">${esc(c)}</button>`
     ),
@@ -199,18 +199,18 @@ function render() {
 
   // Grid content
   const gridHtml = !productsLoaded
-    ? `<div class="catalog-loading"><div class="catalog-spinner"></div><p>טוענת מוצרים...</p></div>`
+    ? `<div class="catalog-loading"><div class="catalog-spinner"></div><p>${t('shop_loading_js', 'טוענת מוצרים...')}</p></div>`
     : filtered.length
       ? filtered.map(cardHTML).join('')
-      : `<div class="sp-empty"><p>לא נמצאו מוצרים התואמים את הסינון שנבחר</p><button class="btn btn-outline" id="reset-filters-btn">איפוס פילטרים</button></div>`;
+      : `<div class="sp-empty"><p>${t('shop_no_results', 'לא נמצאו מוצרים התואמים את הסינון שנבחר')}</p><button class="btn btn-outline" id="reset-filters-btn">${t('shop_reset_filters', 'איפוס פילטרים')}</button></div>`;
 
   el.innerHTML = `
     <div class="container">
 
       <div class="sp-hero">
-        <span class="section-eyebrow">כל הקולקציה</span>
-        <h1 class="sp-title">החנות שלנו</h1>
-        <p class="sp-subtitle">כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.</p>
+        <span class="section-eyebrow">${t('shop_hero_eyebrow_js', 'כל הקולקציה')}</span>
+        <h1 class="sp-title">${t('shop_hero_title_js', 'החנות שלנו')}</h1>
+        <p class="sp-subtitle">${t('shop_hero_sub_js', 'כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.')}</p>
       </div>
 
       <div class="sp-freeship-slim">${freeShipLine}</div>
@@ -218,45 +218,45 @@ function render() {
       <div class="sp-filter-trigger-row">
         <button id="sp-filter-btn" class="sp-filter-trigger">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-          סינון ומיון
+          ${t('shop_filter_btn', 'סינון ומיון')}
         </button>
-        <p class="sp-results-count">מציגה <strong>${productsLoaded ? filtered.length : '...'}</strong> מוצרים${hasFilter ? ` &nbsp;<button class="sp-clear-btn" id="clear-filters">× נקי</button>` : ''}</p>
+        <p class="sp-results-count">${t('shop_showing', 'מציגה')} <strong>${productsLoaded ? filtered.length : '...'}</strong> ${t('shop_products', 'מוצרים')}${hasFilter ? ` &nbsp;<button class="sp-clear-btn" id="clear-filters">× ${t('shop_clear_filter', 'נקי')}</button>` : ''}</p>
       </div>
 
       <div id="sp-backdrop" class="sp-drawer-backdrop"></div>
-      <aside id="sp-drawer" class="sp-drawer" role="dialog" aria-label="פילטרים">
+      <aside id="sp-drawer" class="sp-drawer" role="dialog" aria-label="${t('shop_drawer_title', 'סינון ומיון')}">
         <div class="sp-drawer-header">
-          <h3>סינון ומיון</h3>
+          <h3>${t('shop_drawer_title', 'סינון ומיון')}</h3>
           <button id="sp-drawer-close" class="sp-drawer-close-btn" aria-label="סגור">✕</button>
         </div>
         <div class="sp-drawer-body">
           <div class="sp-drawer-section">
-            <h4 class="sp-drawer-section-title">קטגוריה</h4>
+            <h4 class="sp-drawer-section-title">${t('shop_cat_title', 'קטגוריה')}</h4>
             <div class="sp-pills-row">${catPillsHTML}</div>
           </div>
           <div class="sp-drawer-section">
-            <h4 class="sp-drawer-section-title">גוון</h4>
+            <h4 class="sp-drawer-section-title">${t('shop_color_title', 'גוון')}</h4>
             <div class="sp-pills-row">${colorPillsHTML}</div>
           </div>
           <div class="sp-drawer-section">
-            <h4 class="sp-drawer-section-title">חיפוש</h4>
-            <input type="text" id="search-input" class="sp-search-input" placeholder="חפשי לפי שם מוצר או SKU..." value="${esc(filterSearch)}" autocomplete="off" />
+            <h4 class="sp-drawer-section-title">${t('shop_search_title', 'חיפוש')}</h4>
+            <input type="text" id="search-input" class="sp-search-input" placeholder="${t('shop_search_ph', 'חפשי לפי שם מוצר או SKU...')}" value="${esc(filterSearch)}" autocomplete="off" />
           </div>
           <div class="sp-drawer-section">
-            <h4 class="sp-drawer-section-title">מחיר</h4>
+            <h4 class="sp-drawer-section-title">${t('shop_price_title', 'מחיר')}</h4>
             <div class="sp-pills-row">
               ${[0, 100, 250, 500].map(v =>
-                `<button class="sp-pill${filterPriceMax === v ? ' sp-pill--active' : ''}" data-filter-price="${v}">${v === 0 ? 'הכל' : `עד ${v} ₪`}</button>`
+                `<button class="sp-pill${filterPriceMax === v ? ' sp-pill--active' : ''}" data-filter-price="${v}">${v === 0 ? t('shop_price_all', 'הכל') : `${t('shop_price_up_to', 'עד')} ${v} ₪`}</button>`
               ).join('')}
             </div>
           </div>
           <div class="sp-drawer-section">
-            <h4 class="sp-drawer-section-title">מבצעים</h4>
-            <button class="sp-pill${filterOnSale ? ' sp-pill--active' : ''}" id="shop-sale-toggle">מוצרים במבצע</button>
+            <h4 class="sp-drawer-section-title">${t('shop_sales_title', 'מבצעים')}</h4>
+            <button class="sp-pill${filterOnSale ? ' sp-pill--active' : ''}" id="shop-sale-toggle">${t('shop_sale_toggle', 'מוצרים במבצע')}</button>
           </div>
           <div class="sp-drawer-footer">
-            <button class="btn btn-outline" id="shop-drawer-reset" style="flex:1;">איפוס</button>
-            <button class="btn" id="shop-drawer-apply" style="flex:2;">הצגי תוצאות (${productsLoaded ? filtered.length : '...'})</button>
+            <button class="btn btn-outline" id="shop-drawer-reset" style="flex:1;">${t('shop_reset', 'איפוס')}</button>
+            <button class="btn" id="shop-drawer-apply" style="flex:2;">${t('shop_show_results', 'הצגי תוצאות')} (${productsLoaded ? filtered.length : '...'})</button>
           </div>
         </div>
       </aside>
@@ -264,6 +264,9 @@ function render() {
       <div id="shop-grid" class="sp-shop-grid">${gridHtml}</div>
 
     </div>`;
+
+  // Apply language translations to any data-i18n attributes
+  if (typeof applyLang === 'function') applyLang();
 
   // ── Bind events ──────────────────────────────────────────────
 
