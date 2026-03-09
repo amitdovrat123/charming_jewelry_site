@@ -306,11 +306,23 @@ function render() {
     render();
   });
 
-  // Search
-  el.querySelector('#search-input')?.addEventListener('input', e => {
-    filterSearch = e.target.value;
-    render();
-  });
+  // Search — debounce to avoid re-render on every keystroke
+  const searchInput = el.querySelector('#search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', e => {
+      filterSearch = e.target.value;
+      clearTimeout(render._searchTimer);
+      render._searchTimer = setTimeout(() => {
+        const pos = searchInput.selectionStart;
+        render();
+        const newInput = document.getElementById('search-input');
+        if (newInput) {
+          newInput.focus();
+          newInput.setSelectionRange(pos, pos);
+        }
+      }, 300);
+    });
+  }
 
   // Clear all filters
   const resetAll = () => {
