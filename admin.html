@@ -719,6 +719,20 @@
 </div>
 
 
+<!-- ════ INQUIRY DETAIL MODAL ════ -->
+<div id="inquiry-modal" data-v
+  class="fixed inset-0 z-[9000] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
+  onclick="if(event.target===this)closeInquiryModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto fadein">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0] sticky top-0 bg-white z-10 rounded-t-2xl">
+      <h2 class="font-black text-gray-800">פרטי פנייה</h2>
+      <button onclick="closeInquiryModal()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+    </div>
+    <div id="inquiry-modal-body" class="px-6 py-5 space-y-4"></div>
+  </div>
+</div>
+
 <style>
   .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
   .inp { width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s; font-family:inherit; }
@@ -1839,17 +1853,17 @@ function renderInquiriesTable() {
   body.innerHTML=allInquiries.map(i=>{
     const date=i.createdAt?.seconds?new Date(i.createdAt.seconds*1000).toLocaleDateString('he-IL'):'—';
     const msg=(i.message||'').length>80?(i.message||'').slice(0,80)+'...':(i.message||'');
-    return `<tr class="hover:bg-[#fdf6ee] transition-colors border-b border-[#fdf6ee]${i.status==='new'?' font-semibold':''}">
+    return `<tr class="hover:bg-[#fdf6ee] transition-colors border-b border-[#fdf6ee] cursor-pointer${i.status==='new'?' font-semibold':''}" onclick="window.openInquiryModal('${i.id}')">
       <td class="px-4 py-3 text-sm">${esc(i.name||'—')}</td>
       <td class="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">${esc(i.phone||'—')}</td>
-      <td class="px-4 py-3 text-sm text-gray-500 max-w-[240px] truncate">${esc(msg)}</td>
+      <td class="px-4 py-3 text-sm text-gray-500 max-w-[240px] truncate">${esc(msg||'—')}</td>
       <td class="px-4 py-3 text-sm text-gray-400 hidden sm:table-cell">${date}</td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3" onclick="event.stopPropagation()">
         <select data-inq-status="${i.id}" class="text-xs border border-gray-200 rounded-lg px-2 py-1 ${INQ_STATUS_COLORS[i.status]||''} font-bold cursor-pointer">
           ${Object.entries(INQ_STATUS_LABELS).map(([v,l])=>`<option value="${v}"${i.status===v?' selected':''}>${l}</option>`).join('')}
         </select>
       </td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3" onclick="event.stopPropagation()">
         <button onclick="window.replyToInquiry('${i.id}')"
           class="text-xs font-bold text-[#d4a373] hover:text-[#b8893e] border border-[#f0dfc0] hover:bg-[#fdf6ee] px-3 py-1 rounded-full transition-colors whitespace-nowrap">
           השב לפנייה
@@ -1865,6 +1879,68 @@ async function handleInquiryStatusChange(e) {
   try{await updateDoc(doc(db,INQUIRIES_COL,sel.dataset.inqStatus),{status:sel.value});}
   catch(ex){console.error(ex);}
 }
+
+// ── Inquiry Detail Modal ──────────────────────────────────────────
+function openInquiryModal(inquiryId) {
+  const inq = allInquiries.find(i => i.id === inquiryId);
+  if (!inq) return;
+  const date = inq.createdAt?.seconds ? new Date(inq.createdAt.seconds*1000).toLocaleDateString('he-IL') : '—';
+  const statusLabel = INQ_STATUS_LABELS[inq.status] || inq.status;
+  const statusColor = INQ_STATUS_COLORS[inq.status] || '';
+  const body = document.getElementById('inquiry-modal-body');
+  body.innerHTML = `
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full ${statusColor}">${statusLabel}</span>
+        <span class="text-xs text-gray-400">${date}</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">שם</p>
+        <p class="text-sm text-gray-800 font-semibold">${esc(inq.name||'—')}</p>
+      </div>
+      ${inq.email?`<div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">אימייל</p>
+        <p class="text-sm text-gray-600">${esc(inq.email)}</p>
+      </div>`:''}
+      ${inq.phone?`<div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">טלפון</p>
+        <p class="text-sm text-gray-600">${esc(inq.phone)}</p>
+      </div>`:''}
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">תוכן הפנייה</p>
+        <div class="bg-[#fdf6ee] rounded-xl p-4 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">${esc(inq.message||'—')}</div>
+      </div>
+      ${inq.workshopType?`<div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">סוג סדנה</p>
+        <p class="text-sm text-gray-600">${esc(inq.workshopType)}</p>
+      </div>`:''}
+      ${inq.participants?`<div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">משתתפות</p>
+        <p class="text-sm text-gray-600">${esc(inq.participants)}</p>
+      </div>`:''}
+      ${inq.date?`<div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">תאריך מועדף</p>
+        <p class="text-sm text-gray-600">${esc(inq.date)}</p>
+      </div>`:''}
+      ${inq.notes?`<div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">הערות</p>
+        <div class="bg-[#fdf6ee] rounded-xl p-4 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">${esc(inq.notes)}</div>
+      </div>`:''}
+    </div>
+    <div class="flex gap-2 mt-4 pt-4 border-t border-[#f0dfc0]">
+      ${inq.email?`<button onclick="event.stopPropagation();window.replyToInquiry('${inq.id}')"
+        class="text-xs font-bold text-[#d4a373] hover:text-[#b8893e] border border-[#f0dfc0] hover:bg-[#fdf6ee] px-4 py-2 rounded-full transition-colors">השב לפנייה</button>`:''}
+      <button onclick="closeInquiryModal()"
+        class="text-xs font-bold text-gray-400 hover:text-gray-600 border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-full transition-colors mr-auto">סגור</button>
+    </div>`;
+  document.getElementById('inquiry-modal').removeAttribute('data-v');
+}
+window.openInquiryModal = openInquiryModal;
+
+function closeInquiryModal() {
+  document.getElementById('inquiry-modal').setAttribute('data-v','');
+}
+window.closeInquiryModal = closeInquiryModal;
 
 // ── Inquiry Reply ─────────────────────────────────────────────────
 function replyToInquiry(inquiryId) {
