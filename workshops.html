@@ -236,10 +236,12 @@
             <div class="form-group">
               <label for="name" data-i18n="form_name">שם מלא <span class="required">*</span></label>
               <input type="text" id="name" name="name" placeholder="למשל: נועה כהן" data-i18n-ph="ph_name" required />
+              <span class="form-field-error" id="err-name"></span>
             </div>
             <div class="form-group">
               <label for="phone" data-i18n="form_phone">מספר טלפון <span class="required">*</span></label>
               <input type="tel" id="phone" name="phone" placeholder="05X-XXXXXXX" data-i18n-ph="ph_phone" required />
+              <span class="form-field-error" id="err-phone"></span>
             </div>
           </div>
 
@@ -247,6 +249,7 @@
             <div class="form-group">
               <label for="email" data-i18n="form_email">כתובת אימייל <span class="required">*</span></label>
               <input type="email" id="email" name="email" placeholder="your@email.com" data-i18n-ph="ph_email" required />
+              <span class="form-field-error" id="err-email"></span>
             </div>
             <div class="form-group">
               <label for="participants" data-i18n="form_participants">מספר משתתפות</label>
@@ -473,11 +476,22 @@
         const name  = form.querySelector('#name').value.trim();
         const phone = form.querySelector('#phone').value.trim();
         const email = form.querySelector('#email').value.trim();
-        if (!name || !phone || !email) return;
 
         const btn = form.querySelector('button[type="submit"]');
+        const originalBtnText = btn.textContent;
         btn.disabled = true;
         btn.textContent = 'שולח...';
+
+        // Validate
+        ['err-name','err-phone','err-email'].forEach(id => document.getElementById(id).textContent = '');
+        let valid = true;
+        function showErr(id, msg) { document.getElementById(id).textContent = msg; valid = false; }
+
+        if (!name || name.length < 2) showErr('err-name', 'יש להזין שם מלא');
+        const cleanPhone = phone.replace(/[-\s]/g, '');
+        if (!/^0\d{9}$/.test(cleanPhone)) showErr('err-phone', 'מספר טלפון חייב להתחיל ב-0 ולהכיל 10 ספרות');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) showErr('err-email', 'כתובת אימייל לא תקינה');
+        if (!valid) { btn.disabled = false; btn.textContent = originalBtnText; return; }
 
         try {
           await addDoc(collection(db, INQUIRIES_COL), {
@@ -496,6 +510,12 @@
 
         form.style.display = 'none';
         document.getElementById('signup-success').style.display = '';
+      });
+
+      // Clear errors on typing
+      [['name','err-name'],['phone','err-phone'],['email','err-email']].forEach(([fld,errId])=>{
+        const input = form.querySelector('#'+fld);
+        if (input) input.addEventListener('input', ()=>{ document.getElementById(errId).textContent=''; });
       });
     }
   </script>

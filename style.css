@@ -4914,6 +4914,16 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
   .lang-toggle-mobile  { display: block; }
 }
 
+/* ===== Form Validation Errors ===== */
+.form-field-error {
+  display: block;
+  font-size: 0.78rem;
+  color: #c0392b;
+  min-height: 0;
+  margin-top: 2px;
+}
+.form-field-error:empty { display: none; }
+
 /* ===== LTR overrides ===== */
 [dir="ltr"] .nav-links li a::after { left: 0; right: auto; }
 [dir="ltr"] .footer-grid { direction: ltr; }

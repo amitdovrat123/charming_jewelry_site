@@ -2066,12 +2066,13 @@ window.redeemCoupon = redeemCoupon;
  * submitInquiry({ name, phone, message }) → Promise<void>
  * Writes a new inquiry to Firestore with status 'new'.
  */
-async function submitInquiry({ name, phone, message }) {
+async function submitInquiry({ name, phone, message, email }) {
   if (!name && !message) throw new Error('שם או הודעה נדרשים.');
   await addDoc(collection(db, INQUIRIES_COL_PATH), {
     name:      name    || '',
     phone:     phone   || '',
     message:   message || '',
+    email:     email   || '',
     status:    'new',
     createdAt: serverTimestamp(),
   });

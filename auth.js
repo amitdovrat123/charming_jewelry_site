@@ -107,6 +107,10 @@ const MODAL_HTML = `
           <input type="email" id="reg-email" placeholder="your@email.com" autocomplete="email" required />
         </div>
         <div class="auth-field">
+          <label for="reg-dob">תאריך לידה <span style="color:#c0392b">*</span></label>
+          <input type="date" id="reg-dob" required max="${new Date().toISOString().split('T')[0]}" />
+        </div>
+        <div class="auth-field">
           <label for="reg-password">סיסמה</label>
           <div style="position:relative">
             <input type="password" id="reg-password" placeholder="לפחות 6 תווים" autocomplete="new-password" required minlength="6" style="padding-left:40px;width:100%" />
@@ -271,6 +275,7 @@ async function saveUserToFirestore(user, extras = {}) {
     name:              extras.name  ?? user.displayName ?? '',
     email:             user.email,
     phone:             extras.phone ?? '',
+    birthDate:         extras.dob || '',
     isClubMember:      true,
     newsletterConsent: extras.newsletter !== false,
     joinedAt:          serverTimestamp(),
@@ -293,9 +298,11 @@ async function handleRegister(e) {
   const password   = document.getElementById('reg-password').value;
   const phone      = document.getElementById('reg-phone').value.trim();
   const newsletter = document.getElementById('reg-newsletter').checked;
+  const dob        = document.getElementById('reg-dob').value;
   const termsOk    = document.getElementById('reg-terms').checked;
 
   if (!name)    { errorEl.textContent = 'יש להזין שם מלא.'; return; }
+  if (!dob)     { errorEl.textContent = 'יש להזין תאריך לידה.'; return; }
   if (!termsOk) { errorEl.textContent = 'יש לאשר את התקנון ומדיניות הפרטיות כדי להמשיך.'; return; }
 
   isLoading     = true;
@@ -306,7 +313,7 @@ async function handleRegister(e) {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
-    await saveUserToFirestore(cred.user, { name, phone, newsletter });
+    await saveUserToFirestore(cred.user, { name, phone, newsletter, dob });
     updateNavbar(cred.user);
     switchTab('success');
   } catch (err) {
