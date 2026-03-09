@@ -894,7 +894,7 @@ function renderCheckoutStep1(el) {
   const nextBtn = el.querySelector('#co-next1');
   nextBtn.disabled = !selItems.length;
 
-  el.querySelector('#co-back1').addEventListener('click', () => {
+  el.querySelector('#co-back1')?.addEventListener('click', () => {
     isQuickBuy = false;
     switchView(previousView || 'shop');
   });
