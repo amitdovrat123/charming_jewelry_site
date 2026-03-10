@@ -56,6 +56,10 @@ try {
     if (docs.length > 0) {
       messages = docs;
       applyMessages();
+    } else {
+      // No active messages — keep default HTML text, stop any rotation
+      if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = null; }
+      messages = [];
     }
   }, err => {
     console.warn('[banner] Firestore listen failed, keeping default text.', err);

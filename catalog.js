@@ -606,8 +606,9 @@ function renderProductView() {
   el.innerHTML = `
     <section style="min-height:80vh;padding:80px 0 110px;background:var(--sand);">
       <div class="container">
-        <button id="pv-back-btn" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">
-          ${previousView === 'shop' ? t('pv_back_shop','← חזרה לחנות') : t('pv_back_home','← חזרה לדף הבית')}
+        <button id="pv-back-btn" class="pv-back-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          ${t('pv_back','חזור אחורה')}
         </button>
         <div class="pv-layout">
           <div>
@@ -721,6 +722,10 @@ function renderProfileView() {
             <input id="prof-phone" type="tel" value="${esc(userProfile.phone || '')}" placeholder="05X-XXXXXXX" style="${INP}" />
           </div>
           <div>
+            <label style="${LBL}">${t('profile_dob','תאריך לידה')}</label>
+            <input id="prof-dob" type="date" value="${esc(userProfile.birthDate || '')}" max="${new Date().toISOString().split('T')[0]}" style="${INP}" />
+          </div>
+          <div>
             <label style="${LBL}">${t('profile_address','כתובת למשלוח')}</label>
             <input id="prof-street" type="text" placeholder="${t('co_street_ph','רחוב ומספר')}" value="${esc(userProfile.street || '')}" style="${INP}margin-bottom:8px;" />
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -768,9 +773,10 @@ function renderProfileView() {
     const msg = el.querySelector('#prof-save-msg');
     btn.disabled = true;
     const profileData = {
-      fullName: el.querySelector('#prof-name').value.trim(),
-      phone:    el.querySelector('#prof-phone').value.trim(),
-      street:   el.querySelector('#prof-street').value.trim(),
+      fullName:  el.querySelector('#prof-name').value.trim(),
+      phone:     el.querySelector('#prof-phone').value.trim(),
+      birthDate: el.querySelector('#prof-dob').value || '',
+      street:    el.querySelector('#prof-street').value.trim(),
       floor:    el.querySelector('#prof-floor').value.trim(),
       apt:      el.querySelector('#prof-apt').value.trim(),
       city:     el.querySelector('#prof-city').value.trim(),
@@ -2072,6 +2078,13 @@ async function validateCoupon(code, subtotal) {
 
     if (c.usageLimit != null && (c.usedCount || 0) >= c.usageLimit)
       return { valid: false, reason: 'הקופון הגיע למגבלת השימוש.' };
+
+    // Birthday coupons are restricted to the specific customer
+    if (c.forUid) {
+      const uid = auth.currentUser?.uid;
+      if (!uid || uid !== c.forUid)
+        return { valid: false, reason: 'קופון זה שייך ללקוח/ה אחר/ת.' };
+    }
 
     const discount = c.type === 'percent'
       ? Math.round(subtotal * c.value / 100)

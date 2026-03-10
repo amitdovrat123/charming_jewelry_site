@@ -224,14 +224,30 @@
   <!-- Signup / Contact Form -->
   <section id="signup" class="signup-section">
     <div class="container">
-      <span class="section-eyebrow" data-i18n="form_eyebrow">הרשמה לסדנה</span>
+      <span class="section-eyebrow" data-i18n="form_eyebrow">צור קשר</span>
       <h2 class="section-title" data-i18n="form_title">השאירי פרטים ונחזור אלייך</h2>
       <p class="section-desc" data-i18n="form_desc">
-        מלאי את הטופס ואנחנו ניצור איתך קשר בהקדם לאישור הפרטים. מחפשת סדנה פרטית לקבוצה? צייני זאת בהערות — נשמח להתאים את החוויה בשבילך.
+        מלאי את הטופס ואנחנו ניצור איתך קשר בהקדם. מעוניינת בסדנה? בחרי באפשרות המתאימה ונשמח להתאים את החוויה בשבילך.
       </p>
 
       <div class="form-wrapper">
         <form action="#" method="post" novalidate>
+
+          <!-- Inquiry Type Selector -->
+          <div class="form-group full-width" style="margin-bottom:8px;">
+            <label data-i18n="form_inquiry_type">סוג הפנייה <span class="required">*</span></label>
+            <span class="form-field-error" id="err-inquiry-type"></span>
+            <div class="inquiry-type-selector">
+              <button type="button" class="inquiry-type-btn" data-type="general">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span data-i18n="form_type_general">פנייה כללית</span>
+              </button>
+              <button type="button" class="inquiry-type-btn" data-type="workshop">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                <span data-i18n="form_type_workshop">פנייה בנושא סדנה</span>
+              </button>
+            </div>
+          </div>
 
           <div class="form-row">
             <div class="form-group">
@@ -252,32 +268,37 @@
               <input type="email" id="email" name="email" placeholder="your@email.com" data-i18n-ph="ph_email" required />
               <span class="form-field-error" id="err-email"></span>
             </div>
-            <div class="form-group">
-              <label for="participants" data-i18n="form_participants">מספר משתתפות</label>
-              <input type="number" id="participants" name="participants" placeholder="למשל: 4" data-i18n-ph="ph_participants" min="1" max="20" />
-            </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="workshop-type" data-i18n="form_workshop_type">סוג הסדנה</label>
-              <select id="workshop-type" name="workshop-type">
-                <option value="" disabled selected data-i18n="form_type_default">בחרי סדנה...</option>
-                <option value="bracelets" data-i18n="form_type_bracelets">סדנת צמידי צ'ארם</option>
-                <option value="necklaces" data-i18n="form_type_necklaces">סדנת שרשראות ותליונים</option>
-                <option value="party" data-i18n="form_type_party">סדנת מסיבת רווקות</option>
-                <option value="private" data-i18n="form_type_private">סדנה פרטית / מותאמת אישית</option>
-              </select>
+          <!-- Workshop-specific fields (hidden by default) -->
+          <div id="workshop-fields" style="display:none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="participants" data-i18n="form_participants">מספר משתתפות</label>
+                <input type="number" id="participants" name="participants" placeholder="למשל: 4" data-i18n-ph="ph_participants" min="1" max="20" />
+              </div>
+              <div class="form-group">
+                <label for="workshop-type" data-i18n="form_workshop_type">סוג הסדנה</label>
+                <select id="workshop-type" name="workshop-type">
+                  <option value="" disabled selected data-i18n="form_type_default">בחרי סדנה...</option>
+                  <option value="bracelets" data-i18n="form_type_bracelets">סדנת צמידי צ'ארם</option>
+                  <option value="necklaces" data-i18n="form_type_necklaces">סדנת שרשראות ותליונים</option>
+                  <option value="party" data-i18n="form_type_party">סדנת מסיבת רווקות</option>
+                  <option value="private" data-i18n="form_type_private">סדנה פרטית / מותאמת אישית</option>
+                </select>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="date" data-i18n="form_date">תאריך מועדף</label>
-              <input type="date" id="date" name="date" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="date" data-i18n="form_date">תאריך מועדף</label>
+                <input type="date" id="date" name="date" />
+              </div>
             </div>
           </div>
 
           <div class="form-group full-width">
-            <label for="notes" data-i18n="form_notes">הערות נוספות</label>
-            <textarea id="notes" name="notes" placeholder="רוצות סדנה אצלכן? יש אירוע מיוחד? כל פרט שיעזור לנו להתאים את החוויה בשבילכן..." data-i18n-ph="ph_notes"></textarea>
+            <label for="message" data-i18n="form_message">תוכן הפנייה</label>
+            <textarea id="message" name="message" placeholder="ספרי לנו במה נוכל לעזור..." data-i18n-ph="ph_message"></textarea>
           </div>
 
           <div class="form-submit">
@@ -426,7 +447,7 @@
           <a href="index.html"       class="footer-policy-btn" data-i18n="footer_home">דף הבית</a>
           <a href="shop.html"        class="footer-policy-btn" data-i18n="footer_shop">החנות</a>
           <a href="workshops.html"   class="footer-policy-btn" data-i18n="footer_workshops">סדנאות</a>
-          <a href="#footer-contact"  class="footer-policy-btn" data-i18n="footer_contact_link">צור קשר</a>
+          <a href="#signup" class="footer-policy-btn" data-i18n="footer_contact_link">צור קשר</a>
         </div>
       </div>
 
@@ -442,8 +463,12 @@
       </div>
 
       <div class="footer-contact">
-        <h4 data-i18n="footer_contact_heading">יצרו קשר</h4>
+        <h4 data-i18n="footer_contact_heading">צור קשר</h4>
         <p data-i18n="footer_contact_text">לעדכונים, השראה, ולהזמנות — אנחנו כאן בשבילך:</p>
+        <a href="#signup" class="footer-inquiry-link" data-i18n="footer_send_inquiry">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>השאירי פנייה</span>
+        </a>
         <div class="footer-shipping">
           <p data-i18n="footer_ship_note1">משלוח עד הבית: תוך 3 ימי עסקים</p>
           <p data-i18n="footer_ship_note2">איסוף עצמי: מהסטודיו שלנו בראשון לציון</p>
@@ -475,6 +500,20 @@
     const INQUIRIES_COL = 'artifacts/charming-3dd6f/public/data/inquiries';
     const form = document.querySelector('.signup-section form');
     if (form) {
+      // Inquiry type toggle
+      let selectedType = '';
+      const typeBtns = form.querySelectorAll('.inquiry-type-btn');
+      const workshopFields = document.getElementById('workshop-fields');
+      typeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          typeBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedType = btn.dataset.type;
+          workshopFields.style.display = selectedType === 'workshop' ? '' : 'none';
+          document.getElementById('err-inquiry-type').textContent = '';
+        });
+      });
+
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
         const name  = form.querySelector('#name').value.trim();
@@ -487,32 +526,41 @@
         btn.textContent = 'שולח...';
 
         // Validate
-        ['err-name','err-phone','err-email'].forEach(id => document.getElementById(id).textContent = '');
+        ['err-name','err-phone','err-email','err-inquiry-type'].forEach(id => document.getElementById(id).textContent = '');
         let valid = true;
         function showErr(id, msg) { document.getElementById(id).textContent = msg; valid = false; }
 
+        if (!selectedType) showErr('err-inquiry-type', 'יש לבחור סוג פנייה');
         if (!name || name.length < 2) showErr('err-name', 'יש להזין שם מלא');
         const cleanPhone = phone.replace(/[-\s]/g, '');
         if (!/^0\d{9}$/.test(cleanPhone)) showErr('err-phone', 'מספר טלפון חייב להתחיל ב-0 ולהכיל 10 ספרות');
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) showErr('err-email', 'כתובת אימייל לא תקינה');
         if (!valid) { btn.disabled = false; btn.textContent = originalBtnText; return; }
 
+        const data = {
+          name, phone, email,
+          message: form.querySelector('#message')?.value?.trim() || '',
+          inquiryType: selectedType,
+          source: 'workshops-contact-form',
+          status: 'new',
+          createdAt: serverTimestamp()
+        };
+        if (selectedType === 'workshop') {
+          data.participants = form.querySelector('#participants')?.value || '';
+          data.workshopType = form.querySelector('#workshop-type')?.value || '';
+          data.date = form.querySelector('#date')?.value || '';
+        }
+
         try {
-          await addDoc(collection(db, INQUIRIES_COL), {
-            name, phone, email,
-            participants: form.querySelector('#participants')?.value || '',
-            workshopType: form.querySelector('#workshop-type')?.value || '',
-            date: form.querySelector('#date')?.value || '',
-            notes: form.querySelector('#notes')?.value || '',
-            source: 'workshops-contact-form',
-            status: 'new',
-            createdAt: serverTimestamp()
-          });
+          await addDoc(collection(db, INQUIRIES_COL), data);
         } catch (ex) {
           console.error('Inquiry submit error:', ex);
         }
 
         form.reset();
+        typeBtns.forEach(b => b.classList.remove('active'));
+        selectedType = '';
+        workshopFields.style.display = 'none';
         btn.disabled = false;
         btn.textContent = originalBtnText;
         // Show success popup
