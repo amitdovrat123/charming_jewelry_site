@@ -61,8 +61,40 @@
     /* ERP content margin on desktop */
     @media (min-width: 640px) { #erp-content { margin-right: 220px; } }
 
-    /* Mobile bottom nav padding */
-    @media (max-width: 639px) { #erp-content { padding-bottom: 72px; } }
+    /* Mobile bottom nav padding + overflow fix */
+    @media (max-width: 639px) {
+      html, body { overflow-x: hidden; max-width: 100vw; }
+      #erp-content { padding-bottom: 72px; overflow-x: hidden; }
+      [data-erp-tab] { overflow-x: auto; }
+      section[id^="tab-"] { padding-left: 12px; padding-right: 12px; }
+    }
+
+    /* More menu */
+    .more-menu {
+      display: none;
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 8px;
+      background: #fff;
+      border: 1px solid #f0dfc0;
+      border-radius: 16px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,.12);
+      padding: 8px;
+      min-width: 160px;
+      z-index: 30;
+    }
+    .more-menu.open { display: flex; flex-direction: column; gap: 2px; }
+    .more-menu button {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border: none; background: none;
+      font-family: 'Assistant', sans-serif; font-size: 0.82rem; font-weight: 600;
+      color: #4a3f3c; border-radius: 10px; cursor: pointer; text-align: right;
+      white-space: nowrap; width: 100%;
+    }
+    .more-menu button:hover, .more-menu button.erp-nav-item--active { background: #fdf6ee; color: #d4a373; }
+    .more-menu-backdrop { display:none; position:fixed; inset:0; z-index:19; }
+    .more-menu-backdrop.open { display:block; }
   </style>
 </head>
 <body class="bg-[#fcf8f3] min-h-screen text-gray-800">
@@ -193,7 +225,7 @@
         <nav class="space-y-1">
           <button data-tab="dashboard" onclick="showTab('dashboard')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
-            <span class="text-base">📊</span> לוח בקרה
+            <span class="text-base">📊</span> דשבורד
           </button>
           <button data-tab="orders" onclick="showTab('orders')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
@@ -718,43 +750,51 @@ Charming by Vik 💛</textarea>
   </div><!-- /flex -->
 
   <!-- Mobile bottom nav -->
-  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#f0dfc0] z-20 flex justify-around py-2">
+  <div id="more-menu-backdrop" class="more-menu-backdrop" onclick="closeMoreMenu()"></div>
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#f0dfc0] z-20 flex justify-around items-end py-2 px-1">
     <button data-tab="dashboard" onclick="showTab('dashboard')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">📊</span> לוח בקרה
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-lg">📊</span> דשבורד
     </button>
     <button data-tab="orders" onclick="showTab('orders')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">📦</span> הזמנות
-    </button>
-    <button data-tab="inventory" onclick="showTab('inventory')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">💎</span> קטלוג
-    </button>
-    <button data-tab="customers" onclick="showTab('customers')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">👥</span> לקוחות
-    </button>
-    <button data-tab="coupons" onclick="showTab('coupons')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">🏷️</span> קופונים
-    </button>
-    <button data-tab="inquiries" onclick="showTab('inquiries')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">💬</span> פניות
-    </button>
-    <button data-tab="banner" onclick="showTab('banner')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">📢</span> באנר
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-lg">📦</span> הזמנות
     </button>
     <button data-tab="workshops" onclick="showTab('workshops')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">🎨</span> סדנאות
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-lg">🎨</span> סדנאות
     </button>
-    <button data-tab="settings" onclick="showTab('settings')"
-      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
-      <span class="text-xl">⚙️</span> הגדרות
+    <button data-tab="inquiries" onclick="showTab('inquiries')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-lg">💬</span> פניות
     </button>
+    <button data-tab="inventory" onclick="showTab('inventory')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-lg">💎</span> קטלוג
+    </button>
+    <div class="relative">
+      <button id="more-menu-btn" onclick="toggleMoreMenu()"
+        class="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+        <span class="text-lg">☰</span> עוד
+      </button>
+      <div id="more-menu" class="more-menu">
+        <button data-tab="customers" onclick="showTab('customers');closeMoreMenu()">
+          <span>👥</span> לקוחות
+        </button>
+        <button data-tab="coupons" onclick="showTab('coupons');closeMoreMenu()">
+          <span>🏷️</span> קופונים
+        </button>
+        <button data-tab="banner" onclick="showTab('banner');closeMoreMenu()">
+          <span>📢</span> באנר
+        </button>
+        <button data-tab="logs" onclick="showTab('logs');closeMoreMenu()">
+          <span>📋</span> לוגים
+        </button>
+        <button data-tab="settings" onclick="showTab('settings');closeMoreMenu()">
+          <span>⚙️</span> הגדרות
+        </button>
+      </div>
+    </div>
   </nav>
 
 </div><!-- /v-dash -->
@@ -1351,6 +1391,18 @@ function renderImageGrid() {
 }
 
 // ── Tab switcher ─────────────────────────────────────────────────
+// ── Mobile bottom-nav "More" menu ──
+function toggleMoreMenu() {
+  document.getElementById('more-menu').classList.toggle('open');
+  document.getElementById('more-menu-backdrop').classList.toggle('open');
+}
+function closeMoreMenu() {
+  document.getElementById('more-menu').classList.remove('open');
+  document.getElementById('more-menu-backdrop').classList.remove('open');
+}
+window.toggleMoreMenu = toggleMoreMenu;
+window.closeMoreMenu  = closeMoreMenu;
+
 function showTab(name) {
   ['dashboard','orders','inventory','customers','coupons','inquiries','banner','workshops','logs','settings'].forEach(t => {
     document.getElementById('tab-'+t)?.setAttribute('data-erp-tab','');
@@ -2854,18 +2906,12 @@ function sendWorkshopWhatsApp() {
     arrivalTime = d.toTimeString().slice(0,5);
   }
 
-  let msg = `אני שולחת לך את סיכום הפרטים לסדנא:\n\nאיזה כיף שסגרתן אירוע עם charming 🥰 מתרגשת מאוד לחגוג איתכן את היום המשמח הזה 🤩\nלסיכום השיחה שלנו:\nתאריך: ${dateStr}\nשעה: ${time}\nשם החוגגת: ${celebrant}`;
-  if (occasion) msg += `\nלכבוד: ${occasion}`;
-  msg += `\nמספר משתתפות: עד ${count} משתתפות\nמסלול: ${route}\nסכום: ${base.toLocaleString('he-IL')}₪`;
-  if (disc > 0) msg += `\nהמחיר יכלול הנחה על סך ${disc}%`;
-  if (arrival > 0) msg += `\nבנוסף תהיה עלות הגעה על סך ${arrival} ש"ח (ההנחה אינה נכללת על עלות ההגעה)`;
-  msg += `\nסכום סופי: ${total.toLocaleString('he-IL')}₪`;
-  msg += `\n\nשולמה מקדמה על סך 500 שאר הסכום ינתן ביום האירוע.`;
-  msg += `\n\nלסדנה יש להכין שולחן מרכזי סביבו הבנות ישבו, לכל אחת צריך להיות כיסא. בנוסף, שולחן בצד בסגנון בופה עליו יהיו הצ'ארמים והשרשראות. את עיצוב שולחן הצ'ארמים אני מעצבת 😊.`;
-  msg += `\n\nאנחנו נגיע חצי שעה לפני תחילת הסדנא על מנת לסדר את העמדה. זה אומר שאם שעת הסדנא מתחילה ב-${time}, אנחנו נגיע ב-${arrivalTime}.`;
-  msg += `\n\nבכל מסלול המשתתפות מקבלות טבעת מהמגוון הרחב שלנו במתנה! 💍`;
-  msg += `\n\nאם יש לכן שאלות, בקשות וכל דבר אחר אני זמינה להכל !!!🫶`;
-  msg += `\n\nדוגמאות לסידור השולחן⬇️`;
+  let discLine = '';
+  if (disc > 0) discLine = `\nקיבלת הנחה מיוחדת על סך ${disc}% הנחה .`;
+  let arrivalLine = '';
+  if (arrival > 0) arrivalLine = ` בנוסף תיהיה עלות הגעה על סך ${arrival} שח (ההנחה אינה נכללת על עלות ההגעה )`;
+
+  const msg = `אני שולחת לך את סיכום הפרטים לסדנא:\n\nאיזה כיף שסגרתן אירוע עם charming 🥰 מתרגשת מאוד לחגוג איתכן את היום המשמח הזה 🤩\nלסיכום השיחה שלנו :\n*תאריך:* ${dateStr}\n*שעה :* ${time}\n*שם החוגגת:* ${celebrant}\n*לכבוד:* ${occasion}\n*מספר משתתפות :* עד ${count} משתתפות\n*מסלול:* ${route}\n*סכום :* ${base.toLocaleString('he-IL')}₪${discLine}${arrivalLine}\n*סכום סופי:* ${total.toLocaleString('he-IL')} שח\n\nשולמה מקדמה על סך 500 שאר הסכום ינתן ביום האירוע\n\nלסדנה יש להכין שולחן מרכזי סביבו הבנות ישבו לכל אחת צריך להיות כיסא ובנוסף שולחן בצד בסגנון בופה עליו יהיו הצ'ארמים והשרשאות . את עיצוב שולחן הצ'ארמים אני מעצבת 😊\n\nאנחנו נגיע חצי שעה לפני תחילת הסדנא על מנת לסדר את העמדה זה אומר שאם שעת הסדנא מתחילה ב-${time} אנחנו נגיע ב-${arrivalTime}.\n\nאם יש לכן שאלות , בקשות וכל דבר אחר אני זמינה להכל !!!🫶\n\nדוגמאות לסידור השולחן⬇️`;
 
   const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
   window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -2877,7 +2923,7 @@ function generateCalendarLinks(ws) {
   if (!d) return '';
   const end = new Date(d.getTime() + 2*60*60*1000);
   const fmt = dt => dt.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-  const title = encodeURIComponent(`סדנת ${ws.route} — ${ws.celebrant||ws.customerName}`);
+  const title = encodeURIComponent(`${ws.celebrant||ws.customerName}, אירוע charming`);
   const calNotes = [
     `שם מלא איש קשר: ${ws.customerName}`,
     `שם החוגג/חוגגת: ${ws.celebrant||''}`,

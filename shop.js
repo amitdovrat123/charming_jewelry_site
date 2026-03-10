@@ -109,9 +109,15 @@ function cardHTML(product) {
   const oos   = isOOS(data);
   const sid   = esc(id);
 
-  const imgHtml = imgs[0]
-    ? `<img src="${esc(imgs[0])}" alt="${esc(data.name)}" loading="lazy" />`
+  const imgHtml = imgs.length
+    ? imgs.map((src, i) =>
+        `<img class="sp-slide${i === 0 ? ' sp-slide--active' : ''}" src="${esc(src)}" alt="${esc(data.name)}" loading="${i === 0 ? 'eager' : 'lazy'}" />`
+      ).join('')
     : `<div class="sp-card-img-placeholder">💎</div>`;
+
+  const arrowsHtml = imgs.length > 1
+    ? `<button class="sp-img-arrow sp-img-arrow--prev" aria-label="תמונה קודמת">‹</button><button class="sp-img-arrow sp-img-arrow--next" aria-label="תמונה הבאה">›</button><div class="sp-img-dots">${imgs.map((_, i) => `<span class="sp-img-dot${i === 0 ? ' sp-img-dot--active' : ''}" data-dot="${i}"></span>`).join('')}</div>`
+    : '';
 
   const badgeHtml = (badge && !oos) ? `<span class="sp-card-badge">${esc(badge)}</span>` : '';
   const oosBadge  = oos ? `<span class="sp-card-badge sp-card-badge--oos">${t('shop_oos_badge', 'אזל')}</span>` : '';
@@ -133,7 +139,7 @@ function cardHTML(product) {
   return `
     <div class="sp-shop-card fadein" data-view-id="${sid}" role="button" tabindex="0" aria-label="${esc(pName)}">
       <div class="sp-card-img-wrap">
-        ${imgHtml}${badgeHtml || oosBadge}
+        ${imgHtml}${arrowsHtml}${badgeHtml || oosBadge}
         <button class="sp-card-quickview" data-view-id="${sid}" aria-label="${t('shop_quickview', 'צפייה מהירה')}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
@@ -187,13 +193,13 @@ function render() {
     ? t('shop_freeship_eligible', '✅ זכאית למשלוח חינם!')
     : `${t('shop_freeship_over', '🚚 משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${cartSubtotal > 0 ? ` — ${t('shop_freeship_more', 'עוד')} <strong>${FREE_SHIP_THRESHOLD - cartSubtotal} ₪</strong>` : ''}`;
 
-  // Category pills for drawer
+  // Category pills — top bar (outside drawer)
   const catPillsHTML = [
-    `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">${t('shop_all', 'הכל')}</button>`,
+    `<button class="sp-cat-pill${isAllActive ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">${t('shop_all', 'הכל')}</button>`,
     ...allCats.map(c =>
-      `<button class="sp-pill${filterCat === c && !filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
+      `<button class="sp-cat-pill${filterCat === c && !filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
     ),
-    `<button class="sp-pill sp-pill--star${filterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">${t('shop_featured_pill', 'מוצרים נבחרים ⭐')}</button>`,
+    `<button class="sp-cat-pill${filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">${t('shop_featured_pill', 'מוצרים נבחרים ⭐')}</button>`,
   ].join('');
 
   // Color pills for drawer
@@ -222,6 +228,8 @@ function render() {
 
       <div class="sp-freeship-slim">${freeShipLine}</div>
 
+      <div class="sp-cat-bar">${catPillsHTML}</div>
+
       <div class="sp-filter-trigger-row">
         <button id="sp-filter-btn" class="sp-filter-trigger">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
@@ -238,20 +246,18 @@ function render() {
         </div>
         <div class="sp-drawer-body">
           <div class="sp-drawer-section">
-            <h4 class="sp-drawer-section-title">${t('shop_cat_title', 'קטגוריה')}</h4>
-            <div class="sp-pills-row">${catPillsHTML}</div>
-          </div>
-          <div class="sp-drawer-section">
             <h4 class="sp-drawer-section-title">${t('shop_color_title', 'גוון')}</h4>
-            <div class="sp-pills-row">${colorPillsHTML}</div>
+            <div class="sp-pills-row" id="drawer-color-pills">${colorPillsHTML}</div>
           </div>
           <div class="sp-drawer-section">
             <h4 class="sp-drawer-section-title">${t('shop_search_title', 'חיפוש')}</h4>
-            <input type="text" id="search-input" class="sp-search-input" placeholder="${t('shop_search_ph', 'חפשי לפי שם מוצר או SKU...')}" value="${esc(filterSearch)}" autocomplete="off" />
+            <div class="sp-search-row">
+              <input type="text" id="search-input" class="sp-search-input" placeholder="${t('shop_search_ph', 'חפשי לפי שם מוצר או SKU...')}" value="${esc(filterSearch)}" autocomplete="off" />
+            </div>
           </div>
           <div class="sp-drawer-section">
             <h4 class="sp-drawer-section-title">${t('shop_price_title', 'מחיר')}</h4>
-            <div class="sp-pills-row">
+            <div class="sp-pills-row" id="drawer-price-pills">
               ${[0, 100, 250, 500].map(v =>
                 `<button class="sp-pill${filterPriceMax === v ? ' sp-pill--active' : ''}" data-filter-price="${v}">${v === 0 ? t('shop_price_all', 'הכל') : `${t('shop_price_up_to', 'עד')} ${v} ₪`}</button>`
               ).join('')}
@@ -263,7 +269,7 @@ function render() {
           </div>
           <div class="sp-drawer-footer">
             <button class="btn btn-outline" id="shop-drawer-reset" style="flex:1;">${t('shop_reset', 'איפוס')}</button>
-            <button class="btn" id="shop-drawer-apply" style="flex:2;">${t('shop_show_results', 'הצגי תוצאות')} (${productsLoaded ? filtered.length : '...'})</button>
+            <button class="btn" id="shop-drawer-apply" style="flex:2;">${t('shop_show_results', 'הצגי תוצאות')}</button>
           </div>
         </div>
       </aside>
@@ -283,9 +289,17 @@ function render() {
   el.querySelector('#sp-filter-btn').addEventListener('click', openDrawer);
   el.querySelector('#sp-drawer-close').addEventListener('click', closeDrawer);
   el.querySelector('#sp-backdrop').addEventListener('click', closeDrawer);
-  el.querySelector('#shop-drawer-apply').addEventListener('click', closeDrawer);
 
-  // Category + featured pills
+  // "הצגי תוצאות" — apply pending drawer filters & close
+  el.querySelector('#shop-drawer-apply').addEventListener('click', () => {
+    // Read pending search text
+    const si = el.querySelector('#search-input');
+    if (si) filterSearch = si.value.trim();
+    closeDrawer();
+    render();
+  });
+
+  // ── Category top bar — immediate filter ──
   el.querySelectorAll('[data-filter-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       filterCat      = btn.dataset.filterCat;
@@ -294,45 +308,42 @@ function render() {
     });
   });
 
-  // Color pills
+  // ── Drawer pills — toggle visually in-place, no render ──
+
+  // Color pills (toggle active class only)
   el.querySelectorAll('[data-filter-color]').forEach(btn => {
     btn.addEventListener('click', () => {
-      filterColor = filterColor === btn.dataset.filterColor ? '' : btn.dataset.filterColor;
-      render();
+      const val = btn.dataset.filterColor;
+      filterColor = filterColor === val ? '' : val;
+      el.querySelectorAll('[data-filter-color]').forEach(b =>
+        b.classList.toggle('sp-pill--active', (filterColor === '' && b.dataset.filterColor === '') || b.dataset.filterColor === filterColor));
     });
   });
 
-  // Price pills
+  // Price pills (toggle active class only)
   el.querySelectorAll('[data-filter-price]').forEach(btn => {
     btn.addEventListener('click', () => {
       filterPriceMax = parseInt(btn.dataset.filterPrice) || 0;
-      render();
+      el.querySelectorAll('[data-filter-price]').forEach(b =>
+        b.classList.toggle('sp-pill--active', parseInt(b.dataset.filterPrice || '0') === filterPriceMax));
     });
   });
 
-  // Sale toggle
+  // Sale toggle (toggle active class only)
   el.querySelector('#shop-sale-toggle')?.addEventListener('click', () => {
     filterOnSale = !filterOnSale;
-    render();
+    el.querySelector('#shop-sale-toggle')?.classList.toggle('sp-pill--active', filterOnSale);
   });
 
-  // Search — debounce to avoid re-render on every keystroke
+  // Search — Enter applies immediately
   const searchInput = el.querySelector('#search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', e => {
-      filterSearch = e.target.value;
-      clearTimeout(render._searchTimer);
-      render._searchTimer = setTimeout(() => {
-        const pos = searchInput.selectionStart;
-        render();
-        const newInput = document.getElementById('search-input');
-        if (newInput) {
-          newInput.focus();
-          newInput.setSelectionRange(pos, pos);
-        }
-      }, 300);
-    });
-  }
+  searchInput?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      filterSearch = (searchInput.value || '').trim();
+      closeDrawer();
+      render();
+    }
+  });
 
   // Clear all filters
   const resetAll = () => {
@@ -341,7 +352,17 @@ function render() {
     render();
   };
   el.querySelector('#clear-filters')?.addEventListener('click', resetAll);
-  el.querySelector('#shop-drawer-reset')?.addEventListener('click', resetAll);
+  el.querySelector('#shop-drawer-reset')?.addEventListener('click', () => {
+    filterColor = ''; filterSearch = ''; filterPriceMax = 0; filterOnSale = false;
+    // Update drawer UI without closing
+    el.querySelectorAll('[data-filter-color]').forEach(b =>
+      b.classList.toggle('sp-pill--active', b.dataset.filterColor === ''));
+    el.querySelectorAll('[data-filter-price]').forEach(b =>
+      b.classList.toggle('sp-pill--active', parseInt(b.dataset.filterPrice || '0') === 0));
+    el.querySelector('#shop-sale-toggle')?.classList.remove('sp-pill--active');
+    const si = el.querySelector('#search-input');
+    if (si) si.value = '';
+  });
   el.querySelector('#reset-filters-btn')?.addEventListener('click', resetAll);
 
   // Card click → product detail on index.html
@@ -366,6 +387,37 @@ function render() {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       window.addToCartShop(btn.dataset.addId);
+    });
+  });
+
+  // Image slide arrows
+  el.querySelectorAll('.sp-img-arrow').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const wrap = btn.closest('.sp-card-img-wrap');
+      const slides = wrap.querySelectorAll('.sp-slide');
+      const dots = wrap.querySelectorAll('.sp-img-dot');
+      if (slides.length < 2) return;
+      const cur = wrap.querySelector('.sp-slide--active');
+      const idx = [...slides].indexOf(cur);
+      const dir = btn.classList.contains('sp-img-arrow--next') ? 1 : -1;
+      const next = (idx + dir + slides.length) % slides.length;
+      cur.classList.remove('sp-slide--active');
+      slides[next].classList.add('sp-slide--active');
+      dots.forEach((d, i) => d.classList.toggle('sp-img-dot--active', i === next));
+    });
+  });
+
+  // Image dots
+  el.querySelectorAll('.sp-img-dot').forEach(dot => {
+    dot.addEventListener('click', e => {
+      e.stopPropagation();
+      const wrap = dot.closest('.sp-card-img-wrap');
+      const slides = wrap.querySelectorAll('.sp-slide');
+      const dots = wrap.querySelectorAll('.sp-img-dot');
+      const target = parseInt(dot.dataset.dot);
+      slides.forEach((s, i) => s.classList.toggle('sp-slide--active', i === target));
+      dots.forEach((d, i) => d.classList.toggle('sp-img-dot--active', i === target));
     });
   });
 }
