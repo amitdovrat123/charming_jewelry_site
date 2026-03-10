@@ -92,6 +92,12 @@ function showToast(msg) {
   t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2000);
 }
 
+// ── Bilingual helpers ──────────────────────────────────────────
+function localName(data) {
+  if (typeof getLang === 'function' && getLang() === 'en' && data.nameEn) return data.nameEn;
+  return data.name;
+}
+
 // ── Card HTML ──────────────────────────────────────────────────
 function cardHTML(product) {
   const { data, id } = product;
@@ -123,8 +129,9 @@ function cardHTML(product) {
     ? `<button class="sp-card-add sp-card-add--oos" disabled>${t('shop_oos', 'אזל מהמלאי')}</button>`
     : `<button class="sp-card-add" data-add-id="${sid}">${t('shop_add_to_cart', 'הוסיפי לסל')}</button>`;
 
+  const pName = localName(data);
   return `
-    <div class="sp-shop-card fadein" data-view-id="${sid}" role="button" tabindex="0" aria-label="${esc(data.name)}">
+    <div class="sp-shop-card fadein" data-view-id="${sid}" role="button" tabindex="0" aria-label="${esc(pName)}">
       <div class="sp-card-img-wrap">
         ${imgHtml}${badgeHtml || oosBadge}
         <button class="sp-card-quickview" data-view-id="${sid}" aria-label="${t('shop_quickview', 'צפייה מהירה')}">
@@ -132,7 +139,7 @@ function cardHTML(product) {
         </button>
       </div>
       <div class="sp-card-body">
-        <h3 class="sp-card-name">${esc(data.name)}</h3>
+        <h3 class="sp-card-name">${esc(pName)}</h3>
         <div class="sp-card-price-row">${priceHtml}${metalChip}${matChip}</div>
         ${actionBtn}
       </div>
@@ -375,6 +382,9 @@ onSnapshot(q, snap => {
   productsLoaded = true;
   render();
 });
+
+// Re-render when language changes (bilingual product names)
+window._rerenderProducts = function() { render(); };
 
 // Initial render (shows loading skeleton while Firestore loads)
 document.addEventListener('DOMContentLoaded', () => {

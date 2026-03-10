@@ -106,6 +106,7 @@ const _en = {
   footer_contact_heading: 'Contact Us',
   footer_contact_text: 'For updates, inspiration, and orders — we\'re here for you:',
   footer_wa: 'Message us on WhatsApp',
+  footer_inquiry: 'Send an Inquiry',
   footer_ship_note1: 'Home delivery: within 3 business days',
   footer_ship_note2: 'Self-pickup: from our studio in Ramat Gan',
   footer_copyright: '\u00a9 2025 Charming by Vik. All rights reserved. Designed with love.',
@@ -640,10 +641,9 @@ function applyLang() {
     el.placeholder = lang === 'en' ? (_en[key] || el.dataset.hePh) : el.dataset.hePh;
   });
 
-  /* toggle buttons */
-  document.querySelectorAll('.lang-toggle').forEach(btn => {
-    btn.textContent = lang === 'he' ? 'EN' : 'HE';
-    btn.setAttribute('aria-label', lang === 'he' ? 'Switch to English' : 'החלף לעברית');
+  /* update dropdown active state */
+  document.querySelectorAll('.lang-dropdown-menu button[data-lang]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
   });
 }
 
@@ -651,6 +651,8 @@ function setLang(lang) {
   _lang = lang;
   localStorage.setItem('charming_lang', lang);
   applyLang();
+  // Re-render product catalogs to show bilingual names/descriptions
+  if (typeof window._rerenderProducts === 'function') window._rerenderProducts();
 }
 
 function toggleLang() {
@@ -660,8 +662,31 @@ function toggleLang() {
 /* auto-init */
 document.addEventListener('DOMContentLoaded', () => {
   applyLang();
-  document.querySelectorAll('.lang-toggle').forEach(btn => {
-    btn.addEventListener('click', toggleLang);
+  document.documentElement.classList.remove('lang-loading');
+
+  /* Language dropdown — open/close */
+  document.querySelectorAll('.lang-dropdown-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const dd = btn.closest('.lang-dropdown');
+      // Close all other dropdowns
+      document.querySelectorAll('.lang-dropdown.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
+      dd.classList.toggle('open');
+    });
+  });
+
+  /* Language dropdown — select language */
+  document.querySelectorAll('.lang-dropdown-menu button[data-lang]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      setLang(btn.dataset.lang);
+      document.querySelectorAll('.lang-dropdown.open').forEach(d => d.classList.remove('open'));
+    });
+  });
+
+  /* Close dropdown on outside click */
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.lang-dropdown.open').forEach(d => d.classList.remove('open'));
   });
 });
 

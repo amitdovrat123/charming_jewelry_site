@@ -215,6 +215,22 @@
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">💬</span> פניות
           </button>
+          <button data-tab="banner" onclick="showTab('banner')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">📢</span> באנר עליון
+          </button>
+          <button data-tab="workshops" onclick="showTab('workshops')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">🎨</span> סדנאות
+          </button>
+          <button data-tab="logs" onclick="showTab('logs')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">📋</span> יומן שינויים
+          </button>
+          <button data-tab="settings" onclick="showTab('settings')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">⚙️</span> הגדרות
+          </button>
         </nav>
       </div>
     </aside>
@@ -258,16 +274,55 @@
           </div>
         </div>
 
-        <!-- Chart + Top products -->
+        <!-- Row 2: Profit + AOV -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="relative group bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-emerald-400">
+            <div class="flex items-center gap-1 mb-1">
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">רווח נקי</p>
+              <button class="w-4 h-4 rounded-full bg-gray-100 text-gray-400 text-[9px] font-bold flex items-center justify-center cursor-help hover:bg-[#f0dfc0] hover:text-[#d4a373]"
+                onclick="this.parentElement.parentElement.querySelector('.info-tip').classList.toggle('hidden')">i</button>
+            </div>
+            <p id="kpi-profit" class="text-2xl font-black text-emerald-500">—</p>
+            <div class="info-tip hidden group-hover:block absolute top-full right-0 mt-1 z-20 bg-[#2c2a29] text-white text-xs rounded-xl px-3 py-2 shadow-lg max-w-[220px] leading-relaxed pointer-events-none">
+              (מחיר מכירה - מחיר עלות) × כמות, מהזמנות ששולמו
+            </div>
+          </div>
+          <div class="relative group bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-blue-400">
+            <div class="flex items-center gap-1 mb-1">
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">AOV</p>
+              <button class="w-4 h-4 rounded-full bg-gray-100 text-gray-400 text-[9px] font-bold flex items-center justify-center cursor-help hover:bg-[#f0dfc0] hover:text-[#d4a373]"
+                onclick="this.parentElement.parentElement.querySelector('.info-tip').classList.toggle('hidden')">i</button>
+            </div>
+            <p id="kpi-aov" class="text-2xl font-black text-blue-500">—</p>
+            <div class="info-tip hidden group-hover:block absolute top-full right-0 mt-1 z-20 bg-[#2c2a29] text-white text-xs rounded-xl px-3 py-2 shadow-lg max-w-[220px] leading-relaxed pointer-events-none">
+              ממוצע ערך הזמנה: סה"כ הכנסות חלקי מספר הזמנות
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart + Top products + Period toggle -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow">
-            <h3 class="font-bold text-sm text-gray-800 mb-4">הזמנות — 6 חודשים אחרונים</h3>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-sm text-gray-800">הזמנות — 6 חודשים</h3>
+              <select id="dash-period-select" onchange="dashPeriod=this.value;renderBarChart();" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer">
+                <option value="none">תקופה נוכחית</option>
+                <option value="month">השוואה לחודש קודם</option>
+                <option value="year">השוואה לשנה קודמת</option>
+              </select>
+            </div>
             <div id="bar-chart" class="flex items-end gap-2 h-[120px]"></div>
           </div>
           <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow">
             <h3 class="font-bold text-sm text-gray-800 mb-4">מוצרים מובילים</h3>
             <div id="top-products-list" class="space-y-1"></div>
           </div>
+        </div>
+
+        <!-- Geographic segmentation -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow">
+          <h3 class="font-bold text-sm text-gray-800 mb-4">ערים מובילות (לפי הזמנות)</h3>
+          <div id="geo-cities" class="space-y-2"></div>
         </div>
 
         <!-- Inventory quick stats -->
@@ -407,6 +462,7 @@
                 <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden md:table-cell">טלפון</th>
                 <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">הזמנות</th>
                 <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">LTV</th>
+                <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide">קופונים</th>
                 <th class="px-4 py-3 text-right font-bold text-gray-400 text-[11px] uppercase tracking-wide hidden sm:table-cell">תאריך לידה</th>
               </tr>
             </thead>
@@ -446,6 +502,167 @@
         </div>
       </section>
 
+      <!-- ─── TAB: BANNER ─── -->
+      <section id="tab-banner" data-erp-tab class="p-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="font-black text-gray-800 text-lg">הודעות באנר עליון</h2>
+          <button onclick="openBannerMsgModal()"
+            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            + הודעה חדשה</button>
+        </div>
+        <p class="text-xs text-gray-400">ההודעות מוצגות בבאנר העליון באתר ומתחלפות כל 5 שניות. גררי כדי לשנות סדר.</p>
+        <div id="banner-list" class="space-y-3"></div>
+      </section>
+
+      <!-- ─── TAB: WORKSHOPS ─── -->
+      <section id="tab-workshops" data-erp-tab class="p-6 space-y-6">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <h2 class="font-black text-gray-800 text-lg">ניהול סדנאות</h2>
+          <button onclick="openWorkshopModal()"
+            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            + סיכום סדנה חדשה</button>
+        </div>
+
+        <!-- Calendar view -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-sm text-gray-800">לוח סדנאות</h3>
+            <div class="flex gap-2">
+              <button onclick="changeCalMonth(-1)" class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373] transition-colors">◀</button>
+              <span id="cal-month-label" class="text-sm font-bold text-gray-700 min-w-[120px] text-center leading-8"></span>
+              <button onclick="changeCalMonth(1)" class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373] transition-colors">▶</button>
+            </div>
+          </div>
+          <div id="ws-calendar" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+        </div>
+
+        <!-- Workshop booking form -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+          <h3 class="font-bold text-sm text-gray-800 mb-4">סיכום סדנה טלפונית</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="lbl">שם לקוח *</label>
+              <input id="ws-name" type="text" placeholder="שם מלא" class="inp" required />
+            </div>
+            <div>
+              <label class="lbl">טלפון *</label>
+              <input id="ws-phone" type="tel" placeholder="050-1234567" class="inp" required />
+            </div>
+            <div>
+              <label class="lbl">תאריך אירוע *</label>
+              <input id="ws-date" type="date" class="inp" required />
+            </div>
+            <div>
+              <label class="lbl">שעת התחלה *</label>
+              <input id="ws-time" type="time" class="inp" required />
+            </div>
+            <div>
+              <label class="lbl">מספר משתתפות *</label>
+              <input id="ws-count" type="number" min="1" placeholder="10" class="inp" required />
+            </div>
+            <div>
+              <label class="lbl">מסלול *</label>
+              <select id="ws-route" class="inp">
+                <option value="שרשראות">שרשראות</option>
+                <option value="צמידים">צמידים</option>
+                <option value="משולב">משולב</option>
+              </select>
+            </div>
+            <div>
+              <label class="lbl">מחיר למשתתפת (₪) *</label>
+              <input id="ws-ppp" type="number" min="0" placeholder="150" class="inp" required />
+            </div>
+            <div>
+              <label class="lbl">הנחה (%)</label>
+              <input id="ws-discount" type="number" min="0" max="100" placeholder="0" value="0" class="inp" />
+            </div>
+            <div>
+              <label class="lbl">דמי הגעה (₪)</label>
+              <input id="ws-arrival" type="number" min="0" placeholder="0" value="0" class="inp" />
+              <p class="text-[10px] text-gray-400 mt-1">לא מושפע מההנחה</p>
+            </div>
+            <div>
+              <label class="lbl">הערות</label>
+              <input id="ws-notes" type="text" placeholder="הערות נוספות" class="inp" />
+            </div>
+          </div>
+
+          <!-- Live price preview -->
+          <div id="ws-price-preview" class="mt-4 p-4 bg-[#fdf6ee] rounded-xl text-center">
+            <p class="text-xs text-gray-400 mb-1">סה"כ לתשלום</p>
+            <p id="ws-total-display" class="text-2xl font-black text-[#d4a373]">0 ₪</p>
+          </div>
+
+          <div class="flex flex-wrap gap-3 mt-4">
+            <button onclick="saveWorkshop()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">שמרי סדנה</button>
+            <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">שלח סיכום בוואטסאפ</button>
+            <p id="ws-err" class="text-red-400 text-xs self-center"></p>
+          </div>
+        </div>
+
+        <!-- Saved workshops list -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee]">
+            <h3 class="font-bold text-sm text-gray-800">סדנאות שנשמרו</h3>
+          </div>
+          <div id="ws-list" class="divide-y divide-[#fdf6ee]"></div>
+        </div>
+      </section>
+
+      <!-- ─── TAB: LOGS ─── -->
+      <section id="tab-logs" data-erp-tab class="p-6 space-y-4">
+        <h2 class="font-black text-gray-800 text-lg">יומן שינויים</h2>
+        <p class="text-xs text-gray-400">כל פעולה מרכזית בפאנל נרשמת אוטומטית.</p>
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <div id="logs-list" class="divide-y divide-[#fdf6ee] max-h-[600px] overflow-y-auto"></div>
+        </div>
+      </section>
+
+      <!-- ─── TAB: SETTINGS ─── -->
+      <section id="tab-settings" data-erp-tab class="p-6 space-y-6">
+        <h2 class="font-black text-gray-800 text-lg">הגדרות</h2>
+
+        <!-- Birthday campaign -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-bold text-sm text-gray-800">🎂 קמפיין יום הולדת אוטומטי</h3>
+              <p class="text-xs text-gray-400 mt-1">שליחת קופון הנחה אוטומטי ללקוחות ביום הולדתם</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="set-bday-enabled" class="sr-only peer" onchange="saveSettingToggle('birthdayCampaignEnabled',this.checked)">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4a373]"></div>
+            </label>
+          </div>
+          <div id="bday-settings" class="space-y-3 mt-4" style="display:none;">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="lbl">ערך קופון (%)</label>
+                <input id="set-bday-value" type="number" value="15" min="1" max="100" class="inp" onchange="saveBdaySettings()" />
+              </div>
+              <div>
+                <label class="lbl">תוקף קופון (ימים)</label>
+                <input id="set-bday-days" type="number" value="30" min="1" class="inp" onchange="saveBdaySettings()" />
+              </div>
+            </div>
+            <div>
+              <label class="lbl">תבנית הודעה</label>
+              <textarea id="set-bday-template" rows="4" class="inp resize-none" onchange="saveBdaySettings()">שלום {name},
+יום הולדת שמח! 🎂
+בכיף רב מעניקים לך קופון הנחה של {value}% לכבוד יום הולדתך.
+קוד הקופון שלך: {code}
+הקופון בתוקף ל-{days} ימים.
+
+Charming by Vik 💛</textarea>
+            </div>
+            <button onclick="runBirthdayCampaign()" class="border border-[#d4a373] text-[#d4a373] hover:bg-[#fdf6ee] px-5 py-2.5 rounded-full font-bold text-sm transition-colors">
+              🎂 הרצת קמפיין יום הולדת עכשיו
+            </button>
+            <p id="bday-result" class="text-xs text-gray-500"></p>
+          </div>
+        </div>
+      </section>
+
     </main><!-- /erp-content -->
   </div><!-- /flex -->
 
@@ -474,6 +691,18 @@
     <button data-tab="inquiries" onclick="showTab('inquiries')"
       class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
       <span class="text-xl">💬</span> פניות
+    </button>
+    <button data-tab="banner" onclick="showTab('banner')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">📢</span> באנר
+    </button>
+    <button data-tab="workshops" onclick="showTab('workshops')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">🎨</span> סדנאות
+    </button>
+    <button data-tab="settings" onclick="showTab('settings')"
+      class="erp-nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-colors">
+      <span class="text-xl">⚙️</span> הגדרות
     </button>
   </nav>
 
@@ -507,6 +736,12 @@
         </div>
       </div>
 
+      <!-- Row 1b: English Name -->
+      <div>
+        <label class="lbl">שם המוצר באנגלית</label>
+        <input id="p-name-en" type="text" dir="ltr" placeholder="Rose Gold Heart Necklace" class="inp" />
+      </div>
+
       <!-- Row 2: Category + Collection + Material -->
       <div class="grid grid-cols-3 gap-4">
         <div>
@@ -533,7 +768,7 @@
       </div>
 
       <!-- Row 3: Prices + Stock -->
-      <div class="grid grid-cols-3 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
           <label class="lbl">מחיר מקורי (₪) *</label>
           <input id="p-price" type="number" placeholder="149" min="0" class="inp" required />
@@ -541,6 +776,10 @@
         <div>
           <label class="lbl">מחיר מבצע (₪)</label>
           <input id="p-sale" type="number" placeholder="ריק = אין" min="0" class="inp" />
+        </div>
+        <div>
+          <label class="lbl">מחיר עלות (₪)</label>
+          <input id="p-cost" type="number" placeholder="ריק = לא ידוע" min="0" class="inp" />
         </div>
         <div>
           <label class="lbl">מלאי (יח')</label>
@@ -616,6 +855,13 @@
         <textarea id="p-desc" rows="4" placeholder="תיאור אלגנטי של המוצר — אפשר לקבל עזרה מ-AI ☝️"
           class="inp resize-none"></textarea>
         <p id="ai-err" class="text-red-400 text-xs mt-1 min-h-[1rem]"></p>
+      </div>
+
+      <!-- English Description -->
+      <div>
+        <label class="lbl">תיאור המוצר באנגלית</label>
+        <textarea id="p-desc-en" rows="3" dir="ltr" placeholder="Elegant product description in English"
+          class="inp resize-none"></textarea>
       </div>
 
     </div><!-- /form body -->
@@ -701,9 +947,14 @@
           <input id="cp-value" type="number" placeholder="20" min="1" class="inp" />
         </div>
         <div>
-          <label class="lbl">מגבלת שימוש</label>
+          <label class="lbl">מגבלת שימוש כוללת</label>
           <input id="cp-limit" type="number" placeholder="ריק = ללא הגבלה" min="1" class="inp" />
         </div>
+      </div>
+      <div>
+        <label class="lbl">מגבלת שימוש למשתמש</label>
+        <input id="cp-per-user" type="number" placeholder="ריק = ללא הגבלה" min="1" class="inp" />
+        <p class="text-[10px] text-gray-400 mt-1">מספר פעמים שכל לקוח יכול להשתמש בקופון (לדוגמא: 1 = שימוש חד-פעמי)</p>
       </div>
       <div>
         <label class="lbl">תאריך תפוגה</label>
@@ -718,6 +969,54 @@
   </div>
 </div>
 
+
+<!-- ════ BANNER MESSAGE MODAL ════ -->
+<div id="banner-modal" data-v
+  class="fixed inset-0 z-[9000] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
+  onclick="if(event.target===this)closeBannerMsgModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md fadein">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0]">
+      <h2 id="banner-modal-title" class="font-black text-gray-800">הודעה חדשה</h2>
+      <button onclick="closeBannerMsgModal()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+    </div>
+    <div class="px-6 py-5 space-y-4">
+      <div>
+        <label class="lbl">טקסט בעברית *</label>
+        <input id="bm-text" type="text" placeholder="✦ 10% הנחה בהזמנה הראשונה ✦" class="inp" dir="rtl" />
+      </div>
+      <div>
+        <label class="lbl">טקסט באנגלית</label>
+        <input id="bm-text-en" type="text" placeholder="✦ 10% off your first order ✦" class="inp" dir="ltr" />
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="bm-active" checked class="accent-[#d4a373] w-4 h-4" />
+          <span class="text-sm font-semibold text-gray-700">פעיל</span>
+        </label>
+      </div>
+      <p id="banner-err" class="text-red-400 text-xs min-h-[1rem]"></p>
+    </div>
+    <div class="px-6 py-4 border-t border-[#f0dfc0] flex gap-3 justify-end">
+      <button onclick="closeBannerMsgModal()" class="border border-gray-200 text-gray-500 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
+      <button id="banner-save" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-8 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">שמרי</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CUSTOMER DETAIL MODAL ════ -->
+<div id="customer-modal" data-v
+  class="fixed inset-0 z-[9000] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
+  onclick="if(event.target===this)window.closeCustomerModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto fadein">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0] sticky top-0 bg-white z-10 rounded-t-2xl">
+      <h2 class="font-black text-gray-800">פרטי לקוח</h2>
+      <button onclick="window.closeCustomerModal()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+    </div>
+    <div id="customer-modal-body" class="px-6 py-5 space-y-4"></div>
+  </div>
+</div>
 
 <!-- ════ INQUIRY DETAIL MODAL ════ -->
 <div id="inquiry-modal" data-v
@@ -747,7 +1046,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc,
-  doc, onSnapshot, query, orderBy, serverTimestamp, getDocs, Timestamp,
+  doc, onSnapshot, query, orderBy, where, serverTimestamp, getDocs, Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── Config ──────────────────────────────────────────────────────
@@ -760,6 +1059,10 @@ const ORDERS_COL     = 'artifacts/charming-3dd6f/public/data/orders';
 const CUSTOMERS_COL  = 'artifacts/charming-3dd6f/users';
 const COUPONS_COL    = 'artifacts/charming-3dd6f/public/data/coupons';
 const INQUIRIES_COL  = 'artifacts/charming-3dd6f/public/data/inquiries';
+const BANNER_COL     = 'artifacts/charming-3dd6f/public/data/bannerMessages';
+const LOGS_COL       = 'artifacts/charming-3dd6f/public/data/logs';
+const WORKSHOPS_COL  = 'artifacts/charming-3dd6f/public/data/workshops';
+const SETTINGS_COL   = 'artifacts/charming-3dd6f/public/data/settings';
 
 const app  = initializeApp({
   apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
@@ -801,6 +1104,26 @@ let editCouponId = null;
 
 // Inquiries
 let allInquiries = [];
+
+// Banner messages
+let allBannerMsgs = [];
+let editBannerId  = null;
+let unsubBanner   = null;
+
+// Workshops
+let allWorkshops   = [];
+let editWorkshopId = null;
+let unsubWorkshops = null;
+
+// Logs
+let allLogs    = [];
+let unsubLogs  = null;
+
+// Settings
+let adminSettings = {};
+
+// Dashboard period comparison
+let dashPeriod = 'month'; // 'month' or 'year'
 
 // Notifications
 let notifications = [];
@@ -917,6 +1240,9 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   if (unsubOrders)    unsubOrders();
   if (unsubCoupons)   unsubCoupons();
   if (unsubInquiries) unsubInquiries();
+  if (unsubBanner)    unsubBanner();
+  if (unsubWorkshops) unsubWorkshops();
+  if (unsubLogs)      unsubLogs();
   signOut(auth);
 });
 
@@ -975,7 +1301,7 @@ function renderImageGrid() {
 
 // ── Tab switcher ─────────────────────────────────────────────────
 function showTab(name) {
-  ['dashboard','orders','inventory','customers','coupons','inquiries'].forEach(t => {
+  ['dashboard','orders','inventory','customers','coupons','inquiries','banner','workshops','logs','settings'].forEach(t => {
     document.getElementById('tab-'+t)?.setAttribute('data-erp-tab','');
   });
   document.getElementById('tab-'+name)?.removeAttribute('data-erp-tab');
@@ -990,12 +1316,19 @@ function showTab(name) {
     else if (name === 'customers') initCustomersTab();
     else if (name === 'coupons')   initCouponsTab();
     else if (name === 'inquiries') initInquiriesTab();
+    else if (name === 'banner')    initBannerTab();
+    else if (name === 'workshops') initWorkshopsTab();
+    else if (name === 'logs')      initLogsTab();
+    else if (name === 'settings')  initSettingsTab();
   } else {
     if (name === 'orders')    renderOrdersTable();
     if (name === 'inventory') { updateInventoryStats(); renderTable(); }
     if (name === 'customers') renderCustomersTable();
     if (name === 'coupons')   renderCouponsGrid();
     if (name === 'inquiries') renderInquiriesTable();
+    if (name === 'banner')    renderBannerList();
+    if (name === 'workshops') { renderCalendar(); renderWorkshopsList(); }
+    if (name === 'logs')      renderLogsList();
   }
 }
 window.showTab = showTab;
@@ -1067,7 +1400,7 @@ function renderNotifications() {
 
     if (n.type === 'inquiry') {
       const ts = n.createdAt?.seconds ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('he-IL') : '';
-      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('inquiries');" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
+      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('inquiries');setTimeout(()=>window.openInquiryModal('${n.docId}'),150);document.getElementById('notif-dropdown').style.display='none';" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
           <p class="text-xs font-bold text-gray-700 truncate">פניה חדשה מ${n.name || 'לקוח'}</p>
@@ -1080,7 +1413,7 @@ function renderNotifications() {
     if (n.type === 'order') {
       const ts = n.timestamp?.seconds ? new Date(n.timestamp.seconds * 1000).toLocaleDateString('he-IL') : '';
       const total = n.summary?.total || 0;
-      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('orders');" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
+      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('orders');setTimeout(()=>openOrderModal('${n.docId}'),150);document.getElementById('notif-dropdown').style.display='none';" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
           <p class="text-xs font-bold text-gray-700 truncate">הזמנה חדשה — ${n.orderId || ''}</p>
@@ -1091,7 +1424,7 @@ function renderNotifications() {
     }
 
     if (n.type === 'stock') {
-      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('inventory');" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
+      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('inventory');setTimeout(()=>{const p=allProducts.find(x=>x.id==='${n.docId}');if(p)openModal('edit',p);},150);document.getElementById('notif-dropdown').style.display='none';" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
           <p class="text-xs font-bold text-gray-700 truncate">⚠️ נגמר המלאי — ${n.name || ''}</p>
@@ -1148,6 +1481,10 @@ function startOrdersListener() {
 function initDashboardTab() {
   startProductsListener();
   startOrdersListener();
+  // Pre-load customers for geographic data + birthday campaign
+  if (!allCustomers.length) {
+    getDocs(collection(db,CUSTOMERS_COL)).then(snap=>{allCustomers=snap.docs.map(d=>({id:d.id,...d.data()}));}).catch(()=>{});
+  }
 }
 
 function updateInventoryStats() {
@@ -1165,9 +1502,30 @@ function updateDashboardKPIs() {
   if (el('kpi-revenue'))    el('kpi-revenue').textContent    = revenue.toLocaleString('he-IL')+' ₪';
   if (el('kpi-orders'))     el('kpi-orders').textContent     = nc.length;
   if (el('kpi-customers'))  el('kpi-customers').textContent  = new Set(nc.map(o=>o.customer?.email).filter(Boolean)).size || '—';
-  if (el('kpi-conversion')) el('kpi-conversion').textContent = '3.2%';
+  const custCount = new Set(nc.map(o=>o.customer?.email).filter(Boolean)).size;
+  if (el('kpi-conversion')) el('kpi-conversion').textContent = custCount>0&&nc.length>0?((nc.length/Math.max(custCount*3,1))*100).toFixed(1)+'%':'—';
+
+  // AOV
+  const aov = nc.length>0?Math.round(revenue/nc.length):0;
+  if (el('kpi-aov')) el('kpi-aov').textContent = aov>0?aov.toLocaleString('he-IL')+' ₪':'—';
+
+  // Net profit
+  const paid = allOrders.filter(o=>['paid','processing','shipped','delivered'].includes(o.status));
+  let profit = 0;
+  paid.forEach(o=>{
+    (o.items||[]).forEach(item=>{
+      const p = allProducts.find(x=>x.id===item.productId);
+      if (p && p.costPrice!=null) {
+        const salePrice = item.price||p.priceSale||p.priceOriginal||0;
+        profit += (salePrice - p.costPrice) * (item.qty||item.quantity||1);
+      }
+    });
+  });
+  if (el('kpi-profit')) el('kpi-profit').textContent = profit>0?profit.toLocaleString('he-IL')+' ₪':'—';
+
   renderTopProducts();
   renderBarChart();
+  renderGeoCities();
 }
 
 function renderTopProducts() {
@@ -1202,22 +1560,38 @@ function renderBarChart() {
   const c = document.getElementById('bar-chart');
   if (!c) return;
   const now = new Date();
+  const period = document.getElementById('dash-period-select')?.value || 'none';
+
   const months = Array.from({length:6},(_,i)=>{
     const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
-    return {y:d.getFullYear(),m:d.getMonth(),lbl:d.toLocaleDateString('he-IL',{month:'short'}),count:0};
+    return {y:d.getFullYear(),m:d.getMonth(),lbl:d.toLocaleDateString('he-IL',{month:'short'}),count:0,prev:0};
   });
   allOrders.forEach(o=>{
     const ts = o.timestamp?.seconds ? new Date(o.timestamp.seconds*1000) : null;
     if (!ts) return;
+    // Current period
     const mo = months.find(m=>m.y===ts.getFullYear()&&m.m===ts.getMonth());
     if (mo) mo.count++;
+    // Previous period comparison
+    if (period==='month') {
+      const pm = months.find(m=>m.y===ts.getFullYear()&&m.m===(ts.getMonth()-1+12)%12 || (m.m===ts.getMonth()&&m.y===ts.getFullYear()-1&&ts.getMonth()===0));
+      // Shift: compare each month to its predecessor
+      const prevDate = new Date(ts.getFullYear(), ts.getMonth()+1, ts.getDate());
+      const pm2 = months.find(m=>m.y===prevDate.getFullYear()&&m.m===prevDate.getMonth());
+      if (pm2) pm2.prev++;
+    } else if (period==='year') {
+      const prev = months.find(m=>m.y===(ts.getFullYear()+1)&&m.m===ts.getMonth());
+      if (prev) prev.prev++;
+    }
   });
-  const max = Math.max(...months.map(m=>m.count),1);
+  const max = Math.max(...months.map(m=>Math.max(m.count,m.prev)),1);
+  const showPrev = period!=='none';
   c.innerHTML = months.map(m=>`
     <div class="flex flex-col items-center gap-1 flex-1">
       <span class="text-xs font-bold text-[#d4a373]">${m.count||''}</span>
-      <div class="w-full flex items-end justify-center" style="height:80px">
-        <div class="w-full max-w-[32px] bg-[#d4a373] rounded-t-md"
+      <div class="w-full flex items-end justify-center gap-0.5" style="height:80px">
+        ${showPrev?`<div class="w-1/2 max-w-[14px] bg-gray-300 rounded-t-md" style="height:${m.prev?Math.max(6,Math.round(m.prev/max*80)):2}px;opacity:${m.prev?0.5:0.15}" title="קודם: ${m.prev}"></div>`:''}
+        <div class="${showPrev?'w-1/2 max-w-[14px]':'w-full max-w-[32px]'} bg-[#d4a373] rounded-t-md"
              style="height:${m.count?Math.max(6,Math.round(m.count/max*80)):2}px;opacity:${m.count?1:0.2}"></div>
       </div>
       <span class="text-[10px] text-gray-400">${m.lbl}</span>
@@ -1283,7 +1657,9 @@ function renderOrdersTable() {
 async function handleOrderStatusChange(e) {
   const sel = e.target.closest('[data-ord-status]');
   if (!sel) return;
-  try { await updateDoc(doc(db,ORDERS_COL,sel.dataset.ordStatus),{status:sel.value}); }
+  const ordId=sel.dataset.ordStatus;
+  const newStatus=sel.value;
+  try { await updateDoc(doc(db,ORDERS_COL,ordId),{status:newStatus}); logAction(`הזמנה ${ordId.slice(0,8)} → ${STATUS_LABELS[newStatus]||newStatus}`); }
   catch(ex) { console.error(ex); }
 }
 
@@ -1515,6 +1891,7 @@ function openModal(mode, product=null) {
     document.getElementById('p-mat').value     = product.material||'';
     document.getElementById('p-price').value   = product.priceOriginal??product.price??'';
     document.getElementById('p-sale').value    = product.priceSale??product.salePrice??'';
+    document.getElementById('p-cost').value    = product.costPrice??'';
     document.getElementById('p-stock').value   = product.stockCount??product.stock??'';
     document.getElementById('p-badge').value   = product.badge||'';
     document.getElementById('p-status').value  = product.status||'published';
@@ -1522,6 +1899,8 @@ function openModal(mode, product=null) {
     document.getElementById('p-customizable').checked = !!product.isCustomizable;
     document.getElementById('p-color').value   = product.color||'';
     document.getElementById('p-desc').value    = product.description||'';
+    document.getElementById('p-name-en').value = product.nameEn||'';
+    document.getElementById('p-desc-en').value = product.descriptionEn||'';
     const imgs = Array.isArray(product.images)&&product.images.length
       ?product.images:(product.imageUrl?[product.imageUrl]:[]);
     uploadedImages = [...imgs];
@@ -1543,7 +1922,7 @@ function closeModal() {
 }
 
 function clearForm() {
-  ['p-name','p-sku','p-price','p-sale','p-stock','p-desc'].forEach(id=>{document.getElementById(id).value='';});
+  ['p-name','p-sku','p-price','p-sale','p-cost','p-stock','p-desc','p-name-en','p-desc-en'].forEach(id=>{document.getElementById(id).value='';});
   ['p-cat','p-col','p-badge'].forEach(id=>{document.getElementById(id).value='';});
   document.getElementById('p-mat').value    = 'פלדת אל-חלד';
   document.getElementById('p-color').value  = '';
@@ -1574,6 +1953,8 @@ document.getElementById('save-btn').addEventListener('click', async ()=>{
   const priceOrig = parseFloat(document.getElementById('p-price').value);
   const saleRaw   = document.getElementById('p-sale').value.trim();
   const priceSale = saleRaw!==''?parseFloat(saleRaw):null;
+  const costRaw   = document.getElementById('p-cost').value.trim();
+  const costPrice = costRaw!==''?parseFloat(costRaw):null;
   const stockRaw  = document.getElementById('p-stock').value.trim();
   const stockCount= stockRaw!==''?parseInt(stockRaw):null;
   const badge     = document.getElementById('p-badge').value;
@@ -1581,6 +1962,8 @@ document.getElementById('save-btn').addEventListener('click', async ()=>{
   const isFeatured= document.getElementById('p-featured').checked;
   const color     = document.getElementById('p-color').value;
   const description=document.getElementById('p-desc').value.trim();
+  const nameEn=document.getElementById('p-name-en').value.trim();
+  const descriptionEn=document.getElementById('p-desc-en').value.trim();
   let imagesArr=[];
   try{imagesArr=JSON.parse(document.getElementById('p-imgs').value||'[]')||[];}catch{imagesArr=[];}
 
@@ -1594,17 +1977,24 @@ document.getElementById('save-btn').addEventListener('click', async ()=>{
 
   const data={
     name,sku,category:cat,collection:col||null,material:mat||null,color:color||null,
-    priceOriginal:priceOrig,priceSale,stockCount,
+    priceOriginal:priceOrig,priceSale,costPrice,stockCount,
     badge:badge||null,status,isFeatured,
     isCustomizable:document.getElementById('p-customizable').checked,
     images:imagesArr,imageUrl:imagesArr[0]||null,
     description:description||null,
+    nameEn:nameEn||null,
+    descriptionEn:descriptionEn||null,
     updatedAt:serverTimestamp(),
   };
 
   try {
-    if (modalMode==='edit'&&editId) {await updateDoc(doc(db,COL_PATH,editId),data);}
-    else {data.createdAt=serverTimestamp();await addDoc(collection(db,COL_PATH),data);}
+    if (modalMode==='edit'&&editId) {
+      await updateDoc(doc(db,COL_PATH,editId),data);
+      logAction(`מוצר "${name}" עודכן`);
+    } else {
+      data.createdAt=serverTimestamp();await addDoc(collection(db,COL_PATH),data);
+      logAction(`מוצר "${name}" ${modalMode==='duplicate'?'שוכפל':'נוצר'}`);
+    }
     closeModal();
   } catch(ex) {
     err.textContent='שגיאה בשמירה. נסי שנית.';console.error(ex);
@@ -1624,7 +2014,8 @@ function closeDelete() {
 document.getElementById('del-cancel').addEventListener('click', closeDelete);
 document.getElementById('del-confirm').addEventListener('click', async ()=>{
   if (!pendingDeleteId) return;
-  try{await deleteDoc(doc(db,COL_PATH,pendingDeleteId));}
+  const delName=document.getElementById('del-name').textContent;
+  try{await deleteDoc(doc(db,COL_PATH,pendingDeleteId));logAction(`מוצר "${delName}" נמחק`);}
   catch(ex){console.error('Delete failed:',ex);}
   closeDelete();
 });
@@ -1689,16 +2080,19 @@ function renderCustomersTable() {
   });
   const body=document.getElementById('customers-body');
   if (!body) return;
-  if (!list.length){body.innerHTML=`<tr><td colspan="6" class="text-center py-10 text-gray-300 text-sm">אין לקוחות</td></tr>`;return;}
+  if (!list.length){body.innerHTML=`<tr><td colspan="7" class="text-center py-10 text-gray-300 text-sm">אין לקוחות</td></tr>`;return;}
   body.innerHTML=list.map(c=>{
     const userOrders=allOrders.filter(o=>o.customer?.email===c.email&&o.status!=='cancelled');
     const ltv=userOrders.reduce((s,o)=>s+(o.summary?.total||0),0);
-    return `<tr class="hover:bg-[#fdf6ee] transition-colors border-b border-[#fdf6ee]">
+    const couponOrders = userOrders.filter(o=>o.coupon && o.coupon.code);
+    const couponCount = couponOrders.length;
+    return `<tr class="hover:bg-[#fdf6ee] transition-colors border-b border-[#fdf6ee] cursor-pointer" onclick="window.openCustomerModal('${c.id}')">
       <td class="px-4 py-3 font-semibold text-sm">${esc(c.displayName||c.fullName||'—')}</td>
       <td class="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">${esc(c.email||'—')}</td>
       <td class="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">${esc(c.phone||'—')}</td>
       <td class="px-4 py-3 text-center font-bold text-gray-700">${userOrders.length}</td>
       <td class="px-4 py-3 font-bold text-[#d4a373]">${ltv>0?ltv+' ₪':'—'}</td>
+      <td class="px-4 py-3 text-center text-sm ${couponCount>0?'font-bold text-[#d4a373]':'text-gray-300'}">${couponCount>0?couponCount:'—'}</td>
       <td class="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">${c.birthDate?(c.birthDate.seconds?new Date(c.birthDate.seconds*1000):new Date(c.birthDate)).toLocaleDateString('he-IL'):'—'}</td>
     </tr>`;
   }).join('');
@@ -1706,10 +2100,11 @@ function renderCustomersTable() {
 
 function exportCustomersCSV() {
   const BOM='\uFEFF';
-  const rows=[['שם','אימייל','טלפון','הזמנות','LTV','תאריך לידה']];
+  const rows=[['שם','אימייל','טלפון','הזמנות','LTV','שימושי קופון','תאריך לידה']];
   allCustomers.forEach(c=>{
     const orders=allOrders.filter(o=>o.customer?.email===c.email&&o.status!=='cancelled');
-    rows.push([c.displayName||c.fullName||'',c.email||'',c.phone||'',orders.length,orders.reduce((s,o)=>s+(o.summary?.total||0),0),c.birthDate||'']);
+    const couponUses=orders.filter(o=>o.coupon&&o.coupon.code).length;
+    rows.push([c.displayName||c.fullName||'',c.email||'',c.phone||'',orders.length,orders.reduce((s,o)=>s+(o.summary?.total||0),0),couponUses,c.birthDate||'']);
   });
   const csv=BOM+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
@@ -1719,6 +2114,91 @@ function exportCustomersCSV() {
   URL.revokeObjectURL(url);
 }
 window.exportCustomersCSV=exportCustomersCSV;
+
+// ── Customer Detail Modal ─────────────────────────────────────────
+function openCustomerModal(customerId) {
+  const c = allCustomers.find(x=>x.id===customerId);
+  if (!c) return;
+  const name = esc(c.displayName||c.fullName||'—');
+  const email = esc(c.email||'—');
+  const phone = esc(c.phone||'—');
+  const dob = c.birthDate?(c.birthDate.seconds?new Date(c.birthDate.seconds*1000):new Date(c.birthDate)).toLocaleDateString('he-IL'):'—';
+
+  // Orders for this customer
+  const userOrders = allOrders.filter(o=>o.customer?.email===c.email&&o.status!=='cancelled');
+  const ltv = userOrders.reduce((s,o)=>s+(o.summary?.total||0),0);
+
+  // Coupon usage from orders
+  const couponOrders = userOrders.filter(o=>o.coupon && o.coupon.code);
+
+  // Group coupon usage by code
+  const couponMap = {};
+  couponOrders.forEach(o=>{
+    const code = o.coupon.code;
+    if (!couponMap[code]) couponMap[code] = { code, type: o.coupon.type, value: o.coupon.value, uses: [] };
+    couponMap[code].uses.push({
+      orderId: o.orderId||o.id.slice(0,8),
+      date: o.timestamp?.seconds ? new Date(o.timestamp.seconds*1000).toLocaleDateString('he-IL') : '—',
+      discount: o.coupon.discount || o.summary?.discount || 0
+    });
+  });
+  const couponEntries = Object.values(couponMap);
+
+  let couponHtml = '';
+  if (couponEntries.length > 0) {
+    couponHtml = couponEntries.map(cp => {
+      const discountLabel = cp.type === 'percent' ? `${cp.value}%` : `${cp.value} ₪`;
+      const usesHtml = cp.uses.map(u =>
+        `<div class="flex items-center justify-between py-1.5 border-b border-[#fdf6ee] last:border-0 text-xs">
+          <span class="font-mono text-gray-500">${esc(u.orderId)}</span>
+          <span class="text-gray-400">${u.date}</span>
+          <span class="font-bold text-[#d4a373]">-${u.discount} ₪</span>
+        </div>`
+      ).join('');
+      return `<div class="bg-[#fdf6ee] rounded-xl p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono font-bold text-sm tracking-wider text-gray-800">${esc(cp.code)}</span>
+          <span class="text-xs text-gray-400">${discountLabel} הנחה · ${cp.uses.length} שימושים</span>
+        </div>
+        ${usesHtml}
+      </div>`;
+    }).join('');
+  } else {
+    couponHtml = '<p class="text-gray-300 text-sm text-center py-4">הלקוח לא השתמש בקופונים</p>';
+  }
+
+  const body = document.getElementById('customer-modal-body');
+  body.innerHTML = `
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-[#fdf6ee] rounded-xl p-4">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">פרטי לקוח</p>
+        <p class="font-semibold text-sm">${name}</p>
+        <p class="text-xs text-gray-500 mt-0.5">${email}</p>
+        <p class="text-xs text-gray-500">${phone}</p>
+        <p class="text-xs text-gray-400 mt-1">תאריך לידה: ${dob}</p>
+      </div>
+      <div class="bg-[#fdf6ee] rounded-xl p-4">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">סטטיסטיקה</p>
+        <p class="text-sm"><span class="font-bold text-gray-700">${userOrders.length}</span> הזמנות</p>
+        <p class="text-sm mt-1">LTV: <span class="font-bold text-[#d4a373]">${ltv>0?ltv+' ₪':'—'}</span></p>
+        <p class="text-sm mt-1">קופונים: <span class="font-bold">${couponEntries.length>0?couponEntries.reduce((s,cp)=>s+cp.uses.length,0)+' שימושים':'—'}</span></p>
+      </div>
+    </div>
+    <div>
+      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">מעקב שימוש בקופונים</p>
+      <div class="space-y-3">${couponHtml}</div>
+    </div>
+  `;
+  document.getElementById('customer-modal').removeAttribute('data-v');
+  document.body.style.overflow='hidden';
+}
+window.openCustomerModal=openCustomerModal;
+
+function closeCustomerModal() {
+  document.getElementById('customer-modal').setAttribute('data-v','');
+  document.body.style.overflow='';
+}
+window.closeCustomerModal=closeCustomerModal;
 
 // ── Coupons ───────────────────────────────────────────────────────
 function initCouponsTab() {
@@ -1759,9 +2239,10 @@ function renderCouponsGrid() {
       </div>
       ${c.usageLimit?`
       <div class="mb-3">
-        <div class="flex justify-between text-xs text-gray-400 mb-1"><span>שימוש</span><span>${c.usedCount||0}/${c.usageLimit}</span></div>
+        <div class="flex justify-between text-xs text-gray-400 mb-1"><span>שימוש כולל</span><span>${c.usedCount||0}/${c.usageLimit}</span></div>
         <div class="h-1.5 bg-[#f0dfc0] rounded-full overflow-hidden"><div class="h-full bg-[#d4a373] rounded-full" style="width:${usagePct}%"></div></div>
-      </div>`:`<p class="text-xs text-gray-400 mb-3">שימוש: ${c.usedCount||0} פעמים</p>`}
+      </div>`:`<p class="text-xs text-gray-400 mb-3">שימוש כולל: ${c.usedCount||0} פעמים</p>`}
+      ${c.maxPerUser?`<p class="text-xs text-gray-400 mb-1">מגבלה למשתמש: ${c.maxPerUser} פעמים</p>`:''}
       <p class="text-xs text-gray-400 mb-4">תוקף: ${expiry}</p>
       <div class="flex gap-2">
         <button data-coupon-edit="${c.id}" class="flex-1 text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-2 rounded-full font-bold transition-colors">עריכה</button>
@@ -1794,6 +2275,7 @@ function openCouponModal(coupon=null) {
   document.getElementById('cp-type-percent').checked=coupon?.type==='percent';
   document.getElementById('cp-value').value=coupon?.value??'';
   document.getElementById('cp-limit').value=coupon?.usageLimit??'';
+  document.getElementById('cp-per-user').value=coupon?.maxPerUser??'';
   document.getElementById('cp-expiry').value=coupon?.expiryDate?.seconds
     ?new Date(coupon.expiryDate.seconds*1000).toISOString().split('T')[0]:'';
   document.getElementById('coupon-err').textContent='';
@@ -1815,6 +2297,7 @@ document.getElementById('coupon-save').addEventListener('click', async ()=>{
   const type =document.querySelector('[name="cp-type"]:checked')?.value;
   const value=parseFloat(document.getElementById('cp-value').value);
   const limit=document.getElementById('cp-limit').value.trim();
+  const perUser=document.getElementById('cp-per-user').value.trim();
   const expiry=document.getElementById('cp-expiry').value;
   const errEl=document.getElementById('coupon-err');
   if (!code)       {errEl.textContent='יש להזין קוד.';return;}
@@ -1824,6 +2307,7 @@ document.getElementById('coupon-save').addEventListener('click', async ()=>{
   const data={
     code,type,value,
     usageLimit:limit!==''?parseInt(limit):null,
+    maxPerUser:perUser!==''?parseInt(perUser):null,
     expiryDate:expiry?Timestamp.fromDate(new Date(expiry+'T23:59:59')):null,
     updatedAt:serverTimestamp(),
   };
@@ -1876,7 +2360,7 @@ function renderInquiriesTable() {
 async function handleInquiryStatusChange(e) {
   const sel=e.target.closest('[data-inq-status]');
   if (!sel) return;
-  try{await updateDoc(doc(db,INQUIRIES_COL,sel.dataset.inqStatus),{status:sel.value});}
+  try{await updateDoc(doc(db,INQUIRIES_COL,sel.dataset.inqStatus),{status:sel.value});logAction(`פנייה ${sel.dataset.inqStatus.slice(0,8)} → ${INQ_STATUS_LABELS[sel.value]||sel.value}`);}
   catch(ex){console.error(ex);}
 }
 
@@ -1965,6 +2449,504 @@ function esc(str) {
   d.textContent=String(str??'');
   return d.innerHTML;
 }
+
+// ── Audit Log ────────────────────────────────────────────────────
+async function logAction(description) {
+  try {
+    await addDoc(collection(db, LOGS_COL), {
+      action: description,
+      user: auth.currentUser?.email || 'unknown',
+      timestamp: serverTimestamp(),
+    });
+  } catch(e) { console.warn('[log]', e); }
+}
+window.logAction = logAction;
+
+function initLogsTab() {
+  const q = query(collection(db, LOGS_COL), orderBy('timestamp','desc'));
+  unsubLogs = onSnapshot(q, snap => {
+    allLogs = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderLogsList();
+  }, err=>console.error('logs:', err));
+}
+
+function renderLogsList() {
+  const c = document.getElementById('logs-list');
+  if (!c) return;
+  if (!allLogs.length) { c.innerHTML='<p class="text-gray-300 text-sm text-center py-8">אין פעולות עדיין</p>'; return; }
+  c.innerHTML = allLogs.slice(0,200).map(l => {
+    const ts = l.timestamp?.seconds ? new Date(l.timestamp.seconds*1000).toLocaleString('he-IL') : '—';
+    return `<div class="px-5 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors">
+      <div class="w-2 h-2 rounded-full bg-[#d4a373] mt-2 flex-shrink-0"></div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm text-gray-800">${esc(l.action)}</p>
+        <p class="text-[10px] text-gray-400 mt-0.5">${esc(l.user)} · ${ts}</p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Geographic segmentation ──────────────────────────────────────
+function renderGeoCities() {
+  const c = document.getElementById('geo-cities');
+  if (!c) return;
+  const cities = {};
+  allOrders.filter(o=>o.status!=='cancelled').forEach(o=>{
+    const city = o.customer?.address?.city;
+    if (city) cities[city] = (cities[city]||0)+1;
+  });
+  const sorted = Object.entries(cities).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if (!sorted.length) { c.innerHTML='<p class="text-gray-300 text-sm text-center py-4">אין נתוני ערים</p>'; return; }
+  const max = sorted[0][1];
+  c.innerHTML = sorted.map(([city,count]) => `
+    <div class="flex items-center gap-3">
+      <span class="text-sm font-semibold text-gray-700 w-24 truncate">${esc(city)}</span>
+      <div class="flex-1 h-2 bg-[#f0dfc0] rounded-full overflow-hidden">
+        <div class="h-full bg-[#d4a373] rounded-full" style="width:${Math.round(count/max*100)}%"></div>
+      </div>
+      <span class="text-xs font-bold text-gray-500 w-8 text-left">${count}</span>
+    </div>`).join('');
+}
+
+// ── Workshops ────────────────────────────────────────────────────
+let calYear, calMonth;
+(function(){const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();})();
+
+function initWorkshopsTab() {
+  const q = query(collection(db, WORKSHOPS_COL), orderBy('eventDate','desc'));
+  unsubWorkshops = onSnapshot(q, snap => {
+    allWorkshops = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderCalendar();
+    renderWorkshopsList();
+  }, err=>console.error('workshops:', err));
+
+  // Live price calculation
+  ['ws-count','ws-ppp','ws-discount','ws-arrival'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('input', updateWsTotal);
+  });
+  updateWsTotal();
+}
+
+function updateWsTotal() {
+  const count   = parseInt(document.getElementById('ws-count')?.value)||0;
+  const ppp     = parseFloat(document.getElementById('ws-ppp')?.value)||0;
+  const disc    = parseFloat(document.getElementById('ws-discount')?.value)||0;
+  const arrival = parseFloat(document.getElementById('ws-arrival')?.value)||0;
+  const total   = Math.round((ppp * count) * (1 - disc/100) + arrival);
+  const el = document.getElementById('ws-total-display');
+  if (el) el.textContent = total.toLocaleString('he-IL') + ' ₪';
+}
+window.updateWsTotal = updateWsTotal;
+
+function changeCalMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+window.changeCalMonth = changeCalMonth;
+
+function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  const grid  = document.getElementById('ws-calendar');
+  if (!label || !grid) return;
+  const monthName = new Date(calYear, calMonth).toLocaleDateString('he-IL', {month:'long', year:'numeric'});
+  label.textContent = monthName;
+
+  // Day headers
+  const days = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+  let html = days.map(d=>`<div class="font-bold text-gray-400 text-[10px] py-1">${d}</div>`).join('');
+
+  const first = new Date(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth+1, 0).getDate();
+  let startDay = first.getDay(); // 0=Sun
+
+  // Blank cells
+  for (let i=0; i<startDay; i++) html += '<div></div>';
+
+  // Workshop dates for this month
+  const wsDateSet = new Set();
+  allWorkshops.forEach(w=>{
+    const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : (w.eventDate ? new Date(w.eventDate) : null);
+    if (d && d.getFullYear()===calYear && d.getMonth()===calMonth) wsDateSet.add(d.getDate());
+  });
+
+  const today = new Date();
+  for (let d=1; d<=lastDay; d++) {
+    const isToday = d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear();
+    const hasWs = wsDateSet.has(d);
+    html += `<div class="relative py-1.5 rounded-lg ${isToday?'bg-[#d4a373] text-white font-bold':''} ${hasWs&&!isToday?'bg-[#fdf6ee] font-semibold text-[#d4a373]':'text-gray-600'} cursor-default">
+      ${d}
+      ${hasWs?'<span class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#d4a373]"></span>':''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+async function saveWorkshop() {
+  const name    = document.getElementById('ws-name').value.trim();
+  const phone   = document.getElementById('ws-phone').value.trim();
+  const date    = document.getElementById('ws-date').value;
+  const time    = document.getElementById('ws-time').value;
+  const count   = parseInt(document.getElementById('ws-count').value)||0;
+  const route   = document.getElementById('ws-route').value;
+  const ppp     = parseFloat(document.getElementById('ws-ppp').value)||0;
+  const disc    = parseFloat(document.getElementById('ws-discount').value)||0;
+  const arrival = parseFloat(document.getElementById('ws-arrival').value)||0;
+  const notes   = document.getElementById('ws-notes').value.trim();
+  const errEl   = document.getElementById('ws-err');
+
+  if (!name)  { errEl.textContent='יש להזין שם.'; return; }
+  if (!phone) { errEl.textContent='יש להזין טלפון.'; return; }
+  if (!date)  { errEl.textContent='יש לבחור תאריך.'; return; }
+  if (!time)  { errEl.textContent='יש לבחור שעה.'; return; }
+  if (count<=0){ errEl.textContent='יש להזין מספר משתתפות.'; return; }
+  if (ppp<=0) { errEl.textContent='יש להזין מחיר למשתתפת.'; return; }
+  errEl.textContent='';
+
+  const total = Math.round((ppp * count) * (1 - disc/100) + arrival);
+
+  const data = {
+    customerName: name, phone, eventDate: Timestamp.fromDate(new Date(date+'T'+time)),
+    time, participantCount: count, route, pricePerPerson: ppp,
+    discount: disc, arrivalFee: arrival, total, notes: notes||null,
+    createdAt: serverTimestamp(),
+  };
+
+  try {
+    if (editWorkshopId) {
+      await updateDoc(doc(db, WORKSHOPS_COL, editWorkshopId), data);
+      logAction(`סדנה "${name}" עודכנה`);
+    } else {
+      await addDoc(collection(db, WORKSHOPS_COL), data);
+      logAction(`סדנה חדשה "${name}" — ${count} משתתפות`);
+    }
+    clearWorkshopForm();
+  } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
+}
+window.saveWorkshop = saveWorkshop;
+
+function clearWorkshopForm() {
+  ['ws-name','ws-phone','ws-date','ws-time','ws-notes'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('ws-count').value='';
+  document.getElementById('ws-ppp').value='';
+  document.getElementById('ws-discount').value='0';
+  document.getElementById('ws-arrival').value='0';
+  document.getElementById('ws-err').textContent='';
+  editWorkshopId=null;
+  updateWsTotal();
+}
+
+function openWorkshopModal(id) {
+  if (id) {
+    const w = allWorkshops.find(x=>x.id===id);
+    if (!w) return;
+    editWorkshopId = w.id;
+    document.getElementById('ws-name').value = w.customerName||'';
+    document.getElementById('ws-phone').value = w.phone||'';
+    const ed = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null;
+    if (ed) document.getElementById('ws-date').value = ed.toISOString().split('T')[0];
+    document.getElementById('ws-time').value = w.time||'';
+    document.getElementById('ws-count').value = w.participantCount||'';
+    document.getElementById('ws-route').value = w.route||'שרשראות';
+    document.getElementById('ws-ppp').value = w.pricePerPerson||'';
+    document.getElementById('ws-discount').value = w.discount||0;
+    document.getElementById('ws-arrival').value = w.arrivalFee||0;
+    document.getElementById('ws-notes').value = w.notes||'';
+    updateWsTotal();
+  } else {
+    clearWorkshopForm();
+  }
+  document.querySelector('#tab-workshops .bg-white:nth-child(2)')?.scrollIntoView({behavior:'smooth'});
+}
+window.openWorkshopModal = openWorkshopModal;
+
+function sendWorkshopWhatsApp() {
+  const name    = document.getElementById('ws-name').value.trim();
+  const date    = document.getElementById('ws-date').value;
+  const time    = document.getElementById('ws-time').value;
+  const count   = parseInt(document.getElementById('ws-count').value)||0;
+  const route   = document.getElementById('ws-route').value;
+  const ppp     = parseFloat(document.getElementById('ws-ppp').value)||0;
+  const disc    = parseFloat(document.getElementById('ws-discount').value)||0;
+  const arrival = parseFloat(document.getElementById('ws-arrival').value)||0;
+  const phone   = document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');
+  const total   = Math.round((ppp * count) * (1 - disc/100) + arrival);
+
+  if (!name || !phone) { document.getElementById('ws-err').textContent='יש להזין שם וטלפון.'; return; }
+
+  const dateStr = date ? new Date(date).toLocaleDateString('he-IL') : '';
+  let msg = `היי ${name}, איזה כיף שסגרנו סדנה!\n\nהנה הפרטים:\nתאריך: ${dateStr}\nשעה: ${time}\nמסלול: ${route}\nמשתתפות: ${count}`;
+  if (disc>0) msg += `\nהנחה: ${disc}%`;
+  if (arrival>0) msg += `\nדמי הגעה: ${arrival} ₪`;
+  msg += `\n\nסה"כ לתשלום: ${total} ₪\n\nמחכה לראותכן! 💛\nCharming by Vik`;
+
+  const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
+  window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+window.sendWorkshopWhatsApp = sendWorkshopWhatsApp;
+
+function generateCalendarLinks(ws) {
+  const d = ws.eventDate?.seconds ? new Date(ws.eventDate.seconds*1000) : null;
+  if (!d) return '';
+  const end = new Date(d.getTime() + 2*60*60*1000); // 2 hours
+  const fmt = dt => dt.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const title = encodeURIComponent(`סדנת ${ws.route} — ${ws.customerName}`);
+  const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(d)}/${fmt(end)}&details=${encodeURIComponent(`${ws.participantCount} משתתפות · ${ws.total} ₪`)}`;
+  return `<a href="${gcal}" target="_blank" class="text-[10px] text-[#d4a373] hover:underline">📅 Google Calendar</a>`;
+}
+
+function renderWorkshopsList() {
+  const c = document.getElementById('ws-list');
+  if (!c) return;
+  if (!allWorkshops.length) { c.innerHTML='<p class="text-gray-300 text-sm text-center py-8">אין סדנאות</p>'; return; }
+  c.innerHTML = allWorkshops.map(w => {
+    const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000).toLocaleDateString('he-IL') : '—';
+    return `<div class="px-5 py-4 hover:bg-[#fdf6ee] transition-colors flex flex-wrap items-center gap-3">
+      <div class="flex-1 min-w-[200px]">
+        <p class="font-semibold text-sm text-gray-800">${esc(w.customerName)} <span class="text-xs text-gray-400">(${esc(w.phone||'')})</span></p>
+        <p class="text-xs text-gray-500 mt-0.5">${d} · ${w.time||''} · ${esc(w.route)} · ${w.participantCount} משתתפות</p>
+        ${w.notes?`<p class="text-[10px] text-gray-400 mt-0.5">${esc(w.notes)}</p>`:''}
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="font-black text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')} ₪</span>
+        ${generateCalendarLinks(w)}
+        <button onclick="openWorkshopModal('${w.id}')" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
+        <button onclick="deleteWorkshop('${w.id}')" class="text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteWorkshop(id) {
+  const w = allWorkshops.find(x=>x.id===id);
+  if (w && confirm(`למחוק את הסדנה של "${w.customerName}"?`)) {
+    try { await deleteDoc(doc(db, WORKSHOPS_COL, id)); logAction(`סדנה "${w.customerName}" נמחקה`); }
+    catch(ex) { console.error(ex); }
+  }
+}
+window.deleteWorkshop = deleteWorkshop;
+
+// ── Settings ─────────────────────────────────────────────────────
+async function initSettingsTab() {
+  try {
+    const snap = await getDocs(collection(db, SETTINGS_COL));
+    snap.forEach(d=>{ adminSettings[d.id] = d.data(); });
+  } catch(e) { console.warn('[settings]',e); }
+
+  // Apply settings to UI
+  const bdayEnabled = adminSettings.birthday?.enabled || false;
+  document.getElementById('set-bday-enabled').checked = bdayEnabled;
+  document.getElementById('bday-settings').style.display = bdayEnabled ? '' : 'none';
+  if (adminSettings.birthday) {
+    document.getElementById('set-bday-value').value = adminSettings.birthday.value || 15;
+    document.getElementById('set-bday-days').value = adminSettings.birthday.days || 30;
+    if (adminSettings.birthday.template) document.getElementById('set-bday-template').value = adminSettings.birthday.template;
+  }
+
+  // Toggle listener
+  document.getElementById('set-bday-enabled').addEventListener('change', function() {
+    document.getElementById('bday-settings').style.display = this.checked ? '' : 'none';
+  });
+}
+
+async function saveSettingToggle(key, value) {
+  try {
+    if (key === 'birthdayCampaignEnabled') {
+      const ref = doc(db, SETTINGS_COL, 'birthday');
+      await updateDoc(ref, { enabled: value }).catch(async () => {
+        await addDoc(collection(db, SETTINGS_COL), { enabled: value });
+      });
+      document.getElementById('bday-settings').style.display = value ? '' : 'none';
+      logAction(`הגדרת קמפיין יום הולדת: ${value?'הופעל':'הושבת'}`);
+    }
+  } catch(e) {
+    // Doc might not exist, create it
+    try {
+      const data = key === 'birthdayCampaignEnabled' ? { enabled: value } : {};
+      const existing = await getDocs(collection(db, SETTINGS_COL));
+      let found = false;
+      existing.forEach(d => { if (d.id === 'birthday') found = true; });
+      if (!found) {
+        // Can't set doc ID with addDoc, use setDoc pattern
+        // Just create with addDoc for now
+        await addDoc(collection(db, SETTINGS_COL), { type: 'birthday', enabled: value, value: 15, days: 30, template: document.getElementById('set-bday-template').value });
+      }
+    } catch(ex) { console.error(ex); }
+  }
+}
+window.saveSettingToggle = saveSettingToggle;
+
+async function saveBdaySettings() {
+  try {
+    const data = {
+      enabled: document.getElementById('set-bday-enabled').checked,
+      value: parseInt(document.getElementById('set-bday-value').value) || 15,
+      days: parseInt(document.getElementById('set-bday-days').value) || 30,
+      template: document.getElementById('set-bday-template').value,
+      updatedAt: serverTimestamp(),
+    };
+    // Try updating existing doc
+    const snap = await getDocs(collection(db, SETTINGS_COL));
+    let bdayDocId = null;
+    snap.forEach(d => { if (d.id === 'birthday' || d.data().type === 'birthday') bdayDocId = d.id; });
+    if (bdayDocId) {
+      await updateDoc(doc(db, SETTINGS_COL, bdayDocId), data);
+    } else {
+      data.type = 'birthday';
+      await addDoc(collection(db, SETTINGS_COL), data);
+    }
+  } catch(e) { console.error('[saveBdaySettings]', e); }
+}
+window.saveBdaySettings = saveBdaySettings;
+
+async function runBirthdayCampaign() {
+  const resultEl = document.getElementById('bday-result');
+  resultEl.textContent = 'מריץ קמפיין... טוען לקוחות...';
+  // Ensure customers loaded
+  if (!allCustomers.length) {
+    try { const snap=await getDocs(collection(db,CUSTOMERS_COL));allCustomers=snap.docs.map(d=>({id:d.id,...d.data()})); } catch(e){}
+  }
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // 1-12
+
+  // Find customers with birthday this month
+  const birthdayCustomers = allCustomers.filter(c => {
+    if (!c.birthDate) return false;
+    const bd = c.birthDate.seconds ? new Date(c.birthDate.seconds*1000) : new Date(c.birthDate);
+    return (bd.getMonth()+1) === currentMonth;
+  });
+
+  if (!birthdayCustomers.length) {
+    resultEl.textContent = `לא נמצאו לקוחות עם יום הולדת בחודש ${now.toLocaleDateString('he-IL',{month:'long'})}.`;
+    return;
+  }
+
+  const bdayValue = parseInt(document.getElementById('set-bday-value').value) || 15;
+  const bdayDays  = parseInt(document.getElementById('set-bday-days').value) || 30;
+  let created = 0;
+
+  for (const c of birthdayCustomers) {
+    const code = 'BDAY-' + (c.displayName||c.fullName||'').replace(/\s/g,'').slice(0,4).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + bdayDays);
+
+    try {
+      await addDoc(collection(db, COUPONS_COL), {
+        code, type: 'percent', value: bdayValue,
+        usageLimit: 1, maxPerUser: 1,
+        expiryDate: Timestamp.fromDate(expiry),
+        usedCount: 0,
+        createdAt: serverTimestamp(),
+        autoBirthday: true,
+        forCustomer: c.email || c.displayName || '',
+      });
+      created++;
+    } catch(e) { console.error('[birthday coupon]', e); }
+  }
+
+  resultEl.textContent = `נוצרו ${created} קופוני יום הולדת מתוך ${birthdayCustomers.length} לקוחות. הקופונים מוכנים לשליחה דרך Make.com/SendGrid.`;
+  logAction(`קמפיין יום הולדת: ${created} קופונים נוצרו`);
+}
+window.runBirthdayCampaign = runBirthdayCampaign;
+
+// ── Banner Messages ──────────────────────────────────────────────
+function initBannerTab() {
+  const q=query(collection(db,BANNER_COL),orderBy('order','asc'));
+  unsubBanner=onSnapshot(q, snap=>{
+    allBannerMsgs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderBannerList();
+  }, err=>console.error('banner:',err));
+}
+
+function renderBannerList() {
+  const container=document.getElementById('banner-list');
+  if (!container) return;
+  if (!allBannerMsgs.length) {
+    container.innerHTML='<p class="text-gray-300 text-sm text-center py-8">אין הודעות — לחצי על "+ הודעה חדשה"</p>';
+    return;
+  }
+  container.innerHTML=allBannerMsgs.map((m,idx)=>{
+    const activeBadge=m.active!==false
+      ?'<span class="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600">פעיל</span>'
+      :'<span class="text-[10px] font-bold px-2 py-1 rounded-full bg-gray-100 text-gray-400">מושבת</span>';
+    return `<div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm flex items-center gap-4">
+      <div class="flex flex-col gap-1">
+        <button onclick="moveBannerMsg('${m.id}',${idx},-1)" ${idx===0?'disabled':''} class="text-gray-300 hover:text-[#d4a373] disabled:opacity-30 text-sm transition-colors">▲</button>
+        <button onclick="moveBannerMsg('${m.id}',${idx},1)" ${idx===allBannerMsgs.length-1?'disabled':''} class="text-gray-300 hover:text-[#d4a373] disabled:opacity-30 text-sm transition-colors">▼</button>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm text-gray-800 truncate">${esc(m.text)}</p>
+        ${m.textEn?`<p class="text-xs text-gray-400 truncate mt-0.5" dir="ltr">${esc(m.textEn)}</p>`:''}
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        ${activeBadge}
+        <button onclick="openBannerMsgModal('${m.id}')" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
+        <button onclick="deleteBannerMsg('${m.id}')" class="text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openBannerMsgModal(id) {
+  const m=id?allBannerMsgs.find(x=>x.id===id):null;
+  editBannerId=m?m.id:null;
+  document.getElementById('banner-modal-title').textContent=m?'עריכת הודעה':'הודעה חדשה';
+  document.getElementById('bm-text').value=m?.text||'';
+  document.getElementById('bm-text-en').value=m?.textEn||'';
+  document.getElementById('bm-active').checked=m?m.active!==false:true;
+  document.getElementById('banner-err').textContent='';
+  document.getElementById('banner-modal').removeAttribute('data-v');
+  document.body.style.overflow='hidden';
+}
+window.openBannerMsgModal=openBannerMsgModal;
+
+function closeBannerMsgModal() {
+  document.getElementById('banner-modal').setAttribute('data-v','');
+  document.body.style.overflow='';
+}
+window.closeBannerMsgModal=closeBannerMsgModal;
+
+document.getElementById('banner-save').addEventListener('click', async ()=>{
+  const text=document.getElementById('bm-text').value.trim();
+  const textEn=document.getElementById('bm-text-en').value.trim();
+  const active=document.getElementById('bm-active').checked;
+  const errEl=document.getElementById('banner-err');
+  if (!text){errEl.textContent='יש להזין טקסט.';return;}
+  errEl.textContent='';
+  const data={text,textEn:textEn||null,active,updatedAt:serverTimestamp()};
+  try {
+    if (editBannerId) {
+      await updateDoc(doc(db,BANNER_COL,editBannerId),data);
+    } else {
+      data.order=allBannerMsgs.length;
+      data.createdAt=serverTimestamp();
+      await addDoc(collection(db,BANNER_COL),data);
+    }
+    closeBannerMsgModal();
+  } catch(ex){errEl.textContent='שגיאה בשמירה.';console.error(ex);}
+});
+
+async function moveBannerMsg(id, currentIdx, direction) {
+  const targetIdx=currentIdx+direction;
+  if (targetIdx<0||targetIdx>=allBannerMsgs.length) return;
+  const current=allBannerMsgs[currentIdx];
+  const target=allBannerMsgs[targetIdx];
+  try {
+    await updateDoc(doc(db,BANNER_COL,current.id),{order:targetIdx});
+    await updateDoc(doc(db,BANNER_COL,target.id),{order:currentIdx});
+  } catch(ex){console.error(ex);}
+}
+window.moveBannerMsg=moveBannerMsg;
+
+async function deleteBannerMsg(id) {
+  const m=allBannerMsgs.find(x=>x.id===id);
+  if (m&&confirm(`למחוק את ההודעה "${m.text.slice(0,30)}..."?`)) {
+    try{await deleteDoc(doc(db,BANNER_COL,id));}catch(ex){console.error(ex);}
+  }
+}
+window.deleteBannerMsg=deleteBannerMsg;
+
 </script>
 
 </body>

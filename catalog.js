@@ -18,7 +18,14 @@ const FREE_SHIP_THRESHOLD = 400;
 const COL_PATH            = 'artifacts/charming-3dd6f/public/data/products';
 const USERS_ROOT          = 'artifacts/charming-3dd6f/users';
 const ORDERS_COL          = 'artifacts/charming-3dd6f/public/data/orders';
+const LOGS_COL            = 'artifacts/charming-3dd6f/public/data/logs';
 const FORM_KEY            = 'charming-checkout-form';
+
+// Audit log helper
+async function logAction(description) {
+  try { await addDoc(collection(db, LOGS_COL), { action: description, user: auth.currentUser?.email || 'guest', timestamp: serverTimestamp() }); }
+  catch(e) { /* silent */ }
+}
 
 // Shop predefined filter lists
 const SHOP_CATEGORIES = ['שרשראות', 'צמידים', 'עגילים', 'טבעות', 'מארזי Charming'];
@@ -76,6 +83,13 @@ function switchView(view) {
 }
 
 window.switchView = switchView; // expose to HTML event listeners (module scope isolation)
+
+// Re-render current view when language changes (bilingual product names)
+window._rerenderProducts = function() {
+  if (currentView === 'home')    renderHome();
+  if (currentView === 'shop')    renderShop();
+  if (currentView === 'product') renderProductView();
+};
 
 // ── Category navigation helper ─────────────────────────────────
 // Resets all filters before switching to shop, optionally pre-applying a category or featured flag.
@@ -161,6 +175,16 @@ function showToast(msg) {
 const INP = 'width:100%;padding:10px 14px;border:1.5px solid var(--sand-dark);border-radius:10px;font-family:inherit;font-size:0.9rem;background:var(--sand-light);box-sizing:border-box;';
 const LBL = 'display:block;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;';
 
+// ── Bilingual helpers ──────────────────────────────────────────
+function localName(data) {
+  if (typeof getLang === 'function' && getLang() === 'en' && data.nameEn) return data.nameEn;
+  return data.name;
+}
+function localDesc(data) {
+  if (typeof getLang === 'function' && getLang() === 'en' && data.descriptionEn) return data.descriptionEn;
+  return data.description;
+}
+
 // ── Card HTML ──────────────────────────────────────────────────
 function cardHTML(product) {
   const { data, id } = product;
@@ -184,13 +208,14 @@ function cardHTML(product) {
     ? `<span style="font-weight:700;color:var(--pink-deep);">${sp} ₪</span> <span style="color:var(--muted);text-decoration:line-through;font-size:0.85rem;">${price} ₪</span>`
     : `<span class="shop-card-price">${price} ₪</span>`;
 
+  const pName = localName(data);
   return `
-    <div class="shop-card fadein" data-product-id="${esc(id)}" style="cursor:pointer;" role="button" tabindex="0" aria-label="${esc(data.name)}">
+    <div class="shop-card fadein" data-product-id="${esc(id)}" style="cursor:pointer;" role="button" tabindex="0" aria-label="${esc(pName)}">
       <div class="shop-card-img" style="position:relative;overflow:hidden;">
         ${imgHtml}${badgeHtml || oosHtml}
       </div>
       <div class="shop-card-body" style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;">
-        <h3 style="font-size:0.97rem;font-weight:600;color:var(--ink);margin:0;line-height:1.35;">${esc(data.name)}</h3>
+        <h3 style="font-size:0.97rem;font-weight:600;color:var(--ink);margin:0;line-height:1.35;">${esc(pName)}</h3>
         <div style="display:flex;align-items:center;gap:8px;">${priceHtml}</div>
         <button class="btn" style="margin-top:6px;min-height:40px;font-size:0.82rem;pointer-events:none;">${t('pv_view_product','צפי במוצר')}</button>
       </div>
@@ -256,8 +281,9 @@ function shopCardHTML(product) {
     ? `<button class="sp-card-add sp-card-add--oos" disabled>${t('sp_oos_btn','אזל מהמלאי')}</button>`
     : `<button class="sp-card-add" data-product-id="${sid}">${t('sp_add_to_cart','הוסיפי לסל')}</button>`;
 
+  const pName = localName(data);
   return `
-    <div class="sp-shop-card fadein" data-product-id="${sid}" role="button" tabindex="0" aria-label="${esc(data.name)}">
+    <div class="sp-shop-card fadein" data-product-id="${sid}" role="button" tabindex="0" aria-label="${esc(pName)}">
       <div class="sp-card-img-wrap">
         ${imgHtml}${badgeHtml || oosBadge}
         <button class="sp-card-quickview" data-view-id="${sid}" aria-label="צפייה מהירה">
@@ -265,7 +291,7 @@ function shopCardHTML(product) {
         </button>
       </div>
       <div class="sp-card-body">
-        <h3 class="sp-card-name">${esc(data.name)}</h3>
+        <h3 class="sp-card-name">${esc(pName)}</h3>
         <div class="sp-card-price-row">${priceHtml}${metalChip}${matChip}</div>
         ${actionBtn}
       </div>
@@ -558,8 +584,8 @@ function renderProductView() {
     : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;">💎</div>`;
 
   const navArrows = pvImages.length > 1 ? `
-    <button id="pv-prev" aria-label="תמונה קודמת" style="position:absolute;top:50%;transform:translateY(-50%);right:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:2;">›</button>
-    <button id="pv-next" aria-label="תמונה הבאה" style="position:absolute;top:50%;transform:translateY(-50%);left:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:2;">‹</button>` : '';
+    <button id="pv-prev" aria-label="תמונה קודמת" style="position:absolute;top:50%;transform:translateY(-50%);right:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:2;">‹</button>
+    <button id="pv-next" aria-label="תמונה הבאה" style="position:absolute;top:50%;transform:translateY(-50%);left:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:2;">›</button>` : '';
 
   const thumbnails = pvImages.length > 1 ? `
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
@@ -583,17 +609,17 @@ function renderProductView() {
         <button id="pv-back-btn" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:32px;">
           ${previousView === 'shop' ? t('pv_back_shop','← חזרה לחנות') : t('pv_back_home','← חזרה לדף הבית')}
         </button>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;" class="pv-layout">
+        <div class="pv-layout">
           <div>
             <div style="aspect-ratio:1;border-radius:20px;overflow:hidden;background:var(--pink-light);position:relative;">${mainImg}${navArrows}</div>
             ${thumbnails}
           </div>
           <div style="display:flex;flex-direction:column;gap:18px;">
             ${data.sku ? `<p style="font-size:0.75rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:0;">SKU: ${esc(data.sku)}</p>` : ''}
-            <h1 style="font-size:1.75rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25;">${esc(data.name)}</h1>
+            <h1 style="font-size:1.75rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25;">${esc(localName(data))}</h1>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">${priceHtml}</div>
             ${metaChips ? `<div style="display:flex;gap:8px;flex-wrap:wrap;">${metaChips}</div>` : ''}
-            ${data.description ? `<p style="font-size:0.97rem;color:var(--ink-soft);line-height:1.75;margin:0;">${esc(data.description)}</p>` : ''}
+            ${localDesc(data) ? `<p style="font-size:0.97rem;color:var(--ink-soft);line-height:1.75;margin:0;">${esc(localDesc(data))}</p>` : ''}
             ${actionHtml}
           </div>
         </div>
@@ -843,14 +869,19 @@ function renderProfileView() {
             }
           } catch {}
 
-          // Check if user already used this coupon
+          // Check if user exceeded per-user limit for this coupon
           if (status === 'active' && c.couponDocId) {
             try {
-              const usageSnap = await getDocs(
-                query(collection(db, COUPONS_COL_PATH, c.couponDocId, 'userUsage'), where('uid', '==', currentUser.uid), limit(1))
-              );
-              if (!usageSnap.empty) {
-                status = 'used'; statusLabel = t('profile_coupon_used','נוצל'); statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+              const couponRef = doc(db, COUPONS_COL_PATH, c.couponDocId);
+              const couponSnap2 = await getDoc(couponRef);
+              const maxPerUser = couponSnap2.exists() ? (couponSnap2.data().maxPerUser || null) : null;
+              if (maxPerUser) {
+                const usageSnap = await getDocs(
+                  query(collection(db, COUPONS_COL_PATH, c.couponDocId, 'userUsage'), where('uid', '==', currentUser.uid))
+                );
+                if (usageSnap.size >= maxPerUser) {
+                  status = 'used'; statusLabel = t('profile_coupon_used','נוצל'); statusColor = '#9a8e8a'; statusBg = '#f5f5f4';
+                }
               }
             } catch {}
           }
@@ -1372,18 +1403,24 @@ function renderCheckoutForm(el) {
         return;
       }
 
-      // Check per-user usage for single-use coupons
+      // Check per-user usage limit
       if (currentUser && result.docId) {
         try {
-          const usageSnap = await getDocs(
-            query(collection(db, COUPONS_COL_PATH, result.docId, 'userUsage'),
-                  where('uid', '==', currentUser.uid), limit(1))
-          );
-          if (!usageSnap.empty) {
-            showCouponMsg(t('co_coupon_already_used','קוד זה כבר מומש.'), true);
-            couponApplyBtn.disabled = false;
-            couponApplyBtn.textContent = t('co_coupon_apply','החל');
-            return;
+          // Fetch coupon's maxPerUser setting
+          const couponRef = doc(db, COUPONS_COL_PATH, result.docId);
+          const couponSnap = await getDoc(couponRef);
+          const maxPerUser = couponSnap.exists() ? (couponSnap.data().maxPerUser || null) : null;
+          if (maxPerUser) {
+            const usageSnap = await getDocs(
+              query(collection(db, COUPONS_COL_PATH, result.docId, 'userUsage'),
+                    where('uid', '==', currentUser.uid))
+            );
+            if (usageSnap.size >= maxPerUser) {
+              showCouponMsg(t('co_coupon_already_used','קוד זה כבר מומש.'), true);
+              couponApplyBtn.disabled = false;
+              couponApplyBtn.textContent = t('co_coupon_apply','החל');
+              return;
+            }
           }
         } catch (_) { /* sub-collection may not exist yet — that's fine */ }
       }
@@ -1487,6 +1524,9 @@ function renderCheckoutForm(el) {
         summary: { subtotal, shipping: shipCost2, discount: discountAmt, total: total2, currency: 'ILS' },
         timestamp: serverTimestamp(),
       });
+
+      // Audit log
+      logAction(`הזמנה חדשה ${orderId} — ${total2} ₪ — ${name}`);
 
       // User-scoped orders (for profile "My Orders" tab)
       if (currentUser) {
@@ -1912,7 +1952,7 @@ function injectPromoPopup() {
     <div class="promo-backdrop" aria-hidden="true"></div>
     <div class="promo-card">
       <button id="promo-close" class="promo-close-btn" aria-label="${t('promo_close_aria','סגרי חלון')}">×</button>
-      <div class="promo-deco" aria-hidden="true">💎</div>
+      <div class="promo-deco" aria-hidden="true"><svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="24,4 6,18 24,44 42,18" fill="none" stroke="var(--pink)" stroke-width="1.5"/><polyline points="6,18 24,4 42,18" fill="none" stroke="var(--pink)" stroke-width="1.5"/><line x1="6" y1="18" x2="42" y2="18" stroke="var(--pink)" stroke-width="1.5"/><line x1="24" y1="4" x2="18" y2="18" stroke="var(--pink)" stroke-width="1"/><line x1="24" y1="4" x2="30" y2="18" stroke="var(--pink)" stroke-width="1"/><line x1="18" y1="18" x2="24" y2="44" stroke="var(--pink)" stroke-width="1"/><line x1="30" y1="18" x2="24" y2="44" stroke="var(--pink)" stroke-width="1"/></svg></div>
       <h2 id="promo-title" class="promo-title">${t('promo_title','משהו צ\'ארמינג מחכה לך...')}</h2>
       <p class="promo-sub">${t('promo_sub','הצטרפי למועדון הלקוחות שלנו עכשיו וקבלי')} <strong>${t('promo_discount','10% הנחה')}</strong> ${t('promo_sub2','על הקנייה הראשונה שלך!')}</p>
       <button id="promo-cta" class="btn promo-cta-btn">${t('promo_cta','להרשמה וקבלת ההטבה')} ✨</button>
