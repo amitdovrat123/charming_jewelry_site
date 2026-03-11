@@ -661,7 +661,7 @@ ul { list-style: none; }
 .page-hero--with-bg {
   background:
     linear-gradient(rgba(253, 248, 245, 0.75), rgba(253, 248, 245, 0.75)),
-    url('images/workshop/sadna.png') center / cover no-repeat;
+    url('https://res.cloudinary.com/dhri2dbek/image/upload/v1773270811/sadna_paaqbb.png') center / cover no-repeat;
 }
 
 .page-hero .hero-title {
