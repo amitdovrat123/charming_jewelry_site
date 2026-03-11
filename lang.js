@@ -659,6 +659,8 @@ function setLang(lang) {
   _lang = lang;
   localStorage.setItem('charming_lang', lang);
   applyLang();
+  // Refresh navbar greeting (שלום / Hello) without page reload
+  if (typeof window._updateAuthNavbar === 'function') window._updateAuthNavbar();
   // Re-render product catalogs to show bilingual names/descriptions
   if (typeof window._rerenderProducts === 'function') window._rerenderProducts();
 }

@@ -1,8 +1,10 @@
-import { auth, db, googleProvider } from './firebase-config.js';
+import { auth, db, googleProvider, authReady } from './firebase-config.js';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   updateProfile,
@@ -18,6 +20,9 @@ import {
 // ── Environment ───────────────────────────────────────────────
 const isLocal = window.location.hostname === 'localhost' ||
                 window.location.hostname === '127.0.0.1';
+
+// True on phones / tablets — used to pick redirect vs popup for Google sign-in
+const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 // ── Google icon SVG ───────────────────────────────────────────
 const GOOGLE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
@@ -350,35 +355,52 @@ async function handleLogin(e) {
 }
 
 // ── Google sign-in ────────────────────────────────────────────
+// Shared handler for processing Google auth result (used by both popup and redirect)
+async function processGoogleResult(result) {
+  if (!result || !result.user) return;
+  const user   = result.user;
+  const exists = await userExistsInFirestore(user.uid);
+
+  if (!exists) {
+    await saveUserToFirestore(user, { name: user.displayName, newsletter: true });
+    updateNavbar(user);
+    const overlay = document.getElementById('auth-overlay');
+    if (overlay && !overlay.classList.contains('is-open')) {
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    switchTab('success');
+  } else {
+    skipAutoClose = false;
+    closeModal();
+  }
+}
+
+// Handle redirect result on page load (mobile Google sign-in returns here)
+authReady.then(() => {
+  getRedirectResult(auth).then(result => {
+    if (result) processGoogleResult(result);
+  }).catch(() => {});
+});
+
 // panelId: 'login' | 'reg'  (matches the error element IDs)
 async function handleGoogleAuth(panelId) {
   if (isLoading) return;
   isLoading     = true;
-  // Block onAuthStateChanged until we decide what to show
   skipAutoClose = true;
   const errorEl = document.getElementById(`${panelId}-error`);
   if (errorEl) errorEl.textContent = '';
 
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user   = result.user;
-    const exists = await userExistsInFirestore(user.uid);
-
-    if (!exists) {
-      // New user — save profile and show success panel
-      await saveUserToFirestore(user, { name: user.displayName, newsletter: true });
-      updateNavbar(user);
-      const overlay = document.getElementById('auth-overlay');
-      if (overlay && !overlay.classList.contains('is-open')) {
-        overlay.classList.add('is-open');
-        overlay.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-      }
-      switchTab('success');
+    if (isMobile) {
+      // Redirect flow — avoids popup blockers and FaceID re-prompts on iOS
+      await signInWithRedirect(auth, googleProvider);
+      // Page will redirect; code below won't execute until return
     } else {
-      // Returning user — close modal normally
-      skipAutoClose = false;
-      closeModal();
+      // Desktop — popup is fine
+      const result = await signInWithPopup(auth, googleProvider);
+      await processGoogleResult(result);
     }
   } catch (err) {
     skipAutoClose = false;
@@ -430,9 +452,12 @@ function updateNavbar(user) {
   }
 }
 
+// Expose so lang.js can refresh greeting on language switch
+window._updateAuthNavbar = () => updateNavbar(auth.currentUser);
+
 // ── Auth state observer ───────────────────────────────────────
 onAuthStateChanged(auth, user => {
-  if (isLocal) console.debug('[auth] state changed:', user?.email ?? 'signed out');
+  if (isLocal) console.debug('[auth] state changed:', user ? '(logged in)' : 'signed out');
   updateNavbar(user);
   if (user && !skipAutoClose) closeModal();
 });

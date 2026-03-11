@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper: is the request from a logged-in user? ──
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // ── Helper: is the request from the admin? ──
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email == 'amitdovrat123@gmail.com';
+    }
+
+    // ── Helper: is this the document owner? ──
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  PUBLIC DATA — under artifacts/{appId}/public/data
+    // ══════════════════════════════════════════════════════
+    match /artifacts/{appId}/public/data/{document=**} {
+
+      // ── Products: anyone can read, only admin can write ──
+      match /products/{productId} {
+        allow read:  if true;
+        allow write: if isAdmin();
+      }
+
+      // ── Workshops: anyone can read, only admin can write ──
+      match /workshops/{workshopId} {
+        allow read:  if true;
+        allow write: if isAdmin();
+      }
+
+      // ── Banner Messages: anyone can read, only admin can write ──
+      match /bannerMessages/{messageId} {
+        allow read:  if true;
+        allow write: if isAdmin();
+      }
+
+      // ── Orders: only the order creator or admin can read/write ──
+      match /orders/{orderId} {
+        allow read:  if isAdmin()
+                     || (isAuth() && resource.data.userId == request.auth.uid);
+        allow create: if isAuth();
+        allow update, delete: if isAdmin();
+      }
+
+      // ── Coupons: authenticated users can read, admin can write ──
+      match /coupons/{couponId} {
+        allow read:  if isAuth();
+        allow write: if isAdmin();
+
+        // Coupon per-user usage tracking
+        match /userUsage/{usageId} {
+          allow read:  if isAuth();
+          allow create: if isAuth();
+          allow update, delete: if isAdmin();
+        }
+      }
+
+      // ── Inquiries: anyone can create, only admin can read/update ──
+      match /inquiries/{inquiryId} {
+        allow create: if true;
+        allow read, update, delete: if isAdmin();
+      }
+
+      // ── Logs: authenticated users can create, only admin can read ──
+      match /logs/{logId} {
+        allow create: if true;
+        allow read:   if isAdmin();
+        allow update, delete: if false;
+      }
+
+      // ── Settings: only admin ──
+      match /settings/{settingId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  USER DATA — under artifacts/{appId}/users/{uid}
+    // ══════════════════════════════════════════════════════
+    match /artifacts/{appId}/users/{uid} {
+      // User can read/write their own profile; admin can read all
+      allow read:   if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+
+      // User's personal orders
+      match /orders/{orderId} {
+        allow read, create: if isOwner(uid);
+        allow update, delete: if isAdmin();
+      }
+
+      // User's assigned coupons
+      match /assignedCoupons/{couponId} {
+        allow read:  if isOwner(uid);
+        allow write: if isAdmin();
+      }
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  DENY ALL OTHER PATHS
+    // ══════════════════════════════════════════════════════
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

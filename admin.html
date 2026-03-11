@@ -95,6 +95,34 @@
     .more-menu button:hover, .more-menu button.erp-nav-item--active { background: #fdf6ee; color: #d4a373; }
     .more-menu-backdrop { display:none; position:fixed; inset:0; z-index:19; }
     .more-menu-backdrop.open { display:block; }
+
+    /* Notification dot pulse */
+    @keyframes notifDotPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(212,163,115,0.45); }
+      50%      { box-shadow: 0 0 0 5px rgba(212,163,115,0); }
+    }
+    .notif-dot-pulse { animation: notifDotPulse 2s ease-in-out infinite; }
+
+    /* Bell wiggle when unread */
+    @keyframes bellWiggle {
+      0%   { transform: rotate(0); }
+      15%  { transform: rotate(12deg); }
+      30%  { transform: rotate(-10deg); }
+      45%  { transform: rotate(6deg); }
+      60%  { transform: rotate(-3deg); }
+      75%  { transform: rotate(0); }
+      100% { transform: rotate(0); }
+    }
+    .notif-bell--has-unread svg { animation: bellWiggle 2.5s ease-in-out infinite; transform-origin: top center; }
+
+    /* Notification item hover transition */
+    .notif-item { transition: background 0.2s ease, transform 0.15s ease; }
+    .notif-item:active { transform: scale(0.98); }
+
+    /* Smooth dropdown scroll */
+    #notif-list { scroll-behavior: smooth; }
+    #notif-list::-webkit-scrollbar { width: 4px; }
+    #notif-list::-webkit-scrollbar-thumb { background: #e8cfc4; border-radius: 4px; }
   </style>
 </head>
 <body class="bg-[#fcf8f3] min-h-screen text-gray-800">
@@ -155,18 +183,7 @@
     </form>
     <!-- Admin Forgot Password Section -->
     <div id="admin-forgot-section" class="hidden mt-4 p-4 bg-[#fdf6ee] rounded-xl border border-[#f0dfc0]">
-      <p class="text-xs font-bold text-gray-500 mb-3">לאימות זהות, הזן קוד זיהוי מנהל:</p>
-      <div class="mb-3">
-        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">קוד זיהוי מנהל</label>
-        <div class="relative">
-          <input id="admin-secret-input" type="password" placeholder="••••••••••••"
-            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 pl-10 text-sm bg-white" />
-          <button type="button" id="admin-key-toggle" tabindex="-1"
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#d4a373] transition-colors bg-transparent border-0 p-0 cursor-pointer">
-            <i class="fa fa-eye text-sm"></i>
-          </button>
-        </div>
-      </div>
+      <p class="text-xs font-bold text-gray-500 mb-3">קישור לאיפוס סיסמה יישלח לכתובת הדוא"ל שהוזנה למעלה.</p>
       <button type="button" id="admin-reset-send"
         class="w-full bg-[#d4a373] hover:bg-[#b8893e] text-white rounded-full py-2.5 font-bold text-sm transition-all">
         שליחת קישור לאיפוס
@@ -194,15 +211,19 @@
         <div class="relative" id="notif-wrapper">
           <button id="notif-bell" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#fdf6ee] transition-colors" title="התראות">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span id="notif-badge" class="absolute -top-0.5 -left-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1" style="display:none;">0</span>
+            <span id="notif-badge" class="absolute -top-0.5 -left-0.5 min-w-[18px] h-[18px] bg-gradient-to-br from-[#d4a373] to-[#c0825a] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm" style="display:none;">0</span>
           </button>
-          <div id="notif-dropdown" class="absolute left-0 top-full mt-1 w-80 bg-white rounded-xl shadow-lg border border-[#f0dfc0] z-50 overflow-hidden" style="display:none;">
-            <div class="px-4 py-3 border-b border-[#f0dfc0] flex items-center justify-between">
+          <div id="notif-dropdown" class="absolute left-0 top-full mt-2 w-[340px] bg-white rounded-2xl shadow-xl border border-[#f0dfc0]/60 z-50 overflow-hidden" style="display:none;">
+            <div class="px-4 py-3 border-b border-[#f0dfc0] flex items-center justify-between bg-[#fdf8f5]">
               <span class="font-bold text-sm text-gray-700">התראות</span>
-              <button id="notif-mark-all" class="text-[11px] text-[#d4a373] hover:underline font-semibold">סמן הכל כנקרא</button>
+              <button id="notif-mark-all" class="text-[11px] text-[#d4a373] hover:text-[#a8705a] hover:underline font-semibold transition-colors">סמן הכל כנקרא</button>
             </div>
-            <div id="notif-list" class="max-h-80 overflow-y-auto">
-              <p class="text-center text-gray-400 text-sm py-8">אין התראות חדשות</p>
+            <div id="notif-list" class="max-h-[400px] overflow-y-auto overscroll-contain">
+              <div class="flex flex-col items-center justify-center py-10 px-4">
+                <span class="text-3xl mb-2">✨</span>
+                <p class="text-sm text-gray-400 font-semibold">אין התראות חדשות</p>
+                <p class="text-[11px] text-gray-300 mt-1">הכל שקט כאן</p>
+              </div>
             </div>
           </div>
         </div>
@@ -223,6 +244,7 @@
       <div class="p-4">
         <p class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-3">ניהול</p>
         <nav class="space-y-1">
+          <!-- ── Top 5 (same order as mobile bottom bar) ── -->
           <button data-tab="dashboard" onclick="showTab('dashboard')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">📊</span> דשבורד
@@ -231,10 +253,20 @@
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">📦</span> הזמנות
           </button>
+          <button data-tab="workshops" onclick="showTab('workshops')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">🎨</span> סדנאות
+          </button>
+          <button data-tab="inquiries" onclick="showTab('inquiries')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">💬</span> פניות
+          </button>
           <button data-tab="inventory" onclick="showTab('inventory')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">💎</span> קטלוג ומלאי
           </button>
+          <!-- ── Secondary (same order as mobile "more" menu) ── -->
+          <div class="border-t border-[#f0dfc0] my-2"></div>
           <button data-tab="customers" onclick="showTab('customers')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">👥</span> לקוחות
@@ -243,17 +275,9 @@
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">🏷️</span> קופונים
           </button>
-          <button data-tab="inquiries" onclick="showTab('inquiries')"
-            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
-            <span class="text-base">💬</span> פניות
-          </button>
           <button data-tab="banner" onclick="showTab('banner')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">📢</span> באנר עליון
-          </button>
-          <button data-tab="workshops" onclick="showTab('workshops')"
-            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
-            <span class="text-base">🎨</span> סדנאות
           </button>
           <button data-tab="logs" onclick="showTab('logs')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
@@ -581,16 +605,24 @@
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-sm text-gray-800">לוח סדנאות</h3>
             <div class="flex gap-2">
-              <button onclick="changeCalMonth(-1)" class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373] transition-colors">◀</button>
-              <span id="cal-month-label" class="text-sm font-bold text-gray-700 min-w-[120px] text-center leading-8"></span>
               <button onclick="changeCalMonth(1)" class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373] transition-colors">▶</button>
+              <span id="cal-month-label" class="text-sm font-bold text-gray-700 min-w-[120px] text-center leading-8"></span>
+              <button onclick="changeCalMonth(-1)" class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373] transition-colors">◀</button>
             </div>
           </div>
           <div id="ws-calendar" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+          <!-- Day detail popup -->
+          <div id="ws-day-popup" class="mt-3 rounded-xl border border-[#f0dfc0] bg-[#fdf8f5] overflow-hidden" style="display:none;">
+            <div class="px-4 py-2.5 border-b border-[#f0dfc0] flex items-center justify-between">
+              <span id="ws-day-popup-title" class="font-bold text-sm text-gray-700"></span>
+              <button onclick="closeDayPopup()" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors text-sm">✕</button>
+            </div>
+            <div id="ws-day-popup-list" class="divide-y divide-[#f0dfc0]/50"></div>
+          </div>
         </div>
 
         <!-- Workshop booking form -->
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+        <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
           <h3 class="font-bold text-sm text-gray-800 mb-4">סיכום סדנה טלפונית</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -655,6 +687,13 @@
               <label class="lbl">הערות</label>
               <input id="ws-notes" type="text" placeholder="הערות נוספות" class="inp" />
             </div>
+            <div>
+              <label class="lbl">סטטוס הזמנה</label>
+              <select id="ws-status" class="inp">
+                <option value="confirmed">הזמנה סגורה ✅</option>
+                <option value="draft">טיוטה / טרם נסגר 📝</option>
+              </select>
+            </div>
           </div>
 
           <!-- Live price preview -->
@@ -678,12 +717,37 @@
           </div>
         </div>
 
-        <!-- Saved workshops list -->
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
-          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee]">
-            <h3 class="font-bold text-sm text-gray-800">סדנאות שנשמרו</h3>
+        <!-- Section 1: Drafts -->
+        <div id="ws-section-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+          <div class="px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
+            <span class="text-base">📝</span>
+            <h3 class="font-bold text-sm text-amber-700">סדנאות שטרם נסגרו</h3>
+            <span id="ws-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
           </div>
-          <div id="ws-list" class="divide-y divide-[#fdf6ee]"></div>
+          <div id="ws-list-drafts" class="divide-y divide-amber-50"></div>
+        </div>
+
+        <!-- Section 2: Confirmed & Upcoming -->
+        <div id="ws-section-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2">
+            <span class="text-base">✅</span>
+            <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — קרובות</h3>
+            <span id="ws-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
+          </div>
+          <div id="ws-list-confirmed" class="divide-y divide-[#fdf6ee]"></div>
+        </div>
+
+        <!-- Section 3: Archive -->
+        <div id="ws-section-archive" class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+          <button id="ws-archive-toggle" onclick="toggleWsArchive()" class="w-full px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+            <div class="flex items-center gap-2">
+              <span class="text-base opacity-60">🗂️</span>
+              <h3 class="font-bold text-sm text-gray-400">ארכיון סדנאות</h3>
+              <span id="ws-archive-count" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5"></span>
+            </div>
+            <svg id="ws-archive-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400 transition-transform duration-200"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="ws-list-archive" class="divide-y divide-gray-50" style="display:none;"></div>
         </div>
       </section>
 
@@ -1131,20 +1195,47 @@ Charming by Vik 💛</textarea>
 </style>
 
 <script type="module">
+/*
+ * ════════════════════════════════════════════════════════════════
+ *  NETLIFY ENVIRONMENT VARIABLES (set in Netlify UI → Site Settings → Environment Variables)
+ *  ─────────────────────────────────────────────────────────────
+ *  GEMINI_API_KEY          — Google Gemini API key (used via Netlify Function proxy)
+ *  CLOUDINARY_API_SECRET   — Cloudinary API secret (used via Netlify Function for signed uploads)
+ *
+ *  The following are public client-side values (safe to keep in source):
+ *    - Firebase apiKey (protected by Firestore Security Rules)
+ *    - Cloudinary cloudName + unsigned uploadPreset
+ *    - ADMIN_EMAIL (authorization enforced by Firestore Rules, not by obscurity)
+ * ════════════════════════════════════════════════════════════════
+ */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc, setDoc,
-  doc, onSnapshot, query, orderBy, where, serverTimestamp, getDocs, Timestamp,
+  doc, getDoc, onSnapshot, query, orderBy, where, serverTimestamp, getDocs, Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// ── Config ──────────────────────────────────────────────────────
-const ADMIN_EMAIL      = 'amitdovrat123@gmail.com';
-const ADMIN_SECRET_KEY = 'VikCharming2025';
-const GEMINI_API_KEY   = '';
+// ── Firebase Config (public client-side key — protected by Firestore Rules) ──
+const FIREBASE_CONFIG = {
+  apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
+  authDomain:        'charming-3dd6f.firebaseapp.com',
+  projectId:         'charming-3dd6f',
+  storageBucket:     'charming-3dd6f.firebasestorage.app',
+  messagingSenderId: '13025110676',
+  appId:             '1:13025110676:web:1cddc38b2d147e5e195001',
+};
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── Admin & App Config ──────────────────────────────────────────
+const ADMIN_EMAIL    = 'amitdovrat123@gmail.com';
+const GEMINI_API_KEY = '';   // TODO: migrate to Netlify Function proxy — never paste a real key here
 const GEMINI_MODEL   = 'gemini-2.5-flash-preview-05-20';
+
+// ── Firestore Collection Paths ──────────────────────────────────
 const COL_PATH       = 'artifacts/charming-3dd6f/public/data/products';
 const ORDERS_COL     = 'artifacts/charming-3dd6f/public/data/orders';
 const CUSTOMERS_COL  = 'artifacts/charming-3dd6f/users';
@@ -1154,17 +1245,6 @@ const BANNER_COL     = 'artifacts/charming-3dd6f/public/data/bannerMessages';
 const LOGS_COL       = 'artifacts/charming-3dd6f/public/data/logs';
 const WORKSHOPS_COL  = 'artifacts/charming-3dd6f/public/data/workshops';
 const SETTINGS_COL   = 'artifacts/charming-3dd6f/public/data/settings';
-
-const app  = initializeApp({
-  apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
-  authDomain:        'charming-3dd6f.firebaseapp.com',
-  projectId:         'charming-3dd6f',
-  storageBucket:     'charming-3dd6f.firebasestorage.app',
-  messagingSenderId: '13025110676',
-  appId:             '1:13025110676:web:1cddc38b2d147e5e195001',
-});
-const auth = getAuth(app);
-const db   = getFirestore(app);
 
 // ── State ────────────────────────────────────────────────────────
 // Products (inventory)
@@ -1218,7 +1298,8 @@ let dashPeriod = 'month'; // 'month' or 'year'
 
 // Notifications
 let notifications = [];
-let readNotifIds = JSON.parse(localStorage.getItem('charming_read_notifs') || '[]');
+let readNotifIds = [];
+let readNotifDocLoaded = false;
 
 // Listeners
 let unsubProducts  = null;
@@ -1281,7 +1362,6 @@ function adminTogglePass(inputId, btnId) {
   if (icon) { icon.classList.toggle('fa-eye', !hidden); icon.classList.toggle('fa-eye-slash', hidden); }
 }
 document.getElementById('admin-pass-toggle').addEventListener('click', () => adminTogglePass('a-pass', 'admin-pass-toggle'));
-document.getElementById('admin-key-toggle').addEventListener('click',  () => adminTogglePass('admin-secret-input', 'admin-key-toggle'));
 
 // ── Admin forgot password ─────────────────────────────────────
 document.getElementById('admin-forgot-btn').addEventListener('click', () => {
@@ -1289,21 +1369,14 @@ document.getElementById('admin-forgot-btn').addEventListener('click', () => {
   sec.classList.toggle('hidden');
   if (!sec.classList.contains('hidden')) {
     document.getElementById('admin-reset-msg').textContent = '';
-    document.getElementById('admin-secret-input').value = '';
   }
 });
 
 document.getElementById('admin-reset-send').addEventListener('click', async () => {
-  const key   = document.getElementById('admin-secret-input').value.trim();
   const msgEl = document.getElementById('admin-reset-msg');
   const email = document.getElementById('a-email').value.trim();
   const btn   = document.getElementById('admin-reset-send');
 
-  if (key !== ADMIN_SECRET_KEY) {
-    msgEl.style.color = '#ef4444';
-    msgEl.textContent = 'קוד זיהוי שגוי. הגישה נחסמה.';
-    return;
-  }
   if (!email) {
     msgEl.style.color = '#ef4444';
     msgEl.textContent = 'יש להזין כתובת דוא"ל בשדה למעלה.';
@@ -1337,10 +1410,15 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   signOut(auth);
 });
 
-// ── Cloudinary widget ────────────────────────────────────────────
+// ── Cloudinary widget (unsigned preset — no api_secret in frontend) ──
+// To upgrade to signed uploads: create a Netlify Function that returns
+// { timestamp, signature } using CLOUDINARY_API_SECRET from env vars,
+// then switch to cloudWidget.open({ uploadSignature, uploadSignatureTimestamp }).
+const CLOUDINARY_CLOUD_NAME    = 'dhri2dbek';
+const CLOUDINARY_UPLOAD_PRESET = 'charming_preset';  // unsigned preset — safe for client-side
 const cloudWidget = cloudinary.createUploadWidget({
-  cloudName:    'dhri2dbek',
-  uploadPreset: 'charming_preset',
+  cloudName:    CLOUDINARY_CLOUD_NAME,
+  uploadPreset: CLOUDINARY_UPLOAD_PRESET,
   sources:      ['local','camera'],
   multiple:     true,
   cropping:     false,
@@ -1447,32 +1525,96 @@ function waitAndOpen(checkFn, openFn, maxWait = 3000) {
 window.waitAndOpen = waitAndOpen;
 
 // ── Notifications ─────────────────────────────────────────────────
+const NOTIF_READ_DOC = SETTINGS_COL + '/notificationsRead';
+
+// Persist read IDs to Firestore (debounced)
+let _notifSaveTimer = null;
+function persistReadIds() {
+  clearTimeout(_notifSaveTimer);
+  _notifSaveTimer = setTimeout(() => {
+    setDoc(doc(db, NOTIF_READ_DOC), { ids: readNotifIds }, { merge: true }).catch(() => {});
+  }, 400);
+}
+
+// Mark a single notification as read
+function markNotifRead(nid) {
+  if (readNotifIds.includes(nid)) return;
+  readNotifIds.push(nid);
+  persistReadIds();
+  renderNotifications();
+}
+window.markNotifRead = markNotifRead;
+
+// Handle notification click — mark read, navigate, open detail
+function handleNotifClick(nid, type, docId) {
+  markNotifRead(nid);
+  document.getElementById('notif-dropdown').style.display = 'none';
+
+  if (type === 'inquiry') {
+    showTab('inquiries');
+    waitAndOpen(
+      () => allInquiries.length > 0,
+      () => window.openInquiryModal(docId)
+    );
+  } else if (type === 'order') {
+    showTab('orders');
+    waitAndOpen(
+      () => allOrders.length > 0,
+      () => openOrderModal(docId)
+    );
+  } else if (type === 'stock') {
+    showTab('inventory');
+    waitAndOpen(
+      () => allProducts.length > 0,
+      () => { const p = allProducts.find(x => x.id === docId); if (p) openModal('edit', p); }
+    );
+  }
+}
+window.handleNotifClick = handleNotifClick;
+
+let _unsubNotifInq = null;
+let _unsubNotifOrd = null;
+let _inquiryNotifs = [];
+let _orderNotifs   = [];
+
+function rebuildNotifications() {
+  const oosProducts = allProducts
+    .filter(p => {
+      const s = p.stockCount ?? p.stock ?? null;
+      return s !== null && s <= 0 && p.status === 'published';
+    })
+    .map(p => ({ id: 'oos-' + p.id, type: 'stock', docId: p.id, name: p.name }));
+
+  notifications = [..._inquiryNotifs, ..._orderNotifs, ...oosProducts];
+  renderNotifications();
+}
+
 function initNotifications() {
-  // Listen to new inquiries
-  const iq = query(collection(db, INQUIRIES_COL), orderBy('createdAt','desc'));
-  onSnapshot(iq, snap => {
-    const newInquiries = snap.docs
+  // Load persisted read IDs from Firestore
+  getDoc(doc(db, NOTIF_READ_DOC)).then(snap => {
+    if (snap.exists() && Array.isArray(snap.data().ids)) {
+      readNotifIds = snap.data().ids;
+    }
+    readNotifDocLoaded = true;
+    renderNotifications();
+  }).catch(() => { readNotifDocLoaded = true; });
+
+  // Inquiry listener (independent)
+  const iq = query(collection(db, INQUIRIES_COL), orderBy('createdAt', 'desc'));
+  _unsubNotifInq = onSnapshot(iq, snap => {
+    _inquiryNotifs = snap.docs
       .filter(d => d.data().status === 'new')
-      .map(d => ({ id: 'inq-'+d.id, type: 'inquiry', docId: d.id, ...d.data() }));
+      .map(d => ({ id: 'inq-' + d.id, type: 'inquiry', docId: d.id, ...d.data() }));
+    rebuildNotifications();
+  });
 
-    // Listen to new orders (pending)
-    const oq = query(collection(db, ORDERS_COL), orderBy('timestamp','desc'));
-    onSnapshot(oq, oSnap => {
-      const newOrders = oSnap.docs
-        .filter(d => d.data().status === 'pending_payment')
-        .map(d => ({ id: 'ord-'+d.id, type: 'order', docId: d.id, ...d.data() }));
-
-      // Out-of-stock products
-      const oosProducts = allProducts
-        .filter(p => {
-          const s = p.stockCount ?? p.stock ?? null;
-          return s !== null && s <= 0 && p.status === 'published';
-        })
-        .map(p => ({ id: 'oos-'+p.id, type: 'stock', docId: p.id, name: p.name }));
-
-      notifications = [...newInquiries, ...newOrders, ...oosProducts];
-      renderNotifications();
-    });
+  // Order listener (independent — no nesting)
+  const oq = query(collection(db, ORDERS_COL), orderBy('timestamp', 'desc'));
+  _unsubNotifOrd = onSnapshot(oq, snap => {
+    _orderNotifs = snap.docs
+      .filter(d => d.data().status === 'pending_payment')
+      .map(d => ({ id: 'ord-' + d.id, type: 'order', docId: d.id, ...d.data() }));
+    rebuildNotifications();
   });
 
   // Toggle dropdown
@@ -1489,35 +1631,50 @@ function initNotifications() {
   // Mark all as read
   document.getElementById('notif-mark-all').addEventListener('click', () => {
     readNotifIds = notifications.map(n => n.id);
-    localStorage.setItem('charming_read_notifs', JSON.stringify(readNotifIds));
+    persistReadIds();
     renderNotifications();
   });
 }
 
 function renderNotifications() {
   const unread = notifications.filter(n => !readNotifIds.includes(n.id));
-  const badge = document.getElementById('notif-badge');
-  badge.textContent = unread.length;
+  const badge  = document.getElementById('notif-badge');
+  badge.textContent  = unread.length;
   badge.style.display = unread.length > 0 ? '' : 'none';
+
+  // Subtle bell animation when there are unread items
+  const bell = document.getElementById('notif-bell');
+  bell.classList.toggle('notif-bell--has-unread', unread.length > 0);
 
   const list = document.getElementById('notif-list');
   if (notifications.length === 0) {
-    list.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">אין התראות חדשות</p>';
+    list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 px-4">
+      <span class="text-3xl mb-2">✨</span>
+      <p class="text-sm text-gray-400 font-semibold">אין התראות חדשות</p>
+      <p class="text-[11px] text-gray-300 mt-1">הכל שקט כאן</p>
+    </div>`;
     return;
   }
 
   list.innerHTML = notifications.map(n => {
     const isRead = readNotifIds.includes(n.id);
-    const bg = isRead ? '' : 'bg-[#fdf6ee]';
-    const dot = isRead ? '' : '<span class="w-2 h-2 rounded-full bg-[#d4a373] flex-shrink-0"></span>';
+    const bg  = isRead ? 'bg-white' : 'bg-[#fdf8f3]';
+    const dot = isRead
+      ? '<span class="w-2.5 h-2.5 rounded-full bg-transparent flex-shrink-0 mt-1"></span>'
+      : '<span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#d4a373] to-[#e8b88a] flex-shrink-0 mt-1 shadow-sm shadow-[#d4a373]/30 notif-dot-pulse"></span>';
+    const titleWeight = isRead ? 'font-semibold text-gray-500' : 'font-bold text-gray-800';
+
+    const esc_id    = n.id.replace(/'/g, "\\'");
+    const esc_docId = n.docId.replace(/'/g, "\\'");
+    const onclick   = `handleNotifClick('${esc_id}','${n.type}','${esc_docId}')`;
 
     if (n.type === 'inquiry') {
       const ts = n.createdAt?.seconds ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('he-IL') : '';
-      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('inquiries');waitAndOpen(()=>allInquiries.length>0,()=>window.openInquiryModal('${n.docId}'));document.getElementById('notif-dropdown').style.display='none';" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
+      return `<button onclick="${onclick}" class="notif-item w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all duration-200 border-b border-gray-50 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-bold text-gray-700 truncate">פניה חדשה מ${n.name || 'לקוח'}</p>
-          <p class="text-[11px] text-gray-400 truncate">${n.message || n.notes || n.phone || ''}</p>
+          <p class="text-xs ${titleWeight} truncate">💬 פניה חדשה מ${n.name || 'לקוח'}</p>
+          <p class="text-[11px] text-gray-400 truncate mt-0.5">${n.message || n.notes || n.phone || ''}</p>
           <p class="text-[10px] text-gray-300 mt-1">${ts}</p>
         </div>
       </button>`;
@@ -1526,22 +1683,22 @@ function renderNotifications() {
     if (n.type === 'order') {
       const ts = n.timestamp?.seconds ? new Date(n.timestamp.seconds * 1000).toLocaleDateString('he-IL') : '';
       const total = n.summary?.total || 0;
-      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('orders');waitAndOpen(()=>allOrders.length>0,()=>openOrderModal('${n.docId}'));document.getElementById('notif-dropdown').style.display='none';" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
+      return `<button onclick="${onclick}" class="notif-item w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all duration-200 border-b border-gray-50 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-bold text-gray-700 truncate">הזמנה חדשה — ${n.orderId || ''}</p>
-          <p class="text-[11px] text-gray-400 truncate">${n.customer?.name || ''} · ${total} ₪</p>
+          <p class="text-xs ${titleWeight} truncate">📦 הזמנה חדשה — ${n.orderId || ''}</p>
+          <p class="text-[11px] text-gray-400 truncate mt-0.5">${n.customer?.name || ''} · ${total} ₪</p>
           <p class="text-[10px] text-gray-300 mt-1">${ts}</p>
         </div>
       </button>`;
     }
 
     if (n.type === 'stock') {
-      return `<button onclick="readNotifIds.push('${n.id}');localStorage.setItem('charming_read_notifs',JSON.stringify(readNotifIds));renderNotifications();showTab('inventory');waitAndOpen(()=>allProducts.length>0,()=>{const p=allProducts.find(x=>x.id==='${n.docId}');if(p)openModal('edit',p);});document.getElementById('notif-dropdown').style.display='none';" class="w-full text-right px-4 py-3 flex items-start gap-3 hover:bg-[#fdf6ee] transition-colors border-b border-gray-100 ${bg}">
+      return `<button onclick="${onclick}" class="notif-item w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all duration-200 border-b border-gray-50 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-bold text-gray-700 truncate">⚠️ נגמר המלאי — ${n.name || ''}</p>
-          <p class="text-[11px] text-gray-400 truncate">יש לעדכן מלאי או לשנות סטטוס</p>
+          <p class="text-xs ${titleWeight} truncate">⚠️ נגמר המלאי — ${n.name || ''}</p>
+          <p class="text-[11px] text-gray-400 truncate mt-0.5">יש לעדכן מלאי או לשנות סטטוס</p>
         </div>
       </button>`;
     }
@@ -2772,23 +2929,99 @@ function renderCalendar() {
 
   for (let i=0; i<startDay; i++) html += '<div></div>';
 
-  const wsDateSet = new Set();
-  allWorkshops.forEach(w=>{
+  /* Build map: day → { confirmed: bool, draft: bool } */
+  const wsDayMap = {};
+  allWorkshops.forEach(w => {
+    if (w.archived) return;
     const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : (w.eventDate ? new Date(w.eventDate) : null);
-    if (d && d.getFullYear()===calYear && d.getMonth()===calMonth) wsDateSet.add(d.getDate());
+    if (d && d.getFullYear() === calYear && d.getMonth() === calMonth) {
+      const day = d.getDate();
+      if (!wsDayMap[day]) wsDayMap[day] = { confirmed: false, draft: false };
+      if (w.bookingStatus === 'confirmed') wsDayMap[day].confirmed = true;
+      else wsDayMap[day].draft = true;
+    }
   });
 
   const today = new Date();
   for (let d=1; d<=lastDay; d++) {
     const isToday = d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear();
-    const hasWs = wsDateSet.has(d);
-    html += `<div class="relative py-1.5 rounded-lg ${isToday?'bg-[#d4a373] text-white font-bold':''} ${hasWs&&!isToday?'bg-[#fdf6ee] font-semibold text-[#d4a373]':'text-gray-600'} cursor-default">
+    const info = wsDayMap[d];
+    const hasWs = !!info;
+    const dotColor = info?.confirmed ? '#d4a373' : '#b0b0b0';
+    const clickAttr = hasWs ? `onclick="openDayPopup(${d})" style="cursor:pointer;"` : '';
+    html += `<div class="relative py-1.5 rounded-lg ${isToday?'bg-[#d4a373] text-white font-bold':''} ${hasWs&&!isToday?'bg-[#fdf6ee] font-semibold text-[#d4a373]':'text-gray-600'} ${hasWs?'hover:ring-1 hover:ring-[#d4a373]/40 transition-all':'cursor-default'}" ${clickAttr}>
       ${d}
-      ${hasWs?'<span class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#d4a373]"></span>':''}
+      ${hasWs?`<span class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full" style="background:${dotColor};"></span>`:''}
     </div>`;
   }
   grid.innerHTML = html;
+  closeDayPopup();
 }
+
+function openDayPopup(day) {
+  const popup = document.getElementById('ws-day-popup');
+  const titleEl = document.getElementById('ws-day-popup-title');
+  const listEl = document.getElementById('ws-day-popup-list');
+  if (!popup || !titleEl || !listEl) return;
+
+  const dateStr = new Date(calYear, calMonth, day).toLocaleDateString('he-IL', { day:'numeric', month:'long', year:'numeric' });
+  titleEl.textContent = `סדנאות בתאריך ${dateStr}`;
+
+  const dayWs = allWorkshops.filter(w => {
+    if (w.archived) return false;
+    const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : (w.eventDate ? new Date(w.eventDate) : null);
+    return d && d.getFullYear() === calYear && d.getMonth() === calMonth && d.getDate() === day;
+  });
+
+  if (!dayWs.length) {
+    listEl.innerHTML = `<div class="px-4 py-6 text-center text-gray-400 text-sm">אין סדנאות ביום זה</div>`;
+  } else {
+    listEl.innerHTML = dayWs.map(w => {
+      const isConfirmed = w.bookingStatus === 'confirmed';
+      const statusBadge = isConfirmed
+        ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700">מאושרת</span>`
+        : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500">טיוטה</span>`;
+      const timeStr = w.eventTime || '';
+      return `<div class="px-4 py-3 flex items-center justify-between hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="drillToWorkshop('${w.id}')">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${isConfirmed ? '#d4a373' : '#b0b0b0'};"></span>
+          <div>
+            <span class="text-sm font-semibold text-gray-700">${w.celebrantName || w.contactName || 'ללא שם'}</span>
+            ${timeStr ? `<span class="text-xs text-gray-400 mr-2">${timeStr}</span>` : ''}
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          ${statusBadge}
+          <span class="text-gray-300 text-xs">←</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  popup.style.display = 'block';
+  popup.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.openDayPopup = openDayPopup;
+
+function closeDayPopup() {
+  const popup = document.getElementById('ws-day-popup');
+  if (popup) popup.style.display = 'none';
+}
+window.closeDayPopup = closeDayPopup;
+
+function drillToWorkshop(wsId) {
+  closeDayPopup();
+  showTab('workshops');
+  setTimeout(() => {
+    const card = document.querySelector(`[data-ws-id="${wsId}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('ring-2', 'ring-[#d4a373]');
+      setTimeout(() => card.classList.remove('ring-2', 'ring-[#d4a373]'), 2500);
+    }
+  }, 300);
+}
+window.drillToWorkshop = drillToWorkshop;
 
 async function saveWorkshop() {
   const name      = document.getElementById('ws-name').value.trim();
@@ -2818,11 +3051,14 @@ async function saveWorkshop() {
   const base  = getWsBasePrice();
   const total = Math.round(base * (1 - disc/100) + arrival);
 
+  const bookingStatus = document.getElementById('ws-status').value || 'confirmed';
+
   const data = {
     customerName: name, phone, celebrant, occasion, city,
     eventDate: Timestamp.fromDate(new Date(date+'T'+time)),
     time, participantCount: count, route, basePrice: base,
     discount: disc, arrivalFee: arrival, total, notes: notes||null,
+    bookingStatus,
     createdAt: serverTimestamp(),
   };
 
@@ -2847,6 +3083,7 @@ function clearWorkshopForm() {
   document.getElementById('ws-route').value='';
   document.getElementById('ws-discount').value='0';
   document.getElementById('ws-arrival').value='0';
+  document.getElementById('ws-status').value='confirmed';
   document.getElementById('ws-err').textContent='';
   editWorkshopId=null;
   updateWsTotal();
@@ -2870,11 +3107,12 @@ function openWorkshopModal(id) {
     document.getElementById('ws-discount').value = w.discount||0;
     document.getElementById('ws-arrival').value = w.arrivalFee||0;
     document.getElementById('ws-notes').value = w.notes||'';
+    document.getElementById('ws-status').value = w.bookingStatus || 'confirmed';
     updateWsTotal();
   } else {
     clearWorkshopForm();
   }
-  document.querySelector('#tab-workshops .bg-white:nth-child(2)')?.scrollIntoView({behavior:'smooth'});
+  document.getElementById('ws-form-section')?.scrollIntoView({behavior:'smooth'});
 }
 window.openWorkshopModal = openWorkshopModal;
 
@@ -2906,12 +3144,21 @@ function sendWorkshopWhatsApp() {
     arrivalTime = d.toTimeString().slice(0,5);
   }
 
+  const status = document.getElementById('ws-status')?.value || 'confirmed';
+
   let discLine = '';
   if (disc > 0) discLine = `\nקיבלת הנחה מיוחדת על סך ${disc}% הנחה .`;
   let arrivalLine = '';
   if (arrival > 0) arrivalLine = ` בנוסף תיהיה עלות הגעה על סך ${arrival} שח (ההנחה אינה נכללת על עלות ההגעה )`;
 
-  const msg = `אני שולחת לך את סיכום הפרטים לסדנא:\n\nאיזה כיף שסגרתן אירוע עם charming 🥰 מתרגשת מאוד לחגוג איתכן את היום המשמח הזה 🤩\nלסיכום השיחה שלנו :\n*תאריך:* ${dateStr}\n*שעה :* ${time}\n*שם החוגגת:* ${celebrant}\n*לכבוד:* ${occasion}\n*מספר משתתפות :* עד ${count} משתתפות\n*מסלול:* ${route}\n*סכום :* ${base.toLocaleString('he-IL')}₪${discLine}${arrivalLine}\n*סכום סופי:* ${total.toLocaleString('he-IL')} שח\n\nשולמה מקדמה על סך 500 שאר הסכום ינתן ביום האירוע\n\nלסדנה יש להכין שולחן מרכזי סביבו הבנות ישבו לכל אחת צריך להיות כיסא ובנוסף שולחן בצד בסגנון בופה עליו יהיו הצ'ארמים והשרשאות . את עיצוב שולחן הצ'ארמים אני מעצבת 😊\n\nאנחנו נגיע חצי שעה לפני תחילת הסדנא על מנת לסדר את העמדה זה אומר שאם שעת הסדנא מתחילה ב-${time} אנחנו נגיע ב-${arrivalTime}.\n\nאם יש לכן שאלות , בקשות וכל דבר אחר אני זמינה להכל !!!🫶\n\nדוגמאות לסידור השולחן⬇️`;
+  const detailsBlock = `*תאריך:* ${dateStr}\n*שעה :* ${time}\n*שם החוגגת:* ${celebrant}\n*לכבוד:* ${occasion}\n*מספר משתתפות :* עד ${count} משתתפות\n*מסלול:* ${route}\n*סכום :* ${base.toLocaleString('he-IL')}₪${discLine}${arrivalLine}\n*סכום סופי:* ${total.toLocaleString('he-IL')} שח`;
+
+  let msg;
+  if (status === 'draft') {
+    msg = `היי ${name}, איזה כיף שדיברנו! 😊\nהנה סיכום הפרטים שדיברנו עליהם (התאריך עדיין לא משוריין סופית):\n\n${detailsBlock}\n\nברגע שנסגור את התאריך אשלח לך אישור סופי עם כל הפרטים 🫶\nאם יש שאלות אני כאן!`;
+  } else {
+    msg = `אני שולחת לך את סיכום הפרטים לסדנא:\n\nאיזה כיף שסגרתן אירוע עם charming 🥰 מתרגשת מאוד לחגוג איתכן את היום המשמח הזה 🤩\nלסיכום השיחה שלנו :\n${detailsBlock}\n\nשולמה מקדמה על סך 500 שאר הסכום ינתן ביום האירוע\n\nלסדנה יש להכין שולחן מרכזי סביבו הבנות ישבו לכל אחת צריך להיות כיסא ובנוסף שולחן בצד בסגנון בופה עליו יהיו הצ'ארמים והשרשאות . את עיצוב שולחן הצ'ארמים אני מעצבת 😊\n\nאנחנו נגיע חצי שעה לפני תחילת הסדנא על מנת לסדר את העמדה זה אומר שאם שעת הסדנא מתחילה ב-${time} אנחנו נגיע ב-${arrivalTime}.\n\nאם יש לכן שאלות , בקשות וכל דבר אחר אני זמינה להכל !!!🫶\n\nדוגמאות לסידור השולחן⬇️`;
+  }
 
   const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
   window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -2938,28 +3185,124 @@ function generateCalendarLinks(ws) {
   return `<a href="${gcal}" target="_blank" class="text-[10px] text-[#d4a373] hover:underline">📅 Google Calendar</a>`;
 }
 
-function renderWorkshopsList() {
-  const c = document.getElementById('ws-list');
-  if (!c) return;
-  if (!allWorkshops.length) { c.innerHTML='<p class="text-gray-300 text-sm text-center py-8">אין סדנאות</p>'; return; }
-  c.innerHTML = allWorkshops.map(w => {
-    const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000).toLocaleDateString('he-IL') : '—';
-    return `<div class="px-5 py-4 hover:bg-[#fdf6ee] transition-colors flex flex-wrap items-center gap-3">
-      <div class="flex-1 min-w-[200px]">
-        <p class="font-semibold text-sm text-gray-800">${esc(w.celebrant||w.customerName)} <span class="text-xs text-gray-400">(${esc(w.customerName)} · ${esc(w.phone||'')})</span></p>
-        <p class="text-xs text-gray-500 mt-0.5">${d} · ${w.time||''} · ${esc(w.route)} · עד ${w.participantCount} משתתפות${w.city?' · '+esc(w.city):''}</p>
-        ${w.occasion?`<p class="text-[10px] text-gray-400 mt-0.5">לכבוד: ${esc(w.occasion)}</p>`:''}
-        ${w.notes?`<p class="text-[10px] text-gray-400 mt-0.5">${esc(w.notes)}</p>`:''}
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="font-black text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')} ₪</span>
-        ${generateCalendarLinks(w)}
-        <button onclick="openWorkshopModal('${w.id}')" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
-        <button onclick="deleteWorkshop('${w.id}')" class="text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
-      </div>
-    </div>`;
-  }).join('');
+function getWsDate(w) {
+  return w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate ? new Date(w.eventDate) : null);
 }
+
+function renderWorkshopCard(w, opts = {}) {
+  const d = getWsDate(w);
+  const dateStr = d ? d.toLocaleDateString('he-IL') : '—';
+  const status  = w.bookingStatus || 'confirmed';
+  const isPast  = opts.isPast || false;
+
+  const statusBadge = status === 'draft'
+    ? '<span class="text-[10px] font-bold bg-amber-100 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-full">טיוטה</span>'
+    : '';
+  const pastBadge = isPast
+    ? '<span class="text-[10px] font-bold bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">סדנה עברה</span>'
+    : '';
+  const confirmBtn = status === 'draft'
+    ? `<button onclick="confirmWorkshop('${w.id}')" class="text-xs border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-full font-bold transition-colors">סגור הזמנה ✅</button>`
+    : '';
+
+  return `<div data-ws-id="${w.id}" class="px-5 py-4 hover:bg-[#fdf6ee] transition-colors flex flex-wrap items-center gap-3${isPast ? ' opacity-70' : ''}">
+    <div class="flex-1 min-w-[200px]">
+      <div class="flex items-center gap-2 flex-wrap">
+        <p class="font-semibold text-sm text-gray-800">${esc(w.celebrant || w.customerName)}</p>
+        <span class="text-xs text-gray-400">(${esc(w.customerName)} · ${esc(w.phone || '')})</span>
+        ${statusBadge}${pastBadge}
+      </div>
+      <p class="text-xs text-gray-500 mt-0.5">${dateStr} · ${w.time || ''} · ${esc(w.route)} · עד ${w.participantCount} משתתפות${w.city ? ' · ' + esc(w.city) : ''}</p>
+      ${w.occasion ? `<p class="text-[10px] text-gray-400 mt-0.5">לכבוד: ${esc(w.occasion)}</p>` : ''}
+      ${w.notes ? `<p class="text-[10px] text-gray-400 mt-0.5">${esc(w.notes)}</p>` : ''}
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="font-black text-[#d4a373]">${(w.total || 0).toLocaleString('he-IL')} ₪</span>
+      ${confirmBtn}
+      ${generateCalendarLinks(w)}
+      <button onclick="openWorkshopModal('${w.id}')" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
+      <button onclick="deleteWorkshop('${w.id}')" class="text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
+    </div>
+  </div>`;
+}
+
+function renderWorkshopsList() {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  // Sort by eventDate ascending for upcoming, descending for archive
+  const sorted = [...allWorkshops].sort((a, b) => {
+    const da = getWsDate(a), db = getWsDate(b);
+    return (da?.getTime() || 0) - (db?.getTime() || 0);
+  });
+
+  const drafts    = sorted.filter(w => (w.bookingStatus || 'confirmed') === 'draft');
+  const confirmed = sorted.filter(w => {
+    const s = w.bookingStatus || 'confirmed';
+    if (s !== 'confirmed') return false;
+    const d = getWsDate(w);
+    return !d || d >= now;
+  });
+  const archive   = [...allWorkshops]
+    .filter(w => {
+      const s = w.bookingStatus || 'confirmed';
+      if (s !== 'confirmed') return false;
+      const d = getWsDate(w);
+      return d && d < now;
+    })
+    .sort((a, b) => {
+      const da = getWsDate(a), db = getWsDate(b);
+      return (db?.getTime() || 0) - (da?.getTime() || 0);
+    });
+
+  // Section 1: Drafts
+  const secDrafts = document.getElementById('ws-section-drafts');
+  const listDrafts = document.getElementById('ws-list-drafts');
+  document.getElementById('ws-drafts-count').textContent = drafts.length;
+  if (drafts.length) {
+    secDrafts.style.display = '';
+    listDrafts.innerHTML = drafts.map(w => renderWorkshopCard(w)).join('');
+  } else {
+    secDrafts.style.display = 'none';
+  }
+
+  // Section 2: Confirmed & Upcoming
+  const listConfirmed = document.getElementById('ws-list-confirmed');
+  document.getElementById('ws-confirmed-count').textContent = confirmed.length;
+  if (confirmed.length) {
+    listConfirmed.innerHTML = confirmed.map(w => renderWorkshopCard(w)).join('');
+  } else {
+    listConfirmed.innerHTML = '<p class="text-gray-300 text-sm text-center py-8">אין סדנאות קרובות</p>';
+  }
+
+  // Section 3: Archive
+  const secArchive = document.getElementById('ws-section-archive');
+  const listArchive = document.getElementById('ws-list-archive');
+  document.getElementById('ws-archive-count').textContent = archive.length;
+  if (archive.length) {
+    secArchive.style.display = '';
+    listArchive.innerHTML = archive.map(w => renderWorkshopCard(w, { isPast: true })).join('');
+  } else {
+    secArchive.style.display = 'none';
+  }
+}
+
+async function confirmWorkshop(id) {
+  try {
+    await updateDoc(doc(db, WORKSHOPS_COL, id), { bookingStatus: 'confirmed' });
+    const w = allWorkshops.find(x => x.id === id);
+    logAction(`סדנה "${w?.celebrant || w?.customerName}" — הזמנה נסגרה`);
+  } catch(e) { console.error(e); }
+}
+window.confirmWorkshop = confirmWorkshop;
+
+let wsArchiveOpen = false;
+function toggleWsArchive() {
+  wsArchiveOpen = !wsArchiveOpen;
+  document.getElementById('ws-list-archive').style.display = wsArchiveOpen ? '' : 'none';
+  document.getElementById('ws-archive-arrow').style.transform = wsArchiveOpen ? 'rotate(180deg)' : '';
+}
+window.toggleWsArchive = toggleWsArchive;
 
 async function deleteWorkshop(id) {
   const w = allWorkshops.find(x=>x.id===id);
@@ -3130,7 +3473,7 @@ async function checkAutoBirthdayCampaign() {
     const monthKey = getCurrentMonthKey();
     if (bday.lastRunMonth === monthKey) return; // Already ran this month
 
-    console.log('[birthday] Auto-running campaign for', monthKey);
+    if (location.hostname === 'localhost') console.debug('[birthday] Auto-running campaign for', monthKey);
     await runBirthdayCampaign(false);
   } catch(e) { console.warn('[checkAutoBirthdayCampaign]', e); }
 }

@@ -10,6 +10,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { corePlugins: { preflight: false } }</script>
   <script>if(localStorage.getItem('charming_lang')==='en')document.documentElement.classList.add('lang-loading');</script>
+  <!-- GA4 — consent-gated -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MBC09YG3HY"></script>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'analytics_storage':'denied'});
+    if(localStorage.getItem('charming_cookie_accepted')){gtag('consent','update',{'analytics_storage':'granted'});}
+    gtag('js',new Date());gtag('config','G-MBC09YG3HY');
+  </script>
 </head>
 <body class="has-ticker">
 
@@ -62,7 +70,7 @@
       <img src="images/logo/IMG_0993.jpg" alt="Charming by Vik — לוגו" class="hero-logo-img" />
     </div>
     <div class="hero-content">
-      <h1 class="hero-title">Make your own charms jewelry</h1>
+      <h1 class="hero-title">Make your own jewelry</h1>
       <p class="hero-subtitle" data-i18n="hero_subtitle">ברוכה הבאה לעולם שבו כל תכשיט הוא יצירה ייחודית , מעוצבת , ומספרת את הסיפור שלך !</p>
       <div class="hero-cta-group">
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%96%D7%9E%D7%99%D7%9F%20%D7%9E%D7%A7%D7%95%D7%9D%20%D7%91%D7%A1%D7%93%D7%A0%D7%94%21" target="_blank" rel="noopener noreferrer" class="btn" data-i18n="hero_btn_workshop">הזמיני סדנה</a>
@@ -148,6 +156,27 @@
           </div>
         </button>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SHOP — FEATURED PRODUCTS ===== -->
+  <section id="shop" class="shop-section">
+    <div class="container">
+      <h2 class="section-title" data-i18n="shop_preview_title">מוצרים נבחרים</h2>
+
+      <div id="home-catalog-grid" class="shop-grid">
+        <div id="home-catalog-loading" class="catalog-loading">
+          <div class="catalog-spinner"></div>
+          <p>טוענת מוצרים...</p>
+        </div>
+      </div>
+      <div id="home-catalog-empty" class="catalog-empty" style="display:none">
+        <p>אין מוצרים מומלצים להצגה כרגע — חיזרי בקרוב!</p>
+      </div>
+
+      <div style="text-align:center;margin-top:40px;">
+        <a href="shop.html" class="btn btn-outline" data-i18n="shop_preview_btn">לכל הקולקציה ←</a>
       </div>
     </div>
   </section>
@@ -691,27 +720,6 @@
     </div>
   </section>
 
-  <!-- ===== SHOP — FEATURED PRODUCTS ===== -->
-  <section id="shop" class="shop-section">
-    <div class="container">
-      <h2 class="section-title" data-i18n="shop_preview_title">מוצרים נבחרים</h2>
-
-      <div id="home-catalog-grid" class="shop-grid">
-        <div id="home-catalog-loading" class="catalog-loading">
-          <div class="catalog-spinner"></div>
-          <p>טוענת מוצרים...</p>
-        </div>
-      </div>
-      <div id="home-catalog-empty" class="catalog-empty" style="display:none">
-        <p>אין מוצרים מומלצים להצגה כרגע — חיזרי בקרוב!</p>
-      </div>
-
-      <div style="text-align:center;margin-top:40px;">
-        <a href="shop.html" class="btn btn-outline" data-i18n="shop_preview_btn">לכל הקולקציה ←</a>
-      </div>
-    </div>
-  </section>
-
   </div><!-- /view-home -->
 
   <!-- ===== FOOTER ===== -->
@@ -797,6 +805,26 @@
     <img class="lightbox-img" id="lightboxImg" src="" alt="" />
     <button class="lightbox-arrow lightbox-arrow--next" id="lightboxNext" aria-label="תמונה הבאה">&#8250;</button>
   </div>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookie-banner" class="cookie-banner" role="banner" aria-label="הסכמת קוקיז">
+    <p class="cookie-banner-text">אנחנו משתמשים בקוקיז ובגוגל אנליטיקס כדי להעניק לך את חוויית הקנייה הטובה ביותר. בהמשך הגלישה את מאשרת את השימוש בהם. <a href="legal.html#cookies">למידע נוסף</a></p>
+    <button class="cookie-banner-btn" id="cookie-accept">מאשרת וממשיכה</button>
+  </div>
+  <script>
+  (function(){
+    if(localStorage.getItem('charming_cookie_accepted'))return;
+    var b=document.getElementById('cookie-banner');
+    if(!b)return;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){b.classList.add('is-visible');});});
+    document.getElementById('cookie-accept').addEventListener('click',function(){
+      localStorage.setItem('charming_cookie_accepted',Date.now().toString());
+      if(typeof gtag==='function')gtag('consent','update',{'analytics_storage':'granted'});
+      b.classList.remove('is-visible');
+      b.addEventListener('transitionend',function(){b.remove();},{once:true});
+    });
+  })();
+  </script>
 
   <script src="lang.js"></script>
   <script src="main.js"></script>

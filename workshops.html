@@ -9,6 +9,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { corePlugins: { preflight: false } }</script>
   <script>if(localStorage.getItem('charming_lang')==='en')document.documentElement.classList.add('lang-loading');</script>
+  <!-- GA4 — consent-gated -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MBC09YG3HY"></script>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'analytics_storage':'denied'});
+    if(localStorage.getItem('charming_cookie_accepted')){gtag('consent','update',{'analytics_storage':'granted'});}
+    gtag('js',new Date());gtag('config','G-MBC09YG3HY');
+  </script>
 </head>
 <body>
 
@@ -588,6 +596,26 @@
         if (input) input.addEventListener('input', ()=>{ document.getElementById(errId).textContent=''; });
       });
     }
+  </script>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookie-banner" class="cookie-banner" role="banner" aria-label="הסכמת קוקיז">
+    <p class="cookie-banner-text">אנחנו משתמשים בקוקיז ובגוגל אנליטיקס כדי להעניק לך את חוויית הקנייה הטובה ביותר. בהמשך הגלישה את מאשרת את השימוש בהם. <a href="legal.html#cookies">למידע נוסף</a></p>
+    <button class="cookie-banner-btn" id="cookie-accept">מאשרת וממשיכה</button>
+  </div>
+  <script>
+  (function(){
+    if(localStorage.getItem('charming_cookie_accepted'))return;
+    var b=document.getElementById('cookie-banner');
+    if(!b)return;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){b.classList.add('is-visible');});});
+    document.getElementById('cookie-accept').addEventListener('click',function(){
+      localStorage.setItem('charming_cookie_accepted',Date.now().toString());
+      if(typeof gtag==='function')gtag('consent','update',{'analytics_storage':'granted'});
+      b.classList.remove('is-visible');
+      b.addEventListener('transitionend',function(){b.remove();},{once:true});
+    });
+  })();
   </script>
 </body>
 </html>

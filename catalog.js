@@ -603,13 +603,16 @@ function renderProductView() {
         <button id="pv-quick-buy" class="btn btn-outline" style="min-height:48px;font-size:0.97rem;">${t('pv_quick_buy','קנייה מהירה')}</button>
        </div>`;
 
+  const crumbCat = data.category || '';
   el.innerHTML = `
-    <section style="min-height:80vh;padding:80px 0 110px;background:var(--sand);">
+    <section style="min-height:80vh;padding:100px 0 110px;background:var(--sand);">
       <div class="container">
-        <button id="pv-back-btn" class="pv-back-btn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          ${t('pv_back','חזור אחורה')}
-        </button>
+        <nav class="pv-breadcrumb" aria-label="breadcrumb">
+          <a href="#" id="pv-crumb-home">${t('nav_home','דף הבית')}</a>
+          <span class="pv-breadcrumb-sep">/</span>
+          ${crumbCat ? `<a href="#" id="pv-crumb-cat">${esc(crumbCat)}</a><span class="pv-breadcrumb-sep">/</span>` : ''}
+          <span class="pv-breadcrumb-current">${esc(localName(data))}</span>
+        </nav>
         <div class="pv-layout">
           <div>
             <div style="aspect-ratio:1;border-radius:20px;overflow:hidden;background:var(--pink-light);position:relative;">${mainImg}${navArrows}</div>
@@ -629,7 +632,14 @@ function renderProductView() {
 
   if (typeof applyLang === 'function') applyLang();
 
-  el.querySelector('#pv-back-btn').addEventListener('click', () => switchView(previousView));
+  el.querySelector('#pv-crumb-home').addEventListener('click', e => { e.preventDefault(); switchView('home'); });
+  const crumbCatEl = el.querySelector('#pv-crumb-cat');
+  if (crumbCatEl) {
+    crumbCatEl.addEventListener('click', e => {
+      e.preventDefault();
+      window.location.href = `shop.html?cat=${encodeURIComponent(crumbCat)}`;
+    });
+  }
 
   if (!oos) {
     el.querySelector('#pv-add-cart').addEventListener('click', () => { addToCart(currentProduct); });
@@ -664,7 +674,7 @@ function renderProfileView() {
 
   if (!currentUser) {
     el.innerHTML = `
-      <section style="min-height:80vh;padding:80px 0;display:flex;align-items:center;justify-content:center;background:var(--sand);">
+      <section style="min-height:80vh;padding:100px 0;display:flex;align-items:center;justify-content:center;background:var(--sand);">
         <div style="text-align:center;max-width:360px;padding:0 20px;">
           <div style="font-size:4rem;margin-bottom:20px;">🔐</div>
           <h2 style="font-size:1.4rem;font-weight:700;color:var(--ink);margin:0 0 10px;">${t('profile_login_required','נדרשת התחברות')}</h2>
@@ -680,7 +690,7 @@ function renderProfileView() {
   }
 
   el.innerHTML = `
-    <section style="min-height:80vh;padding:80px 0 110px;background:var(--sand);">
+    <section style="min-height:80vh;padding:100px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:680px;">
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">${t('profile_title','האזור האישי שלי')}</h2>
         <div style="display:flex;gap:0;border-bottom:2px solid var(--sand-dark);margin-bottom:32px;">
@@ -968,7 +978,7 @@ function renderCheckoutStep1(el) {
 
   if (!items.length) {
     el.innerHTML = `
-      <section style="min-height:80vh;padding:80px 0;display:flex;align-items:center;justify-content:center;background:var(--sand);">
+      <section style="min-height:80vh;padding:100px 0;display:flex;align-items:center;justify-content:center;background:var(--sand);">
         <div style="text-align:center;max-width:360px;padding:0 20px;">
           <div style="font-size:3.5rem;margin-bottom:16px;">🛒</div>
           <h2 style="font-size:1.3rem;font-weight:700;color:var(--ink);margin:0 0 10px;">${t('cart_empty_title','העגלה ריקה')}</h2>
@@ -1007,7 +1017,7 @@ function renderCheckoutStep1(el) {
     </div>`).join('');
 
   el.innerHTML = `
-    <section style="padding:80px 0 110px;background:var(--sand);">
+    <section style="padding:100px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:640px;">
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">${t('cart_my_cart','העגלה שלי')}</h2>
         ${stepIndicator(1, 2)}
@@ -1603,7 +1613,7 @@ function renderThankYouView() {
 function _unused_renderCheckoutStep2(el) {
   const addr = userProfile || {};
   el.innerHTML = `
-    <section style="padding:80px 0 110px;background:var(--sand);">
+    <section style="padding:100px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:640px;">
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">פרטי משלוח</h2>
         ${stepIndicator(2, 3)}
@@ -1758,7 +1768,7 @@ function _unused_renderCheckoutStep3(el) {
     </div>`).join('');
 
   el.innerHTML = `
-    <section style="padding:80px 0 110px;background:var(--sand);">
+    <section style="padding:100px 0 110px;background:var(--sand);">
       <div class="container" style="max-width:640px;">
         <h2 style="font-size:1.6rem;font-weight:700;color:var(--ink);margin:0 0 28px;">סיכום הזמנה</h2>
         ${stepIndicator(3)}

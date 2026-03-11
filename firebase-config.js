@@ -1,5 +1,10 @@
+/*
+ * Firebase Client Config (public keys — protected by Firestore Security Rules).
+ * No private keys or service-account credentials belong in this file.
+ * See firestore.rules for access control.
+ */
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider }
+import { getAuth, GoogleAuthProvider, browserLocalPersistence, setPersistence }
                              from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore }      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -10,16 +15,19 @@ const firebaseConfig = {
   storageBucket:     'charming-3dd6f.firebasestorage.app',
   messagingSenderId: '13025110676',
   appId:             '1:13025110676:web:1cddc38b2d147e5e195001',
-  measurementId:     'G-MBC09YG3HY',
 };
 
 const app = initializeApp(firebaseConfig);
 
-export const auth           = getAuth(app);
+export const auth = getAuth(app);
+
+// Persist auth state in localStorage/IndexedDB so page navigations
+// never trigger a re-authentication prompt (FaceID / passkey).
+export const authReady = setPersistence(auth, browserLocalPersistence);
+
 export const db             = getFirestore(app);
 export const googleProvider = (() => {
   const p = new GoogleAuthProvider();
   p.setCustomParameters({ prompt: 'select_account' });
   return p;
 })();
-
