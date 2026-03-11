@@ -2981,12 +2981,12 @@ function openDayPopup(day) {
       const statusBadge = isConfirmed
         ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700">מאושרת</span>`
         : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500">טיוטה</span>`;
-      const timeStr = w.eventTime || '';
+      const timeStr = w.time || '';
       return `<div class="px-4 py-3 flex items-center justify-between hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="drillToWorkshop('${w.id}')">
         <div class="flex items-center gap-2.5">
           <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${isConfirmed ? '#d4a373' : '#b0b0b0'};"></span>
           <div>
-            <span class="text-sm font-semibold text-gray-700">${w.celebrantName || w.contactName || 'ללא שם'}</span>
+            <span class="text-sm font-semibold text-gray-700">${w.celebrant || w.customerName || 'ללא שם'}</span>
             ${timeStr ? `<span class="text-xs text-gray-400 mr-2">${timeStr}</span>` : ''}
           </div>
         </div>

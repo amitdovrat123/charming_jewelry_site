@@ -608,9 +608,9 @@ function renderProductView() {
     <section style="min-height:80vh;padding:100px 0 110px;background:var(--sand);">
       <div class="container">
         <nav class="pv-breadcrumb" aria-label="breadcrumb">
-          <a href="#" id="pv-crumb-home">${t('nav_home','דף הבית')}</a>
+          <a href="index.html" id="pv-crumb-home">${t('nav_home','דף הבית')}</a>
           <span class="pv-breadcrumb-sep">/</span>
-          ${crumbCat ? `<a href="#" id="pv-crumb-cat">${esc(crumbCat)}</a><span class="pv-breadcrumb-sep">/</span>` : ''}
+          ${crumbCat ? `<a href="shop.html?cat=${encodeURIComponent(crumbCat)}" id="pv-crumb-cat">${esc(crumbCat)}</a><span class="pv-breadcrumb-sep">/</span>` : ''}
           <span class="pv-breadcrumb-current">${esc(localName(data))}</span>
         </nav>
         <div class="pv-layout">
@@ -632,14 +632,8 @@ function renderProductView() {
 
   if (typeof applyLang === 'function') applyLang();
 
-  el.querySelector('#pv-crumb-home').addEventListener('click', e => { e.preventDefault(); switchView('home'); });
-  const crumbCatEl = el.querySelector('#pv-crumb-cat');
-  if (crumbCatEl) {
-    crumbCatEl.addEventListener('click', e => {
-      e.preventDefault();
-      window.location.href = `shop.html?cat=${encodeURIComponent(crumbCat)}`;
-    });
-  }
+  el.querySelector('#pv-crumb-home')?.addEventListener('click', e => { e.preventDefault(); switchView('home'); });
+  // Category crumb already has a real href — no JS needed
 
   if (!oos) {
     el.querySelector('#pv-add-cart').addEventListener('click', () => { addToCart(currentProduct); });
