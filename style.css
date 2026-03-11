@@ -202,7 +202,7 @@ ul { list-style: none; }
   padding: 130px 48px 90px;
   background:
     linear-gradient(rgba(253, 248, 245, 0.75), rgba(253, 248, 245, 0.75)),
-    url('https://res.cloudinary.com/dhri2dbek/image/upload/site_assets/1112.png') center / cover no-repeat;
+    url('images/workshop/1112.png') center / cover no-repeat;
   position: relative;
 }
 
@@ -661,7 +661,7 @@ ul { list-style: none; }
 .page-hero--with-bg {
   background:
     linear-gradient(rgba(253, 248, 245, 0.75), rgba(253, 248, 245, 0.75)),
-    url('https://res.cloudinary.com/dhri2dbek/image/upload/site_assets/sadna.png') center / cover no-repeat;
+    url('images/workshop/sadna.png') center / cover no-repeat;
 }
 
 .page-hero .hero-title {
@@ -1118,7 +1118,7 @@ ul { list-style: none; }
     padding: 120px 24px 72px;
     background:
       linear-gradient(rgba(253, 248, 245, 0.78), rgba(253, 248, 245, 0.78)),
-      url('https://res.cloudinary.com/dhri2dbek/image/upload/site_assets/1112.png') center / cover no-repeat;
+      url('images/workshop/1112.png') center / cover no-repeat;
   }
 
   .hero-content { max-width: 100%; width: 100%; }
