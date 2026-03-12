@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto,w_32,h_32/v1773316728/logo_squer_ewfevn.png" />
-  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto,w_180,h_180/v1773316728/logo_squer_ewfevn.png" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="https://res.cloudinary.com/dhri2dbek/image/upload/c_thumb,g_center,z_15.0,w_32,h_32,f_auto,q_auto/v1773325210/simbole_xzkmjs.png?v=3">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://res.cloudinary.com/dhri2dbek/image/upload/c_thumb,g_center,z_15.0,w_16,h_16,f_auto,q_auto/v1773325210/simbole_xzkmjs.png?v=3">
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dhri2dbek/image/upload/c_thumb,g_center,z_15.0,w_180,h_180,f_auto,q_auto/v1773325210/simbole_xzkmjs.png?v=3">
   <title>לוח ניהול | Charming by Vik</title>
   <link rel="preconnect" href="https://cdn.tailwindcss.com" />
   <link rel="preconnect" href="https://res.cloudinary.com" />
@@ -291,12 +293,12 @@
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">💎</span> קטלוג ומלאי
           </button>
+          <!-- ── Secondary (same order as mobile "more" menu) ── -->
+          <div class="border-t border-[#f0dfc0] my-2"></div>
           <button data-tab="ws-gallery" onclick="showTab('ws-gallery')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">🖼️</span> גלריית סדנאות
           </button>
-          <!-- ── Secondary (same order as mobile "more" menu) ── -->
-          <div class="border-t border-[#f0dfc0] my-2"></div>
           <button data-tab="customers" onclick="showTab('customers')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">👥</span> לקוחות
@@ -1321,6 +1323,7 @@ Charming by Vik 💛</textarea>
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail,
+  setPersistence, browserLocalPersistence,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc, setDoc,
@@ -1339,6 +1342,7 @@ const FIREBASE_CONFIG = {
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 // ── Admin & App Config ──────────────────────────────────────────
 const ADMIN_EMAIL    = 'amitdovrat123@gmail.com';
@@ -1433,10 +1437,23 @@ function show(id) {
 }
 
 // ── Auth ─────────────────────────────────────────────────────────
-onAuthStateChanged(auth, user => {
-  if (!user)                      { show('v-login');  return; }
-  if (user.email !== ADMIN_EMAIL) { show('v-denied'); return; }
-  initERP(user);
+// Persist auth in localStorage/IndexedDB so navigating between
+// admin and public pages (or closing a tab) never loses the session.
+setPersistence(auth, browserLocalPersistence).then(() => {
+  if (isLocal) console.log('Auth Persistence set to LOCAL ✅');
+  onAuthStateChanged(auth, user => {
+    if (!user)                      { show('v-login');  return; }
+    if (user.email !== ADMIN_EMAIL) { show('v-denied'); return; }
+    initERP(user);
+  });
+}).catch(err => {
+  console.error('setPersistence failed:', err);
+  // Fall back to listener anyway so the page is still usable
+  onAuthStateChanged(auth, user => {
+    if (!user)                      { show('v-login');  return; }
+    if (user.email !== ADMIN_EMAIL) { show('v-denied'); return; }
+    initERP(user);
+  });
 });
 
 document.getElementById('login-form').addEventListener('submit', async e => {
@@ -1913,10 +1930,21 @@ function renderFullNotifications() {
   });
 
   let html = '';
-  const renderGroup = (title, list) => {
+  const groupMeta = {
+    today:     { icon: '🔴', color: '#d4a373' },
+    yesterday: { icon: '🟠', color: '#b8893e' },
+    week:      { icon: '🔵', color: '#7a8a9a' },
+    older:     { icon: '⚪', color: '#9a8e8a' },
+  };
+  const renderGroup = (key, title, list) => {
     if (!list.length) return '';
+    const meta = groupMeta[key];
     let h = `<div>
-      <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 px-1">${title}</p>
+      <div class="flex items-center gap-2 mb-3 px-1">
+        <span class="text-sm">${meta.icon}</span>
+        <p class="text-xs font-black uppercase tracking-widest" style="color:${meta.color}">${title}</p>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:${meta.color}15;color:${meta.color}">${list.length}</span>
+      </div>
       <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden divide-y divide-[#fdf6ee]">`;
     list.forEach(n => {
       const isRead = readNotifIds.includes(n.id);
@@ -1935,17 +1963,20 @@ function renderFullNotifications() {
           <p class="text-sm ${fw} truncate">${n.label}</p>
           <p class="text-xs text-gray-400 truncate mt-0.5">${n.sub || ''}</p>
         </div>
-        <span class="text-[10px] text-gray-300 whitespace-nowrap mt-1">${timeStr}<br>${dateStr}</span>
+        <div class="flex flex-col items-end flex-shrink-0 mt-0.5">
+          <span class="text-[11px] font-bold text-gray-500">${timeStr}</span>
+          <span class="text-[10px] font-semibold text-gray-400 mt-0.5">${dateStr}</span>
+        </div>
       </button>`;
     });
     h += '</div></div>';
     return h;
   };
 
-  html += renderGroup('היום', groups.today);
-  html += renderGroup('אתמול', groups.yesterday);
-  html += renderGroup('ב-7 הימים האחרונים', groups.week);
-  html += renderGroup('קודם לכן', groups.older);
+  html += renderGroup('today', 'היום', groups.today);
+  html += renderGroup('yesterday', 'אתמול', groups.yesterday);
+  html += renderGroup('week', 'ב-7 הימים האחרונים', groups.week);
+  html += renderGroup('older', 'קודם לכן', groups.older);
 
   container.innerHTML = html;
 }
@@ -3390,62 +3421,64 @@ function sendWorkshopWhatsApp() {
 
   const status = document.getElementById('ws-status')?.value || 'confirmed';
 
-  // Conditional discount & arrival lines
-  let discArrivalLine = '';
-  if (disc > 0) discArrivalLine += `\u05e7\u05d9\u05d1\u05dc\u05ea \u05d4\u05e0\u05d7\u05d4 \u05de\u05d9\u05d5\u05d7\u05d3\u05ea \u05e2\u05dc \u05e1\u05da ${disc}% \u05d4\u05e0\u05d7\u05d4 .`;
-  if (arrival > 0) discArrivalLine += `${disc > 0 ? ' ' : ''}\u05d1\u05e0\u05d5\u05e1\u05e3 \u05ea\u05d9\u05d4\u05d9\u05d4 \u05e2\u05dc\u05d5\u05ea \u05d4\u05d2\u05e2\u05d4 \u05e2\u05dc \u05e1\u05da ${arrival} \u05e9\u05d7 (\u05d4\u05d4\u05e0\u05d7\u05d4 \u05d0\u05d9\u05e0\u05d4 \u05e0\u05db\u05dc\u05dc\u05ea \u05e2\u05dc \u05e2\u05dc\u05d5\u05ea \u05d4\u05d4\u05d2\u05e2\u05d4 )`;
+  // Conditional discount & arrival fee lines
+  let discountText = '';
+  if (disc > 0) discountText = `קיבלת הנחה מיוחדת על סך ${disc}% הנחה .`;
+  let feeText = '';
+  if (arrival > 0) feeText = `בנוסף תיהיה עלות הגעה על סך ${arrival} שח (ההנחה אינה נכללת על עלות ההגעה )`;
 
-  // Table setup image links (replace with actual URLs)
+  // Table setup image links
   const tableImg1 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-1';
   const tableImg2 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-2';
   const tableImg3 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-3';
+  const imagesText = `${tableImg1}\n${tableImg2}\n${tableImg3}`;
 
   let msg;
   if (status === 'draft') {
-    msg = `\u05d4\u05d9\u05d9 ${name}, \u05d0\u05d9\u05d6\u05d4 \u05db\u05d9\u05e3 \u05e9\u05d3\u05d9\u05d1\u05e8\u05e0\u05d5! \ud83d\ude0a
-\u05d4\u05e0\u05d4 \u05e1\u05d9\u05db\u05d5\u05dd \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05e9\u05d3\u05d9\u05d1\u05e8\u05e0\u05d5 \u05e2\u05dc\u05d9\u05d4\u05dd (\u05d4\u05ea\u05d0\u05e8\u05d9\u05da \u05e2\u05d3\u05d9\u05d9\u05df \u05dc\u05d0 \u05de\u05e9\u05d5\u05e8\u05d9\u05d9\u05df \u05e1\u05d5\u05e4\u05d9\u05ea):
+    msg = `הייי ${name}, איזה כיף שדיברנו! 😊
+הנה סיכום הפרטים שדיברנו עליהם (התאריך עדיין לא משוריין סופית):
 
-*\u05ea\u05d0\u05e8\u05d9\u05da:* ${dateStr}
-*\u05e9\u05e2\u05d4 :* ${time}
-*\u05e9\u05dd \u05d4\u05d7\u05d5\u05d2\u05d2\u05ea:* ${celebrant}
-*\u05dc\u05db\u05d1\u05d5\u05d3:* ${occasion}
-*\u05de\u05e1\u05e4\u05e8 \u05de\u05e9\u05ea\u05ea\u05e4\u05d5\u05ea :* \u05e2\u05d3 ${count} \u05de\u05e9\u05ea\u05ea\u05e4\u05d5\u05ea
-*\u05de\u05e1\u05dc\u05d5\u05dc:* ${route}
-*\u05e1\u05db\u05d5\u05dd :* ${base.toLocaleString('he-IL')}\u20aa
-${discArrivalLine ? discArrivalLine + '\n' : ''}*\u05e1\u05db\u05d5\u05dd \u05e1\u05d5\u05e4\u05d9:* ${total.toLocaleString('he-IL')} \u05e9\u05d7
+*תאריך:* ${dateStr}
+*שעה :* ${time}
+*שם החוגגת:* ${celebrant}
+*לכבוד:* ${occasion}
+*מספר משתתפות :* עד ${count} משתתפות
+*מסלול:* ${route}
+*סכום :* ${base.toLocaleString('he-IL')}₪
+${discountText ? discountText + '\n' : ''}${feeText ? feeText + '\n' : ''}*סכום סופי:* ${total.toLocaleString('he-IL')} שח
 
-\u05d1\u05e8\u05d2\u05e2 \u05e9\u05e0\u05e1\u05d2\u05d5\u05e8 \u05d0\u05ea \u05d4\u05ea\u05d0\u05e8\u05d9\u05da \u05d0\u05e9\u05dc\u05d7 \u05dc\u05da \u05d0\u05d9\u05e9\u05d5\u05e8 \u05e1\u05d5\u05e4\u05d9 \u05e2\u05dd \u05db\u05dc \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \ud83e\udec6
-\u05d0\u05dd \u05d9\u05e9 \u05e9\u05d0\u05dc\u05d5\u05ea \u05d0\u05e0\u05d9 \u05db\u05d0\u05df!`;
+ברגע שנסגור את התאריך אשלח לך אישור סופי עם כל הפרטים 🫶
+אם יש שאלות אני כאן!`;
   } else {
-    msg = `\u05d0\u05e0\u05d9 \u05e9\u05d5\u05dc\u05d7\u05ea \u05dc\u05da \u05d0\u05ea \u05e1\u05d9\u05db\u05d5\u05dd \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05dc\u05e1\u05d3\u05e0\u05d0:
+    msg = `אני שולחת לך את סיכום הפרטים לסדנא:
 
-\u05d0\u05d9\u05d6\u05d4 \u05db\u05d9\u05e3 \u05e9\u05e1\u05d2\u05e8\u05ea\u05df \u05d0\u05d9\u05e8\u05d5\u05e2 \u05e2\u05dd charming \ud83e\udd70 \u05de\u05ea\u05e8\u05d2\u05e9\u05ea \u05de\u05d0\u05d5\u05d3 \u05dc\u05d7\u05d2\u05d5\u05d2 \u05d0\u05d9\u05ea\u05db\u05df \u05d0\u05ea \u05d4\u05d9\u05d5\u05dd \u05d4\u05de\u05e9\u05de\u05d7 \u05d4\u05d6\u05d4 \ud83e\udd29
-\u05dc\u05e1\u05d9\u05db\u05d5\u05dd \u05d4\u05e9\u05d9\u05d7\u05d4 \u05e9\u05dc\u05e0\u05d5 :
-*\u05ea\u05d0\u05e8\u05d9\u05da:* ${dateStr}
-*\u05e9\u05e2\u05d4 :* ${time}
-*\u05e9\u05dd \u05d4\u05d7\u05d5\u05d2\u05d2\u05ea:* ${celebrant}
-*\u05dc\u05db\u05d1\u05d5\u05d3:* ${occasion}
-*\u05de\u05e1\u05e4\u05e8 \u05de\u05e9\u05ea\u05ea\u05e4\u05d5\u05ea :* \u05e2\u05d3 ${count} \u05de\u05e9\u05ea\u05ea\u05e4\u05d5\u05ea
-*\u05de\u05e1\u05dc\u05d5\u05dc:* ${route}
-*\u05e1\u05db\u05d5\u05dd :* ${base.toLocaleString('he-IL')}\u20aa
-${discArrivalLine ? discArrivalLine + '\n' : ''}*\u05e1\u05db\u05d5\u05dd \u05e1\u05d5\u05e4\u05d9:* ${total.toLocaleString('he-IL')} \u05e9\u05d7
+איזה כיף שסגרתן אירוע עם charming 🥰 מתרגשת מאוד לחגוג איתכן את היום המשמח הזה 🤩
+לסיכום השיחה שלנו :
+תאריך: ${dateStr}
+שעה : ${time}
+שם החוגגת: ${celebrant}
+לכבוד: ${occasion}
+מספר משתתפות : עד ${count} משתתפות
+מסלול: ${route}
+סכום : ${base.toLocaleString('he-IL')}₪
+${discountText ? discountText + '\n' : ''}${feeText ? feeText + '\n' : ''}סכום סופי: ${total.toLocaleString('he-IL')} שח
 
-\u05e9\u05d5\u05dc\u05de\u05d4 \u05de\u05e7\u05d3\u05de\u05d4 \u05e2\u05dc \u05e1\u05da 500 \u05e9\u05d0\u05e8 \u05d4\u05e1\u05db\u05d5\u05dd \u05d9\u05e0\u05ea\u05df \u05d1\u05d9\u05d5\u05dd \u05d4\u05d0\u05d9\u05e8\u05d5\u05e2
+שולמה מקדמה על סך 500 שאר הסכום ינתן ביום האירוע
 
-\u05dc\u05e1\u05d3\u05e0\u05d4 \u05d9\u05e9 \u05dc\u05d4\u05db\u05d9\u05df \u05e9\u05d5\u05dc\u05d7\u05df \u05de\u05e8\u05db\u05d6\u05d9 \u05e1\u05d1\u05d9\u05d1\u05d5 \u05d4\u05d1\u05e0\u05d5\u05ea \u05d9\u05e9\u05d1\u05d5 \u05dc\u05db\u05dc \u05d0\u05d7\u05ea \u05e6\u05e8\u05d9\u05da \u05dc\u05d4\u05d9\u05d5\u05ea \u05db\u05d9\u05e1\u05d0 \u05d5\u05d1\u05e0\u05d5\u05e1\u05e3 \u05e9\u05d5\u05dc\u05d7\u05df \u05d1\u05e6\u05d3 \u05d1\u05e1\u05d2\u05e0\u05d5\u05df \u05d1\u05d5\u05e4\u05d4 \u05e2\u05dc\u05d9\u05d5 \u05d9\u05d4\u05d9\u05d5 \u05d4\u05e6\u05f3\u05d0\u05e8\u05de\u05d9\u05dd \u05d5\u05d4\u05e9\u05e8\u05e9\u05d0\u05d5\u05ea . \u05d0\u05ea \u05e2\u05d9\u05e6\u05d5\u05d1 \u05d4\u05e9\u05d5\u05dc\u05d7\u05df \u05e9\u05dc \u05e9\u05d5\u05dc\u05d7\u05df \u05d4\u05e6\u05f3\u05d0\u05e8\u05de\u05d9\u05dd \u05d0\u05e0\u05d9 \u05de\u05e2\u05e6\u05d1\u05ea \ud83d\ude0a
+לסדנה יש להכין שולחן מרכזי סביבו הבנות ישבו לכל אחת צריך להיות כיסא ובנוסף שולחן בצד בסגנון בופה עליו יהיו הצ'ארמים והשרשאות . את עיצוב שולחן הצ'ארמים אני מעצבת 😊
 
-\u05d0\u05e0\u05d7\u05e0\u05d5 \u05e0\u05d2\u05d9\u05e2 \u05d7\u05e6\u05d9 \u05e9\u05e2\u05d4 \u05dc\u05e4\u05e0\u05d9 \u05ea\u05d7\u05d9\u05dc\u05ea \u05d4\u05e1\u05d3\u05e0\u05d0 \u05e2\u05dc \u05de\u05e0\u05ea \u05dc\u05e1\u05d3\u05e8 \u05d0\u05ea \u05d4\u05e2\u05de\u05d3\u05d4 \u05d6\u05d4 \u05d0\u05d5\u05de\u05e8 \u05e9\u05d0\u05dd \u05e9\u05e2\u05ea \u05d4\u05e1\u05d3\u05e0\u05d0 \u05de\u05ea\u05d7\u05d9\u05dc\u05d4 \u05d1-${time} \u05d0\u05e0\u05d7\u05e0\u05d5 \u05e0\u05d2\u05d9\u05e2 \u05d1-${arrivalTime}.
+אנחנו נגיע חצי שעה לפני תחילת הסדנא על מנת לסדר את העמדה זה אומר שאם שעת הסדנא מתחילה ב-${time} אנחנו נגיע ב-${arrivalTime}.
 
-\u05d0\u05dd \u05d9\u05e9 \u05dc\u05db\u05df \u05e9\u05d0\u05dc\u05d5\u05ea , \u05d1\u05e7\u05e9\u05d5\u05ea \u05d5\u05db\u05dc \u05d3\u05d1\u05e8 \u05d0\u05d7\u05e8 \u05d0\u05e0\u05d9 \u05d6\u05de\u05d9\u05e0\u05d4 \u05dc\u05d4\u05db\u05dc !!!\ud83e\udec6
+אם יש לכן שאלות , בקשות וכל דבר אחר אני זמינה להכל !!!🫶
 
-\u05d3\u05d5\u05d2\u05de\u05d0\u05d5\u05ea \u05dc\u05e1\u05d9\u05d3\u05d5\u05e8 \u05d4\u05e9\u05d5\u05dc\u05d7\u05df\u2b07\ufe0f
-${tableImg1}
-${tableImg2}
-${tableImg3}`;
+דוגמאות לסידור השולחן⬇️
+${imagesText}`;
   }
 
   const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
-  window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+  const encodedMessage = encodeURIComponent(msg);
+  const whatsappUrl = "https://wa.me/" + waPhone + "?text=" + encodedMessage;
+  window.open(whatsappUrl, '_blank');
 }
 window.sendWorkshopWhatsApp = sendWorkshopWhatsApp;
 
@@ -3902,14 +3935,30 @@ const wsgCloudWidget = cloudinary.createUploadWidget({
   }
 });
 
+let wsgInited = false;
 function initWsGalleryTab() {
+  if (wsgInited) return;
+  wsgInited = true;
+
   document.getElementById('wsg-upload-btn').addEventListener('click', () => wsgCloudWidget.open());
 
-  // Real-time listener
-  const q = query(collection(db, WS_GALLERY_COL), orderBy('order','asc'));
+  // Real-time listener — try ordered query first, fall back to unordered
+  const col = collection(db, WS_GALLERY_COL);
+  const q = query(col, orderBy('order','asc'));
   onSnapshot(q, snap => {
     wsGalleryImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderWsgGrid();
+  }, err => {
+    console.warn('Gallery ordered query failed, falling back to unordered:', err);
+    onSnapshot(col, snap => {
+      wsGalleryImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      wsGalleryImages.sort((a,b) => (a.order||0) - (b.order||0));
+      renderWsgGrid();
+    }, err2 => {
+      console.error('Gallery query failed:', err2);
+      document.getElementById('wsg-loading').style.display = 'none';
+      document.getElementById('wsg-empty').style.display = '';
+    });
   });
 }
 
