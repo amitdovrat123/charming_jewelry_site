@@ -3190,7 +3190,7 @@ let calYear, calMonth;
 const WS_PRICES = {
   10: { 'מסלול 1 - שרשרת / צמיד': 1890, 'מסלול 2 - שרשרת ועגילים': 2290, 'מסלול 2 משודרג - שרשרת וצמיד': 2550, 'מסלול 3 - שרשרת צמיד ועגילים': 2690 },
   15: { 'מסלול 1 - שרשרת / צמיד': 2590, 'מסלול 2 - שרשרת ועגילים': 3290, 'מסלול 2 משודרג - שרשרת וצמיד': 3590, 'מסלול 3 - שרשרת צמיד ועגילים': 3790 },
-  20: { 'מסלול 1 - שרשרת / צמיד': 3290, 'מסלול 2 - שרשרת ועגילים': 3890, 'מסלול 2 משודרג - שרשרת וצמיד': 4790, 'מסלול 3 - שרשרת צמיד ועגילים': 4390 },
+  20: { 'מסלול 1 - שרשרת / צמיד': 3290, 'מסלול 2 - שרשרת ועגילים': 3890, 'מסלול 2 משודרג - שרשרת וצמיד': 4390, 'מסלול 3 - שרשרת צמיד ועגילים': 4790 },
   25: { 'מסלול 1 - שרשרת / צמיד': 4190, 'מסלול 2 - שרשרת ועגילים': 4890, 'מסלול 2 משודרג - שרשרת וצמיד': 5490, 'מסלול 3 - שרשרת צמיד ועגילים': 5990 },
   30: { 'מסלול 1 - שרשרת / צמיד': 4790, 'מסלול 2 - שרשרת ועגילים': 5690, 'מסלול 2 משודרג - שרשרת וצמיד': 6290, 'מסלול 3 - שרשרת צמיד ועגילים': 6890 },
 };
@@ -3473,22 +3473,16 @@ function sendWorkshopWhatsApp() {
   const status = document.getElementById('ws-status')?.value || 'confirmed';
 
   // Conditional discount & arrival fee lines
-  let discountText = '';
-  if (disc > 0) discountText = `קיבלת הנחה מיוחדת על סך ${disc}% הנחה .`;
-  let feeText = '';
-  if (arrival > 0) feeText = `בנוסף תיהיה עלות הגעה על סך ${arrival} שח (ההנחה אינה נכללת על עלות ההגעה )`;
+  let discountLine = disc > 0 ? '\u05E7\u05D9\u05D1\u05DC\u05EA \u05D4\u05E0\u05D7\u05D4 \u05DE\u05D9\u05D5\u05D7\u05D3\u05EA \u05E2\u05DC \u05E1\u05DA ' + disc + '% \u05D4\u05E0\u05D7\u05D4 .' : '';
+  let arrivalFeeLine = arrival > 0 ? '\u05D1\u05E0\u05D5\u05E1\u05E3 \u05EA\u05D9\u05D4\u05D9\u05D4 \u05E2\u05DC\u05D5\u05EA \u05D4\u05D2\u05E2\u05D4 \u05E2\u05DC \u05E1\u05DA ' + arrival + ' \u05E9\u05D7 (\u05D4\u05D4\u05E0\u05D7\u05D4 \u05D0\u05D9\u05E0\u05D4 \u05E0\u05DB\u05DC\u05DC\u05EA \u05E2\u05DC \u05E2\u05DC\u05D5\u05EA \u05D4\u05D4\u05D2\u05E2\u05D4 )' : '';
+  let extraChargesText = [discountLine, arrivalFeeLine].filter(function(x){return x;}).join(' ');
+  if (extraChargesText) extraChargesText = '\n' + extraChargesText;
 
-  // Table setup image links
-  const tableImg1 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-1';
-  const tableImg2 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-2';
-  const tableImg3 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-3';
-  const imagesText = tableImg1 + '\n' + tableImg2 + '\n' + tableImg3;
+  // Cloudinary collection link
+  const collectionLink = 'https://collection.cloudinary.com/dhri2dbek/eea3f87f5bbcd1d24c0a33e39b5399f4';
 
-  // Emoji placeholders — will be swapped for raw percent-encoded UTF-8 bytes
-  // AFTER encodeURIComponent, so emojis never exist as JS string characters.
-  // This bypasses any file-encoding or runtime string issues entirely.
+  // Emoji placeholders — swapped for raw percent-encoded UTF-8 bytes after encodeURIComponent
   const _PH = { SMILE: '{{E_SMILE}}', HEARTS: '{{E_HEARTS}}', STARS: '{{E_STARS}}', HHANDS: '{{E_HHANDS}}', DOWN: '{{E_DOWN}}' };
-  // Pre-computed percent-encoded UTF-8 bytes for each emoji:
   const _EB = {
     SMILE:  '%F0%9F%98%8A',         // U+1F60A
     HEARTS: '%F0%9F%A5%B0',         // U+1F970
@@ -3510,57 +3504,52 @@ function sendWorkshopWhatsApp() {
       '*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA',
       '*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route,
       '*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA',
-      (discountText ? discountText : ''),
-      (feeText ? feeText : ''),
+      (discountLine ? discountLine : ''),
+      (arrivalFeeLine ? arrivalFeeLine : ''),
       '*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7',
       '',
       '\u05D1\u05E8\u05D2\u05E2 \u05E9\u05E0\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05D0\u05E9\u05DC\u05D7 \u05DC\u05DA \u05D0\u05D9\u05E9\u05D5\u05E8 \u05E1\u05D5\u05E4\u05D9 \u05E2\u05DD \u05DB\u05DC \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD ' + _PH.HHANDS,
       '\u05D0\u05DD \u05D9\u05E9 \u05E9\u05D0\u05DC\u05D5\u05EA \u05D0\u05E0\u05D9 \u05DB\u05D0\u05DF!'
-    ].filter(l => l !== '').join('\n');
+    ].filter(function(l){return l !== '';}).join('\n');
   } else {
-    msg = [
-      '\u05D0\u05E0\u05D9 \u05E9\u05D5\u05DC\u05D7\u05EA \u05DC\u05DA \u05D0\u05EA \u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05DC\u05E1\u05D3\u05E0\u05D0:',
-      '',
-      '\u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05E1\u05D2\u05E8\u05EA\u05DF \u05D0\u05D9\u05E8\u05D5\u05E2 \u05E2\u05DD charming ' + _PH.HEARTS + ' \u05DE\u05EA\u05E8\u05D2\u05E9\u05EA \u05DE\u05D0\u05D5\u05D3 \u05DC\u05D7\u05D2\u05D5\u05D2 \u05D0\u05D9\u05EA\u05DB\u05DF \u05D0\u05EA \u05D4\u05D9\u05D5\u05DD \u05D4\u05DE\u05E9\u05DE\u05D7 \u05D4\u05D6\u05D4 ' + _PH.STARS,
-      '\u05DC\u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E9\u05D9\u05D7\u05D4 \u05E9\u05DC\u05E0\u05D5 :',
-      '*\u05EA\u05D0\u05E8\u05D9\u05DA:* ' + dateStr,
-      '*\u05E9\u05E2\u05D4 :* ' + time,
-      '*\u05E9\u05DD \u05D4\u05D7\u05D5\u05D2\u05D2\u05EA:* ' + celebrant,
-      '*\u05DC\u05DB\u05D1\u05D5\u05D3:* ' + occasion,
-      '*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA',
-      '*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route,
-      '*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA',
-      (discountText ? discountText : ''),
-      (feeText ? feeText : ''),
-      '*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7',
-      '',
-      '\u05E9\u05D5\u05DC\u05DE\u05D4 \u05DE\u05E7\u05D3\u05DE\u05D4 \u05E2\u05DC \u05E1\u05DA 500 \u05E9\u05D0\u05E8 \u05D4\u05E1\u05DB\u05D5\u05DD \u05D9\u05E0\u05EA\u05DF \u05D1\u05D9\u05D5\u05DD \u05D4\u05D0\u05D9\u05E8\u05D5\u05E2',
-      '',
-      '\u05DC\u05E1\u05D3\u05E0\u05D4 \u05D9\u05E9 \u05DC\u05D4\u05DB\u05D9\u05DF \u05E9\u05D5\u05DC\u05D7\u05DF \u05DE\u05E8\u05DB\u05D6\u05D9 \u05E1\u05D1\u05D9\u05D1\u05D5 \u05D4\u05D1\u05E0\u05D5\u05EA \u05D9\u05E9\u05D1\u05D5 \u05DC\u05DB\u05DC \u05D0\u05D7\u05EA \u05E6\u05E8\u05D9\u05DA \u05DC\u05D4\u05D9\u05D5\u05EA \u05DB\u05D9\u05E1\u05D0 \u05D5\u05D1\u05E0\u05D5\u05E1\u05E3 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D1\u05E6\u05D3 \u05D1\u05E1\u05D2\u05E0\u05D5\u05DF \u05D1\u05D5\u05E4\u05D4 \u05E2\u05DC\u05D9\u05D5 \u05D9\u05D4\u05D9\u05D5 \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D5\u05D4\u05E9\u05E8\u05E9\u05D0\u05D5\u05EA . \u05D0\u05EA \u05E2\u05D9\u05E6\u05D5\u05D1 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D0\u05E0\u05D9 \u05DE\u05E2\u05E6\u05D1\u05EA ' + _PH.SMILE,
-      '',
-      '\u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D7\u05E6\u05D9 \u05E9\u05E2\u05D4 \u05DC\u05E4\u05E0\u05D9 \u05EA\u05D7\u05D9\u05DC\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05E2\u05DC \u05DE\u05E0\u05EA \u05DC\u05E1\u05D3\u05E8 \u05D0\u05EA \u05D4\u05E2\u05DE\u05D3\u05D4 \u05D6\u05D4 \u05D0\u05D5\u05DE\u05E8 \u05E9\u05D0\u05DD \u05E9\u05E2\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05DE\u05EA\u05D7\u05D9\u05DC\u05D4 \u05D1-' + time + ' \u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D1-' + arrivalTime + '.',
-      '',
-      '\u05D0\u05DD \u05D9\u05E9 \u05DC\u05DB\u05DF \u05E9\u05D0\u05DC\u05D5\u05EA , \u05D1\u05E7\u05E9\u05D5\u05EA \u05D5\u05DB\u05DC \u05D3\u05D1\u05E8 \u05D0\u05D7\u05E8 \u05D0\u05E0\u05D9 \u05D6\u05DE\u05D9\u05E0\u05D4 \u05DC\u05D4\u05DB\u05DC !!!' + _PH.HHANDS,
-      '',
-      '\u05D3\u05D5\u05D2\u05DE\u05D0\u05D5\u05EA \u05DC\u05E1\u05D9\u05D3\u05D5\u05E8 \u05D4\u05E9\u05D5\u05DC\u05D7\u05DF' + _PH.DOWN,
-      imagesText
-    ].filter(l => l !== '').join('\n');
+    // Confirmed message — V19.7 template
+    var lines = [];
+    lines.push('\u05D0\u05E0\u05D9 \u05E9\u05D5\u05DC\u05D7\u05EA \u05DC\u05DA \u05D0\u05EA \u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05DC\u05E1\u05D3\u05E0\u05D0:');
+    lines.push('');
+    lines.push('\u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05E1\u05D2\u05E8\u05EA\u05DF \u05D0\u05D9\u05E8\u05D5\u05E2 \u05E2\u05DD charming ' + _PH.HEARTS + ' \u05DE\u05EA\u05E8\u05D2\u05E9\u05EA \u05DE\u05D0\u05D5\u05D3 \u05DC\u05D7\u05D2\u05D5\u05D2 \u05D0\u05D9\u05EA\u05DB\u05DF \u05D0\u05EA \u05D4\u05D9\u05D5\u05DD \u05D4\u05DE\u05E9\u05DE\u05D7 \u05D4\u05D6\u05D4 ' + _PH.STARS);
+    lines.push('\u05DC\u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E9\u05D9\u05D7\u05D4 \u05E9\u05DC\u05E0\u05D5 :');
+    lines.push('*\u05EA\u05D0\u05E8\u05D9\u05DA:* ' + dateStr);
+    lines.push('*\u05E9\u05E2\u05D4 :* ' + time);
+    lines.push('*\u05E9\u05DD \u05D4\u05D7\u05D5\u05D2\u05D2\u05EA:* ' + celebrant);
+    lines.push('*\u05DC\u05DB\u05D1\u05D5\u05D3:* ' + occasion);
+    lines.push('*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA');
+    lines.push('*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route);
+    lines.push('*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA' + extraChargesText);
+    lines.push('*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7');
+    lines.push('');
+    lines.push('\u05E9\u05D5\u05DC\u05DE\u05D4 \u05DE\u05E7\u05D3\u05DE\u05D4 \u05E2\u05DC \u05E1\u05DA 500 \u05E9\u05D0\u05E8 \u05D4\u05E1\u05DB\u05D5\u05DD \u05D9\u05E0\u05EA\u05DF \u05D1\u05D9\u05D5\u05DD \u05D4\u05D0\u05D9\u05E8\u05D5\u05E2');
+    lines.push('');
+    lines.push('\u05DC\u05E1\u05D3\u05E0\u05D4 \u05D9\u05E9 \u05DC\u05D4\u05DB\u05D9\u05DF \u05E9\u05D5\u05DC\u05D7\u05DF \u05DE\u05E8\u05DB\u05D6\u05D9 \u05E1\u05D1\u05D9\u05D1\u05D5 \u05D4\u05D1\u05E0\u05D5\u05EA \u05D9\u05E9\u05D1\u05D5 \u05DC\u05DB\u05DC \u05D0\u05D7\u05EA \u05E6\u05E8\u05D9\u05DA \u05DC\u05D4\u05D9\u05D5\u05EA \u05DB\u05D9\u05E1\u05D0 \u05D5\u05D1\u05E0\u05D5\u05E1\u05E3 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D1\u05E6\u05D3 \u05D1\u05E1\u05D2\u05E0\u05D5\u05DF \u05D1\u05D5\u05E4\u05D4 \u05E2\u05DC\u05D9\u05D5 \u05D9\u05D4\u05D9\u05D5 \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D5\u05D4\u05E9\u05E8\u05E9\u05D0\u05D5\u05EA . \u05D0\u05EA \u05E2\u05D9\u05E6\u05D5\u05D1 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D0\u05E0\u05D9 \u05DE\u05E2\u05E6\u05D1\u05EA ' + _PH.SMILE);
+    lines.push('');
+    lines.push('\u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D7\u05E6\u05D9 \u05E9\u05E2\u05D4 \u05DC\u05E4\u05E0\u05D9 \u05EA\u05D7\u05D9\u05DC\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05E2\u05DC \u05DE\u05E0\u05EA \u05DC\u05E1\u05D3\u05E8 \u05D0\u05EA \u05D4\u05E2\u05DE\u05D3\u05D4 \u05D6\u05D4 \u05D0\u05D5\u05DE\u05E8 \u05E9\u05D0\u05DD \u05E9\u05E2\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05DE\u05EA\u05D7\u05D9\u05DC\u05D4 \u05D1-' + time + ' \u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D1-' + arrivalTime + '.');
+    lines.push('');
+    lines.push('\u05D0\u05DD \u05D9\u05E9 \u05DC\u05DB\u05DF \u05E9\u05D0\u05DC\u05D5\u05EA , \u05D1\u05E7\u05E9\u05D5\u05EA \u05D5\u05DB\u05DC \u05D3\u05D1\u05E8 \u05D0\u05D7\u05E8 \u05D0\u05E0\u05D9 \u05D6\u05DE\u05D9\u05E0\u05D4 \u05DC\u05D4\u05DB\u05DC !!!' + _PH.HHANDS);
+    lines.push('');
+    lines.push('\u05D3\u05D5\u05D2\u05DE\u05D0\u05D5\u05EA \u05DC\u05E1\u05D9\u05D3\u05D5\u05E8 \u05D4\u05E9\u05D5\u05DC\u05D7\u05DF (\u05D1\u05E7\u05D9\u05E9\u05D5\u05E8 \u05DB\u05D0\u05DF' + _PH.DOWN + ')');
+    lines.push(collectionLink);
+    msg = lines.join('\n');
   }
 
   // Encode the message, then swap placeholders for raw emoji bytes
   const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
   let encoded = encodeURIComponent(msg);
-  encoded = encoded
-    .replace(encodeURIComponent(_PH.SMILE),  _EB.SMILE)
-    .replace(encodeURIComponent(_PH.HEARTS), _EB.HEARTS)
-    .replace(encodeURIComponent(_PH.STARS),  _EB.STARS)
-    .replace(encodeURIComponent(_PH.HHANDS), _EB.HHANDS)
-    .replace(encodeURIComponent(_PH.DOWN),   _EB.DOWN);
-  // Use replaceAll for confirmed msg which has duplicate SMILE/HHANDS
-  if (encoded.indexOf(encodeURIComponent(_PH.SMILE)) !== -1)
-    encoded = encoded.split(encodeURIComponent(_PH.SMILE)).join(_EB.SMILE);
-  if (encoded.indexOf(encodeURIComponent(_PH.HHANDS)) !== -1)
-    encoded = encoded.split(encodeURIComponent(_PH.HHANDS)).join(_EB.HHANDS);
+  // Replace all placeholder occurrences with pre-encoded emoji bytes
+  Object.keys(_PH).forEach(function(k) {
+    var phEncoded = encodeURIComponent(_PH[k]);
+    while (encoded.indexOf(phEncoded) !== -1) {
+      encoded = encoded.replace(phEncoded, _EB[k]);
+    }
+  });
   window.open('https://wa.me/' + waPhone + '?text=' + encoded, '_blank');
 }
 window.sendWorkshopWhatsApp = sendWorkshopWhatsApp;
