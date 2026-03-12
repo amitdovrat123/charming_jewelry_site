@@ -79,6 +79,12 @@ service cloud.firestore {
       match /settings/{settingId} {
         allow read, write: if isAdmin();
       }
+
+      // ── Workshop Gallery: anyone can read, only admin can write ──
+      match /workshopGallery/{imageId} {
+        allow read:  if true;
+        allow write: if isAdmin();
+      }
     }
 
     // ══════════════════════════════════════════════════════

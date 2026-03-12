@@ -185,6 +185,34 @@ function localDesc(data) {
   return data.description;
 }
 
+// ── Translation maps for dynamic Firestore data ──────────────
+const _catMap = {
+  'שרשראות': '_cat_necklaces',
+  'צמידים': '_cat_bracelets',
+  'עגילים': '_cat_earrings',
+  'טבעות': '_cat_rings',
+  'מארזי Charming': '_cat_charming_sets',
+  'מארזי Charming ביתיים': '_cat_charming_sets',
+};
+const _badgeMap = {
+  'בסט-סלר': '_badge_bestseller',
+  'חדש': '_badge_new',
+  'מבצע': '_badge_sale',
+  'מהדורה מוגבלת': '_badge_limited',
+};
+const _colorMap = {
+  'זהב': '_color_gold',
+  'כסף': '_color_silver',
+  'זהב ורוד': '_color_rosegold',
+};
+const _matMap = {
+  'פלדת אל-חלד': '_mat_stainless',
+};
+function localCat(val)      { return (typeof t === 'function' && _catMap[val])   ? t(_catMap[val], val)   : val; }
+function localBadge(val)    { return (typeof t === 'function' && _badgeMap[val]) ? t(_badgeMap[val], val) : val; }
+function localColor(val)    { return (typeof t === 'function' && _colorMap[val]) ? t(_colorMap[val], val) : val; }
+function localMaterial(val) { return (typeof t === 'function' && _matMap[val])   ? t(_matMap[val], val)   : val; }
+
 // ── Card HTML ──────────────────────────────────────────────────
 function cardHTML(product) {
   const { data, id } = product;
@@ -200,7 +228,7 @@ function cardHTML(product) {
     : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;">💎</div>`;
 
   const badgeHtml = badge
-    ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;">${esc(badge)}</span>` : '';
+    ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;">${esc(localBadge(badge))}</span>` : '';
   const oosHtml = oos
     ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;background:var(--muted);">${t('pv_oos_badge','אזל')}</span>` : '';
 
@@ -249,7 +277,7 @@ function shopCardHTML(product) {
     : `<div class="sp-card-img-placeholder">💎</div>`;
 
   const badgeHtml = (badge && !oos)
-    ? `<span class="sp-card-badge">${esc(badge)}</span>` : '';
+    ? `<span class="sp-card-badge">${esc(localBadge(badge))}</span>` : '';
   const oosBadge = oos
     ? `<span class="sp-card-badge sp-card-badge--oos">${t('pv_oos_badge','אזל')}</span>` : '';
 
@@ -258,10 +286,10 @@ function shopCardHTML(product) {
     : `<span class="sp-card-price">${price} ₪</span>`;
 
   const metalChip = data.color
-    ? `<span class="sp-card-metal">${esc(data.color)}</span>` : '';
+    ? `<span class="sp-card-metal">${esc(localColor(data.color))}</span>` : '';
 
   const matChip = data.material
-    ? `<span class="sp-card-material">${esc(data.material)}</span>` : '';
+    ? `<span class="sp-card-material">${esc(localMaterial(data.material))}</span>` : '';
 
   const customField = data.isCustomizable ? `
     <div class="sp-custom-field">
@@ -400,7 +428,7 @@ function renderShop() {
   const catPillsHTML = [
     `<button class="sp-pill${isAllActive ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">${t('shop_all','הכל')}</button>`,
     ...allCats.map(c =>
-      `<button class="sp-pill${shopFilterCat === c ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
+      `<button class="sp-pill${shopFilterCat === c ? ' sp-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(localCat(c))}</button>`
     ),
     `<button class="sp-pill sp-pill--star${shopFilterFeatured ? ' sp-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">${t('shop_featured','מוצרים נבחרים')} ⭐</button>`,
   ].join('');
@@ -408,7 +436,7 @@ function renderShop() {
   const colorPillsHTML = [
     `<button class="sp-pill${!shopFilterColor ? ' sp-pill--active' : ''}" data-filter-color="">${t('shop_all','הכל')}</button>`,
     ...allColors.map(c =>
-      `<button class="sp-pill${shopFilterColor === c ? ' sp-pill--active' : ''}" data-filter-color="${esc(c)}">${esc(c)}</button>`
+      `<button class="sp-pill${shopFilterColor === c ? ' sp-pill--active' : ''}" data-filter-color="${esc(c)}">${esc(localColor(c))}</button>`
     ),
   ].join('');
 
@@ -573,10 +601,10 @@ function renderProductView() {
     : `<span style="font-size:1.6rem;font-weight:700;color:var(--ink);">${price} ₪</span>`;
 
   const metaChips = [
-    data.category && `<span style="background:var(--pink-light);color:var(--pink-deep);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(data.category)}</span>`,
-    data.material && `<span style="background:var(--sand);border:1px solid var(--sand-dark);color:var(--ink-soft);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(data.material)}</span>`,
-    data.color    && `<span style="background:var(--sand);border:1px solid var(--sand-dark);color:var(--ink-soft);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(data.color)}</span>`,
-    badge         && `<span style="background:var(--pink);color:#fff;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:50px;">${esc(badge)}</span>`,
+    data.category && `<span style="background:var(--pink-light);color:var(--pink-deep);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(localCat(data.category))}</span>`,
+    data.material && `<span style="background:var(--sand);border:1px solid var(--sand-dark);color:var(--ink-soft);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(localMaterial(data.material))}</span>`,
+    data.color    && `<span style="background:var(--sand);border:1px solid var(--sand-dark);color:var(--ink-soft);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(localColor(data.color))}</span>`,
+    badge         && `<span style="background:var(--pink);color:#fff;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:50px;">${esc(localBadge(badge))}</span>`,
   ].filter(Boolean).join('');
 
   const mainImg = pvImages[0]
@@ -610,7 +638,7 @@ function renderProductView() {
         <nav class="pv-breadcrumb" aria-label="breadcrumb">
           <a href="index.html" id="pv-crumb-home">${t('nav_home','דף הבית')}</a>
           <span class="pv-breadcrumb-sep">/</span>
-          ${crumbCat ? `<a href="shop.html?cat=${encodeURIComponent(crumbCat)}" id="pv-crumb-cat">${esc(crumbCat)}</a><span class="pv-breadcrumb-sep">/</span>` : ''}
+          ${crumbCat ? `<a href="shop.html?cat=${encodeURIComponent(crumbCat)}" id="pv-crumb-cat">${esc(localCat(crumbCat))}</a><span class="pv-breadcrumb-sep">/</span>` : ''}
           <span class="pv-breadcrumb-current">${esc(localName(data))}</span>
         </nav>
         <div class="pv-layout">
@@ -633,7 +661,17 @@ function renderProductView() {
   if (typeof applyLang === 'function') applyLang();
 
   el.querySelector('#pv-crumb-home')?.addEventListener('click', e => { e.preventDefault(); switchView('home'); });
-  // Category crumb already has a real href — no JS needed
+  // Category crumb navigates to shop.html — make it also work within the SPA
+  el.querySelector('#pv-crumb-cat')?.addEventListener('click', e => {
+    e.preventDefault();
+    // If we have the shop view in this page, filter and show it
+    if (document.getElementById('view-shop')) {
+      shopFilterCat = crumbCat;
+      switchView('shop');
+    } else {
+      window.location.href = e.currentTarget.href;
+    }
+  });
 
   if (!oos) {
     el.querySelector('#pv-add-cart').addEventListener('click', () => { addToCart(currentProduct); });
@@ -1125,12 +1163,10 @@ function clearFormStorage() { localStorage.removeItem(FORM_KEY); }
 
 // ── Order ID generator ─────────────────────────────────────────
 function generateOrderId() {
-  const now   = new Date();
-  const dd    = String(now.getDate()).padStart(2, '0');
-  const mm    = String(now.getMonth() + 1).padStart(2, '0');
+  const year  = new Date().getFullYear();
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const rand  = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `CH-${dd}${mm}-${rand}`;
+  return `CH-${year}-${rand}`;
 }
 
 // ── V15.3 New checkout form (step 2) ──────────────────────────
@@ -1204,7 +1240,7 @@ function renderCheckoutForm(el) {
               </div>
               <div class="co-field">
                 <label class="co-label" for="co-email">${t('co_email_label','אימייל')} *</label>
-                <input id="co-email" class="co-input" type="email" value="${esc(pre.email)}" autocomplete="email" />
+                <input id="co-email" class="co-input" type="email" required value="${esc(pre.email)}" autocomplete="email" />
               </div>
               <div class="co-field">
                 <label class="co-label" for="co-phone">${t('co_phone_label','טלפון (10 ספרות)')} *</label>
@@ -1528,7 +1564,7 @@ function renderCheckoutForm(el) {
           name:              i.name,
           price:             i.price,
           quantity:          i.qty || 1,
-          customizationNote: i.customizationNote || null,
+          customizationNote: i.customizationNote || '',
           image:             i.imageUrl || '',
         })),
         summary: { subtotal, shipping: shipCost2, discount: discountAmt, total: total2, currency: 'ILS' },
@@ -1556,6 +1592,7 @@ function renderCheckoutForm(el) {
       isQuickBuy = false; checkoutItems = [];
       clearFormStorage();
       orderIdGenerated = orderId;
+      localStorage.setItem('charming_last_order', orderId);
 
       switchView('thank-you');
     } catch (ex) {
@@ -2048,6 +2085,14 @@ function init() {
       const _p = allProducts.find(p => p.id === _productParam);
       if (_p) { pendingProductId = null; showProduct(_p); }
     }
+  }
+
+  // Handle ?payment=success callback (e.g. from external payment gateway)
+  if (_params.get('payment') === 'success') {
+    const _oid = _params.get('orderId') || localStorage.getItem('charming_last_order') || null;
+    window.history.replaceState({}, '', window.location.pathname);
+    if (_oid) orderIdGenerated = _oid;
+    switchView('thank-you');
   }
 
   // Promotional popup — 5 s delay, once per 7 days

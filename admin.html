@@ -1582,16 +1582,67 @@ function renderImageGrid() {
   }
   document.getElementById('upload-btn-label').textContent = `✓ ${uploadedImages.length} תמונה/ות — לחצי להוספה`;
   grid.innerHTML = uploadedImages.map((url, i) => `
-    <div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid #f0dfc0;">
-      <img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.display='none'" />
+    <div draggable="true" data-img-drag="${i}"
+      style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid ${i === 0 ? '#d4a373' : '#f0dfc0'};cursor:grab;transition:border-color 0.2s,transform 0.2s;">
+      <img src="${url}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" onerror="this.parentElement.style.display='none'" />
+      <span style="position:absolute;bottom:4px;right:4px;background:${i === 0 ? '#d4a373' : 'rgba(0,0,0,0.5)'};color:#fff;font-size:0.6rem;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${i+1}</span>
+      ${i > 0 ? `<button type="button" data-img-move-left="${i}"
+        style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.55);border:none;color:#fff;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">◀</button>` : ''}
+      ${i < uploadedImages.length - 1 ? `<button type="button" data-img-move-right="${i}"
+        style="position:absolute;top:4px;${i > 0 ? 'right:30px' : 'right:4px'};width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.55);border:none;color:#fff;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>` : ''}
       <button type="button" data-img-idx="${i}"
-        style="position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#ef4444;border:none;color:#fff;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+        style="position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#ef4444;border:none;color:#fff;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
     </div>`).join('');
+
+  // Delete buttons
   grid.querySelectorAll('[data-img-idx]').forEach(btn => {
     btn.addEventListener('click', () => {
       uploadedImages.splice(parseInt(btn.dataset.imgIdx), 1);
       document.getElementById('p-imgs').value = JSON.stringify(uploadedImages);
       renderImageGrid();
+    });
+  });
+
+  // Move left (earlier in order)
+  grid.querySelectorAll('[data-img-move-left]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.imgMoveLeft);
+      if (i > 0) { [uploadedImages[i-1], uploadedImages[i]] = [uploadedImages[i], uploadedImages[i-1]]; }
+      document.getElementById('p-imgs').value = JSON.stringify(uploadedImages);
+      renderImageGrid();
+    });
+  });
+
+  // Move right (later in order)
+  grid.querySelectorAll('[data-img-move-right]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.imgMoveRight);
+      if (i < uploadedImages.length - 1) { [uploadedImages[i], uploadedImages[i+1]] = [uploadedImages[i+1], uploadedImages[i]]; }
+      document.getElementById('p-imgs').value = JSON.stringify(uploadedImages);
+      renderImageGrid();
+    });
+  });
+
+  // Drag & drop reordering
+  let dragIdx = null;
+  grid.querySelectorAll('[data-img-drag]').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragIdx = parseInt(el.dataset.imgDrag);
+      el.style.opacity = '0.4';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => { el.style.opacity = '1'; });
+    el.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; el.style.borderColor = '#d4a373'; });
+    el.addEventListener('dragleave', () => { el.style.borderColor = parseInt(el.dataset.imgDrag) === 0 ? '#d4a373' : '#f0dfc0'; });
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      const dropIdx = parseInt(el.dataset.imgDrag);
+      if (dragIdx !== null && dragIdx !== dropIdx) {
+        const [moved] = uploadedImages.splice(dragIdx, 1);
+        uploadedImages.splice(dropIdx, 0, moved);
+        document.getElementById('p-imgs').value = JSON.stringify(uploadedImages);
+        renderImageGrid();
+      }
     });
   });
 }
@@ -3431,53 +3482,67 @@ function sendWorkshopWhatsApp() {
   const tableImg1 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-1';
   const tableImg2 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-2';
   const tableImg3 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-3';
-  const imagesText = `${tableImg1}\n${tableImg2}\n${tableImg3}`;
+  const imagesText = tableImg1 + '\n' + tableImg2 + '\n' + tableImg3;
+
+  // Build emojis from Unicode code points (immune to file encoding issues)
+  const E_HEARTS  = String.fromCodePoint(0x1F970); // 🥰
+  const E_STARS   = String.fromCodePoint(0x1F929); // 🤩
+  const E_SMILE   = String.fromCodePoint(0x1F60A); // 😊
+  const E_HHANDS  = String.fromCodePoint(0x1FAF6); // 🫶
+  const E_DOWN    = String.fromCodePoint(0x2B07, 0xFE0F); // ⬇️
 
   let msg;
   if (status === 'draft') {
-    msg = `הייי ${name}, איזה כיף שדיברנו! 😊
-הנה סיכום הפרטים שדיברנו עליהם (התאריך עדיין לא משוריין סופית):
-
-*תאריך:* ${dateStr}
-*שעה :* ${time}
-*שם החוגגת:* ${celebrant}
-*לכבוד:* ${occasion}
-*מספר משתתפות :* עד ${count} משתתפות
-*מסלול:* ${route}
-*סכום :* ${base.toLocaleString('he-IL')}₪
-${discountText ? discountText + '\n' : ''}${feeText ? feeText + '\n' : ''}*סכום סופי:* ${total.toLocaleString('he-IL')} שח
-
-ברגע שנסגור את התאריך אשלח לך אישור סופי עם כל הפרטים 🫶
-אם יש שאלות אני כאן!`;
+    msg = [
+      '\u05D4\u05D9\u05D9\u05D9 ' + name + ', \u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05D3\u05D9\u05D1\u05E8\u05E0\u05D5! ' + E_SMILE,
+      '\u05D4\u05E0\u05D4 \u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05E9\u05D3\u05D9\u05D1\u05E8\u05E0\u05D5 \u05E2\u05DC\u05D9\u05D4\u05DD (\u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05DE\u05E9\u05D5\u05E8\u05D9\u05D9\u05DF \u05E1\u05D5\u05E4\u05D9\u05EA):',
+      '',
+      '*\u05EA\u05D0\u05E8\u05D9\u05DA:* ' + dateStr,
+      '*\u05E9\u05E2\u05D4 :* ' + time,
+      '*\u05E9\u05DD \u05D4\u05D7\u05D5\u05D2\u05D2\u05EA:* ' + celebrant,
+      '*\u05DC\u05DB\u05D1\u05D5\u05D3:* ' + occasion,
+      '*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA',
+      '*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route,
+      '*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA',
+      (discountText ? discountText : ''),
+      (feeText ? feeText : ''),
+      '*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7',
+      '',
+      '\u05D1\u05E8\u05D2\u05E2 \u05E9\u05E0\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05D0\u05E9\u05DC\u05D7 \u05DC\u05DA \u05D0\u05D9\u05E9\u05D5\u05E8 \u05E1\u05D5\u05E4\u05D9 \u05E2\u05DD \u05DB\u05DC \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD ' + E_HHANDS,
+      '\u05D0\u05DD \u05D9\u05E9 \u05E9\u05D0\u05DC\u05D5\u05EA \u05D0\u05E0\u05D9 \u05DB\u05D0\u05DF!'
+    ].filter(l => l !== '').join('\n');
   } else {
-    msg = `אני שולחת לך את סיכום הפרטים לסדנא:
-
-איזה כיף שסגרתן אירוע עם charming 🥰 מתרגשת מאוד לחגוג איתכן את היום המשמח הזה 🤩
-לסיכום השיחה שלנו :
-תאריך: ${dateStr}
-שעה : ${time}
-שם החוגגת: ${celebrant}
-לכבוד: ${occasion}
-מספר משתתפות : עד ${count} משתתפות
-מסלול: ${route}
-סכום : ${base.toLocaleString('he-IL')}₪
-${discountText ? discountText + '\n' : ''}${feeText ? feeText + '\n' : ''}סכום סופי: ${total.toLocaleString('he-IL')} שח
-
-שולמה מקדמה על סך 500 שאר הסכום ינתן ביום האירוע
-
-לסדנה יש להכין שולחן מרכזי סביבו הבנות ישבו לכל אחת צריך להיות כיסא ובנוסף שולחן בצד בסגנון בופה עליו יהיו הצ'ארמים והשרשאות . את עיצוב שולחן הצ'ארמים אני מעצבת 😊
-
-אנחנו נגיע חצי שעה לפני תחילת הסדנא על מנת לסדר את העמדה זה אומר שאם שעת הסדנא מתחילה ב-${time} אנחנו נגיע ב-${arrivalTime}.
-
-אם יש לכן שאלות , בקשות וכל דבר אחר אני זמינה להכל !!!🫶
-
-דוגמאות לסידור השולחן⬇️
-${imagesText}`;
+    msg = [
+      '\u05D0\u05E0\u05D9 \u05E9\u05D5\u05DC\u05D7\u05EA \u05DC\u05DA \u05D0\u05EA \u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05DC\u05E1\u05D3\u05E0\u05D0:',
+      '',
+      '\u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05E1\u05D2\u05E8\u05EA\u05DF \u05D0\u05D9\u05E8\u05D5\u05E2 \u05E2\u05DD charming ' + E_HEARTS + ' \u05DE\u05EA\u05E8\u05D2\u05E9\u05EA \u05DE\u05D0\u05D5\u05D3 \u05DC\u05D7\u05D2\u05D5\u05D2 \u05D0\u05D9\u05EA\u05DB\u05DF \u05D0\u05EA \u05D4\u05D9\u05D5\u05DD \u05D4\u05DE\u05E9\u05DE\u05D7 \u05D4\u05D6\u05D4 ' + E_STARS,
+      '\u05DC\u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E9\u05D9\u05D7\u05D4 \u05E9\u05DC\u05E0\u05D5 :',
+      '*\u05EA\u05D0\u05E8\u05D9\u05DA:* ' + dateStr,
+      '*\u05E9\u05E2\u05D4 :* ' + time,
+      '*\u05E9\u05DD \u05D4\u05D7\u05D5\u05D2\u05D2\u05EA:* ' + celebrant,
+      '*\u05DC\u05DB\u05D1\u05D5\u05D3:* ' + occasion,
+      '*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA',
+      '*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route,
+      '*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA',
+      (discountText ? discountText : ''),
+      (feeText ? feeText : ''),
+      '*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7',
+      '',
+      '\u05E9\u05D5\u05DC\u05DE\u05D4 \u05DE\u05E7\u05D3\u05DE\u05D4 \u05E2\u05DC \u05E1\u05DA 500 \u05E9\u05D0\u05E8 \u05D4\u05E1\u05DB\u05D5\u05DD \u05D9\u05E0\u05EA\u05DF \u05D1\u05D9\u05D5\u05DD \u05D4\u05D0\u05D9\u05E8\u05D5\u05E2',
+      '',
+      '\u05DC\u05E1\u05D3\u05E0\u05D4 \u05D9\u05E9 \u05DC\u05D4\u05DB\u05D9\u05DF \u05E9\u05D5\u05DC\u05D7\u05DF \u05DE\u05E8\u05DB\u05D6\u05D9 \u05E1\u05D1\u05D9\u05D1\u05D5 \u05D4\u05D1\u05E0\u05D5\u05EA \u05D9\u05E9\u05D1\u05D5 \u05DC\u05DB\u05DC \u05D0\u05D7\u05EA \u05E6\u05E8\u05D9\u05DA \u05DC\u05D4\u05D9\u05D5\u05EA \u05DB\u05D9\u05E1\u05D0 \u05D5\u05D1\u05E0\u05D5\u05E1\u05E3 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D1\u05E6\u05D3 \u05D1\u05E1\u05D2\u05E0\u05D5\u05DF \u05D1\u05D5\u05E4\u05D4 \u05E2\u05DC\u05D9\u05D5 \u05D9\u05D4\u05D9\u05D5 \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D5\u05D4\u05E9\u05E8\u05E9\u05D0\u05D5\u05EA . \u05D0\u05EA \u05E2\u05D9\u05E6\u05D5\u05D1 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D0\u05E0\u05D9 \u05DE\u05E2\u05E6\u05D1\u05EA ' + E_SMILE,
+      '',
+      '\u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D7\u05E6\u05D9 \u05E9\u05E2\u05D4 \u05DC\u05E4\u05E0\u05D9 \u05EA\u05D7\u05D9\u05DC\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05E2\u05DC \u05DE\u05E0\u05EA \u05DC\u05E1\u05D3\u05E8 \u05D0\u05EA \u05D4\u05E2\u05DE\u05D3\u05D4 \u05D6\u05D4 \u05D0\u05D5\u05DE\u05E8 \u05E9\u05D0\u05DD \u05E9\u05E2\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05DE\u05EA\u05D7\u05D9\u05DC\u05D4 \u05D1-' + time + ' \u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D1-' + arrivalTime + '.',
+      '',
+      '\u05D0\u05DD \u05D9\u05E9 \u05DC\u05DB\u05DF \u05E9\u05D0\u05DC\u05D5\u05EA , \u05D1\u05E7\u05E9\u05D5\u05EA \u05D5\u05DB\u05DC \u05D3\u05D1\u05E8 \u05D0\u05D7\u05E8 \u05D0\u05E0\u05D9 \u05D6\u05DE\u05D9\u05E0\u05D4 \u05DC\u05D4\u05DB\u05DC !!!' + E_HHANDS,
+      '',
+      '\u05D3\u05D5\u05D2\u05DE\u05D0\u05D5\u05EA \u05DC\u05E1\u05D9\u05D3\u05D5\u05E8 \u05D4\u05E9\u05D5\u05DC\u05D7\u05DF' + E_DOWN,
+      imagesText
+    ].filter(l => l !== '').join('\n');
   }
 
   const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
-  const encodedMessage = encodeURIComponent(msg);
-  const whatsappUrl = "https://wa.me/" + waPhone + "?text=" + encodedMessage;
+  const whatsappUrl = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(msg);
   window.open(whatsappUrl, '_blank');
 }
 window.sendWorkshopWhatsApp = sendWorkshopWhatsApp;
@@ -3918,10 +3983,11 @@ const wsgCloudWidget = cloudinary.createUploadWidget({
     fonts: { default: { active: true } },
   },
 }, async (error, result) => {
-  if (error) return;
+  if (error) { console.error('Cloudinary upload error:', error); return; }
   if (result && result.event === 'success') {
     const url = result.info.secure_url;
     const order = wsGalleryImages.length;
+    console.log('Cloudinary upload OK, saving to Firestore:', url);
     try {
       await addDoc(collection(db, WS_GALLERY_COL), {
         url,
@@ -3930,8 +3996,12 @@ const wsgCloudWidget = cloudinary.createUploadWidget({
         order,
         createdAt: serverTimestamp(),
       });
+      console.log('Firestore write OK');
       logAction('תמונת סדנה חדשה נוספה לגלריה');
-    } catch(ex) { console.error(ex); }
+    } catch(ex) {
+      console.error('Firestore write FAILED:', ex);
+      alert('העלאה לקלאודינרי הצליחה אך השמירה נכשלה: ' + (ex.message || ex.code || 'שגיאה'));
+    }
   }
 });
 

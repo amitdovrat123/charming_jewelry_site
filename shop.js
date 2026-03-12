@@ -98,6 +98,18 @@ function localName(data) {
   return data.name;
 }
 
+const _catMap = {
+  'שרשראות': '_cat_necklaces', 'צמידים': '_cat_bracelets', 'עגילים': '_cat_earrings',
+  'טבעות': '_cat_rings', 'מארזי Charming': '_cat_charming_sets', 'מארזי Charming ביתיים': '_cat_charming_sets',
+};
+const _badgeMap = { 'בסט-סלר': '_badge_bestseller', 'חדש': '_badge_new', 'מבצע': '_badge_sale', 'מהדורה מוגבלת': '_badge_limited' };
+const _colorMap = { 'זהב': '_color_gold', 'כסף': '_color_silver', 'זהב ורוד': '_color_rosegold' };
+const _matMap   = { 'פלדת אל-חלד': '_mat_stainless' };
+function localCat(v)      { return (typeof t === 'function' && _catMap[v])   ? t(_catMap[v], v)   : v; }
+function localBadge(v)    { return (typeof t === 'function' && _badgeMap[v]) ? t(_badgeMap[v], v) : v; }
+function localColor(v)    { return (typeof t === 'function' && _colorMap[v]) ? t(_colorMap[v], v) : v; }
+function localMaterial(v) { return (typeof t === 'function' && _matMap[v])   ? t(_matMap[v], v)   : v; }
+
 // ── Card HTML ──────────────────────────────────────────────────
 function cardHTML(product) {
   const { data, id } = product;
@@ -119,15 +131,15 @@ function cardHTML(product) {
     ? `<button class="sp-img-arrow sp-img-arrow--prev" aria-label="תמונה קודמת">‹</button><button class="sp-img-arrow sp-img-arrow--next" aria-label="תמונה הבאה">›</button><div class="sp-img-dots">${imgs.map((_, i) => `<span class="sp-img-dot${i === 0 ? ' sp-img-dot--active' : ''}" data-dot="${i}"></span>`).join('')}</div>`
     : '';
 
-  const badgeHtml = (badge && !oos) ? `<span class="sp-card-badge">${esc(badge)}</span>` : '';
+  const badgeHtml = (badge && !oos) ? `<span class="sp-card-badge">${esc(localBadge(badge))}</span>` : '';
   const oosBadge  = oos ? `<span class="sp-card-badge sp-card-badge--oos">${t('shop_oos_badge', 'אזל')}</span>` : '';
 
   const priceHtml = (sale > 0 && sale < price)
     ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
     : `<span class="sp-card-price">${sp} ₪</span>`;
 
-  const metalChip    = data.color    ? `<span class="sp-card-metal">${esc(data.color)}</span>`    : '';
-  const matChip      = data.material ? `<span class="sp-card-material">${esc(data.material)}</span>` : '';
+  const metalChip    = data.color    ? `<span class="sp-card-metal">${esc(localColor(data.color))}</span>`    : '';
+  const matChip      = data.material ? `<span class="sp-card-material">${esc(localMaterial(data.material))}</span>` : '';
   const customBadge  = data.isCustomizable
     ? `<div class="sp-custom-badge">${t('shop_customizable', '✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה')}</div>` : '';
 
@@ -197,7 +209,7 @@ function render() {
   const catPillsHTML = [
     `<button class="sp-cat-pill${isAllActive ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">${t('shop_all', 'הכל')}</button>`,
     ...allCats.map(c =>
-      `<button class="sp-cat-pill${filterCat === c && !filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(c)}</button>`
+      `<button class="sp-cat-pill${filterCat === c && !filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(localCat(c))}</button>`
     ),
     `<button class="sp-cat-pill${filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">${t('shop_featured_pill', 'מוצרים נבחרים ⭐')}</button>`,
   ].join('');
@@ -206,7 +218,7 @@ function render() {
   const colorPillsHTML = [
     `<button class="sp-pill${!filterColor ? ' sp-pill--active' : ''}" data-filter-color="">${t('shop_all', 'הכל')}</button>`,
     ...allColors.map(c =>
-      `<button class="sp-pill${filterColor === c ? ' sp-pill--active' : ''}" data-filter-color="${esc(c)}">${esc(c)}</button>`
+      `<button class="sp-pill${filterColor === c ? ' sp-pill--active' : ''}" data-filter-color="${esc(c)}">${esc(localColor(c))}</button>`
     ),
   ].join('');
 

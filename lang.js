@@ -397,6 +397,21 @@ const _en = {
   terms_s21_text: 'Terms may be updated from time to time. Subject to Israeli law. Jurisdiction: Tel Aviv courts.',
   terms_back_top: 'Back to Top',
 
+  /* ── Dynamic data translations (categories, badges, materials, colors) ── */
+  _cat_necklaces: 'Necklaces',
+  _cat_bracelets: 'Bracelets',
+  _cat_earrings: 'Earrings',
+  _cat_rings: 'Rings',
+  _cat_charming_sets: 'Charming Home Sets',
+  _badge_bestseller: 'Best Seller',
+  _badge_new: 'New',
+  _badge_sale: 'Sale',
+  _badge_limited: 'Limited Edition',
+  _color_gold: 'Gold',
+  _color_silver: 'Silver',
+  _color_rosegold: 'Rose Gold',
+  _mat_stainless: 'Stainless Steel',
+
   /* ── Catalog / Dynamic (catalog.js) ───────────────── */
   cart_title: 'My Cart',
   cart_empty: 'Your cart is empty',
