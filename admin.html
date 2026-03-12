@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto,w_32,h_32/v1773316728/logo_squer_ewfevn.png" />
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto,w_180,h_180/v1773316728/logo_squer_ewfevn.png" />
   <title>לוח ניהול | Charming by Vik</title>
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+  <link rel="preconnect" href="https://res.cloudinary.com" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -67,6 +71,24 @@
       #erp-content { padding-bottom: 72px; overflow-x: hidden; }
       [data-erp-tab] { overflow-x: auto; }
       section[id^="tab-"] { padding-left: 12px; padding-right: 12px; }
+
+      /* Orders table — prevent cut-off on mobile */
+      #tab-orders .bg-white { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      #tab-orders table { min-width: 520px; }
+      #tab-orders th, #tab-orders td { padding-left: 8px; padding-right: 8px; font-size: 0.75rem; }
+      #tab-orders td:last-child { position: sticky; left: 0; background: #fff; z-index: 1; }
+      #tab-orders thead td:last-child,
+      #tab-orders th:last-child { position: sticky; left: 0; background: #fdf6ee; z-index: 1; }
+
+      /* Notifications dropdown — fit mobile screen */
+      #notif-dropdown {
+        position: fixed;
+        top: 60px;
+        left: 12px;
+        right: 12px;
+        width: auto;
+        max-width: none;
+      }
     }
 
     /* More menu */
@@ -225,6 +247,10 @@
                 <p class="text-[11px] text-gray-300 mt-1">הכל שקט כאן</p>
               </div>
             </div>
+            <button onclick="document.getElementById('notif-dropdown').style.display='none';showTab('notifications')"
+              class="w-full py-2.5 text-center text-xs font-bold text-[#d4a373] hover:bg-[#fdf6ee] border-t border-[#f0dfc0] transition-colors">
+              כל ההתראות →
+            </button>
           </div>
         </div>
         <a href="index.html" target="_blank"
@@ -264,6 +290,10 @@
           <button data-tab="inventory" onclick="showTab('inventory')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">💎</span> קטלוג ומלאי
+          </button>
+          <button data-tab="ws-gallery" onclick="showTab('ws-gallery')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">🖼️</span> גלריית סדנאות
           </button>
           <!-- ── Secondary (same order as mobile "more" menu) ── -->
           <div class="border-t border-[#f0dfc0] my-2"></div>
@@ -810,6 +840,83 @@ Charming by Vik 💛</textarea>
         </div>
       </section>
 
+      <!-- ─── TAB: NOTIFICATIONS (full page) ─── -->
+      <section id="tab-notifications" data-erp-tab class="p-6 space-y-4">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="font-black text-gray-800 text-lg">כל ההתראות</h2>
+          <button onclick="markAllNotifsRead()" class="text-xs text-[#d4a373] hover:text-[#a8705a] font-bold transition-colors">סמן הכל כנקרא</button>
+        </div>
+        <div id="notif-full-list" class="space-y-5">
+          <div class="py-14 text-center">
+            <span class="text-4xl mb-3 block">✨</span>
+            <p class="text-sm text-gray-400 font-semibold">אין התראות</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TAB: WORKSHOP GALLERY ─── -->
+      <section id="tab-ws-gallery" data-erp-tab class="p-6 space-y-6">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h2 class="font-black text-gray-800 text-lg">גלריית תמונות סדנאות</h2>
+            <p class="text-xs text-gray-400 mt-1">התמונות מוצגות באזור "תמונות מהסדנאות שלנו" בדף הבית</p>
+          </div>
+          <button id="wsg-upload-btn"
+            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            העלאת תמונות
+          </button>
+        </div>
+
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <p class="text-sm text-gray-500">גררי תמונות כדי לשנות סדר • לחצי על תמונה לעריכה</p>
+            <span id="wsg-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">0 תמונות</span>
+          </div>
+          <div id="wsg-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <!-- gallery items rendered here -->
+          </div>
+          <div id="wsg-empty" class="py-16 text-center" style="display:none;">
+            <p class="text-4xl mb-3">🖼️</p>
+            <p class="text-gray-400 font-semibold text-sm">אין תמונות בגלריה</p>
+            <p class="text-gray-300 text-xs mt-1">לחצי על "העלאת תמונות" כדי להוסיף תמונות מהסדנאות</p>
+          </div>
+          <div id="wsg-loading" class="py-14 text-center">
+            <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
+            <p class="text-gray-300 text-sm">טוענת גלריה...</p>
+          </div>
+        </div>
+
+        <!-- Edit single image panel -->
+        <div id="wsg-edit-panel" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm" style="display:none;">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-700">עריכת תמונה</h3>
+            <button onclick="closeWsgEdit()" class="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-5">
+            <img id="wsg-edit-img" src="" alt="" class="w-full sm:w-48 h-48 object-cover rounded-xl border border-[#f0dfc0]" />
+            <div class="flex-1 space-y-3">
+              <div>
+                <label class="text-xs font-bold text-gray-500 mb-1 block">תיאור (alt text)</label>
+                <input id="wsg-edit-alt" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50" placeholder="תיאור התמונה..." />
+              </div>
+              <div>
+                <label class="text-xs font-bold text-gray-500 mb-1 block">סגנון תצוגה</label>
+                <select id="wsg-edit-layout" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+                  <option value="">רגיל</option>
+                  <option value="tall">גבוה (tall)</option>
+                  <option value="wide">רחב (wide)</option>
+                </select>
+              </div>
+              <div class="flex gap-2 pt-2">
+                <button onclick="saveWsgEdit()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all">שמור</button>
+                <button onclick="deleteWsgImage()" class="border border-red-200 text-red-400 hover:bg-red-50 px-5 py-2 rounded-full font-bold text-sm transition-all">מחק</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main><!-- /erp-content -->
   </div><!-- /flex -->
 
@@ -842,6 +949,9 @@ Charming by Vik 💛</textarea>
         <span class="text-lg">☰</span> עוד
       </button>
       <div id="more-menu" class="more-menu">
+        <button data-tab="ws-gallery" onclick="showTab('ws-gallery');closeMoreMenu()">
+          <span>🖼️</span> גלריית סדנאות
+        </button>
         <button data-tab="customers" onclick="showTab('customers');closeMoreMenu()">
           <span>👥</span> לקוחות
         </button>
@@ -1214,7 +1324,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc, setDoc,
-  doc, getDoc, onSnapshot, query, orderBy, where, serverTimestamp, getDocs, Timestamp,
+  doc, getDoc, onSnapshot, query, orderBy, where, serverTimestamp, getDocs, Timestamp, writeBatch,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── Firebase Config (public client-side key — protected by Firestore Rules) ──
@@ -1245,6 +1355,7 @@ const BANNER_COL     = 'artifacts/charming-3dd6f/public/data/bannerMessages';
 const LOGS_COL       = 'artifacts/charming-3dd6f/public/data/logs';
 const WORKSHOPS_COL  = 'artifacts/charming-3dd6f/public/data/workshops';
 const SETTINGS_COL   = 'artifacts/charming-3dd6f/public/data/settings';
+const WS_GALLERY_COL = 'artifacts/charming-3dd6f/public/data/workshopGallery';
 
 // ── State ────────────────────────────────────────────────────────
 // Products (inventory)
@@ -1482,7 +1593,7 @@ window.toggleMoreMenu = toggleMoreMenu;
 window.closeMoreMenu  = closeMoreMenu;
 
 function showTab(name) {
-  ['dashboard','orders','inventory','customers','coupons','inquiries','banner','workshops','logs','settings'].forEach(t => {
+  ['dashboard','orders','inventory','customers','coupons','inquiries','banner','workshops','ws-gallery','notifications','logs','settings'].forEach(t => {
     document.getElementById('tab-'+t)?.setAttribute('data-erp-tab','');
   });
   document.getElementById('tab-'+name)?.removeAttribute('data-erp-tab');
@@ -1499,6 +1610,8 @@ function showTab(name) {
     else if (name === 'inquiries') initInquiriesTab();
     else if (name === 'banner')    initBannerTab();
     else if (name === 'workshops') initWorkshopsTab();
+    else if (name === 'ws-gallery') initWsGalleryTab();
+    else if (name === 'notifications') renderFullNotifications();
     else if (name === 'logs')      initLogsTab();
     else if (name === 'settings')  initSettingsTab();
   } else {
@@ -1509,6 +1622,7 @@ function showTab(name) {
     if (name === 'inquiries') renderInquiriesTable();
     if (name === 'banner')    renderBannerList();
     if (name === 'workshops') { renderCalendar(); renderWorkshopsList(); }
+    if (name === 'notifications') renderFullNotifications();
     if (name === 'logs')      renderLogsList();
   }
 }
@@ -1542,6 +1656,7 @@ function markNotifRead(nid) {
   readNotifIds.push(nid);
   persistReadIds();
   renderNotifications();
+  if (typeof renderFullNotifications === 'function') renderFullNotifications();
 }
 window.markNotifRead = markNotifRead;
 
@@ -1706,6 +1821,135 @@ function renderNotifications() {
   }).join('');
 }
 window.renderNotifications = renderNotifications;
+
+// ── Full Notifications Screen (Instagram-style) ─────────────────
+function markAllNotifsRead() {
+  const allIds = _allNotifItems.map(n => n.id);
+  readNotifIds = [...new Set([...readNotifIds, ...allIds])];
+  persistReadIds();
+  renderNotifications();
+  renderFullNotifications();
+}
+window.markAllNotifsRead = markAllNotifsRead;
+
+let _allNotifItems = [];
+
+function buildAllNotifItems() {
+  // Build full notification list from ALL orders & inquiries (not just active)
+  const items = [];
+
+  // All orders
+  allOrders.forEach(o => {
+    const ts = o.timestamp?.seconds ? o.timestamp.seconds * 1000 : 0;
+    items.push({
+      id: 'ord-' + o.id,
+      type: 'order',
+      docId: o.id,
+      ts,
+      label: `📦 הזמנה ${o.status === 'pending_payment' ? 'חדשה' : (o.status === 'delivered' ? 'נמסרה' : o.status === 'shipped' ? 'נשלחה' : o.status === 'cancelled' ? 'בוטלה' : '')} — ${o.orderId || o.id.slice(0,8)}`,
+      sub: `${o.customer?.name || '—'} · ${o.summary?.total || 0} ₪`,
+      ...o
+    });
+  });
+
+  // All inquiries
+  allInquiries.forEach(inq => {
+    const ts = inq.createdAt?.seconds ? inq.createdAt.seconds * 1000 : 0;
+    items.push({
+      id: 'inq-' + inq.id,
+      type: 'inquiry',
+      docId: inq.id,
+      ts,
+      label: `💬 פניה מ${inq.name || 'לקוח'}`,
+      sub: inq.message || inq.notes || inq.phone || '',
+      ...inq
+    });
+  });
+
+  // Out-of-stock
+  allProducts.filter(p => {
+    const s = p.stockCount ?? p.stock ?? null;
+    return s !== null && s <= 0 && p.status === 'published';
+  }).forEach(p => {
+    items.push({
+      id: 'oos-' + p.id,
+      type: 'stock',
+      docId: p.id,
+      ts: p.createdAt?.seconds ? p.createdAt.seconds * 1000 : 0,
+      label: `⚠️ נגמר המלאי — ${p.name || ''}`,
+      sub: 'יש לעדכן מלאי או לשנות סטטוס',
+    });
+  });
+
+  items.sort((a, b) => b.ts - a.ts);
+  _allNotifItems = items;
+  return items;
+}
+
+function renderFullNotifications() {
+  const container = document.getElementById('notif-full-list');
+  if (!container) return;
+  const items = buildAllNotifItems();
+
+  if (!items.length) {
+    container.innerHTML = `<div class="py-14 text-center">
+      <span class="text-4xl mb-3 block">✨</span>
+      <p class="text-sm text-gray-400 font-semibold">אין התראות</p>
+    </div>`;
+    return;
+  }
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterdayStart = todayStart - 86400000;
+  const weekStart = todayStart - 6 * 86400000;
+
+  const groups = { today: [], yesterday: [], week: [], older: [] };
+  items.forEach(n => {
+    if (n.ts >= todayStart) groups.today.push(n);
+    else if (n.ts >= yesterdayStart) groups.yesterday.push(n);
+    else if (n.ts >= weekStart) groups.week.push(n);
+    else groups.older.push(n);
+  });
+
+  let html = '';
+  const renderGroup = (title, list) => {
+    if (!list.length) return '';
+    let h = `<div>
+      <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 px-1">${title}</p>
+      <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden divide-y divide-[#fdf6ee]">`;
+    list.forEach(n => {
+      const isRead = readNotifIds.includes(n.id);
+      const bg = isRead ? '' : 'bg-[#fdf8f3]';
+      const dot = isRead
+        ? '<span class="w-2.5 h-2.5 rounded-full bg-gray-200 flex-shrink-0 mt-1.5"></span>'
+        : '<span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#d4a373] to-[#e8b88a] flex-shrink-0 mt-1.5 shadow-sm shadow-[#d4a373]/30"></span>';
+      const fw = isRead ? 'font-semibold text-gray-500' : 'font-bold text-gray-800';
+      const dateStr = n.ts ? new Date(n.ts).toLocaleDateString('he-IL') : '';
+      const timeStr = n.ts ? new Date(n.ts).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
+      const esc_id = n.id.replace(/'/g, "\\'");
+      const esc_docId = (n.docId || '').replace(/'/g, "\\'");
+      h += `<button onclick="handleNotifClick('${esc_id}','${n.type}','${esc_docId}')" class="w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all ${bg}">
+        ${dot}
+        <div class="flex-1 min-w-0">
+          <p class="text-sm ${fw} truncate">${n.label}</p>
+          <p class="text-xs text-gray-400 truncate mt-0.5">${n.sub || ''}</p>
+        </div>
+        <span class="text-[10px] text-gray-300 whitespace-nowrap mt-1">${timeStr}<br>${dateStr}</span>
+      </button>`;
+    });
+    h += '</div></div>';
+    return h;
+  };
+
+  html += renderGroup('היום', groups.today);
+  html += renderGroup('אתמול', groups.yesterday);
+  html += renderGroup('ב-7 הימים האחרונים', groups.week);
+  html += renderGroup('קודם לכן', groups.older);
+
+  container.innerHTML = html;
+}
+window.renderFullNotifications = renderFullNotifications;
 
 // ── ERP init (called once after auth) ────────────────────────────
 function initERP(user) {
@@ -3152,9 +3396,9 @@ function sendWorkshopWhatsApp() {
   if (arrival > 0) discArrivalLine += `${disc > 0 ? ' ' : ''}\u05d1\u05e0\u05d5\u05e1\u05e3 \u05ea\u05d9\u05d4\u05d9\u05d4 \u05e2\u05dc\u05d5\u05ea \u05d4\u05d2\u05e2\u05d4 \u05e2\u05dc \u05e1\u05da ${arrival} \u05e9\u05d7 (\u05d4\u05d4\u05e0\u05d7\u05d4 \u05d0\u05d9\u05e0\u05d4 \u05e0\u05db\u05dc\u05dc\u05ea \u05e2\u05dc \u05e2\u05dc\u05d5\u05ea \u05d4\u05d4\u05d2\u05e2\u05d4 )`;
 
   // Table setup image links (replace with actual URLs)
-  const tableImg1 = 'https://res.cloudinary.com/dhri2dbek/image/upload/v1773270807/table-setup-1';
-  const tableImg2 = 'https://res.cloudinary.com/dhri2dbek/image/upload/v1773270807/table-setup-2';
-  const tableImg3 = 'https://res.cloudinary.com/dhri2dbek/image/upload/v1773270807/table-setup-3';
+  const tableImg1 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-1';
+  const tableImg2 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-2';
+  const tableImg3 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-3';
 
   let msg;
   if (status === 'draft') {
@@ -3614,6 +3858,161 @@ async function deleteBannerMsg(id) {
   }
 }
 window.deleteBannerMsg=deleteBannerMsg;
+
+// ════════════════════════════════════════════════════════════════
+// ── TAB: WORKSHOP GALLERY ──────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+let wsGalleryImages = [];
+let wsgEditId = null;
+
+// Cloudinary widget for workshop gallery (separate folder)
+const wsgCloudWidget = cloudinary.createUploadWidget({
+  cloudName:    CLOUDINARY_CLOUD_NAME,
+  uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+  sources:      ['local','camera'],
+  multiple:     true,
+  cropping:     false,
+  folder:       'charming_workshop_gallery',
+  clientAllowedFormats: ['jpg','jpeg','png','webp'],
+  maxFileSize:  8000000,
+  styles: {
+    palette: {
+      window:'#FFFFFF', windowBorder:'#d4a373', tabIcon:'#d4a373',
+      menuIcons:'#9a8e8a', textDark:'#2c2a29', textLight:'#FFFFFF',
+      link:'#d4a373', action:'#d4a373', inactiveTabIcon:'#9a8e8a',
+      error:'#e74c3c', inProgress:'#d4a373', complete:'#27ae60', sourceBg:'#fdf8f5',
+    },
+    fonts: { default: { active: true } },
+  },
+}, async (error, result) => {
+  if (error) return;
+  if (result && result.event === 'success') {
+    const url = result.info.secure_url;
+    const order = wsGalleryImages.length;
+    try {
+      await addDoc(collection(db, WS_GALLERY_COL), {
+        url,
+        alt: 'תמונה מהסדנה',
+        layout: '',
+        order,
+        createdAt: serverTimestamp(),
+      });
+      logAction('תמונת סדנה חדשה נוספה לגלריה');
+    } catch(ex) { console.error(ex); }
+  }
+});
+
+function initWsGalleryTab() {
+  document.getElementById('wsg-upload-btn').addEventListener('click', () => wsgCloudWidget.open());
+
+  // Real-time listener
+  const q = query(collection(db, WS_GALLERY_COL), orderBy('order','asc'));
+  onSnapshot(q, snap => {
+    wsGalleryImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderWsgGrid();
+  });
+}
+
+function renderWsgGrid() {
+  const grid = document.getElementById('wsg-grid');
+  const empty = document.getElementById('wsg-empty');
+  const loading = document.getElementById('wsg-loading');
+  const count = document.getElementById('wsg-count');
+
+  loading.style.display = 'none';
+  count.textContent = wsGalleryImages.length + ' תמונות';
+
+  if (!wsGalleryImages.length) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = wsGalleryImages.map((img, i) => `
+    <div class="relative group rounded-xl overflow-hidden border border-[#f0dfc0] cursor-pointer aspect-square bg-gray-50"
+         draggable="true" data-wsg-id="${img.id}" data-wsg-idx="${i}" onclick="openWsgEdit('${img.id}')">
+      <img src="${esc(img.url)}" alt="${esc(img.alt||'')}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+      <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+        <span class="opacity-0 group-hover:opacity-100 text-white text-xs font-bold bg-black/50 px-3 py-1.5 rounded-full transition-opacity">✏️ עריכה</span>
+      </div>
+      ${img.layout ? `<span class="absolute top-2 right-2 text-[10px] bg-white/90 text-[#d4a373] px-2 py-0.5 rounded-full font-bold">${img.layout === 'tall' ? 'גבוה' : 'רחב'}</span>` : ''}
+      <span class="absolute bottom-2 left-2 text-[10px] bg-white/90 text-gray-500 w-5 h-5 flex items-center justify-center rounded-full font-bold">${i+1}</span>
+    </div>
+  `).join('');
+
+  // Drag & drop reordering
+  const items = grid.querySelectorAll('[data-wsg-id]');
+  items.forEach(el => {
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', el.dataset.wsgIdx);
+      el.classList.add('opacity-50');
+    });
+    el.addEventListener('dragend', () => el.classList.remove('opacity-50'));
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('ring-2','ring-[#d4a373]'); });
+    el.addEventListener('dragleave', () => el.classList.remove('ring-2','ring-[#d4a373]'));
+    el.addEventListener('drop', async e => {
+      e.preventDefault();
+      el.classList.remove('ring-2','ring-[#d4a373]');
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      const toIdx = parseInt(el.dataset.wsgIdx);
+      if (fromIdx === toIdx) return;
+      await reorderWsgImages(fromIdx, toIdx);
+    });
+  });
+}
+
+async function reorderWsgImages(fromIdx, toIdx) {
+  const moved = [...wsGalleryImages];
+  const [item] = moved.splice(fromIdx, 1);
+  moved.splice(toIdx, 0, item);
+  const batch = writeBatch(db);
+  moved.forEach((img, i) => {
+    batch.update(doc(db, WS_GALLERY_COL, img.id), { order: i });
+  });
+  try { await batch.commit(); } catch(ex) { console.error(ex); }
+}
+
+function openWsgEdit(id) {
+  const img = wsGalleryImages.find(x => x.id === id);
+  if (!img) return;
+  wsgEditId = id;
+  document.getElementById('wsg-edit-img').src = img.url;
+  document.getElementById('wsg-edit-alt').value = img.alt || '';
+  document.getElementById('wsg-edit-layout').value = img.layout || '';
+  document.getElementById('wsg-edit-panel').style.display = '';
+  document.getElementById('wsg-edit-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.openWsgEdit = openWsgEdit;
+
+function closeWsgEdit() {
+  wsgEditId = null;
+  document.getElementById('wsg-edit-panel').style.display = 'none';
+}
+window.closeWsgEdit = closeWsgEdit;
+
+async function saveWsgEdit() {
+  if (!wsgEditId) return;
+  const alt = document.getElementById('wsg-edit-alt').value.trim();
+  const layout = document.getElementById('wsg-edit-layout').value;
+  try {
+    await updateDoc(doc(db, WS_GALLERY_COL, wsgEditId), { alt, layout });
+    logAction('תמונת סדנה עודכנה');
+    closeWsgEdit();
+  } catch(ex) { console.error(ex); }
+}
+window.saveWsgEdit = saveWsgEdit;
+
+async function deleteWsgImage() {
+  if (!wsgEditId) return;
+  if (!confirm('למחוק את התמונה מהגלריה?')) return;
+  try {
+    await deleteDoc(doc(db, WS_GALLERY_COL, wsgEditId));
+    logAction('תמונת סדנה נמחקה מהגלריה');
+    closeWsgEdit();
+  } catch(ex) { console.error(ex); }
+}
+window.deleteWsgImage = deleteWsgImage;
 
 </script>
 

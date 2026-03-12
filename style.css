@@ -661,7 +661,7 @@ ul { list-style: none; }
 .page-hero--with-bg {
   background:
     linear-gradient(rgba(253, 248, 245, 0.75), rgba(253, 248, 245, 0.75)),
-    url('https://res.cloudinary.com/dhri2dbek/image/upload/v1773270811/sadna_paaqbb.png') center / cover no-repeat;
+    url('https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270811/sadna_paaqbb.png') center / cover no-repeat;
 }
 
 .page-hero .hero-title {
@@ -3755,36 +3755,47 @@ ul { list-style: none; }
 
 .sp-cat-pill {
   flex-shrink: 0;
-  padding: 10px 28px;
-  border: 1px solid var(--sand-dark);
-  border-radius: 50px;
-  background: var(--sand-light);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--ink-soft);
   font-family: 'Assistant', sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0.3px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.25s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  position: relative;
+  transition: color 0.25s ease;
+}
+.sp-cat-pill::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 2.5px;
+  background: var(--pink);
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
 .sp-cat-pill:hover {
-  border-color: var(--pink);
-  color: var(--pink-deep);
-  background: var(--pink-light);
-  box-shadow: 0 2px 8px rgba(201,149,122,0.15);
-  transform: translateY(-1px);
+  color: var(--ink);
+}
+.sp-cat-pill:hover::after {
+  width: 100%;
 }
 .sp-cat-pill--active {
+  color: var(--ink);
+  font-weight: 700;
+}
+.sp-cat-pill--active::after {
+  width: 100%;
   background: var(--pink);
-  border-color: var(--pink);
-  color: #fff;
-  box-shadow: 0 3px 12px rgba(201,149,122,0.3);
 }
 .sp-cat-pill--active:hover {
-  background: var(--pink-deep);
-  border-color: var(--pink-deep);
+  color: var(--ink);
 }
 
 /* Mobile: scrollable row */
@@ -3800,7 +3811,7 @@ ul { list-style: none; }
   }
   .sp-cat-bar::-webkit-scrollbar { display: none; }
   .sp-cat-pill {
-    padding: 9px 22px;
+    padding: 9px 16px;
     font-size: 0.84rem;
   }
 }
@@ -5359,6 +5370,18 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
   .cookie-banner { padding: 14px 16px; gap: 12px; }
   .cookie-banner-text { font-size: 0.78rem; }
   .cookie-banner-btn { padding: 8px 22px; font-size: 0.8rem; }
+}
+
+/* ===== Utility classes (replaces Tailwind CDN) ===== */
+.object-cover { object-fit: cover; }
+.rounded-lg   { border-radius: 0.5rem; }
+
+/* ===== GPU-accelerated animations ===== */
+.journey-step-img img,
+.collage-item img,
+.category-card img,
+.hero-logo-img {
+  will-change: transform, opacity;
 }
 
 /* ===== LTR overrides ===== */
