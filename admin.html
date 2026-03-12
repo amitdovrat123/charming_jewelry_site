@@ -3484,17 +3484,23 @@ function sendWorkshopWhatsApp() {
   const tableImg3 = 'https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270807/table-setup-3';
   const imagesText = tableImg1 + '\n' + tableImg2 + '\n' + tableImg3;
 
-  // Build emojis from Unicode code points (immune to file encoding issues)
-  const E_HEARTS  = String.fromCodePoint(0x1F970); // 🥰
-  const E_STARS   = String.fromCodePoint(0x1F929); // 🤩
-  const E_SMILE   = String.fromCodePoint(0x1F60A); // 😊
-  const E_HHANDS  = String.fromCodePoint(0x1FAF6); // 🫶
-  const E_DOWN    = String.fromCodePoint(0x2B07, 0xFE0F); // ⬇️
+  // Emoji placeholders — will be swapped for raw percent-encoded UTF-8 bytes
+  // AFTER encodeURIComponent, so emojis never exist as JS string characters.
+  // This bypasses any file-encoding or runtime string issues entirely.
+  const _PH = { SMILE: '{{E_SMILE}}', HEARTS: '{{E_HEARTS}}', STARS: '{{E_STARS}}', HHANDS: '{{E_HHANDS}}', DOWN: '{{E_DOWN}}' };
+  // Pre-computed percent-encoded UTF-8 bytes for each emoji:
+  const _EB = {
+    SMILE:  '%F0%9F%98%8A',         // U+1F60A
+    HEARTS: '%F0%9F%A5%B0',         // U+1F970
+    STARS:  '%F0%9F%A4%A9',         // U+1F929
+    HHANDS: '%F0%9F%AB%B6',         // U+1FAF6
+    DOWN:   '%E2%AC%87%EF%B8%8F',   // U+2B07 U+FE0F
+  };
 
   let msg;
   if (status === 'draft') {
     msg = [
-      '\u05D4\u05D9\u05D9\u05D9 ' + name + ', \u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05D3\u05D9\u05D1\u05E8\u05E0\u05D5! ' + E_SMILE,
+      '\u05D4\u05D9\u05D9\u05D9 ' + name + ', \u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05D3\u05D9\u05D1\u05E8\u05E0\u05D5! ' + _PH.SMILE,
       '\u05D4\u05E0\u05D4 \u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05E9\u05D3\u05D9\u05D1\u05E8\u05E0\u05D5 \u05E2\u05DC\u05D9\u05D4\u05DD (\u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05DE\u05E9\u05D5\u05E8\u05D9\u05D9\u05DF \u05E1\u05D5\u05E4\u05D9\u05EA):',
       '',
       '*\u05EA\u05D0\u05E8\u05D9\u05DA:* ' + dateStr,
@@ -3508,14 +3514,14 @@ function sendWorkshopWhatsApp() {
       (feeText ? feeText : ''),
       '*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7',
       '',
-      '\u05D1\u05E8\u05D2\u05E2 \u05E9\u05E0\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05D0\u05E9\u05DC\u05D7 \u05DC\u05DA \u05D0\u05D9\u05E9\u05D5\u05E8 \u05E1\u05D5\u05E4\u05D9 \u05E2\u05DD \u05DB\u05DC \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD ' + E_HHANDS,
+      '\u05D1\u05E8\u05D2\u05E2 \u05E9\u05E0\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05D0\u05E9\u05DC\u05D7 \u05DC\u05DA \u05D0\u05D9\u05E9\u05D5\u05E8 \u05E1\u05D5\u05E4\u05D9 \u05E2\u05DD \u05DB\u05DC \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD ' + _PH.HHANDS,
       '\u05D0\u05DD \u05D9\u05E9 \u05E9\u05D0\u05DC\u05D5\u05EA \u05D0\u05E0\u05D9 \u05DB\u05D0\u05DF!'
     ].filter(l => l !== '').join('\n');
   } else {
     msg = [
       '\u05D0\u05E0\u05D9 \u05E9\u05D5\u05DC\u05D7\u05EA \u05DC\u05DA \u05D0\u05EA \u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05DC\u05E1\u05D3\u05E0\u05D0:',
       '',
-      '\u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05E1\u05D2\u05E8\u05EA\u05DF \u05D0\u05D9\u05E8\u05D5\u05E2 \u05E2\u05DD charming ' + E_HEARTS + ' \u05DE\u05EA\u05E8\u05D2\u05E9\u05EA \u05DE\u05D0\u05D5\u05D3 \u05DC\u05D7\u05D2\u05D5\u05D2 \u05D0\u05D9\u05EA\u05DB\u05DF \u05D0\u05EA \u05D4\u05D9\u05D5\u05DD \u05D4\u05DE\u05E9\u05DE\u05D7 \u05D4\u05D6\u05D4 ' + E_STARS,
+      '\u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05E1\u05D2\u05E8\u05EA\u05DF \u05D0\u05D9\u05E8\u05D5\u05E2 \u05E2\u05DD charming ' + _PH.HEARTS + ' \u05DE\u05EA\u05E8\u05D2\u05E9\u05EA \u05DE\u05D0\u05D5\u05D3 \u05DC\u05D7\u05D2\u05D5\u05D2 \u05D0\u05D9\u05EA\u05DB\u05DF \u05D0\u05EA \u05D4\u05D9\u05D5\u05DD \u05D4\u05DE\u05E9\u05DE\u05D7 \u05D4\u05D6\u05D4 ' + _PH.STARS,
       '\u05DC\u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E9\u05D9\u05D7\u05D4 \u05E9\u05DC\u05E0\u05D5 :',
       '*\u05EA\u05D0\u05E8\u05D9\u05DA:* ' + dateStr,
       '*\u05E9\u05E2\u05D4 :* ' + time,
@@ -3530,20 +3536,32 @@ function sendWorkshopWhatsApp() {
       '',
       '\u05E9\u05D5\u05DC\u05DE\u05D4 \u05DE\u05E7\u05D3\u05DE\u05D4 \u05E2\u05DC \u05E1\u05DA 500 \u05E9\u05D0\u05E8 \u05D4\u05E1\u05DB\u05D5\u05DD \u05D9\u05E0\u05EA\u05DF \u05D1\u05D9\u05D5\u05DD \u05D4\u05D0\u05D9\u05E8\u05D5\u05E2',
       '',
-      '\u05DC\u05E1\u05D3\u05E0\u05D4 \u05D9\u05E9 \u05DC\u05D4\u05DB\u05D9\u05DF \u05E9\u05D5\u05DC\u05D7\u05DF \u05DE\u05E8\u05DB\u05D6\u05D9 \u05E1\u05D1\u05D9\u05D1\u05D5 \u05D4\u05D1\u05E0\u05D5\u05EA \u05D9\u05E9\u05D1\u05D5 \u05DC\u05DB\u05DC \u05D0\u05D7\u05EA \u05E6\u05E8\u05D9\u05DA \u05DC\u05D4\u05D9\u05D5\u05EA \u05DB\u05D9\u05E1\u05D0 \u05D5\u05D1\u05E0\u05D5\u05E1\u05E3 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D1\u05E6\u05D3 \u05D1\u05E1\u05D2\u05E0\u05D5\u05DF \u05D1\u05D5\u05E4\u05D4 \u05E2\u05DC\u05D9\u05D5 \u05D9\u05D4\u05D9\u05D5 \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D5\u05D4\u05E9\u05E8\u05E9\u05D0\u05D5\u05EA . \u05D0\u05EA \u05E2\u05D9\u05E6\u05D5\u05D1 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D0\u05E0\u05D9 \u05DE\u05E2\u05E6\u05D1\u05EA ' + E_SMILE,
+      '\u05DC\u05E1\u05D3\u05E0\u05D4 \u05D9\u05E9 \u05DC\u05D4\u05DB\u05D9\u05DF \u05E9\u05D5\u05DC\u05D7\u05DF \u05DE\u05E8\u05DB\u05D6\u05D9 \u05E1\u05D1\u05D9\u05D1\u05D5 \u05D4\u05D1\u05E0\u05D5\u05EA \u05D9\u05E9\u05D1\u05D5 \u05DC\u05DB\u05DC \u05D0\u05D7\u05EA \u05E6\u05E8\u05D9\u05DA \u05DC\u05D4\u05D9\u05D5\u05EA \u05DB\u05D9\u05E1\u05D0 \u05D5\u05D1\u05E0\u05D5\u05E1\u05E3 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D1\u05E6\u05D3 \u05D1\u05E1\u05D2\u05E0\u05D5\u05DF \u05D1\u05D5\u05E4\u05D4 \u05E2\u05DC\u05D9\u05D5 \u05D9\u05D4\u05D9\u05D5 \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D5\u05D4\u05E9\u05E8\u05E9\u05D0\u05D5\u05EA . \u05D0\u05EA \u05E2\u05D9\u05E6\u05D5\u05D1 \u05E9\u05D5\u05DC\u05D7\u05DF \u05D4\u05E6\'\u05D0\u05E8\u05DE\u05D9\u05DD \u05D0\u05E0\u05D9 \u05DE\u05E2\u05E6\u05D1\u05EA ' + _PH.SMILE,
       '',
       '\u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D7\u05E6\u05D9 \u05E9\u05E2\u05D4 \u05DC\u05E4\u05E0\u05D9 \u05EA\u05D7\u05D9\u05DC\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05E2\u05DC \u05DE\u05E0\u05EA \u05DC\u05E1\u05D3\u05E8 \u05D0\u05EA \u05D4\u05E2\u05DE\u05D3\u05D4 \u05D6\u05D4 \u05D0\u05D5\u05DE\u05E8 \u05E9\u05D0\u05DD \u05E9\u05E2\u05EA \u05D4\u05E1\u05D3\u05E0\u05D0 \u05DE\u05EA\u05D7\u05D9\u05DC\u05D4 \u05D1-' + time + ' \u05D0\u05E0\u05D7\u05E0\u05D5 \u05E0\u05D2\u05D9\u05E2 \u05D1-' + arrivalTime + '.',
       '',
-      '\u05D0\u05DD \u05D9\u05E9 \u05DC\u05DB\u05DF \u05E9\u05D0\u05DC\u05D5\u05EA , \u05D1\u05E7\u05E9\u05D5\u05EA \u05D5\u05DB\u05DC \u05D3\u05D1\u05E8 \u05D0\u05D7\u05E8 \u05D0\u05E0\u05D9 \u05D6\u05DE\u05D9\u05E0\u05D4 \u05DC\u05D4\u05DB\u05DC !!!' + E_HHANDS,
+      '\u05D0\u05DD \u05D9\u05E9 \u05DC\u05DB\u05DF \u05E9\u05D0\u05DC\u05D5\u05EA , \u05D1\u05E7\u05E9\u05D5\u05EA \u05D5\u05DB\u05DC \u05D3\u05D1\u05E8 \u05D0\u05D7\u05E8 \u05D0\u05E0\u05D9 \u05D6\u05DE\u05D9\u05E0\u05D4 \u05DC\u05D4\u05DB\u05DC !!!' + _PH.HHANDS,
       '',
-      '\u05D3\u05D5\u05D2\u05DE\u05D0\u05D5\u05EA \u05DC\u05E1\u05D9\u05D3\u05D5\u05E8 \u05D4\u05E9\u05D5\u05DC\u05D7\u05DF' + E_DOWN,
+      '\u05D3\u05D5\u05D2\u05DE\u05D0\u05D5\u05EA \u05DC\u05E1\u05D9\u05D3\u05D5\u05E8 \u05D4\u05E9\u05D5\u05DC\u05D7\u05DF' + _PH.DOWN,
       imagesText
     ].filter(l => l !== '').join('\n');
   }
 
+  // Encode the message, then swap placeholders for raw emoji bytes
   const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
-  const whatsappUrl = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(msg);
-  window.open(whatsappUrl, '_blank');
+  let encoded = encodeURIComponent(msg);
+  encoded = encoded
+    .replace(encodeURIComponent(_PH.SMILE),  _EB.SMILE)
+    .replace(encodeURIComponent(_PH.HEARTS), _EB.HEARTS)
+    .replace(encodeURIComponent(_PH.STARS),  _EB.STARS)
+    .replace(encodeURIComponent(_PH.HHANDS), _EB.HHANDS)
+    .replace(encodeURIComponent(_PH.DOWN),   _EB.DOWN);
+  // Use replaceAll for confirmed msg which has duplicate SMILE/HHANDS
+  if (encoded.indexOf(encodeURIComponent(_PH.SMILE)) !== -1)
+    encoded = encoded.split(encodeURIComponent(_PH.SMILE)).join(_EB.SMILE);
+  if (encoded.indexOf(encodeURIComponent(_PH.HHANDS)) !== -1)
+    encoded = encoded.split(encodeURIComponent(_PH.HHANDS)).join(_EB.HHANDS);
+  window.open('https://wa.me/' + waPhone + '?text=' + encoded, '_blank');
 }
 window.sendWorkshopWhatsApp = sendWorkshopWhatsApp;
 
