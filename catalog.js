@@ -20,6 +20,53 @@ const USERS_ROOT          = 'artifacts/charming-3dd6f/users';
 const ORDERS_COL          = 'artifacts/charming-3dd6f/public/data/orders';
 const LOGS_COL            = 'artifacts/charming-3dd6f/public/data/logs';
 const FORM_KEY            = 'charming-checkout-form';
+const TRAFFIC_COL         = 'artifacts/charming-3dd6f/public/data/site_traffic';
+
+// ── Session Tracking ────────────────────────────────────────────
+const _sid = sessionStorage.getItem('charming_sid') || crypto.randomUUID();
+sessionStorage.setItem('charming_sid', _sid);
+
+function _detectDevice() {
+  const w = window.innerWidth;
+  return w < 768 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop';
+}
+function _detectSource() {
+  const params = new URLSearchParams(window.location.search);
+  const utm = params.get('utm_source');
+  if (utm) return utm;
+  const ref = document.referrer;
+  if (!ref) return 'direct';
+  try {
+    const host = new URL(ref).hostname.replace('www.', '');
+    if (host.includes('google'))   return 'google';
+    if (host.includes('facebook') || host.includes('fb'))  return 'facebook';
+    if (host.includes('instagram'))return 'instagram';
+    if (host.includes('tiktok'))   return 'tiktok';
+    return host;
+  } catch { return 'direct'; }
+}
+
+function trackEvent(event, meta = {}) {
+  try {
+    addDoc(collection(db, TRAFFIC_COL), {
+      sessionId: _sid,
+      event,
+      page: currentView || 'home',
+      referrer: document.referrer || '',
+      source: _detectSource(),
+      device: _detectDevice(),
+      screenW: window.innerWidth,
+      uid: auth.currentUser?.uid || null,
+      meta,
+      timestamp: serverTimestamp(),
+    });
+  } catch (e) { /* silent */ }
+}
+
+// Auto page-view on load
+trackEvent('page_view', { page: window.location.pathname });
+// Session ping every 30s
+setInterval(() => trackEvent('session_ping'), 30000);
 
 // Audit log helper
 async function logAction(description) {
@@ -70,6 +117,7 @@ function switchView(view) {
   if (isLocal) console.debug('[switchView]', view);
   previousView = currentView;
   currentView  = view;
+  trackEvent('page_view', { view });
   document.querySelectorAll('.v-section').forEach(el => { el.style.display = 'none'; });
   const el = document.getElementById('view-' + view);
   if (el) el.style.display = 'block';
@@ -125,6 +173,7 @@ function addToCart(product, customizationNote) {
     });
   }
   saveCart();
+  trackEvent('add_to_cart', { productId: product.id, name: product.data.name, price: sellPrice(product.data) });
   updateCartBadge();
   showToast(t('pv_added_toast','נוסף לסל!'));
 }
@@ -975,6 +1024,7 @@ function initCheckoutView() {
     checkoutStep = 1;
   }
   checkoutDelivery = 'delivery';
+  trackEvent('checkout_start', { itemCount: cart.length });
   renderCheckoutStep(el);
 }
 
@@ -1568,7 +1618,7 @@ function renderCheckoutForm(el) {
           image:             i.imageUrl || '',
         })),
         summary: { subtotal, shipping: shipCost2, discount: discountAmt, total: total2, currency: 'ILS' },
-        timestamp: serverTimestamp(),
+        createdAt: serverTimestamp(),
       });
 
       // Audit log
@@ -1593,6 +1643,7 @@ function renderCheckoutForm(el) {
       clearFormStorage();
       orderIdGenerated = orderId;
       localStorage.setItem('charming_last_order', orderId);
+      trackEvent('order_complete', { orderId });
 
       switchView('thank-you');
     } catch (ex) {
@@ -1611,7 +1662,7 @@ function renderThankYouView() {
   if (!el) return;
 
   const oid   = orderIdGenerated || '—';
-  const waMsg = encodeURIComponent(`היי ויק! ביצעתי הזמנה באתר שמספרה ${oid}. מחכה לעדכון!`);
+  const waMsg = encodeURIComponent(`\u05D4\u05D9\u05D9 \u05D5\u05D9\u05E7 , \u05D4\u05D2\u05E2\u05EA\u05D9 \u05D3\u05E8\u05DA \u05D0\u05EA\u05E8 Charming \u2728\n\u05D0\u05E9\u05DE\u05D7 \u05DC\u05D4\u05EA\u05D9\u05D9\u05E2\u05E5 \u05D0\u05D9\u05EA\u05DA \u05D1\u05E0\u05D5\u05D2\u05E2 \u05DC\u05E4\u05E8\u05D9\u05D8 \u05E9\u05E8\u05D0\u05D9\u05EA\u05D9 \u05D0\u05D5 \u05DC\u05D2\u05D1\u05D9 \u05D4\u05E1\u05D3\u05E0\u05D0\u05D5\u05EA \u05E9\u05DC\u05DA !`);
 
   el.innerHTML = `
     <section class="co-ty-section">

@@ -85,6 +85,13 @@ service cloud.firestore {
         allow read:  if true;
         allow write: if isAdmin();
       }
+
+      // ── Site Traffic: anyone can create, only admin can read ──
+      match /site_traffic/{docId} {
+        allow create: if true;
+        allow read:   if isAdmin();
+        allow update, delete: if false;
+      }
     }
 
     // ══════════════════════════════════════════════════════
