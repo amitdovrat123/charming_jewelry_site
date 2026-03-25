@@ -5103,25 +5103,29 @@ function renderWorkshopCard(w, opts = {}) {
     }
   }
 
-  return `<div data-ws-id="${w.id}" class="px-5 py-4 hover:bg-[#fdf6ee] transition-colors flex flex-wrap items-center gap-3 cursor-pointer${isPast ? ' opacity-70' : ''}" onclick="if(!event.target.closest('button'))openWsCard('${w.id}')">
-    <div class="flex-1 min-w-[200px]">
-      <div class="flex items-center gap-2 flex-wrap">
-        <p class="font-semibold text-sm text-gray-800">${esc(w.celebrant || w.customerName)}</p>
-        <span class="text-xs text-gray-400">(${esc(w.customerName)} · ${esc(w.phone || '')})</span>
-        ${statusBadge}${pastBadge}${payBadge}
+
+  // Short route names
+  const routeShort = {
+    'מסלול 1 - שרשרת / צמיד': 'מסלול 1',
+    'מסלול 2 - שרשרת + צמיד': 'מסלול 2',
+    'מסלול 2 משודרג - שרשרת + צמיד + טבעת': 'מסלול 2+',
+  };
+  const shortRoute = routeShort[w.route] || w.route || '';
+
+  return `<div data-ws-id="${w.id}" class="px-4 py-3 hover:bg-[#fdf6ee] transition-colors cursor-pointer${isPast ? ' opacity-60' : ''}" onclick="if(!event.target.closest('button'))openWsCard('${w.id}')">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 flex-1 min-w-0">
+        <p class="font-bold text-sm text-gray-800 truncate">${esc(w.celebrant || w.customerName)}</p>
+        ${statusBadge}${payBadge}
       </div>
-      <p class="text-xs text-gray-500 mt-0.5">${dateStr} · ${w.time || ''} · ${esc(w.route)} · עד ${w.participantCount} משתתפות${w.city ? ' · ' + esc(w.city) : ''}</p>
-      ${w.occasion ? `<p class="text-[10px] text-gray-400 mt-0.5">לכבוד: ${esc(w.occasion)}</p>` : ''}
-      ${w.notes ? `<p class="text-[10px] text-gray-400 mt-0.5">${esc(w.notes)}</p>` : ''}
-      ${payDetails ? `<div class="flex flex-wrap gap-1 mt-1">${payDetails}</div>` : ''}
+      <span class="font-black text-sm text-[#d4a373] flex-shrink-0">${(w.total || 0).toLocaleString('he-IL')} ₪</span>
     </div>
-    <div class="flex items-center gap-2 flex-wrap">
-      <span class="font-black text-[#d4a373]">${(w.total || 0).toLocaleString('he-IL')} ₪</span>
-      ${quickPayBtns}
-      ${confirmBtn}
-      ${generateCalendarLinks(w)}
-      <button onclick="openWorkshopModal('${w.id}')" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
-      <button onclick="deleteWorkshop('${w.id}')" class="text-xs border border-red-200 text-red-400 hover:bg-red-50 px-3 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
+    <div class="flex items-center gap-2 mt-1 text-[11px] text-gray-400 flex-wrap">
+      <span>${dateStr}</span>
+      <span class="text-gray-200">|</span>
+      <span>${esc(shortRoute)}</span>
+      <span class="text-gray-200">|</span>
+      <span>${w.participantCount || 0} משתתפות</span>
     </div>
   </div>`;
 }
@@ -5981,9 +5985,8 @@ function renderExpensesList() {
     const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
     return `<div class="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="if(!event.target.closest('button'))openExpenseCard('${e.id}')">
       <span class="text-xs text-gray-500 w-14 flex-shrink-0">${dateStr}</span>
-      <span class="text-xs text-gray-600 w-24 flex-shrink-0 truncate">${cat.label}</span>
-      <span class="text-xs font-semibold text-red-500 w-14 flex-shrink-0">${(e.amount||0).toLocaleString('he-IL')}</span>
-      <span class="text-xs text-gray-400 flex-1 truncate">${e.notes ? esc(e.notes) : (e.workshopName ? esc(e.workshopName) : '')}</span>
+      <span class="text-xs text-gray-600 flex-1 truncate">${cat.label}${e.notes ? ' · '+esc(e.notes) : (e.workshopName ? ' · '+esc(e.workshopName) : '')}</span>
+      <span class="text-xs font-semibold text-red-500 flex-shrink-0">${(e.amount||0).toLocaleString('he-IL')} ₪</span>
       <div class="flex gap-1 flex-shrink-0">
         <button onclick="openExpenseForm('${e.id}')" class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-[#d4a373] hover:bg-[#fdf6ee] transition-all" title="עריכה"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
         <button onclick="confirmDeleteExpense('${e.id}')" class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all" title="מחיקה"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
