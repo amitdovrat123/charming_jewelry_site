@@ -1216,9 +1216,10 @@
               <input id="exp-notes" type="text" placeholder="פירוט נוסף" class="inp" />
             </div>
           </div>
-          <div class="flex flex-wrap gap-3 mt-4">
+          <div class="flex flex-wrap gap-3 mt-4 items-center">
             <button onclick="saveExpense()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור הוצאה</button>
             <button onclick="closeExpenseForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
+            <button id="exp-delete-btn" onclick="deleteExpense(editExpenseId)" class="border border-red-200 text-red-400 hover:bg-red-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors" style="display:none">🗑️ מחיקה</button>
             <p id="exp-err" class="text-red-400 text-xs self-center"></p>
           </div>
         </div>
@@ -1253,22 +1254,7 @@
               <option value="all">הכל</option>
             </select>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="bg-[#fdf6ee] text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                  <th class="px-4 py-2 text-right">תאריך</th>
-                  <th class="px-4 py-2 text-right">קטגוריה</th>
-                  <th class="px-4 py-2 text-right">סכום</th>
-                  <th class="px-4 py-2 text-right">אמצעי</th>
-                  <th class="px-4 py-2 text-right">סדנא</th>
-                  <th class="px-4 py-2 text-right">הערות</th>
-                  <th class="px-4 py-2 text-right">פעולות</th>
-                </tr>
-              </thead>
-              <tbody id="exp-table-body" class="divide-y divide-[#fdf6ee]"></tbody>
-            </table>
-          </div>
+          <div id="exp-list" class="divide-y divide-[#fdf6ee]"></div>
         </div>
       </section>
 
@@ -5599,6 +5585,7 @@ function openExpenseForm(id) {
       document.getElementById('exp-staff-amount').style.display = '';
       document.getElementById('exp-staff-amount').value = e.amount || '150';
     }
+    document.getElementById('exp-delete-btn').style.display = '';
   } else {
     editExpenseId = null;
     document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
@@ -5608,6 +5595,7 @@ function openExpenseForm(id) {
     document.getElementById('exp-workshop').value = '';
     document.getElementById('exp-notes').value = '';
     document.getElementById('exp-staff-amount').style.display = 'none';
+    document.getElementById('exp-delete-btn').style.display = 'none';
   }
   form.scrollIntoView({behavior:'smooth'});
 }
@@ -5685,8 +5673,8 @@ function updateExpenseKPIs() {
 }
 
 function renderExpensesList() {
-  const body = document.getElementById('exp-table-body');
-  if (!body) return;
+  const list = document.getElementById('exp-list');
+  if (!list) return;
 
   const filter = document.getElementById('exp-filter-month')?.value || 'current';
   const now = new Date();
@@ -5701,31 +5689,57 @@ function renderExpensesList() {
   }
 
   if (!filtered.length) {
-    body.innerHTML = '<tr><td colspan="7" class="text-center text-gray-300 py-8 text-sm">אין הוצאות לתקופה זו</td></tr>';
+    list.innerHTML = '<p class="text-center text-gray-300 py-8 text-sm">אין הוצאות לתקופה זו</p>';
+    updateExpenseKPIs();
     return;
   }
 
-  body.innerHTML = filtered.map(e => {
-    const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '', color: 'text-gray-400' };
-    const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL') : '—';
-    return `<tr class="hover:bg-[#fdf6ee] transition-colors text-sm">
-      <td class="px-4 py-3 text-gray-600">${dateStr}</td>
-      <td class="px-4 py-3"><span class="${cat.color} font-semibold">${cat.icon} ${cat.label}</span></td>
-      <td class="px-4 py-3 font-bold text-red-500">${(e.amount||0).toLocaleString('he-IL')} ₪</td>
-      <td class="px-4 py-3 text-gray-500 text-xs">${EXPENSE_METHODS[e.method] || e.method || '—'}</td>
-      <td class="px-4 py-3 text-gray-400 text-xs">${e.workshopName ? esc(e.workshopName) : '—'}</td>
-      <td class="px-4 py-3 text-gray-400 text-xs truncate max-w-[120px]">${e.notes ? esc(e.notes) : '—'}</td>
-      <td class="px-4 py-3">
-        <div class="flex gap-1">
-          <button onclick="openExpenseForm('${e.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2 py-1 rounded-full font-bold transition-colors">עריכה</button>
-          <button onclick="deleteExpense('${e.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2 py-1 rounded-full font-bold transition-colors">מחיקה</button>
-        </div>
-      </td>
-    </tr>`;
+  list.innerHTML = filtered.map(e => {
+    const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
+    const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
+    return `<div class="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="if(!event.target.closest('button'))openExpenseCard('${e.id}')">
+      <span class="text-xs text-gray-400 w-14 flex-shrink-0">${dateStr}</span>
+      <span class="text-xs text-gray-600 w-20 flex-shrink-0 truncate">${cat.icon} ${cat.label}</span>
+      <span class="text-xs font-bold text-red-500 w-16 flex-shrink-0">${(e.amount||0).toLocaleString('he-IL')}₪</span>
+      <span class="text-xs text-gray-400 flex-1 truncate">${e.workshopName ? esc(e.workshopName) : ''}</span>
+      <button onclick="openExpenseForm('${e.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2 py-1 rounded-full font-bold transition-colors flex-shrink-0">✏️</button>
+    </div>`;
   }).join('');
 
   updateExpenseKPIs();
 }
+
+// Expense card modal
+function openExpenseCard(id) {
+  const e = allExpenses.find(x=>x.id===id);
+  if (!e) return;
+  const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
+  const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
+  const mn = EXPENSE_METHODS[e.method] || e.method || '—';
+
+  const modal = document.createElement('div');
+  modal.className = 'fixed inset-0 z-[9000] flex items-center justify-center p-4';
+  modal.style.cssText = 'background:rgba(44,42,41,.55);backdrop-filter:blur(6px)';
+  modal.onclick = (ev) => { if(ev.target===modal) modal.remove(); };
+  modal.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm fadein overflow-hidden">
+    <div class="px-5 py-4 bg-[#fdf6ee] border-b border-[#f0dfc0] flex items-center justify-between">
+      <h3 class="font-bold text-sm text-gray-800">${cat.icon} ${cat.label}</h3>
+      <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+    </div>
+    <div class="p-5 space-y-3">
+      <div class="flex justify-between"><span class="text-xs text-gray-500">תאריך</span><span class="text-sm font-semibold text-gray-700">${dateStr}</span></div>
+      <div class="flex justify-between"><span class="text-xs text-gray-500">סכום</span><span class="text-sm font-black text-red-500">${(e.amount||0).toLocaleString('he-IL')} ₪</span></div>
+      <div class="flex justify-between"><span class="text-xs text-gray-500">אמצעי תשלום</span><span class="text-sm text-gray-700">${mn}</span></div>
+      ${e.workshopName ? `<div class="flex justify-between"><span class="text-xs text-gray-500">סדנא</span><span class="text-sm text-gray-700">${esc(e.workshopName)}</span></div>` : ''}
+      ${e.notes ? `<div class="flex justify-between"><span class="text-xs text-gray-500">הערות</span><span class="text-sm text-gray-600">${esc(e.notes)}</span></div>` : ''}
+    </div>
+    <div class="px-5 py-3 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2">
+      <button onclick="this.closest('.fixed').remove();openExpenseForm('${e.id}')" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2 rounded-full font-bold text-sm transition-colors">✏️ עריכה</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+window.openExpenseCard = openExpenseCard;
 
 // ── Settings ─────────────────────────────────────────────────────
 async function initSettingsTab() {
