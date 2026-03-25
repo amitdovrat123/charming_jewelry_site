@@ -18,6 +18,7 @@
           colors: {
             gold: { DEFAULT: '#d4a373', dark: '#b8893e', light: '#f0dfc0', pale: '#fdf6ee' },
             cream: { DEFAULT: '#fcf8f3', dark: '#f0e6d8' },
+            shell: { DEFAULT: '#1a1410', surface: '#231d18', card: '#2d241e' },
           }
         }
       }
@@ -30,7 +31,7 @@
     * { font-family: 'Assistant', sans-serif; }
     [data-v] { display: none !important; }
     [data-erp-tab] { display: none !important; }
-    .erp-nav-item--active { background: #fdf6ee; color: #d4a373; font-weight: 700; }
+    .erp-nav-item--active { background: rgba(212,163,115,0.12); color: #d4a373; font-weight: 700; }
     .spin  { animation: spin  .8s linear infinite; }
     .fadein{ animation: fadein .28s ease; }
     @keyframes spin   { to { transform: rotate(360deg); } }
@@ -65,12 +66,12 @@
     #product-modal .modal-inner { max-height: 90vh; overflow-y: auto; }
 
     /* ERP content margin on desktop */
-    @media (min-width: 640px) { #erp-content { margin-right: 220px; } }
+    @media (min-width: 640px) { #erp-content { margin-right: 240px; } }
 
     /* Mobile bottom nav padding + overflow fix */
     @media (max-width: 639px) {
       html, body { overflow-x: hidden; max-width: 100vw; }
-      #erp-content { padding-bottom: 72px; overflow-x: hidden; }
+      #erp-content { padding-bottom: 96px; overflow-x: hidden; }
       [data-erp-tab] { overflow-x: auto; }
       section[id^="tab-"] { padding-left: 12px; padding-right: 12px; }
 
@@ -364,20 +365,20 @@
 
         <!-- ══ Dashboard view switcher ══ -->
         <div class="flex items-center gap-2 bg-white border border-[#f0dfc0] rounded-full p-1 w-fit shadow-sm">
-          <button id="dash-view-shop" onclick="switchDashView('shop')"
-            class="dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all bg-[#d4a373] text-white">
-            💎 חנות
-          </button>
           <button id="dash-view-workshops" onclick="switchDashView('workshops')"
-            class="dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all text-gray-400 hover:text-[#d4a373]">
+            class="dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all bg-[#d4a373] text-white">
             🎨 סדנאות
+          </button>
+          <button id="dash-view-shop" onclick="switchDashView('shop')"
+            class="dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all text-gray-400 hover:text-[#d4a373]">
+            💎 חנות
           </button>
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════ -->
         <!-- ══ WORKSHOP DASHBOARD ══ -->
         <!-- ═══════════════════════════════════════════════════════════ -->
-        <div id="dash-workshops" style="display:none;" class="space-y-8">
+        <div id="dash-workshops" class="space-y-8">
 
           <!-- KPI Cards Row 1 -->
           <div>
@@ -602,7 +603,7 @@
         <!-- ═══ END WORKSHOP DASHBOARD ═══ -->
 
         <!-- ══ SHOP DASHBOARD (original) ══ -->
-        <div id="dash-shop">
+        <div id="dash-shop" style="display:none;">
 
         <!-- ══ סיכום חודשי ══ -->
         <div>
@@ -2688,7 +2689,7 @@ function initDashboardTab() {
 }
 
 // ── Workshop Dashboard ──────────────────────────────────────────
-let currentDashView = 'shop';
+let currentDashView = 'workshops';
 function switchDashView(view) {
   currentDashView = view;
   document.getElementById('dash-shop').style.display = view === 'shop' ? '' : 'none';
@@ -4441,11 +4442,29 @@ async function saveWorkshop() {
 
   try {
     if (editWorkshopId) {
+      // Check if advance was just toggled on (wasn't paid before)
+      const prevWs = allWorkshops.find(x => x.id === editWorkshopId);
+      const wasAdvancePaid = prevWs?.payment?.advancePaid;
       await updateDoc(doc(db, WORKSHOPS_COL, editWorkshopId), data);
       logAction(`סדנה "${name}" עודכנה`);
+      // Auto-create materials expense if advance just got marked as paid
+      if (advancePaid && !wasAdvancePaid) {
+        await addDoc(collection(db, EXPENSES_COL), {
+          date: new Date().toISOString().split('T')[0], category: 'materials', amount: 400, method: 'cash',
+          workshopId: editWorkshopId, workshopName: celebrant || name, notes: 'סחורה לסדנא — אוטומטי', createdAt: serverTimestamp(),
+        });
+        logAction(`הוצאת סחורה 400₪ — "${celebrant || name}" (אוטומטי)`);
+      }
     } else {
-      await addDoc(collection(db, WORKSHOPS_COL), data);
+      const ref = await addDoc(collection(db, WORKSHOPS_COL), data);
       logAction(`סדנה חדשה "${celebrant}" — ${count} משתתפות`);
+      if (advancePaid) {
+        await addDoc(collection(db, EXPENSES_COL), {
+          date: new Date().toISOString().split('T')[0], category: 'materials', amount: 400, method: 'cash',
+          workshopId: ref.id, workshopName: celebrant || name, notes: 'סחורה לסדנא — אוטומטי', createdAt: serverTimestamp(),
+        });
+        logAction(`הוצאת סחורה 400₪ — "${celebrant || name}" (אוטומטי)`);
+      }
     }
     clearWorkshopForm();
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
@@ -4835,6 +4854,18 @@ async function quickPayAdvance(id) {
       bookingStatus: 'confirmed',
     });
     logAction(`מקדמה אושרה + סדנא נסגרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
+    // Auto-create 400₪ materials expense
+    await addDoc(collection(db, EXPENSES_COL), {
+      date: new Date().toISOString().split('T')[0],
+      category: 'materials',
+      amount: 400,
+      method: 'cash',
+      workshopId: id,
+      workshopName: w.celebrant || w.customerName,
+      notes: 'סחורה לסדנא — אוטומטי',
+      createdAt: serverTimestamp(),
+    });
+    logAction(`הוצאת סחורה 400₪ — "${w.celebrant || w.customerName}" (אוטומטי)`);
   } catch(e) { console.error(e); }
 }
 window.quickPayAdvance = quickPayAdvance;
@@ -4858,62 +4889,86 @@ async function quickPayBalance(id) {
     });
     const methodNames = { cash:'מזומן', bit:'Bit', paybox:'PayBox', transfer:'העברה' };
     logAction(`יתרה אושרה — "${w.celebrant || w.customerName}" · ${Math.max(0,balanceAmount).toLocaleString('he-IL')}₪ · ${methodNames[chosen]}`);
+    // Auto-create fuel expense based on city distance
+    const dist = getCityDistance(w.city);
+    if (dist && dist > 0) {
+      const fuelCost = calcFuelCost(dist);
+      await addDoc(collection(db, EXPENSES_COL), {
+        date: new Date().toISOString().split('T')[0],
+        category: 'fuel',
+        amount: fuelCost,
+        method: 'cash',
+        workshopId: id,
+        workshopName: w.celebrant || w.customerName,
+        notes: `דלק ${dist} ק"מ × ${FUEL_RATE}₪ — ${w.city} — אוטומטי`,
+        createdAt: serverTimestamp(),
+      });
+      logAction(`הוצאת דלק ${fuelCost}₪ — ${w.city} (${dist} ק"מ) — אוטומטי`);
+    }
   } catch(e) { console.error(e); }
 }
 window.quickPayBalance = quickPayBalance;
 
 // ── Distance Pricing Tool ────────────────────────────────────────
-// City → arrival fee map. Cities within 30 min from Rishon LeZion = 0.
-// User can update via admin settings in the future.
-const ARRIVAL_FEE_MAP = {
-  // Free (within ~30 min from Rishon LeZion)
-  'ראשון לציון': 0, 'רחובות': 0, 'נס ציונה': 0, 'באר יעקב': 0,
-  'לוד': 0, 'רמלה': 0, 'יבנה': 0, 'חולון': 0, 'בת ים': 0,
-  'אשדוד': 0, 'גבעתיים': 0, 'רמת גן': 0, 'פתח תקווה': 0,
-  'תל אביב': 0, 'הרצליה': 0, 'מודיעין': 0,
-  // Medium distance (30-45 min)
-  'אשקלון': 100, 'נתניה': 100, 'כפר סבא': 100, 'רעננה': 100,
-  'הוד השרון': 100, 'ירושלים': 150, 'בית שמש': 150,
-  'קריית גת': 100, 'גדרה': 50, 'שוהם': 50,
-  // Far (45+ min)
-  'באר שבע': 200, 'חיפה': 250, 'עפולה': 250, 'טבריה': 300,
-  'נצרת': 300, 'קריית שמונה': 400, 'אילת': 500,
-  'חדרה': 150, 'עכו': 300, 'נהריה': 350, 'כרמיאל': 300,
-  'ערד': 250, 'דימונה': 250, 'אופקים': 200, 'שדרות': 150,
+// Distance from Rishon LeZion (km one-way, approx road distance)
+const CITY_DISTANCE_KM = {
+  'ראשון לציון':0,'נס ציונה':5,'רחובות':10,'באר יעקב':8,
+  'לוד':15,'רמלה':15,'יבנה':15,'חולון':8,'בת ים':10,
+  'גבעתיים':12,'רמת גן':14,'בני ברק':16,'תל אביב':15,
+  'הרצליה':25,'פתח תקווה':22,'קריית אונו':14,'אור יהודה':10,
+  'יהוד':14,'גני תקווה':18,'אלעד':25,'גדרה':18,'אשדוד':25,
+  'רעננה':30,'כפר סבא':32,'הוד השרון':30,'ראש העין':28,
+  'שוהם':22,'מודיעין':32,
+  'נתניה':45,'אשקלון':40,'קריית גת':35,'כפר יונה':40,
+  'אריאל':45,'בית שמש':40,
+  'ירושלים':55,'חדרה':60,'נתיבות':60,'שדרות':50,
+  'מבשרת ציון':50,'ביתר עילית':50,'קרני שומרון':50,
+  'פרדס חנה':65,'בית אל':65,
+  'אופקים':70,'קיסריה':70,'זכרון יעקב':75,
+  'באר שבע':85,'חיפה':90,'נשר':90,'יוקנעם':90,
+  'קריית אתא':95,'קריית ביאליק':93,'קריית מוצקין':95,
+  'קריית ים':95,'עתלית':80,'טירת כרמל':85,
+  'קרית ארבע':90,'מעלה אפרים':80,
+  'עפולה':100,'מגדל העמק':100,'ערד':100,
+  'עכו':105,'נצרת':110,'כרמיאל':110,
+  'דימונה':110,'נהריה':115,'מעלות':120,
+  'טבריה':130,'בית שאן':130,
+  'צפת':140,'מצפה רמון':150,
+  'קריית שמונה':170,'מטולה':180,'אילת':310,
 };
+const FUEL_RATE = 1.3; // ₪ per km one-way
+const FREE_DISTANCE_KM = 25;
+
+function calcArrivalFee(km) {
+  if (km <= FREE_DISTANCE_KM) return 0;
+  if (km <= 35) return 50;  if (km <= 50) return 100;
+  if (km <= 70) return 150; if (km <= 100) return 200;
+  if (km <= 130) return 250; if (km <= 160) return 300;
+  if (km <= 200) return 400; return 500;
+}
+function calcFuelCost(km) { return Math.round(km * FUEL_RATE); }
+function getCityDistance(city) {
+  if (CITY_DISTANCE_KM[city] !== undefined) return CITY_DISTANCE_KM[city];
+  const k = Object.keys(CITY_DISTANCE_KM).find(k => city.includes(k) || k.includes(city));
+  return k !== undefined ? CITY_DISTANCE_KM[k] : null;
+}
 
 function suggestArrivalFee() {
   const city = document.getElementById('ws-city')?.value.trim();
   const hintEl = document.getElementById('ws-arrival-hint');
   if (!city) { hintEl.textContent = 'יש להזין עיר קודם'; hintEl.className = 'text-[10px] text-red-400 mt-1'; return; }
-
-  // Exact match
-  if (ARRIVAL_FEE_MAP.hasOwnProperty(city)) {
-    const fee = ARRIVAL_FEE_MAP[city];
+  const dist = getCityDistance(city);
+  if (dist !== null) {
+    const fee = calcArrivalFee(dist);
+    const fuel = calcFuelCost(dist);
     document.getElementById('ws-arrival').value = fee;
     updateWsTotal();
-    if (fee === 0) {
-      hintEl.textContent = `✓ ${city} — ללא תוספת הגעה (עד 30 דק׳)`;
-      hintEl.className = 'text-[10px] text-emerald-500 mt-1 font-semibold';
-    } else {
-      hintEl.textContent = `✓ ${city} — תוספת ${fee}₪ מומלצת`;
-      hintEl.className = 'text-[10px] text-[#d4a373] mt-1 font-semibold';
-    }
+    const feeText = fee === 0 ? 'ללא תוספת' : `תוספת ${fee}₪`;
+    hintEl.innerHTML = `✓ <b>${city}</b> — ${dist} ק"מ · ${feeText} · דלק: ~${fuel}₪`;
+    hintEl.className = `text-[10px] ${fee === 0 ? 'text-emerald-500' : 'text-[#d4a373]'} mt-1 font-semibold`;
     return;
   }
-
-  // Partial match
-  const partial = Object.keys(ARRIVAL_FEE_MAP).find(k => city.includes(k) || k.includes(city));
-  if (partial) {
-    const fee = ARRIVAL_FEE_MAP[partial];
-    document.getElementById('ws-arrival').value = fee;
-    updateWsTotal();
-    hintEl.textContent = `✓ נמצא: "${partial}" — תוספת ${fee}₪ (ניתן לשנות)`;
-    hintEl.className = 'text-[10px] text-amber-500 mt-1 font-semibold';
-    return;
-  }
-
-  hintEl.textContent = `⚠ "${city}" לא נמצאה ברשימה — הזן סכום ידנית`;
+  hintEl.textContent = `⚠ "${city}" לא נמצאה — הזן סכום ידנית`;
   hintEl.className = 'text-[10px] text-amber-500 mt-1';
 }
 window.suggestArrivalFee = suggestArrivalFee;
