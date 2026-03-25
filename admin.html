@@ -893,16 +893,12 @@
 
         <!-- Section 2: Confirmed & Upcoming (5 latest + show all) -->
         <div id="ws-section-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
-          <button onclick="const l=document.getElementById('ws-list-confirmed');const o=l.style.display!=='none';l.style.display=o?'none':'';this.querySelector('.ws-chevron').style.transform=o?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5ece7] transition-colors">
-            <i data-lucide="check-circle" class="w-4 h-4 inline-block text-emerald-500"></i>
+          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
             <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — קרובות</h3>
             <span id="ws-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
-            <i data-lucide="chevron-up" class="ws-chevron w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
-          </button>
-          <div id="ws-list-confirmed" class="divide-y divide-[#fdf6ee]"></div>
-          <div id="ws-confirmed-show-all" class="text-center py-3 border-t border-[#f0dfc0]" style="display:none;">
-            <button onclick="showAllConfirmedWorkshops()" class="text-xs font-bold text-[#d4a373] hover:text-[#a8705a] transition-colors">הצג את כל הסדנאות הסגורות...</button>
           </div>
+          <div id="ws-list-confirmed" class="divide-y divide-[#fdf6ee]"></div>
         </div>
 
         <!-- Calendar view -->
@@ -928,12 +924,13 @@
 
         <!-- Workshop booking form -->'
 
-        <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm hidden overflow-hidden">
-          <button onclick="document.getElementById('ws-form-section').classList.add('hidden')" class="w-full px-5 py-3 flex items-center justify-between bg-[#fdf6ee] border-b border-[#f0dfc0]/40 hover:bg-[#f5ece7] transition-colors cursor-pointer">
-            <h3 class="font-bold text-sm text-gray-800">סיכום סדנה טלפונית</h3>
-            <i data-lucide="chevron-up" class="w-4 h-4 text-gray-400"></i>
-          </button>
-          <div class="p-5">
+        <div id="ws-form-section" data-v class="fixed inset-0 z-[9000] flex items-center justify-center p-3 sm:p-6" style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)" onclick="if(event.target===this)closeWsForm()">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl fadein overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0] sticky top-0 bg-white rounded-t-2xl z-10">
+            <h2 id="ws-modal-title" class="font-black text-gray-800 text-base">סדנה חדשה</h2>
+            <button onclick="closeWsForm()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+          </div>
+          <div class="px-6 py-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="lbl">שם מלא איש קשר *</label>
@@ -1092,12 +1089,14 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-3 mt-4">
-            <button onclick="saveWorkshop()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">שמרי סדנה</button>
-            <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">שלח סיכום בוואטסאפ</button>
-            <p id="ws-err" class="text-red-400 text-xs self-center"></p>
+          <p id="ws-err" class="text-red-400 text-xs mt-3"></p>
+          </div><!-- /px-6 py-5 -->
+          <div class="px-6 py-4 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2 sticky bottom-0">
+            <button onclick="saveWorkshop()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור סדנה</button>
+            <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp</button>
+            <button onclick="closeWsForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-5 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
           </div>
-          </div><!-- /p-5 inner -->
+          </div><!-- /modal inner -->
         </div><!-- /ws-form-section -->
 
         <!-- Section 3: Archive -->
@@ -1174,8 +1173,13 @@
         </div>
 
         <!-- Expense Form -->
-        <div id="exp-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm" style="display:none;">
-          <h3 class="font-bold text-sm text-gray-800 mb-4">פרטי הוצאה</h3>
+        <div id="exp-form-section" data-v class="fixed inset-0 z-[9000] flex items-center justify-center p-3 sm:p-6" style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)" onclick="if(event.target===this)closeExpenseForm()">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg fadein overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0] sticky top-0 bg-white rounded-t-2xl z-10">
+            <h2 id="exp-modal-title" class="font-black text-gray-800 text-base">הוצאה חדשה</h2>
+            <button onclick="closeExpenseForm()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+          </div>
+          <div class="px-6 py-5">
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="lbl">תאריך *</label>
@@ -1228,11 +1232,13 @@
               <input id="exp-notes" type="text" placeholder="פירוט נוסף" class="inp" />
             </div>
           </div>
-          <div class="flex flex-wrap gap-3 mt-4 items-center">
-            <button onclick="saveExpense()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור הוצאה</button>
-            <button onclick="closeExpenseForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
-            <button id="exp-delete-btn" onclick="confirmDeleteExpense(editExpenseId)" class="flex items-center gap-1.5 border border-red-200/60 hover:bg-red-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors" style="display:none;color:rgba(239,68,68,.6)"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> מחיקה</button>
-            <p id="exp-err" class="text-red-400 text-xs self-center"></p>
+          <p id="exp-err" class="text-red-400 text-xs"></p>
+          </div>
+          <div class="px-6 py-4 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2 sticky bottom-0">
+            <button onclick="saveExpense()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור הוצאה</button>
+            <button onclick="closeExpenseForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-5 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
+            <button id="exp-delete-btn" onclick="confirmDeleteExpense(editExpenseId)" class="flex items-center gap-1.5 border border-red-200/60 hover:bg-red-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors" style="display:none;color:rgba(239,68,68,.6)"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </div>
           </div>
         </div>
 
@@ -4893,13 +4899,22 @@ function openWorkshopModal(id) {
     }
     updateWsTotal();
     updatePaymentBadge();
+    const titleEl = document.getElementById('ws-modal-title');
+    if (titleEl) titleEl.textContent = 'עריכת סדנה';
   } else {
     clearWorkshopForm();
+    const titleEl = document.getElementById('ws-modal-title');
+    if (titleEl) titleEl.textContent = 'סדנה חדשה';
   }
-  document.getElementById('ws-form-section')?.classList.remove('hidden');
-  document.getElementById('ws-form-section')?.scrollIntoView({behavior:'smooth'});
+  document.getElementById('ws-form-section')?.removeAttribute('data-v');
+  if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 }
 window.openWorkshopModal = openWorkshopModal;
+
+function closeWsForm() {
+  document.getElementById('ws-form-section')?.setAttribute('data-v','');
+}
+window.closeWsForm = closeWsForm;
 
 function sendWorkshopWhatsApp() {
   const name      = document.getElementById('ws-name').value.trim();
@@ -5145,19 +5160,10 @@ function renderWorkshopsList() {
     const visible = items.slice(0, 5);
     let html = visible.map(renderFn).join('');
     if (items.length > 5) {
-      html += '<button onclick="openWsFullView();\'none\';this.previousElementSibling?.remove();this.parentElement.dataset.expanded=\'1\'" data-showmore class="w-full py-3 text-center text-xs font-bold ' + btnTextColor + ' hover:bg-gray-50/50 border-t ' + btnClass + ' transition-colors">\u05d4\u05e6\u05d2 \u05d0\u05ea \u05db\u05dc ' + items.length + ' \u05d4\u05e1\u05d3\u05e0\u05d0\u05d5\u05ea \u2192</button>';
+      html += '<div class="w-full py-3 text-center border-t ' + btnClass + '"><button onclick="openWsFullView()" class="text-xs font-bold ' + btnTextColor + ' hover:underline transition-colors">' + '\u05d4\u05e6\u05d2 \u05d0\u05ea \u05db\u05dc ' + items.length + ' \u05d4\u05e1\u05d3\u05e0\u05d0\u05d5\u05ea \u2192</button></div>';
     }
     container.innerHTML = html;
-    // Store full items for expand
-    container._allItems = items;
-    container._renderFn = renderFn;
-    const showBtn = container.querySelector('[data-showmore]');
-    if (showBtn) {
-      showBtn.onclick = function() {
-        container.innerHTML = container._allItems.map(container._renderFn).join('');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-      };
-    }
+    if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
   }
 
   // Section 1: Drafts
@@ -5812,12 +5818,14 @@ function populateExpenseWorkshops() {
 
 function openExpenseForm(id) {
   const form = document.getElementById('exp-form-section');
-  form.style.display = '';
+  form.removeAttribute('data-v');
   populateExpenseWorkshops();
+  const titleEl = document.getElementById('exp-modal-title');
   if (id) {
     const e = allExpenses.find(x=>x.id===id);
     if (!e) return;
     editExpenseId = e.id;
+    if (titleEl) titleEl.textContent = 'עריכת הוצאה';
     document.getElementById('exp-date').value = e.date || '';
     document.getElementById('exp-category').value = e.category || '';
     document.getElementById('exp-amount').value = e.amount || '';
@@ -5831,6 +5839,7 @@ function openExpenseForm(id) {
     document.getElementById('exp-delete-btn').style.display = '';
   } else {
     editExpenseId = null;
+    if (titleEl) titleEl.textContent = 'הוצאה חדשה';
     document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('exp-category').value = '';
     document.getElementById('exp-amount').value = '';
@@ -5840,12 +5849,12 @@ function openExpenseForm(id) {
     document.getElementById('exp-staff-amount').style.display = 'none';
     document.getElementById('exp-delete-btn').style.display = 'none';
   }
-  form.scrollIntoView({behavior:'smooth'});
+  if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 }
 window.openExpenseForm = openExpenseForm;
 
 function closeExpenseForm() {
-  document.getElementById('exp-form-section').style.display = 'none';
+  document.getElementById('exp-form-section')?.setAttribute('data-v','');
   editExpenseId = null;
 }
 window.closeExpenseForm = closeExpenseForm;
