@@ -927,6 +927,7 @@
           </div>
         </div>
 
+        <div id="ws-list-view">
         <!-- Workshop booking form -->
         <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm hidden overflow-hidden">
           <button onclick="document.getElementById('ws-form-section').classList.add('hidden')" class="w-full px-5 py-3 flex items-center justify-between bg-[#fdf6ee] border-b border-[#f0dfc0]/40 hover:bg-[#f5ece7] transition-colors cursor-pointer">
@@ -1103,16 +1104,64 @@
         <!-- Section 3: Archive -->
         <div id="ws-section-archive" class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
           <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
-              <i data-lucide="folder" class="w-4 h-4 opacity-60 inline-block"></i>
-              <h3 class="font-bold text-sm text-gray-400">ארכיון סדנאות</h3>
-              <span id="ws-archive-count" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5"></span>
-            </div>
-            <svg id="ws-archive-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400 transition-transform duration-200"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div id="ws-list-archive" class="divide-y divide-gray-50" style="display:none;"></div>
+            <i data-lucide="folder" class="w-4 h-4 opacity-60"></i>
+            <h3 class="font-bold text-sm text-gray-400">ארכיון סדנאות</h3>
+            <span id="ws-archive-count" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5"></span>
+          </div>
+          <div id="ws-list-archive" class="divide-y divide-gray-50"></div>
         </div>
 
         </div><!-- END ws-list-view -->
+
+        <!-- ══ Full Workshops View (all workshops) ══ -->
+        <div id="ws-full-view" class="space-y-6" style="display:none;">
+          <div class="flex items-center justify-between">
+            <h2 class="font-black text-gray-800 text-lg">כל הסדנאות</h2>
+            <button onclick="closeWsFullView()" class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#d4a373] border border-[#f0dfc0]/60 hover:border-[#d4a373]/40 bg-white px-3.5 py-2 rounded-full transition-all font-semibold shadow-sm">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> חזרה
+            </button>
+          </div>
+
+          <!-- Category: Drafts (future) -->
+          <div id="wsf-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+            <div class="px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
+              <i data-lucide="file-edit" class="w-4 h-4 text-amber-600"></i>
+              <h3 class="font-bold text-sm text-amber-700">סדנאות בטיוטה</h3>
+              <span id="wsf-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
+            </div>
+            <div id="wsf-drafts-list" class="divide-y divide-amber-50"></div>
+          </div>
+
+          <!-- Category: Confirmed & Upcoming -->
+          <div id="wsf-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+            <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+              <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — עתידיות</h3>
+              <span id="wsf-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
+            </div>
+            <div id="wsf-confirmed-list" class="divide-y divide-[#fdf6ee]"></div>
+          </div>
+
+          <!-- Category: Unsettled (draft + past date) -->
+          <div id="wsf-unsettled" class="bg-white border border-red-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+            <div class="px-5 py-3 border-b border-red-100 bg-red-50 flex items-center gap-2">
+              <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
+              <h3 class="font-bold text-sm text-red-600">סדנאות שלא נסגרו</h3>
+              <span id="wsf-unsettled-count" class="text-[10px] font-bold bg-red-200 text-red-600 rounded-full px-2 py-0.5"></span>
+            </div>
+            <div id="wsf-unsettled-list" class="divide-y divide-red-50"></div>
+          </div>
+
+          <!-- Category: Past (confirmed + past date) -->
+          <div id="wsf-past" class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+            <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+              <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
+              <h3 class="font-bold text-sm text-gray-400">סדנאות שעברו</h3>
+              <span id="wsf-past-count" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5"></span>
+            </div>
+            <div id="wsf-past-list" class="divide-y divide-gray-50"></div>
+          </div>
+        </div>
 
       </section>
 
@@ -1188,30 +1237,23 @@
           </div>
         </div>
 
-        <!-- Monthly Summary — inline bar -->
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl px-5 py-3 shadow-sm flex items-center gap-5 overflow-x-auto no-scrollbar">
-          <div class="flex items-center gap-1.5 flex-shrink-0">
-            <div class="w-1.5 h-4 bg-red-400 rounded-full"></div>
-            <span class="text-[10px] text-gray-500">סה"כ</span>
-            <span id="exp-total-month" class="text-sm font-black text-red-500">—</span>
+        <!-- Monthly Summary -->
+        <div class="grid grid-cols-4 gap-3">
+          <div class="rounded-xl px-3 py-2.5 text-center" style="background:rgba(239,68,68,.07)">
+            <p class="text-[9px] font-bold tracking-wide" style="color:rgba(239,68,68,.55)">סה"כ החודש</p>
+            <p id="exp-total-month" class="text-base font-black mt-0.5" style="color:rgba(239,68,68,.75)">—</p>
           </div>
-          <div class="w-px h-5 bg-gray-200 flex-shrink-0"></div>
-          <div class="flex items-center gap-1.5 flex-shrink-0">
-            <div class="w-1.5 h-4 bg-[#d4a373] rounded-full"></div>
-            <span class="text-[10px] text-gray-500">חומרי גלם</span>
-            <span id="exp-materials-month" class="text-sm font-bold text-[#d4a373]">—</span>
+          <div class="rounded-xl px-3 py-2.5 text-center" style="background:rgba(212,163,115,.08)">
+            <p class="text-[9px] font-bold tracking-wide" style="color:rgba(212,163,115,.6)">חומרי גלם</p>
+            <p id="exp-materials-month" class="text-base font-black mt-0.5" style="color:rgba(212,163,115,.8)">—</p>
           </div>
-          <div class="w-px h-5 bg-gray-200 flex-shrink-0"></div>
-          <div class="flex items-center gap-1.5 flex-shrink-0">
-            <div class="w-1.5 h-4 bg-blue-400 rounded-full"></div>
-            <span class="text-[10px] text-gray-500">עובדות</span>
-            <span id="exp-staff-month" class="text-sm font-bold text-blue-500">—</span>
+          <div class="rounded-xl px-3 py-2.5 text-center" style="background:rgba(59,130,246,.06)">
+            <p class="text-[9px] font-bold tracking-wide" style="color:rgba(59,130,246,.5)">עובדות</p>
+            <p id="exp-staff-month" class="text-base font-black mt-0.5" style="color:rgba(59,130,246,.7)">—</p>
           </div>
-          <div class="w-px h-5 bg-gray-200 flex-shrink-0"></div>
-          <div class="flex items-center gap-1.5 flex-shrink-0">
-            <div class="w-1.5 h-4 bg-purple-400 rounded-full"></div>
-            <span class="text-[10px] text-gray-500">שיווק</span>
-            <span id="exp-marketing-month" class="text-sm font-bold text-purple-500">—</span>
+          <div class="rounded-xl px-3 py-2.5 text-center" style="background:rgba(147,51,234,.06)">
+            <p class="text-[9px] font-bold tracking-wide" style="color:rgba(147,51,234,.45)">שיווק</p>
+            <p id="exp-marketing-month" class="text-base font-black mt-0.5" style="color:rgba(147,51,234,.65)">—</p>
           </div>
         </div>
 
@@ -4602,6 +4644,71 @@ function drillToWorkshop(wsId) {
 }
 window.drillToWorkshop = drillToWorkshop;
 
+
+// ── Full Workshops View ──────────────────────────────────────────
+function openWsFullView() {
+  const now = new Date(); now.setHours(0,0,0,0);
+
+  const drafts = allWorkshops.filter(w => {
+    const s = w.bookingStatus || 'confirmed';
+    if (s !== 'draft') return false;
+    const d = getWsDate(w);
+    return !d || d >= now;
+  });
+
+  const confirmed = allWorkshops.filter(w => {
+    const s = w.bookingStatus || 'confirmed';
+    if (s !== 'confirmed') return false;
+    const d = getWsDate(w);
+    return !d || d >= now;
+  }).sort((a,b) => (getWsDate(a)?.getTime()||0) - (getWsDate(b)?.getTime()||0));
+
+  const unsettled = allWorkshops.filter(w => {
+    const s = w.bookingStatus || 'confirmed';
+    if (s !== 'draft') return false;
+    const d = getWsDate(w);
+    return d && d < now;
+  }).sort((a,b) => (getWsDate(b)?.getTime()||0) - (getWsDate(a)?.getTime()||0));
+
+  const past = allWorkshops.filter(w => {
+    const s = w.bookingStatus || 'confirmed';
+    if (s !== 'confirmed') return false;
+    const d = getWsDate(w);
+    return d && d < now;
+  }).sort((a,b) => (getWsDate(b)?.getTime()||0) - (getWsDate(a)?.getTime()||0));
+
+  function fillSection(id, items, renderOpts) {
+    const sec = document.getElementById('wsf-' + id);
+    const list = document.getElementById('wsf-' + id + '-list');
+    const count = document.getElementById('wsf-' + id + '-count');
+    if (count) count.textContent = items.length;
+    if (items.length) {
+      sec.style.display = '';
+      list.innerHTML = items.map(w => renderWorkshopCard(w, renderOpts || {})).join('');
+    } else {
+      sec.style.display = 'none';
+    }
+  }
+
+  fillSection('drafts', drafts);
+  fillSection('confirmed', confirmed);
+  fillSection('unsettled', unsettled);
+  fillSection('past', past, { isPast: true });
+
+  document.getElementById('ws-list-view')?.style && (document.getElementById('ws-list-view').style.display = 'none');
+  document.getElementById('ws-crm-view').style.display = 'none';
+  document.getElementById('ws-full-view').style.display = '';
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
+}
+window.openWsFullView = openWsFullView;
+
+function closeWsFullView() {
+  document.getElementById('ws-full-view').style.display = 'none';
+  document.getElementById('ws-list-view')?.style && (document.getElementById('ws-list-view').style.display = '');
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
+}
+window.closeWsFullView = closeWsFullView;
+
 async function saveWorkshop() {
   const name      = document.getElementById('ws-name').value.trim();
   const phone     = document.getElementById('ws-phone').value.trim();
@@ -5019,7 +5126,7 @@ function renderWorkshopsList() {
     const visible = items.slice(0, 5);
     let html = visible.map(renderFn).join('');
     if (items.length > 5) {
-      html += '<button onclick="this.style.display=\'none\';this.previousElementSibling?.remove();this.parentElement.dataset.expanded=\'1\'" data-showmore class="w-full py-3 text-center text-xs font-bold ' + btnTextColor + ' hover:bg-gray-50/50 border-t ' + btnClass + ' transition-colors">\u05d4\u05e6\u05d2 \u05d0\u05ea \u05db\u05dc ' + items.length + ' \u05d4\u05e1\u05d3\u05e0\u05d0\u05d5\u05ea \u2192</button>';
+      html += '<button onclick="openWsFullView();\'none\';this.previousElementSibling?.remove();this.parentElement.dataset.expanded=\'1\'" data-showmore class="w-full py-3 text-center text-xs font-bold ' + btnTextColor + ' hover:bg-gray-50/50 border-t ' + btnClass + ' transition-colors">\u05d4\u05e6\u05d2 \u05d0\u05ea \u05db\u05dc ' + items.length + ' \u05d4\u05e1\u05d3\u05e0\u05d0\u05d5\u05ea \u2192</button>';
     }
     container.innerHTML = html;
     // Store full items for expand
