@@ -400,7 +400,7 @@
     <main id="erp-content" class="flex-1 overflow-y-auto">
 
       <!-- ─── TAB: DASHBOARD ─── -->
-      <section id="tab-dashboard" data-erp-tab class="p-6 space-y-8">
+      <section id="tab-dashboard" data-erp-tab class="p-4 sm:p-6 space-y-5">
 
         <!-- ══ Dashboard view switcher ══ -->
         <div class="flex items-center gap-2 bg-white border border-[#f0dfc0] rounded-full p-1 w-fit shadow-sm">
@@ -417,89 +417,107 @@
         <!-- ═══════════════════════════════════════════════════════════ -->
         <!-- ══ WORKSHOP DASHBOARD ══ -->
         <!-- ═══════════════════════════════════════════════════════════ -->
-        <div id="dash-workshops" class="space-y-8">
+        <div id="dash-workshops" class="space-y-4">
 
           <!-- KPI Cards Row 1 -->
           <div>
-            <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
-              <span class="w-1.5 h-5 bg-[#d4a373] rounded-full inline-block"></span>
+            <h2 class="text-xs font-black text-gray-700 mb-2 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-[#d4a373] rounded-full inline-block"></span>
               סיכום חודשי — סדנאות
             </h2>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373]">
-                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">סדנאות סגורות החודש</p>
-                <p id="wsd-confirmed-month" class="text-2xl font-black text-[#d4a373]">—</p>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">סדנאות סגורות</p>
+                <p id="wsd-confirmed-month" class="text-xl font-black text-[#d4a373]">—</p>
               </div>
-              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-amber-400">
-                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">לידים בטיוטה</p>
-                <p id="wsd-drafts" class="text-2xl font-black text-amber-500">—</p>
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-amber-400">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">לידים בטיוטה</p>
+                <p id="wsd-drafts" class="text-xl font-black text-amber-500">—</p>
               </div>
-              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-emerald-400">
-                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">הכנסות חודשיות</p>
-                <p id="wsd-revenue-month" class="text-2xl font-black text-emerald-500">—</p>
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-emerald-400">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">הכנסות חודשיות</p>
+                <p id="wsd-revenue-month" class="text-xl font-black text-emerald-500">—</p>
               </div>
-              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-blue-400">
-                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">ממוצע הכנסה לסדנא</p>
-                <p id="wsd-avg-revenue" class="text-2xl font-black text-blue-500">—</p>
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-blue-400">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">ממוצע לסדנא</p>
+                <p id="wsd-avg-revenue" class="text-xl font-black text-blue-500">—</p>
               </div>
             </div>
           </div>
 
+          <!-- Next Workshop + 7-Day Calendar (side by side) -->
+          <div class="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-4">
+            <!-- Next Workshop Quick View -->
+            <div id="wsd-next-workshop" class="bg-gradient-to-l from-[#fdf6ee] to-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-xs text-gray-800 flex items-center gap-1.5"><i data-lucide="zap" class="w-3.5 h-3.5 text-[#d4a373]"></i> הסדנא הקרובה</h3>
+                <button id="wsd-next-goto" onclick="" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide="clipboard-list" class="w-3 h-3 inline-block"></i> פרטים</button>
+              </div>
+              <div id="wsd-next-content" class="text-sm text-gray-600">אין סדנאות קרובות</div>
+            </div>
+
+            <!-- 7-Day Calendar -->
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <h3 class="font-bold text-xs text-gray-800 mb-3 flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5 text-[#d4a373]"></i> שבוע קדימה</h3>
+              <div id="wsd-week-calendar" class="grid grid-cols-7 gap-2"></div>
+            </div>
+          </div>
+
           <!-- Goals + Payment Status -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- Goals Card -->
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="target" class="w-4 h-4 text-[#d4a373]"></i> יעדים</h3>
-                <button onclick="document.getElementById('wsd-goals-editor').classList.toggle('hidden')" class="text-[10px] border border-gray-200 text-gray-400 hover:text-[#d4a373] hover:border-[#f0dfc0] px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide="settings" class="w-3 h-3 inline-block"></i> ערוך יעדים</button>
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-xs text-gray-800 flex items-center gap-1.5"><i data-lucide="target" class="w-3.5 h-3.5 text-[#d4a373]"></i> יעדים</h3>
+                <button onclick="document.getElementById('wsd-goals-editor').classList.toggle('hidden')" class="text-[10px] border border-gray-200 text-gray-400 hover:text-[#d4a373] hover:border-[#f0dfc0] px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide="settings" class="w-3 h-3 inline-block"></i> ערוך</button>
               </div>
               <!-- Goals editor (hidden) -->
-              <div id="wsd-goals-editor" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2">
+              <div id="wsd-goals-editor" class="hidden mb-3 p-2.5 bg-gray-50 rounded-lg border border-gray-100 space-y-2">
                 <div class="flex items-center gap-3">
                   <label class="text-xs text-gray-500 w-24">יעד שבועי:</label>
-                  <input id="wsd-weekly-goal" type="number" min="1" max="20" value="3" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1.5 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
+                  <input id="wsd-weekly-goal" type="number" min="1" max="20" value="3" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
                 </div>
                 <div class="flex items-center gap-3">
                   <label class="text-xs text-gray-500 w-24">יעד חודשי:</label>
-                  <input id="wsd-monthly-goal" type="number" min="1" max="50" value="10" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1.5 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
+                  <input id="wsd-monthly-goal" type="number" min="1" max="50" value="10" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
                 </div>
               </div>
               <!-- Weekly meter -->
-              <div class="mb-4">
-                <div class="flex items-center justify-between mb-1.5">
+              <div class="mb-3">
+                <div class="flex items-center justify-between mb-1">
                   <span class="text-xs font-semibold text-gray-600">שבועי</span>
                   <span id="wsd-goal-weekly-label" class="text-xs font-bold text-[#d4a373]">0/3</span>
                 </div>
-                <div class="relative h-5 bg-[#f0dfc0] rounded-full overflow-hidden">
+                <div class="relative h-4 bg-[#f0dfc0] rounded-full overflow-hidden">
                   <div id="wsd-goal-weekly-bar" class="absolute inset-y-0 right-0 bg-gradient-to-l from-[#d4a373] to-[#e8b894] rounded-full transition-all duration-700 ease-out" style="width:0%"></div>
                   <div class="absolute inset-0 flex items-center justify-center">
-                    <span id="wsd-goal-weekly-pct" class="text-[10px] font-black text-white drop-shadow-sm"></span>
+                    <span id="wsd-goal-weekly-pct" class="text-[9px] font-black text-white drop-shadow-sm"></span>
                   </div>
                 </div>
-                <p id="wsd-goal-weekly-status" class="text-[10px] text-gray-400 mt-1"></p>
+                <p id="wsd-goal-weekly-status" class="text-[10px] text-gray-400 mt-0.5"></p>
               </div>
               <!-- Monthly meter -->
               <div>
-                <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center justify-between mb-1">
                   <span class="text-xs font-semibold text-gray-600">חודשי</span>
                   <span id="wsd-goal-monthly-label" class="text-xs font-bold text-blue-500">0/10</span>
                 </div>
-                <div class="relative h-5 bg-blue-100 rounded-full overflow-hidden">
+                <div class="relative h-4 bg-blue-100 rounded-full overflow-hidden">
                   <div id="wsd-goal-monthly-bar" class="absolute inset-y-0 right-0 bg-gradient-to-l from-blue-500 to-blue-400 rounded-full transition-all duration-700 ease-out" style="width:0%"></div>
                   <div class="absolute inset-0 flex items-center justify-center">
-                    <span id="wsd-goal-monthly-pct" class="text-[10px] font-black text-white drop-shadow-sm"></span>
+                    <span id="wsd-goal-monthly-pct" class="text-[9px] font-black text-white drop-shadow-sm"></span>
                   </div>
                 </div>
-                <p id="wsd-goal-monthly-status" class="text-[10px] text-gray-400 mt-1"></p>
+                <p id="wsd-goal-monthly-status" class="text-[10px] text-gray-400 mt-0.5"></p>
               </div>
               <!-- Confetti container -->
               <div id="wsd-confetti" class="relative pointer-events-none" style="height:0;overflow:visible;"></div>
             </div>
 
             <!-- Payment Status Overview -->
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="credit-card" class="w-4 h-4 text-[#d4a373]"></i> סטטוס תשלומים — קרובות</h3>
-              <div class="space-y-2">
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <h3 class="font-bold text-xs text-gray-800 mb-2.5 flex items-center gap-1.5"><i data-lucide="credit-card" class="w-3.5 h-3.5 text-[#d4a373]"></i> סטטוס תשלומים — קרובות</h3>
+              <div class="space-y-1.5">
                 <div class="flex items-center justify-between p-2 rounded-lg bg-emerald-50 border border-emerald-100">
                   <span class="text-xs font-semibold text-emerald-700">שולם במלואו</span>
                   <span id="wsd-pay-full" class="text-sm font-black text-emerald-600">—</span>
@@ -512,7 +530,7 @@
                   <span class="text-xs font-semibold text-red-600">ממתין לתשלום</span>
                   <span id="wsd-pay-none" class="text-sm font-black text-red-500">—</span>
                 </div>
-                <div class="flex items-center justify-between p-2 rounded-lg bg-gray-50 border border-gray-200 mt-1">
+                <div class="flex items-center justify-between p-2 rounded-lg bg-gray-50 border border-gray-200">
                   <span class="text-xs font-bold text-gray-600">סה"כ חוב פתוח</span>
                   <span id="wsd-open-debt" class="text-sm font-black text-red-500">—</span>
                 </div>
@@ -520,43 +538,28 @@
             </div>
           </div>
 
-          <!-- Next Workshop Quick View -->
-          <div id="wsd-next-workshop" class="bg-gradient-to-l from-[#fdf6ee] to-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-[#d4a373]"></i> הסדנא הקרובה ביותר</h3>
-              <button id="wsd-next-goto" onclick="" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors"><i data-lucide="clipboard-list" class="w-3.5 h-3.5 inline-block"></i> פרטים מלאים</button>
+          <!-- Revenue Chart + Conversion Funnel (side by side) -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <h3 class="font-bold text-xs text-gray-800 mb-3 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-3.5 h-3.5 text-[#d4a373]"></i> מגמת הכנסות — 6 חודשים</h3>
+              <div id="wsd-revenue-chart" class="flex items-end gap-2 h-[100px]"></div>
             </div>
-            <div id="wsd-next-content" class="text-sm text-gray-600">אין סדנאות קרובות</div>
-          </div>
-
-          <!-- 7-Day Calendar -->
-          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-            <h3 class="font-bold text-sm text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-[#d4a373]"></i> שבוע קדימה</h3>
-            <div id="wsd-week-calendar" class="grid grid-cols-7 gap-2"></div>
-          </div>
-
-          <!-- Monthly Revenue Trend -->
-          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-            <h3 class="font-bold text-sm text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4 text-[#d4a373]"></i> מגמת הכנסות — 6 חודשים</h3>
-            <div id="wsd-revenue-chart" class="flex items-end gap-2 h-[120px]"></div>
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <h3 class="font-bold text-xs text-gray-800 mb-2.5 flex items-center gap-1.5"><i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-[#d4a373]"></i> משפך המרה</h3>
+              <div id="wsd-funnel" class="space-y-1.5"></div>
+            </div>
           </div>
 
           <!-- Popular Routes + Cities -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4 text-[#d4a373]"></i> מסלולים פופולריים</h3>
-              <div id="wsd-popular-routes" class="space-y-2"></div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <h3 class="font-bold text-xs text-gray-800 mb-2.5 flex items-center gap-1.5"><i data-lucide="trophy" class="w-3.5 h-3.5 text-[#d4a373]"></i> מסלולים פופולריים</h3>
+              <div id="wsd-popular-routes" class="space-y-1.5"></div>
             </div>
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-[#d4a373]"></i> ערים מובילות</h3>
-              <div id="wsd-popular-cities" class="space-y-2"></div>
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+              <h3 class="font-bold text-xs text-gray-800 mb-2.5 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#d4a373]"></i> ערים מובילות</h3>
+              <div id="wsd-popular-cities" class="space-y-1.5"></div>
             </div>
-          </div>
-
-          <!-- Conversion Funnel -->
-          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-            <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4 text-[#d4a373]"></i> משפך המרה</h3>
-            <div id="wsd-funnel" class="space-y-2"></div>
           </div>
 
         </div>
@@ -564,127 +567,110 @@
         <!-- ═══ END WORKSHOP DASHBOARD ═══ -->
 
         <!-- ══ SHOP DASHBOARD (original) ══ -->
-        <div id="dash-shop" style="display:none;">
+        <div id="dash-shop" style="display:none;" class="space-y-4">
 
-        <!-- ══ סיכום חודשי ══ -->
+        <!-- ══ סיכום חודשי + כללי (merged into one row of 8) ══ -->
         <div>
-          <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
-            <span class="w-1.5 h-5 bg-[#d4a373] rounded-full inline-block"></span>
+          <h2 class="text-xs font-black text-gray-700 mb-2 flex items-center gap-2">
+            <span class="w-1.5 h-4 bg-[#d4a373] rounded-full inline-block"></span>
             סיכום חודשי
           </h2>
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- הכנסות החודש -->
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373] kpi-hover-card" data-kpi="m-revenue">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">הכנסות החודש</p>
-              <p id="kpi-m-revenue" class="text-2xl font-black text-[#d4a373]">—</p>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373] kpi-hover-card" data-kpi="m-revenue">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">הכנסות החודש</p>
+              <p id="kpi-m-revenue" class="text-xl font-black text-[#d4a373]">—</p>
               <div class="kpi-tooltip hidden absolute top-full right-0 mt-1 z-20 bg-[#2c2a29] text-white text-xs rounded-xl px-3 py-2 shadow-lg max-w-[240px] leading-relaxed pointer-events-none" id="tip-m-revenue"></div>
             </div>
-            <!-- הזמנות החודש -->
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-emerald-400 kpi-hover-card" data-kpi="m-orders">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">הזמנות החודש</p>
-              <p id="kpi-m-orders" class="text-2xl font-black text-emerald-500">—</p>
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-emerald-400 kpi-hover-card" data-kpi="m-orders">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">הזמנות החודש</p>
+              <p id="kpi-m-orders" class="text-xl font-black text-emerald-500">—</p>
               <div class="kpi-tooltip hidden absolute top-full right-0 mt-1 z-20 bg-[#2c2a29] text-white text-xs rounded-xl px-3 py-2 shadow-lg max-w-[240px] leading-relaxed pointer-events-none" id="tip-m-orders"></div>
             </div>
-            <!-- לקוחות חדשים החודש -->
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-blue-400 kpi-hover-card" data-kpi="m-new-customers">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">לקוחות חדשים החודש</p>
-              <p id="kpi-m-new-customers" class="text-2xl font-black text-blue-500">—</p>
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-blue-400 kpi-hover-card" data-kpi="m-new-customers">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">לקוחות חדשים</p>
+              <p id="kpi-m-new-customers" class="text-xl font-black text-blue-500">—</p>
               <div class="kpi-tooltip hidden absolute top-full right-0 mt-1 z-20 bg-[#2c2a29] text-white text-xs rounded-xl px-3 py-2 shadow-lg max-w-[240px] leading-relaxed pointer-events-none" id="tip-m-new-customers"></div>
             </div>
-            <!-- ממוצע הזמנה החודש -->
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-amber-400 kpi-hover-card" data-kpi="m-aov">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">ממוצע הזמנה החודש</p>
-              <p id="kpi-m-aov" class="text-2xl font-black text-amber-500">—</p>
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-amber-400 kpi-hover-card" data-kpi="m-aov">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">ממוצע הזמנה</p>
+              <p id="kpi-m-aov" class="text-xl font-black text-amber-500">—</p>
               <div class="kpi-tooltip hidden absolute top-full right-0 mt-1 z-20 bg-[#2c2a29] text-white text-xs rounded-xl px-3 py-2 shadow-lg max-w-[240px] leading-relaxed pointer-events-none" id="tip-m-aov"></div>
             </div>
           </div>
         </div>
 
-        <!-- ══ סיכום כללי ══ -->
         <div>
-          <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
-            <span class="w-1.5 h-5 bg-emerald-400 rounded-full inline-block"></span>
+          <h2 class="text-xs font-black text-gray-700 mb-2 flex items-center gap-2">
+            <span class="w-1.5 h-4 bg-emerald-400 rounded-full inline-block"></span>
             סיכום כללי
           </h2>
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373]">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">סה"כ הכנסות</p>
-              <p id="kpi-revenue" class="text-2xl font-black text-[#d4a373]">—</p>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">סה"כ הכנסות</p>
+              <p id="kpi-revenue" class="text-xl font-black text-[#d4a373]">—</p>
             </div>
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-emerald-400">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">סה"כ הזמנות</p>
-              <p id="kpi-orders" class="text-2xl font-black text-emerald-500">—</p>
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-emerald-400">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">סה"כ הזמנות</p>
+              <p id="kpi-orders" class="text-xl font-black text-emerald-500">—</p>
             </div>
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-emerald-400">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">רווח נקי</p>
-              <p id="kpi-profit" class="text-2xl font-black text-emerald-500">—</p>
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-emerald-400">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">רווח נקי</p>
+              <p id="kpi-profit" class="text-xl font-black text-emerald-500">—</p>
             </div>
-            <div class="relative bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-blue-400">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">ממוצע הזמנה כולל</p>
-              <p id="kpi-aov" class="text-2xl font-black text-blue-500">—</p>
+            <div class="relative bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-blue-400">
+              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">ממוצע הזמנה כולל</p>
+              <p id="kpi-aov" class="text-xl font-black text-blue-500">—</p>
             </div>
           </div>
         </div>
 
         <!-- ══ ניתוח מכירות ══ -->
-        <div>
-          <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
-            <span class="w-1.5 h-5 bg-blue-400 rounded-full inline-block"></span>
-            ניתוח מכירות
-          </h2>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-sm text-gray-800">הזמנות — 6 חודשים</h3>
-                <select id="dash-period-select" onchange="dashPeriod=this.value;renderBarChart();" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer">
-                  <option value="none">תקופה נוכחית</option>
-                  <option value="month">השוואה לחודש קודם</option>
-                  <option value="year">השוואה לשנה קודמת</option>
-                </select>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-xs text-gray-800">הזמנות — 6 חודשים</h3>
+              <select id="dash-period-select" onchange="dashPeriod=this.value;renderBarChart();" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer">
+                <option value="none">תקופה נוכחית</option>
+                <option value="month">השוואה לחודש קודם</option>
+                <option value="year">השוואה לשנה קודמת</option>
+              </select>
+            </div>
+            <div id="bar-chart" class="flex items-end gap-2 h-[100px]"></div>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+            <h3 class="font-bold text-xs text-gray-800 mb-3">מוצרים מובילים</h3>
+            <div id="top-products-list" class="space-y-1"></div>
+          </div>
+        </div>
+
+        <!-- ══ פילוח גיאוגרפי + מלאי (side by side) ══ -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
+            <h3 class="font-bold text-xs text-gray-800 mb-3">ערים מובילות (לפי הזמנות)</h3>
+            <div id="geo-cities" class="space-y-1.5"></div>
+          </div>
+          <div>
+            <h3 class="text-xs font-black text-gray-700 mb-2 flex items-center gap-2">
+              <span class="w-1.5 h-4 bg-amber-400 rounded-full inline-block"></span>
+              מלאי ומוצרים
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">סה"כ מוצרים</p>
+                <p id="s-total" class="text-xl font-black text-[#d4a373]">—</p>
               </div>
-              <div id="bar-chart" class="flex items-end gap-2 h-[120px]"></div>
-            </div>
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow">
-              <h3 class="font-bold text-sm text-gray-800 mb-4">מוצרים מובילים</h3>
-              <div id="top-products-list" class="space-y-1"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ══ פילוח גיאוגרפי ══ -->
-        <div>
-          <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
-            <span class="w-1.5 h-5 bg-purple-400 rounded-full inline-block"></span>
-            פילוח גיאוגרפי
-          </h2>
-          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow">
-            <h3 class="font-bold text-sm text-gray-800 mb-4">ערים מובילות (לפי הזמנות)</h3>
-            <div id="geo-cities" class="space-y-2"></div>
-          </div>
-        </div>
-
-        <!-- ══ מלאי ומוצרים ══ -->
-        <div>
-          <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
-            <span class="w-1.5 h-5 bg-amber-400 rounded-full inline-block"></span>
-            מלאי ומוצרים
-          </h2>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373]">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">סה"כ מוצרים</p>
-              <p id="s-total" class="text-3xl font-black text-[#d4a373]">—</p>
-            </div>
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373]">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">פורסם</p>
-              <p id="s-pub" class="text-3xl font-black text-emerald-500">—</p>
-            </div>
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373]">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">אזל מלאי</p>
-              <p id="s-oos" class="text-3xl font-black text-red-400">—</p>
-            </div>
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373]">
-              <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">מוצרים מומלצים</p>
-              <p id="s-feat" class="text-3xl font-black text-amber-500">—</p>
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">פורסם</p>
+                <p id="s-pub" class="text-xl font-black text-emerald-500">—</p>
+              </div>
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">אזל מלאי</p>
+                <p id="s-oos" class="text-xl font-black text-red-400">—</p>
+              </div>
+              <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">מוצרים מומלצים</p>
+                <p id="s-feat" class="text-xl font-black text-amber-500">—</p>
+              </div>
             </div>
           </div>
         </div>
