@@ -152,6 +152,9 @@
     .bi-nav-btn { padding:10px 16px; font-size:13px; font-weight:600; color:#6b7280; border-bottom:2px solid transparent; white-space:nowrap; transition:color .2s, border-color .2s; background:none; cursor:pointer; }
     .bi-nav-btn:hover { color:#d4a373; }
     .bi-nav-btn.bi-nav-active { color:#d4a373; border-bottom-color:#d4a373; font-weight:700; }
+    .settings-nav-btn { padding:10px 16px; font-size:13px; font-weight:600; color:#6b7280; border-bottom:2px solid transparent; white-space:nowrap; transition:color .2s, border-color .2s; background:none; cursor:pointer; }
+    .settings-nav-btn:hover { color:#d4a373; }
+    .settings-nav-btn.settings-nav-active { color:#d4a373; border-bottom-color:#d4a373; font-weight:700; }
     .no-scrollbar::-webkit-scrollbar { display:none; }
     .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
     .bi-kpi-card { background:#fff; border:1px solid #f0dfc0; border-radius:16px; padding:20px; transition:transform .2s, box-shadow .2s; }
@@ -333,21 +336,9 @@
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">💰</span> הוצאות
           </button>
-          <button data-tab="ws-gallery" onclick="showTab('ws-gallery')"
-            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
-            <span class="text-base">🖼️</span> גלריית סדנאות
-          </button>
           <button data-tab="customers" onclick="showTab('customers')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">👥</span> לקוחות
-          </button>
-          <button data-tab="coupons" onclick="showTab('coupons')"
-            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
-            <span class="text-base">🏷️</span> קופונים
-          </button>
-          <button data-tab="banner" onclick="showTab('banner')"
-            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
-            <span class="text-base">📢</span> באנר עליון
           </button>
           <button data-tab="analytics" onclick="showTab('analytics')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
@@ -865,17 +856,6 @@
         </div>
       </section>
 
-      <!-- ─── TAB: COUPONS ─── -->
-      <section id="tab-coupons" data-erp-tab class="p-6 space-y-4">
-        <div class="flex justify-between items-center">
-          <h2 class="font-black text-gray-800 text-lg">קופונים</h2>
-          <button onclick="openCouponModal()"
-            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            + קופון חדש
-          </button>
-        </div>
-        <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </section>
 
       <!-- ─── TAB: INQUIRIES ─── -->
       <section id="tab-inquiries" data-erp-tab class="p-6 space-y-4">
@@ -895,18 +875,6 @@
             <tbody id="inquiries-body" class="divide-y divide-[#fdf6ee]"></tbody>
           </table>
         </div>
-      </section>
-
-      <!-- ─── TAB: BANNER ─── -->
-      <section id="tab-banner" data-erp-tab class="p-6 space-y-4">
-        <div class="flex justify-between items-center">
-          <h2 class="font-black text-gray-800 text-lg">הודעות באנר עליון</h2>
-          <button onclick="openBannerMsgModal()"
-            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            + הודעה חדשה</button>
-        </div>
-        <p class="text-xs text-gray-400">ההודעות מוצגות בבאנר העליון באתר ומתחלפות כל 5 שניות. גררי כדי לשנות סדר.</p>
-        <div id="banner-list" class="space-y-3"></div>
       </section>
 
       <!-- ─── TAB: WORKSHOPS ─── -->
@@ -1306,51 +1274,151 @@
         </div>
       </section>
 
-      <!-- ─── TAB: SETTINGS ─── -->
-      <section id="tab-settings" data-erp-tab class="p-6 space-y-6">
-        <h2 class="font-black text-gray-800 text-lg">הגדרות</h2>
-
-        <!-- Birthday campaign -->
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="font-bold text-sm text-gray-800">🎂 קמפיין יום הולדת אוטומטי</h3>
-              <p class="text-xs text-gray-400 mt-1">שליחת קופון הנחה אוטומטי ללקוחות עם יום הולדת בחודש הנוכחי</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="set-bday-enabled" class="sr-only peer" onchange="saveSettingToggle('birthdayCampaignEnabled',this.checked)">
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4a373]"></div>
-            </label>
+      <!-- ─── TAB: SETTINGS (with sub-pages) ─── -->
+      <section id="tab-settings" data-erp-tab class="p-0">
+        <!-- Settings sub-nav -->
+        <div class="border-b border-[#f0dfc0] bg-white sticky top-0 z-10">
+          <div class="flex overflow-x-auto no-scrollbar px-2 sm:px-4">
+            <button class="settings-nav-btn settings-nav-active" data-settings-page="general" onclick="showSettingsPage('general')">⚙️ כללי</button>
+            <button class="settings-nav-btn" data-settings-page="banner" onclick="showSettingsPage('banner')">📢 באנר עליון</button>
+            <button class="settings-nav-btn" data-settings-page="coupons" onclick="showSettingsPage('coupons')">🏷️ קופונים</button>
+            <button class="settings-nav-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">🖼️ גלריית סדנאות</button>
           </div>
-          <div id="bday-settings" class="space-y-3 mt-4" style="display:none;">
-            <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700 leading-relaxed mb-2">
-              הקמפיין רץ אוטומטית ב-1 לכל חודש. הוא סורק את כל הלקוחות עם יום הולדת בחודש הנוכחי, יוצר להם קופון אישי שתקף עד סוף החודש, ושולח להם הודעה. קופון ליום הולדת יעבוד רק ללקוח הספציפי שקיבל אותו.
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        </div>
+
+        <!-- Sub-page: General -->
+        <div id="settings-page-general" class="settings-page p-6 space-y-6">
+          <h2 class="font-black text-gray-800 text-lg">הגדרות</h2>
+
+          <!-- Birthday campaign -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
               <div>
-                <label class="lbl">ערך קופון (%)</label>
-                <input id="set-bday-value" type="number" value="15" min="1" max="100" class="inp" onchange="saveBdaySettings()" />
+                <h3 class="font-bold text-sm text-gray-800">🎂 קמפיין יום הולדת אוטומטי</h3>
+                <p class="text-xs text-gray-400 mt-1">שליחת קופון הנחה אוטומטי ללקוחות עם יום הולדת בחודש הנוכחי</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="set-bday-enabled" class="sr-only peer" onchange="saveSettingToggle('birthdayCampaignEnabled',this.checked)">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4a373]"></div>
+              </label>
+            </div>
+            <div id="bday-settings" class="space-y-3 mt-4" style="display:none;">
+              <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700 leading-relaxed mb-2">
+                הקמפיין רץ אוטומטית ב-1 לכל חודש. הוא סורק את כל הלקוחות עם יום הולדת בחודש הנוכחי, יוצר להם קופון אישי שתקף עד סוף החודש, ושולח להם הודעה. קופון ליום הולדת יעבוד רק ללקוח הספציפי שקיבל אותו.
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="lbl">ערך קופון (%)</label>
+                  <input id="set-bday-value" type="number" value="15" min="1" max="100" class="inp" onchange="saveBdaySettings()" />
+                </div>
+                <div>
+                  <label class="lbl">הרצה אחרונה</label>
+                  <p id="bday-last-run" class="text-sm text-gray-500 mt-1 px-3 py-2 bg-gray-50 rounded-lg">לא רץ עדיין</p>
+                </div>
               </div>
               <div>
-                <label class="lbl">הרצה אחרונה</label>
-                <p id="bday-last-run" class="text-sm text-gray-500 mt-1 px-3 py-2 bg-gray-50 rounded-lg">לא רץ עדיין</p>
-              </div>
-            </div>
-            <div>
-              <label class="lbl">תבנית הודעה</label>
-              <textarea id="set-bday-template" rows="4" class="inp resize-none" onchange="saveBdaySettings()">שלום {name},
+                <label class="lbl">תבנית הודעה</label>
+                <textarea id="set-bday-template" rows="4" class="inp resize-none" onchange="saveBdaySettings()">שלום {name},
 יום הולדת שמח! 🎂
 בכיף רב מעניקים לך קופון הנחה של {value}% לכבוד יום הולדתך.
 קוד הקופון שלך: {code}
 הקופון בתוקף עד סוף החודש.
 
 Charming by Vik 💛</textarea>
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <button onclick="runBirthdayCampaign(true)" class="border border-[#d4a373] text-[#d4a373] hover:bg-[#fdf6ee] px-5 py-2.5 rounded-full font-bold text-sm transition-colors">
+                  🎂 הרצה ידנית עכשיו
+                </button>
+                <p id="bday-result" class="text-xs text-gray-500"></p>
+              </div>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-              <button onclick="runBirthdayCampaign(true)" class="border border-[#d4a373] text-[#d4a373] hover:bg-[#fdf6ee] px-5 py-2.5 rounded-full font-bold text-sm transition-colors">
-                🎂 הרצה ידנית עכשיו
-              </button>
-              <p id="bday-result" class="text-xs text-gray-500"></p>
+          </div>
+        </div>
+
+        <!-- Sub-page: Banner -->
+        <div id="settings-page-banner" class="settings-page p-6 space-y-4" style="display:none;">
+          <div class="flex justify-between items-center">
+            <h2 class="font-black text-gray-800 text-lg">הודעות באנר עליון</h2>
+            <button onclick="openBannerMsgModal()"
+              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              + הודעה חדשה</button>
+          </div>
+          <p class="text-xs text-gray-400">ההודעות מוצגות בבאנר העליון באתר ומתחלפות כל 5 שניות. גררי כדי לשנות סדר.</p>
+          <div id="banner-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Sub-page: Coupons -->
+        <div id="settings-page-coupons" class="settings-page p-6 space-y-4" style="display:none;">
+          <div class="flex justify-between items-center">
+            <h2 class="font-black text-gray-800 text-lg">קופונים</h2>
+            <button onclick="openCouponModal()"
+              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              + קופון חדש
+            </button>
+          </div>
+          <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- Sub-page: Workshop Gallery -->
+        <div id="settings-page-ws-gallery" class="settings-page p-6 space-y-6" style="display:none;">
+          <div class="flex flex-wrap justify-between items-center gap-3">
+            <div>
+              <h2 class="font-black text-gray-800 text-lg">גלריית תמונות סדנאות</h2>
+              <p class="text-xs text-gray-400 mt-1">התמונות מוצגות באזור "תמונות מהסדנאות שלנו" בדף הבית</p>
+            </div>
+            <button id="wsg-upload-btn"
+              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              העלאת תמונות
+            </button>
+          </div>
+
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <p class="text-sm text-gray-500">גררי תמונות כדי לשנות סדר • לחצי על תמונה לעריכה</p>
+              <span id="wsg-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">0 תמונות</span>
+            </div>
+            <div id="wsg-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              <!-- gallery items rendered here -->
+            </div>
+            <div id="wsg-empty" class="py-16 text-center" style="display:none;">
+              <p class="text-4xl mb-3">🖼️</p>
+              <p class="text-gray-400 font-semibold text-sm">אין תמונות בגלריה</p>
+              <p class="text-gray-300 text-xs mt-1">לחצי על "העלאת תמונות" כדי להוסיף תמונות מהסדנאות</p>
+            </div>
+            <div id="wsg-loading" class="py-14 text-center">
+              <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
+              <p class="text-gray-300 text-sm">טוענת גלריה...</p>
+            </div>
+          </div>
+
+          <!-- Edit single image panel -->
+          <div id="wsg-edit-panel" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm" style="display:none;">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-gray-700">עריכת תמונה</h3>
+              <button onclick="closeWsgEdit()" class="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-5">
+              <img id="wsg-edit-img" src="" alt="" class="w-full sm:w-48 h-48 object-cover rounded-xl border border-[#f0dfc0]" />
+              <div class="flex-1 space-y-3">
+                <div>
+                  <label class="text-xs font-bold text-gray-500 mb-1 block">תיאור (alt text)</label>
+                  <input id="wsg-edit-alt" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50" placeholder="תיאור התמונה..." />
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-gray-500 mb-1 block">סגנון תצוגה</label>
+                  <select id="wsg-edit-layout" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
+                    <option value="">רגיל</option>
+                    <option value="tall">גבוה (tall)</option>
+                    <option value="wide">רחב (wide)</option>
+                  </select>
+                </div>
+                <div class="flex gap-2 pt-2">
+                  <button onclick="saveWsgEdit()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all">שמור</button>
+                  <button onclick="deleteWsgImage()" class="border border-red-200 text-red-400 hover:bg-red-50 px-5 py-2 rounded-full font-bold text-sm transition-all">מחק</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1366,69 +1434,6 @@ Charming by Vik 💛</textarea>
           <div class="py-14 text-center">
             <span class="text-4xl mb-3 block">✨</span>
             <p class="text-sm text-gray-400 font-semibold">אין התראות</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ─── TAB: WORKSHOP GALLERY ─── -->
-      <section id="tab-ws-gallery" data-erp-tab class="p-6 space-y-6">
-        <div class="flex flex-wrap justify-between items-center gap-3">
-          <div>
-            <h2 class="font-black text-gray-800 text-lg">גלריית תמונות סדנאות</h2>
-            <p class="text-xs text-gray-400 mt-1">התמונות מוצגות באזור "תמונות מהסדנאות שלנו" בדף הבית</p>
-          </div>
-          <button id="wsg-upload-btn"
-            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            העלאת תמונות
-          </button>
-        </div>
-
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <p class="text-sm text-gray-500">גררי תמונות כדי לשנות סדר • לחצי על תמונה לעריכה</p>
-            <span id="wsg-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">0 תמונות</span>
-          </div>
-          <div id="wsg-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            <!-- gallery items rendered here -->
-          </div>
-          <div id="wsg-empty" class="py-16 text-center" style="display:none;">
-            <p class="text-4xl mb-3">🖼️</p>
-            <p class="text-gray-400 font-semibold text-sm">אין תמונות בגלריה</p>
-            <p class="text-gray-300 text-xs mt-1">לחצי על "העלאת תמונות" כדי להוסיף תמונות מהסדנאות</p>
-          </div>
-          <div id="wsg-loading" class="py-14 text-center">
-            <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
-            <p class="text-gray-300 text-sm">טוענת גלריה...</p>
-          </div>
-        </div>
-
-        <!-- Edit single image panel -->
-        <div id="wsg-edit-panel" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm" style="display:none;">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-gray-700">עריכת תמונה</h3>
-            <button onclick="closeWsgEdit()" class="text-gray-400 hover:text-gray-600 text-lg">✕</button>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-5">
-            <img id="wsg-edit-img" src="" alt="" class="w-full sm:w-48 h-48 object-cover rounded-xl border border-[#f0dfc0]" />
-            <div class="flex-1 space-y-3">
-              <div>
-                <label class="text-xs font-bold text-gray-500 mb-1 block">תיאור (alt text)</label>
-                <input id="wsg-edit-alt" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50" placeholder="תיאור התמונה..." />
-              </div>
-              <div>
-                <label class="text-xs font-bold text-gray-500 mb-1 block">סגנון תצוגה</label>
-                <select id="wsg-edit-layout" class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50">
-                  <option value="">רגיל</option>
-                  <option value="tall">גבוה (tall)</option>
-                  <option value="wide">רחב (wide)</option>
-                </select>
-              </div>
-              <div class="flex gap-2 pt-2">
-                <button onclick="saveWsgEdit()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all">שמור</button>
-                <button onclick="deleteWsgImage()" class="border border-red-200 text-red-400 hover:bg-red-50 px-5 py-2 rounded-full font-bold text-sm transition-all">מחק</button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -1491,17 +1496,8 @@ Charming by Vik 💛</textarea>
         <span class="text-lg">☰</span> עוד
       </button>
       <div id="more-menu" class="more-menu">
-        <button data-tab="ws-gallery" onclick="showTab('ws-gallery');closeMoreMenu()">
-          <span>🖼️</span> גלריית סדנאות
-        </button>
         <button data-tab="customers" onclick="showTab('customers');closeMoreMenu()">
           <span>👥</span> לקוחות
-        </button>
-        <button data-tab="coupons" onclick="showTab('coupons');closeMoreMenu()">
-          <span>🏷️</span> קופונים
-        </button>
-        <button data-tab="banner" onclick="showTab('banner');closeMoreMenu()">
-          <span>📢</span> באנר
         </button>
         <button data-tab="analytics" onclick="showTab('analytics');closeMoreMenu()">
           <span>📈</span> אנליטיקה
@@ -2235,8 +2231,39 @@ function closeMoreMenu() {
 window.toggleMoreMenu = toggleMoreMenu;
 window.closeMoreMenu  = closeMoreMenu;
 
+// ── Settings sub-page navigation ──────────────────────────────────
+const settingsSubPages = ['general','banner','coupons','ws-gallery'];
+let settingsSubInited = {};
+function showSettingsPage(page) {
+  settingsSubPages.forEach(p => {
+    const el = document.getElementById('settings-page-'+p);
+    if (el) el.style.display = p === page ? '' : 'none';
+  });
+  document.querySelectorAll('.settings-nav-btn').forEach(btn =>
+    btn.classList.toggle('settings-nav-active', btn.dataset.settingsPage === page));
+  // Init sub-page data on first view
+  if (!settingsSubInited[page]) {
+    settingsSubInited[page] = true;
+    if (page === 'coupons' && typeof initCouponsTab === 'function') initCouponsTab();
+    else if (page === 'banner' && typeof initBannerTab === 'function') initBannerTab();
+    else if (page === 'ws-gallery' && typeof initWsGalleryTab === 'function') initWsGalleryTab();
+  } else {
+    if (page === 'coupons' && typeof renderCouponsGrid === 'function') renderCouponsGrid();
+    else if (page === 'banner' && typeof renderBannerList === 'function') renderBannerList();
+  }
+}
+window.showSettingsPage = showSettingsPage;
+
 function showTab(name) {
-  ['dashboard','orders','inventory','customers','coupons','inquiries','banner','workshops','expenses','ws-gallery','notifications','logs','settings','analytics'].forEach(t => {
+  // Redirect legacy sub-tabs to settings
+  const settingsMap = { 'coupons':'coupons', 'banner':'banner', 'ws-gallery':'ws-gallery' };
+  if (settingsMap[name]) {
+    showTab('settings');
+    showSettingsPage(settingsMap[name]);
+    return;
+  }
+
+  ['dashboard','orders','inventory','customers','inquiries','workshops','expenses','notifications','logs','settings','analytics'].forEach(t => {
     document.getElementById('tab-'+t)?.setAttribute('data-erp-tab','');
   });
   document.getElementById('tab-'+name)?.removeAttribute('data-erp-tab');
@@ -2249,12 +2276,9 @@ function showTab(name) {
     else if (name === 'orders')    initOrdersTab();
     else if (name === 'inventory') initInventoryTab();
     else if (name === 'customers') initCustomersTab();
-    else if (name === 'coupons')   initCouponsTab();
     else if (name === 'inquiries') initInquiriesTab();
-    else if (name === 'banner')    initBannerTab();
     else if (name === 'workshops') initWorkshopsTab();
     else if (name === 'expenses')  initExpensesTab();
-    else if (name === 'ws-gallery') initWsGalleryTab();
     else if (name === 'notifications') renderFullNotifications();
     else if (name === 'logs')      initLogsTab();
     else if (name === 'settings')  initSettingsTab();
@@ -2263,9 +2287,7 @@ function showTab(name) {
     if (name === 'orders')    renderOrdersTable();
     if (name === 'inventory') { updateInventoryStats(); renderTable(); }
     if (name === 'customers') renderCustomersTable();
-    if (name === 'coupons')   renderCouponsGrid();
     if (name === 'inquiries') renderInquiriesTable();
-    if (name === 'banner')    renderBannerList();
     if (name === 'workshops') { renderCalendar(); renderWorkshopsList(); }
     if (name === 'expenses')  renderExpensesList();
     if (name === 'notifications') renderFullNotifications();
