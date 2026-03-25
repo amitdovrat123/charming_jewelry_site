@@ -74,7 +74,7 @@
       #erp-content { padding-bottom: 100px; overflow-x: hidden; }
       [data-erp-tab] { overflow-x: auto; }
       section[id^="tab-"] { padding-left: 12px; padding-right: 12px; }
-      nav.fixed .erp-nav-item--active { background: rgba(212,163,115,0.20); color: #e8b894; }
+      nav.fixed .erp-nav-item--active { background: rgba(212,163,115,0.15); color: #d4a373; }
 
       /* Orders table — prevent cut-off on mobile */
       #tab-orders .bg-white { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -1575,31 +1575,31 @@ Charming by Vik 💛</textarea>
   <!-- Mobile bottom nav — Floating Pill -->
   <div id="more-menu-backdrop" class="more-menu-backdrop" onclick="closeMoreMenu()"></div>
   <nav class="sm:hidden fixed bottom-5 left-5 right-5 z-20">
-    <div class="bg-[#2c2a29]/90 backdrop-blur-xl rounded-full shadow-xl shadow-black/20 border border-[#4a3f3c]/40 px-3 py-2.5 flex items-center justify-around">
+    <div class="bg-[#fdf6ee] backdrop-blur-xl rounded-full shadow-lg shadow-[#d4a373]/15 border-2 border-[#e8cfc4] px-3 py-2.5 flex items-center justify-around">
       <button data-tab="workshops" onclick="showTab('workshops')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-[#9a8e8a] hover:text-[#d4a373] transition-all">
         <i data-lucide="palette" class="w-[20px] h-[20px]"></i>
         <span>סדנאות</span>
       </button>
       <button data-tab="expenses" onclick="showTab('expenses')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-[#9a8e8a] hover:text-[#d4a373] transition-all">
         <i data-lucide="wallet" class="w-[20px] h-[20px]"></i>
         <span>הוצאות</span>
       </button>
       <button data-tab="dashboard" onclick="showTab('dashboard')"
         class="erp-nav-item flex flex-col items-center gap-0.5 -mt-3 transition-all">
-        <span class="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-br from-[#d4a373] to-[#b8893e] text-white shadow-lg shadow-[#d4a373]/40">
+        <span class="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-br from-[#d4a373] to-[#b8893e] text-white shadow-lg shadow-[#d4a373]/30">
           <i data-lucide="layout-grid" class="w-[20px] h-[20px]"></i>
         </span>
-        <span class="text-[10px] font-bold text-[#e8b894]">דשבורד</span>
+        <span class="text-[10px] font-bold text-[#d4a373]">דשבורד</span>
       </button>
       <button data-tab="inventory" onclick="showTab('inventory')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-[#9a8e8a] hover:text-[#d4a373] transition-all">
         <i data-lucide="gem" class="w-[20px] h-[20px]"></i>
         <span>קטלוג</span>
       </button>
       <button data-tab="inquiries" onclick="showTab('inquiries')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-[#9a8e8a] hover:text-[#d4a373] transition-all">
         <i data-lucide="message-circle" class="w-[20px] h-[20px]"></i>
         <span>פניות</span>
       </button>
