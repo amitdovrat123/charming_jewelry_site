@@ -362,6 +362,10 @@
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
             <i data-lucide="wallet" class="w-[20px] h-[20px] flex-shrink-0"></i> הוצאות
           </button>
+          <button data-tab="finances" onclick="showTab('finances');closeSidebar()"
+            class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
+            <i data-lucide="bar-chart-3" class="w-[20px] h-[20px] flex-shrink-0"></i> כספים ודוחות
+          </button>
           <button data-tab="customers" onclick="showTab('customers');closeSidebar()"
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
             <i data-lucide="users" class="w-[20px] h-[20px] flex-shrink-0"></i> לקוחות
@@ -446,8 +450,8 @@
             <!-- Goals Card -->
             <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-sm text-gray-800">🎯 יעדים</h3>
-                <button onclick="document.getElementById('wsd-goals-editor').classList.toggle('hidden')" class="text-[10px] border border-gray-200 text-gray-400 hover:text-[#d4a373] hover:border-[#f0dfc0] px-2.5 py-1 rounded-full font-bold transition-colors">⚙️ ערוך יעדים</button>
+                <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="target" class="w-4 h-4 text-[#d4a373]"></i> יעדים</h3>
+                <button onclick="document.getElementById('wsd-goals-editor').classList.toggle('hidden')" class="text-[10px] border border-gray-200 text-gray-400 hover:text-[#d4a373] hover:border-[#f0dfc0] px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide="settings" class="w-3 h-3 inline-block"></i> ערוך יעדים</button>
               </div>
               <!-- Goals editor (hidden) -->
               <div id="wsd-goals-editor" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2">
@@ -494,7 +498,7 @@
 
             <!-- Payment Status Overview -->
             <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <h3 class="font-bold text-sm text-gray-800 mb-3">💳 סטטוס תשלומים — קרובות</h3>
+              <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="credit-card" class="w-4 h-4 text-[#d4a373]"></i> סטטוס תשלומים — קרובות</h3>
               <div class="space-y-2">
                 <div class="flex items-center justify-between p-2 rounded-lg bg-emerald-50 border border-emerald-100">
                   <span class="text-xs font-semibold text-emerald-700">שולם במלואו</span>
@@ -519,144 +523,43 @@
           <!-- Next Workshop Quick View -->
           <div id="wsd-next-workshop" class="bg-gradient-to-l from-[#fdf6ee] to-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="font-bold text-sm text-gray-800">⚡ הסדנא הקרובה ביותר</h3>
-              <button id="wsd-next-goto" onclick="" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">📋 פרטים מלאים</button>
+              <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-[#d4a373]"></i> הסדנא הקרובה ביותר</h3>
+              <button id="wsd-next-goto" onclick="" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors"><i data-lucide="clipboard-list" class="w-3.5 h-3.5 inline-block"></i> פרטים מלאים</button>
             </div>
             <div id="wsd-next-content" class="text-sm text-gray-600">אין סדנאות קרובות</div>
           </div>
 
           <!-- 7-Day Calendar -->
           <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-            <h3 class="font-bold text-sm text-gray-800 mb-4">📅 שבוע קדימה</h3>
+            <h3 class="font-bold text-sm text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-[#d4a373]"></i> שבוע קדימה</h3>
             <div id="wsd-week-calendar" class="grid grid-cols-7 gap-2"></div>
           </div>
 
           <!-- Monthly Revenue Trend -->
           <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-            <h3 class="font-bold text-sm text-gray-800 mb-4">📈 מגמת הכנסות — 6 חודשים</h3>
+            <h3 class="font-bold text-sm text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4 text-[#d4a373]"></i> מגמת הכנסות — 6 חודשים</h3>
             <div id="wsd-revenue-chart" class="flex items-end gap-2 h-[120px]"></div>
           </div>
 
           <!-- Popular Routes + Cities -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <h3 class="font-bold text-sm text-gray-800 mb-3">🏆 מסלולים פופולריים</h3>
+              <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4 text-[#d4a373]"></i> מסלולים פופולריים</h3>
               <div id="wsd-popular-routes" class="space-y-2"></div>
             </div>
             <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <h3 class="font-bold text-sm text-gray-800 mb-3">📍 ערים מובילות</h3>
+              <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-[#d4a373]"></i> ערים מובילות</h3>
               <div id="wsd-popular-cities" class="space-y-2"></div>
             </div>
           </div>
 
           <!-- Conversion Funnel -->
           <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-            <h3 class="font-bold text-sm text-gray-800 mb-3">🔄 משפך המרה</h3>
+            <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4 text-[#d4a373]"></i> משפך המרה</h3>
             <div id="wsd-funnel" class="space-y-2"></div>
           </div>
 
         </div>
-          <!-- Financial Reports Section -->
-          <div class="border-t border-[#f0dfc0] pt-6">
-            <h2 class="text-sm font-black text-gray-700 mb-4 flex items-center gap-2">
-              <span class="w-1.5 h-5 bg-emerald-400 rounded-full inline-block"></span>
-              דוחות כספיים
-            </h2>
-
-            <!-- Report period selector -->
-            <div class="flex items-center gap-3 mb-4">
-              <select id="wsd-report-period" onchange="renderFinancialReports()" class="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-600 cursor-pointer font-semibold">
-                <option value="current">החודש הנוכחי</option>
-                <option value="prev">חודש קודם</option>
-                <option value="quarter">רבעון אחרון</option>
-                <option value="year">שנה נוכחית</option>
-              </select>
-              <span id="wsd-report-label" class="text-xs text-gray-400"></span>
-            </div>
-
-            <!-- P&L Report -->
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md mb-6">
-              <h3 class="font-bold text-sm text-gray-800 mb-4">📊 דוח רווח והפסד</h3>
-              <div class="space-y-2">
-                <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                  <span class="text-sm font-semibold text-emerald-700">הכנסות מסדנאות</span>
-                  <span id="wsd-pnl-revenue" class="text-lg font-black text-emerald-600">—</span>
-                </div>
-                <div class="border-t border-gray-100 my-1"></div>
-                <div class="flex items-center justify-between p-2 px-3">
-                  <span class="text-xs text-gray-500">חומרי גלם</span>
-                  <span id="wsd-pnl-materials" class="text-sm font-bold text-red-400">—</span>
-                </div>
-                <div class="flex items-center justify-between p-2 px-3">
-                  <span class="text-xs text-gray-500">עובדות</span>
-                  <span id="wsd-pnl-staff" class="text-sm font-bold text-red-400">—</span>
-                </div>
-                <div class="flex items-center justify-between p-2 px-3">
-                  <span class="text-xs text-gray-500">שיווק ממומן</span>
-                  <span id="wsd-pnl-marketing" class="text-sm font-bold text-red-400">—</span>
-                </div>
-                <div class="flex items-center justify-between p-2 px-3">
-                  <span class="text-xs text-gray-500">דלק / נסיעות</span>
-                  <span id="wsd-pnl-fuel" class="text-sm font-bold text-red-400">—</span>
-                </div>
-                <div class="flex items-center justify-between p-2 px-3">
-                  <span class="text-xs text-gray-500">ציוד קבוע</span>
-                  <span id="wsd-pnl-equipment" class="text-sm font-bold text-red-400">—</span>
-                </div>
-                <div class="flex items-center justify-between p-2 px-3">
-                  <span class="text-xs text-gray-500">אחר</span>
-                  <span id="wsd-pnl-other" class="text-sm font-bold text-red-400">—</span>
-                </div>
-                <div class="border-t border-gray-100 my-1"></div>
-                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
-                  <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
-                  <span id="wsd-pnl-expenses" class="text-lg font-black text-red-500">—</span>
-                </div>
-                <div class="flex items-center justify-between p-3 rounded-lg border-2" id="wsd-pnl-profit-row">
-                  <span class="text-sm font-bold">רווח נקי</span>
-                  <span id="wsd-pnl-profit" class="text-xl font-black">—</span>
-                </div>
-                <div class="flex items-center justify-between p-2 px-3">
-                  <span class="text-[10px] text-gray-400">אחוז רווחיות</span>
-                  <span id="wsd-pnl-margin" class="text-xs font-bold text-gray-500">—</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Cash Flow -->
-            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <h3 class="font-bold text-sm text-gray-800 mb-4">💰 תזרים מזומנים</h3>
-              <p class="text-[10px] text-gray-400 mb-3">מבוסס על תשלומים שבוצעו בפועל (לא על סדנאות שנסגרו)</p>
-              <div class="space-y-2">
-                <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                  <span class="text-sm font-semibold text-emerald-700">מקדמות שהתקבלו</span>
-                  <span id="wsd-cf-advances" class="text-sm font-black text-emerald-600">—</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                  <span class="text-sm font-semibold text-emerald-700">יתרות שהתקבלו</span>
-                  <span id="wsd-cf-balances" class="text-sm font-black text-emerald-600">—</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <span class="text-sm font-bold text-blue-700">סה"כ כניסות</span>
-                  <span id="wsd-cf-total-in" class="text-lg font-black text-blue-600">—</span>
-                </div>
-                <div class="border-t border-gray-100 my-1"></div>
-                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
-                  <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
-                  <span id="wsd-cf-total-out" class="text-sm font-black text-red-500">—</span>
-                </div>
-                <div class="flex items-center justify-between p-3 rounded-lg border-2" id="wsd-cf-net-row">
-                  <span class="text-sm font-bold">תזרים נטו</span>
-                  <span id="wsd-cf-net" class="text-xl font-black">—</span>
-                </div>
-              </div>
-              <!-- Monthly cash flow chart -->
-              <div class="mt-4">
-                <h4 class="text-xs font-bold text-gray-500 mb-2">תזרים חודשי — 6 חודשים</h4>
-                <div id="wsd-cf-chart" class="flex items-end gap-2 h-[100px]"></div>
-              </div>
-            </div>
-          </div>
 
         <!-- ═══ END WORKSHOP DASHBOARD ═══ -->
 
@@ -859,7 +762,7 @@
             <p class="text-gray-300 text-sm">טוען מוצרים...</p>
           </div>
           <div id="tbl-empty" data-v class="py-20 text-center">
-            <p class="text-5xl mb-3">💎</p>
+            <div class="mb-3"><i data-lucide="gem" class="w-12 h-12 mx-auto text-[#d4a373]/40"></i></div>
             <p class="text-gray-500 font-semibold text-sm">אין מוצרים</p>
             <p class="text-gray-300 text-xs mt-1">הוסיפי מוצר ראשון בלחיצה על "מוצר חדש"</p>
           </div>
@@ -1039,7 +942,7 @@
               <label class="lbl">סטטוס הזמנה</label>
               <input id="ws-status" type="hidden" value="draft" />
               <div id="ws-status-display" class="flex items-center gap-2 mt-1 px-3 py-2 bg-gray-50 rounded-lg">
-                <span id="ws-status-icon" class="text-base">📝</span>
+                <span id="ws-status-icon"><i data-lucide="file-edit" class="w-4 h-4 inline-block"></i></span>
                 <span id="ws-status-text" class="text-sm font-semibold text-amber-600">טיוטה — ממתין למקדמה</span>
               </div>
               <p class="text-[10px] text-gray-400 mt-1">הסדנא תיסגר אוטומטית עם אישור מקדמה</p>
@@ -1063,7 +966,7 @@
           <!-- ── CRM: Payment Tracking ── -->
           <div id="ws-payment-section" class="mt-4 border border-[#f0dfc0] rounded-xl overflow-hidden">
             <div class="px-4 py-3 bg-[#fdf6ee] border-b border-[#f0dfc0] flex items-center gap-2">
-              <span class="text-base">💳</span>
+              <i data-lucide="credit-card" class="w-4 h-4 inline-block"></i>
               <h4 class="font-bold text-sm text-gray-800">מעקב תשלומים</h4>
               <span id="ws-payment-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full"></span>
             </div>
@@ -1137,7 +1040,7 @@
         <!-- Section 1: Drafts -->
         <div id="ws-section-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
           <div class="px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
-            <span class="text-base">📝</span>
+            <i data-lucide="file-edit" class="w-4 h-4 inline-block"></i>
             <h3 class="font-bold text-sm text-amber-700">סדנאות שטרם נסגרו</h3>
             <span id="ws-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
           </div>
@@ -1147,7 +1050,7 @@
         <!-- Section 2: Confirmed & Upcoming -->
         <div id="ws-section-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2">
-            <span class="text-base">✅</span>
+            <i data-lucide="check-circle" class="w-4 h-4 inline-block text-emerald-500"></i>
             <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — קרובות</h3>
             <span id="ws-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
           </div>
@@ -1158,7 +1061,7 @@
         <div id="ws-section-archive" class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
           <button id="ws-archive-toggle" onclick="toggleWsArchive()" class="w-full px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
             <div class="flex items-center gap-2">
-              <span class="text-base opacity-60">🗂️</span>
+              <i data-lucide="folder" class="w-4 h-4 opacity-60 inline-block"></i>
               <h3 class="font-bold text-sm text-gray-400">ארכיון סדנאות</h3>
               <span id="ws-archive-count" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5"></span>
             </div>
@@ -1171,7 +1074,7 @@
         <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="text-base">💬</span>
+              <i data-lucide="message-circle" class="w-4 h-4 inline-block"></i>
               <h3 class="font-bold text-sm text-gray-800">הודעות WhatsApp מוכנות</h3>
               <span id="wa-tpl-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
             </div>
@@ -1324,6 +1227,114 @@
         </div>
       </section>
 
+      <!-- ─── TAB: FINANCES ─── -->
+      <section id="tab-finances" data-erp-tab class="p-6 space-y-6">
+        <h2 class="font-black text-gray-800 text-lg flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-[#d4a373] inline-block"></i> כספים ודוחות</h2>
+
+        <!-- Report period selector -->
+        <div class="flex items-center gap-3">
+          <select id="wsd-report-period" onchange="renderFinancialReports()" class="text-sm border border-[#f0dfc0] rounded-xl px-4 py-2.5 text-gray-700 cursor-pointer font-semibold bg-white shadow-sm">
+            <option value="current">החודש הנוכחי</option>
+            <option value="prev">חודש קודם</option>
+            <option value="quarter">רבעון אחרון</option>
+            <option value="year">שנה נוכחית</option>
+          </select>
+          <span id="wsd-report-label" class="text-sm font-semibold text-[#d4a373]"></span>
+        </div>
+
+        <!-- Summary KPIs -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-emerald-400">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">הכנסות</p>
+            <p id="wsd-pnl-revenue" class="text-2xl font-black text-emerald-500">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-red-400">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">הוצאות</p>
+            <p id="wsd-pnl-expenses" class="text-2xl font-black text-red-500">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-[#d4a373]">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">רווח נקי</p>
+            <p id="wsd-pnl-profit" class="text-2xl font-black text-[#d4a373]">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-blue-400">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">רווחיות</p>
+            <p id="wsd-pnl-margin" class="text-2xl font-black text-blue-500">—</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- P&L Detail -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
+            <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee]">
+              <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-4 h-4 text-[#d4a373]"></i> דוח רווח והפסד</h3>
+            </div>
+            <div class="p-5 space-y-1">
+              <div class="flex justify-between p-2.5 bg-emerald-50 rounded-lg border border-emerald-100">
+                <span class="text-sm font-semibold text-emerald-700">הכנסות מסדנאות</span>
+                <span id="fin-revenue" class="text-sm font-black text-emerald-600">—</span>
+              </div>
+              <div class="border-t border-gray-100 my-2"></div>
+              <p class="text-[10px] text-gray-400 font-bold px-2 mb-1">פירוט הוצאות</p>
+              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='scissors' class='w-3.5 h-3.5 inline-block'></i> חומרי גלם</span><span id="wsd-pnl-materials" class="text-sm font-bold text-red-400">—</span></div>
+              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='user' class='w-3.5 h-3.5 inline-block'></i> עובדות</span><span id="wsd-pnl-staff" class="text-sm font-bold text-red-400">—</span></div>
+              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='megaphone' class='w-3.5 h-3.5 inline-block'></i> שיווק ממומן</span><span id="wsd-pnl-marketing" class="text-sm font-bold text-red-400">—</span></div>
+              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='fuel' class='w-3.5 h-3.5 inline-block'></i> דלק / נסיעות</span><span id="wsd-pnl-fuel" class="text-sm font-bold text-red-400">—</span></div>
+              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600">🔧 ציוד קבוע</span><span id="wsd-pnl-equipment" class="text-sm font-bold text-red-400">—</span></div>
+              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600">📦 אחר</span><span id="wsd-pnl-other" class="text-sm font-bold text-red-400">—</span></div>
+              <div class="border-t border-gray-100 my-2"></div>
+              <div class="flex justify-between p-2.5 bg-red-50 rounded-lg border border-red-100">
+                <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
+                <span id="fin-expenses" class="text-sm font-black text-red-500">—</span>
+              </div>
+              <div class="flex justify-between p-3 rounded-lg border-2" id="wsd-pnl-profit-row">
+                <span class="text-sm font-bold">רווח נקי</span>
+                <span id="fin-profit" class="text-lg font-black">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cash Flow -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
+            <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee]">
+              <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4 text-[#d4a373]"></i> תזרים מזומנים</h3>
+              <p class="text-[10px] text-gray-400 mt-0.5">מבוסס על תשלומים בפועל</p>
+            </div>
+            <div class="p-5 space-y-1">
+              <div class="flex justify-between p-2.5 bg-emerald-50 rounded-lg border border-emerald-100">
+                <span class="text-xs font-semibold text-emerald-700">מקדמות שהתקבלו</span>
+                <span id="wsd-cf-advances" class="text-sm font-black text-emerald-600">—</span>
+              </div>
+              <div class="flex justify-between p-2.5 bg-emerald-50 rounded-lg border border-emerald-100">
+                <span class="text-xs font-semibold text-emerald-700">יתרות שהתקבלו</span>
+                <span id="wsd-cf-balances" class="text-sm font-black text-emerald-600">—</span>
+              </div>
+              <div class="flex justify-between p-2.5 bg-blue-50 rounded-lg border border-blue-100 mt-1">
+                <span class="text-sm font-bold text-blue-700">סה"כ כניסות</span>
+                <span id="wsd-cf-total-in" class="text-sm font-black text-blue-600">—</span>
+              </div>
+              <div class="border-t border-gray-100 my-2"></div>
+              <div class="flex justify-between p-2.5 bg-red-50 rounded-lg border border-red-100">
+                <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
+                <span id="wsd-cf-total-out" class="text-sm font-black text-red-500">—</span>
+              </div>
+              <div class="flex justify-between p-3 rounded-lg border-2 mt-1" id="wsd-cf-net-row">
+                <span class="text-sm font-bold">תזרים נטו</span>
+                <span id="wsd-cf-net" class="text-lg font-black">—</span>
+              </div>
+            </div>
+            <!-- Chart -->
+            <div class="px-5 pb-5">
+              <h4 class="text-xs font-bold text-gray-500 mb-2">תזרים חודשי — 6 חודשים</h4>
+              <div class="flex items-center gap-3 mb-2">
+                <div class="flex items-center gap-1"><div class="w-3 h-3 bg-emerald-400 rounded"></div><span class="text-[9px] text-gray-400">כניסות</span></div>
+                <div class="flex items-center gap-1"><div class="w-3 h-3 bg-red-300 rounded"></div><span class="text-[9px] text-gray-400">יציאות</span></div>
+              </div>
+              <div id="wsd-cf-chart" class="flex items-end gap-2 h-[120px]"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ─── TAB: LOGS ─── -->
       <section id="tab-logs" data-erp-tab class="p-6 space-y-4">
         <h2 class="font-black text-gray-800 text-lg">יומן שינויים</h2>
@@ -1338,9 +1349,9 @@
         <!-- Settings sub-nav -->
         <div class="border-b border-[#f0dfc0] bg-white sticky top-0 z-10">
           <div class="flex overflow-x-auto no-scrollbar px-2 sm:px-4">
-            <button class="settings-nav-btn settings-nav-active" data-settings-page="general" onclick="showSettingsPage('general')">⚙️ כללי</button>
+            <button class="settings-nav-btn settings-nav-active" data-settings-page="general" onclick="showSettingsPage('general')"><i data-lucide="settings" class="w-3.5 h-3.5 inline-block"></i> כללי</button>
             <button class="settings-nav-btn" data-settings-page="banner" onclick="showSettingsPage('banner')">📢 באנר עליון</button>
-            <button class="settings-nav-btn" data-settings-page="coupons" onclick="showSettingsPage('coupons')">🏷️ קופונים</button>
+            <button class="settings-nav-btn" data-settings-page="coupons" onclick="showSettingsPage('coupons')"><i data-lucide="tag" class="w-3.5 h-3.5 inline-block"></i> קופונים</button>
             <button class="settings-nav-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">🖼️ גלריית סדנאות</button>
           </div>
         </div>
@@ -1353,7 +1364,7 @@
           <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
               <div>
-                <h3 class="font-bold text-sm text-gray-800">🎂 קמפיין יום הולדת אוטומטי</h3>
+                <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="cake" class="w-4 h-4 text-[#d4a373]"></i> קמפיין יום הולדת אוטומטי</h3>
                 <p class="text-xs text-gray-400 mt-1">שליחת קופון הנחה אוטומטי ללקוחות עם יום הולדת בחודש הנוכחי</p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -1442,7 +1453,7 @@ Charming by Vik 💛</textarea>
               <!-- gallery items rendered here -->
             </div>
             <div id="wsg-empty" class="py-16 text-center" style="display:none;">
-              <p class="text-4xl mb-3">🖼️</p>
+              <div class="mb-3"><i data-lucide="image" class="w-10 h-10 mx-auto text-[#d4a373]/40"></i></div>
               <p class="text-gray-400 font-semibold text-sm">אין תמונות בגלריה</p>
               <p class="text-gray-300 text-xs mt-1">לחצי על "העלאת תמונות" כדי להוסיף תמונות מהסדנאות</p>
             </div>
@@ -1491,7 +1502,7 @@ Charming by Vik 💛</textarea>
         </div>
         <div id="notif-full-list" class="space-y-5">
           <div class="py-14 text-center">
-            <span class="text-4xl mb-3 block">✨</span>
+            <i data-lucide="sparkles" class="w-10 h-10 text-[#d4a373]/50 mb-3 block mx-auto"></i>
             <p class="text-sm text-gray-400 font-semibold">אין התראות</p>
           </div>
         </div>
@@ -1696,7 +1707,7 @@ Charming by Vik 💛</textarea>
             <input type="checkbox" id="p-featured" />
             <span class="tog-track"></span>
           </label>
-          <span class="text-sm text-gray-600 font-semibold">מוצר מומלץ ⭐</span>
+          <span class="text-sm text-gray-600 font-semibold flex items-center gap-1">מוצר מומלץ <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i></span>
         </div>
         <div class="flex items-center gap-2 pb-1">
           <label class="tog flex items-center gap-2 cursor-pointer">
@@ -1725,7 +1736,7 @@ Charming by Vik 💛</textarea>
           <label class="lbl !mb-0">תיאור</label>
           <button type="button" id="ai-btn"
             class="flex items-center gap-1.5 text-xs font-bold text-[#d4a373] hover:text-[#b8893e] border border-[#f0dfc0] hover:border-[#d4a373] px-3 py-1.5 rounded-full transition-colors">
-            ✨ <span id="ai-btn-label">צרי תיאור ב-AI</span>
+            <i data-lucide="wand-2" class="w-4 h-4 inline-block"></i> <span id="ai-btn-label">צרי תיאור ב-AI</span>
           </button>
         </div>
         <textarea id="p-desc" rows="4" placeholder="תיאור אלגנטי של המוצר — אפשר לקבל עזרה מ-AI ☝️"
@@ -1764,7 +1775,7 @@ Charming by Vik 💛</textarea>
   class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
   style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)">
   <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-xs w-full text-center fadein">
-    <p class="text-5xl mb-4">🗑️</p>
+    <div class="mb-4"><i data-lucide="trash-2" class="w-14 h-14 mx-auto text-red-300"></i></div>
     <h3 class="font-bold text-gray-800 text-lg mb-1">למחוק את המוצר?</h3>
     <p id="del-name" class="text-[#d4a373] font-semibold text-sm mb-4 truncate"></p>
     <p class="text-gray-400 text-xs mb-7">פעולה זו אינה ניתנת לשחזור.</p>
@@ -2065,7 +2076,7 @@ function show(id) {
 // Persist auth in localStorage/IndexedDB so navigating between
 // admin and public pages (or closing a tab) never loses the session.
 setPersistence(auth, browserLocalPersistence).then(() => {
-  if (isLocal) console.log('Auth Persistence set to LOCAL ✅');
+  if (isLocal) console.log('Auth Persistence set to LOCAL');
   onAuthStateChanged(auth, user => {
     if (!user)                      { show('v-login');  return; }
     if (!isAdminEmail(user.email)) { show('v-denied'); return; }
@@ -2351,7 +2362,7 @@ function showTab(name) {
     return;
   }
 
-  ['dashboard','orders','inventory','customers','inquiries','workshops','expenses','notifications','logs','settings','analytics'].forEach(t => {
+  ['dashboard','orders','inventory','customers','inquiries','workshops','expenses','finances','notifications','logs','settings','analytics'].forEach(t => {
     document.getElementById('tab-'+t)?.setAttribute('data-erp-tab','');
   });
   document.getElementById('tab-'+name)?.removeAttribute('data-erp-tab');
@@ -2369,6 +2380,7 @@ function showTab(name) {
     else if (name === 'inquiries') initInquiriesTab();
     else if (name === 'workshops') initWorkshopsTab();
     else if (name === 'expenses')  initExpensesTab();
+    else if (name === 'finances')  initFinancesTab();
     else if (name === 'notifications') renderFullNotifications();
     else if (name === 'logs')      initLogsTab();
     else if (name === 'settings')  initSettingsTab();
@@ -2380,6 +2392,7 @@ function showTab(name) {
     if (name === 'inquiries') renderInquiriesTable();
     if (name === 'workshops') { renderCalendar(); renderWorkshopsList(); }
     if (name === 'expenses')  renderExpensesList();
+    if (name === 'finances')  renderFinancialReports();
     if (name === 'notifications') renderFullNotifications();
     if (name === 'logs')      renderLogsList();
     if (name === 'analytics') refreshCurrentBiPage();
@@ -2523,7 +2536,7 @@ function renderNotifications() {
   const list = document.getElementById('notif-list');
   if (notifications.length === 0) {
     list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 px-4">
-      <span class="text-3xl mb-2">✨</span>
+      <i data-lucide="sparkles" class="w-8 h-8 text-[#d4a373]/50 mb-2"></i>
       <p class="text-sm text-gray-400 font-semibold">אין התראות חדשות</p>
       <p class="text-[11px] text-gray-300 mt-1">הכל שקט כאן</p>
     </div>`;
@@ -2547,7 +2560,7 @@ function renderNotifications() {
       return `<button onclick="${onclick}" class="notif-item w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all duration-200 border-b border-gray-50 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
-          <p class="text-xs ${titleWeight} truncate">💬 פניה חדשה מ${n.name || 'לקוח'}</p>
+          <p class="text-xs ${titleWeight} truncate"><i data-lucide='message-circle' class='w-3 h-3 inline-block'></i> פניה חדשה מ${n.name || 'לקוח'}</p>
           <p class="text-[11px] text-gray-400 truncate mt-0.5">${n.message || n.notes || n.phone || ''}</p>
           <p class="text-[10px] text-gray-300 mt-1">${ts}</p>
         </div>
@@ -2560,7 +2573,7 @@ function renderNotifications() {
       return `<button onclick="${onclick}" class="notif-item w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all duration-200 border-b border-gray-50 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
-          <p class="text-xs ${titleWeight} truncate">📦 הזמנה חדשה — ${n.orderId || ''}</p>
+          <p class="text-xs ${titleWeight} truncate"><i data-lucide='package' class='w-3 h-3 inline-block'></i> הזמנה חדשה — ${n.orderId || ''}</p>
           <p class="text-[11px] text-gray-400 truncate mt-0.5">${n.customer?.name || ''} · ${total} ₪</p>
           <p class="text-[10px] text-gray-300 mt-1">${ts}</p>
         </div>
@@ -2571,7 +2584,7 @@ function renderNotifications() {
       return `<button onclick="${onclick}" class="notif-item w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all duration-200 border-b border-gray-50 ${bg}">
         ${dot}
         <div class="flex-1 min-w-0">
-          <p class="text-xs ${titleWeight} truncate">⚠️ נגמר המלאי — ${n.name || ''}</p>
+          <p class="text-xs ${titleWeight} truncate"><i data-lucide='alert-triangle' class='w-3 h-3 inline-block'></i> נגמר המלאי — ${n.name || ''}</p>
           <p class="text-[11px] text-gray-400 truncate mt-0.5">יש לעדכן מלאי או לשנות סטטוס</p>
         </div>
       </button>`;
@@ -2605,7 +2618,7 @@ function buildAllNotifItems() {
       type: 'order',
       docId: o.id,
       ts,
-      label: `📦 הזמנה ${o.status === 'pending_payment' ? 'חדשה' : (o.status === 'delivered' ? 'נמסרה' : o.status === 'shipped' ? 'נשלחה' : o.status === 'cancelled' ? 'בוטלה' : '')} — ${o.orderId || o.id.slice(0,8)}`,
+      label: `הזמנה ${o.status === 'pending_payment' ? 'חדשה' : (o.status === 'delivered' ? 'נמסרה' : o.status === 'shipped' ? 'נשלחה' : o.status === 'cancelled' ? 'בוטלה' : '')} — ${o.orderId || o.id.slice(0,8)}`,
       sub: `${o.customer?.name || '—'} · ${o.summary?.total || 0} ₪`,
       ...o
     });
@@ -2619,7 +2632,7 @@ function buildAllNotifItems() {
       type: 'inquiry',
       docId: inq.id,
       ts,
-      label: `💬 פניה מ${inq.name || 'לקוח'}`,
+      label: `פניה מ${inq.name || 'לקוח'}`,
       sub: inq.message || inq.notes || inq.phone || '',
       ...inq
     });
@@ -2635,7 +2648,7 @@ function buildAllNotifItems() {
       type: 'stock',
       docId: p.id,
       ts: p.createdAt?.seconds ? p.createdAt.seconds * 1000 : 0,
-      label: `⚠️ נגמר המלאי — ${p.name || ''}`,
+      label: `נגמר המלאי — ${p.name || ''}`,
       sub: 'יש לעדכן מלאי או לשנות סטטוס',
     });
   });
@@ -2652,7 +2665,7 @@ function renderFullNotifications() {
 
   if (!items.length) {
     container.innerHTML = `<div class="py-14 text-center">
-      <span class="text-4xl mb-3 block">✨</span>
+      <i data-lucide="sparkles" class="w-10 h-10 text-[#d4a373]/50 mb-3 block mx-auto"></i>
       <p class="text-sm text-gray-400 font-semibold">אין התראות</p>
     </div>`;
     return;
@@ -2673,10 +2686,10 @@ function renderFullNotifications() {
 
   let html = '';
   const groupMeta = {
-    today:     { icon: '🔴', color: '#d4a373' },
-    yesterday: { icon: '🟠', color: '#b8893e' },
-    week:      { icon: '🔵', color: '#7a8a9a' },
-    older:     { icon: '⚪', color: '#9a8e8a' },
+    today:     { icon: '', color: '#d4a373' },
+    yesterday: { icon: '', color: '#b8893e' },
+    week:      { icon: '', color: '#7a8a9a' },
+    older:     { icon: '', color: '#9a8e8a' },
   };
   const renderGroup = (key, title, list) => {
     if (!list.length) return '';
@@ -2844,7 +2857,7 @@ function renderWsDashboard() {
   if (el('wsd-goal-weekly-pct')) el('wsd-goal-weekly-pct').textContent = wPct > 10 ? wPct + '%' : '';
   if (el('wsd-goal-weekly-label')) el('wsd-goal-weekly-label').textContent = weekConfirmed + '/' + wGoal;
   if (el('wsd-goal-weekly-status')) {
-    if (weekConfirmed >= wGoal) el('wsd-goal-weekly-status').textContent = '🎉 עמדת ביעד השבועי!';
+    if (weekConfirmed >= wGoal) el('wsd-goal-weekly-status').textContent = 'עמדת ביעד השבועי!';
     else el('wsd-goal-weekly-status').textContent = 'עוד ' + (wGoal - weekConfirmed) + ' סגירות ליעד';
   }
 
@@ -2855,7 +2868,7 @@ function renderWsDashboard() {
   if (el('wsd-goal-monthly-pct')) el('wsd-goal-monthly-pct').textContent = mPct > 10 ? mPct + '%' : '';
   if (el('wsd-goal-monthly-label')) el('wsd-goal-monthly-label').textContent = monthConfirmed.length + '/' + mGoal;
   if (el('wsd-goal-monthly-status')) {
-    if (monthConfirmed.length >= mGoal) el('wsd-goal-monthly-status').textContent = '🎉 עמדת ביעד החודשי!';
+    if (monthConfirmed.length >= mGoal) el('wsd-goal-monthly-status').textContent = 'עמדת ביעד החודשי!';
     else el('wsd-goal-monthly-status').textContent = 'עוד ' + (mGoal - monthConfirmed.length) + ' סגירות ליעד';
   }
 
@@ -2887,16 +2900,16 @@ function renderWsDashboard() {
   if (next) {
     const nd = wsDate(next);
     const pay = next.payment || {};
-    const payStatus = (pay.advancePaid && pay.balancePaid) ? '💚 שולם' : pay.advancePaid ? '🟡 מקדמה' : '🔴 לא שולם';
+    const payStatus = (pay.advancePaid && pay.balancePaid) ? 'שולם' : pay.advancePaid ? 'מקדמה' : '🔴 לא שולם';
     const daysUntil = Math.ceil((nd - now) / 86400000);
     const daysText = daysUntil === 0 ? 'היום!' : daysUntil === 1 ? 'מחר' : 'בעוד ' + daysUntil + ' ימים';
     el('wsd-next-content').innerHTML = `
       <div class="flex flex-wrap gap-4 items-center">
         <div class="flex-1 min-w-[200px]">
           <p class="font-bold text-gray-800">${esc(next.celebrant || next.customerName)} <span class="text-xs text-gray-400">(${esc(next.customerName)})</span></p>
-          <p class="text-xs text-gray-500 mt-1">📅 ${nd.toLocaleDateString('he-IL')} · ${next.time || ''} · 📍 ${esc(next.city || '')}</p>
-          <p class="text-xs text-gray-500 mt-0.5">🎨 ${esc(next.route)} · 👥 עד ${next.participantCount} משתתפות</p>
-          ${next.occasion ? `<p class="text-xs text-gray-400 mt-0.5">🎉 ${esc(next.occasion)}</p>` : ''}
+          <p class="text-xs text-gray-500 mt-1">${nd.toLocaleDateString('he-IL')} · ${next.time || ''} · ${esc(next.city || '')}</p>
+          <p class="text-xs text-gray-500 mt-0.5">${esc(next.route)} · עד ${next.participantCount} משתתפות</p>
+          ${next.occasion ? `<p class="text-xs text-gray-400 mt-0.5">${esc(next.occasion)}</p>` : ''}
         </div>
         <div class="text-left">
           <p class="text-2xl font-black text-[#d4a373]">${(next.total || 0).toLocaleString('he-IL')} ₪</p>
@@ -3032,6 +3045,13 @@ function launchConfetti(container) {
   setTimeout(() => { container.innerHTML = ''; }, 2500);
 }
 
+function initFinancesTab() {
+  // Ensure data sources are loaded
+  if (!tabsInited.workshops) { tabsInited.workshops = true; initWorkshopsTab(); }
+  if (!tabsInited.expenses) { tabsInited.expenses = true; initExpensesTab(); }
+  renderFinancialReports();
+}
+
 function renderFinancialReports() {
   const el = id => document.getElementById(id);
   const period = el('wsd-report-period')?.value || 'current';
@@ -3087,16 +3107,21 @@ function renderFinancialReports() {
   const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 
   // Render P&L
+  // KPI cards
   if (el('wsd-pnl-revenue')) el('wsd-pnl-revenue').textContent = revenue.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-expenses')) el('wsd-pnl-expenses').textContent = totalExp.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-profit')) el('wsd-pnl-profit').textContent = profit.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-margin')) el('wsd-pnl-margin').textContent = margin + '%';
+  // P&L detail
+  if (el('fin-revenue')) el('fin-revenue').textContent = revenue.toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-materials')) el('wsd-pnl-materials').textContent = (expByCategory.materials || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-staff')) el('wsd-pnl-staff').textContent = (expByCategory.staff || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-marketing')) el('wsd-pnl-marketing').textContent = (expByCategory.marketing || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-fuel')) el('wsd-pnl-fuel').textContent = (expByCategory.fuel || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-equipment')) el('wsd-pnl-equipment').textContent = (expByCategory.equipment || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-other')) el('wsd-pnl-other').textContent = (expByCategory.other || 0).toLocaleString('he-IL') + ' ₪';
-  if (el('wsd-pnl-expenses')) el('wsd-pnl-expenses').textContent = totalExp.toLocaleString('he-IL') + ' ₪';
-  if (el('wsd-pnl-profit')) el('wsd-pnl-profit').textContent = profit.toLocaleString('he-IL') + ' ₪';
-  if (el('wsd-pnl-margin')) el('wsd-pnl-margin').textContent = margin + '%';
+  if (el('fin-expenses')) el('fin-expenses').textContent = totalExp.toLocaleString('he-IL') + ' ₪';
+  if (el('fin-profit')) el('fin-profit').textContent = profit.toLocaleString('he-IL') + ' ₪';
 
   // Color profit row
   const profitRow = el('wsd-pnl-profit-row');
@@ -3457,7 +3482,7 @@ function openOrderModal(orderId) {
     <div class="flex items-center gap-3 py-2 border-b border-[#fdf6ee] last:border-0">
       ${item.image
         ?`<img src="${esc(item.image)}" class="w-12 h-12 rounded-lg object-cover border border-[#f0dfc0]" onerror="this.style.display='none'" />`
-        :'<div class="w-12 h-12 rounded-lg bg-[#fdf6ee] flex items-center justify-center">💎</div>'}
+        :'<div class="w-12 h-12 rounded-lg bg-[#fdf6ee] flex items-center justify-center"><i data-lucide="gem" class="w-5 h-5 text-[#d4a373]/50"></i></div>'}
       <div class="flex-1">
         <p class="font-semibold text-sm">${esc(item.name)}</p>
         ${item.customizationNote?`<p class="text-xs text-gray-400">${esc(item.customizationNote)}</p>`:''}
@@ -3611,7 +3636,7 @@ function renderTable() {
       ?`<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">פורסם</span>`
       :`<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">טיוטה</span>`;
 
-    const featStar = p.isFeatured?`<span class="text-amber-400 text-sm">⭐</span>`:'';
+    const featStar = p.isFeatured?`<i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400 inline-block"></i>`:'';
 
     return `<tr class="hover:bg-[#fdf6ee] transition-colors" data-id="${p.id}">
       <td class="px-4 py-3">${thumb}</td>
@@ -4370,12 +4395,12 @@ function updatePaymentBadge() {
   const statusInput = document.getElementById('ws-status');
   if (statusIcon && statusText && statusInput) {
     if (adv) {
-      statusIcon.textContent = '✅';
+      statusIcon.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 inline-block text-emerald-500"></i>'; if(typeof lucide!=='undefined')lucide.createIcons();
       statusText.textContent = 'הזמנה סגורה';
       statusText.className = 'text-sm font-semibold text-emerald-600';
       statusInput.value = 'confirmed';
     } else {
-      statusIcon.textContent = '📝';
+      statusIcon.innerHTML = '<i data-lucide="file-edit" class="w-4 h-4 inline-block"></i>'; if(typeof lucide!=='undefined')lucide.createIcons();
       statusText.textContent = 'טיוטה — ממתין למקדמה';
       statusText.className = 'text-sm font-semibold text-amber-600';
       statusInput.value = 'draft';
@@ -4797,7 +4822,7 @@ function generateCalendarLinks(ws) {
     `שולמה מקדמה`,
   ].join('\n');
   const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(d)}/${fmt(end)}&details=${encodeURIComponent(calNotes)}`;
-  return `<a href="${gcal}" target="_blank" class="text-[10px] text-[#d4a373] hover:underline">📅 Google Calendar</a>`;
+  return `<a href="${gcal}" target="_blank" class="text-[10px] text-[#d4a373] hover:underline"><i data-lucide='calendar' class='w-3 h-3 inline-block'></i> Google Calendar</a>`;
 }
 
 function getWsDate(w) {
@@ -4817,7 +4842,7 @@ function renderWorkshopCard(w, opts = {}) {
     ? '<span class="text-[10px] font-bold bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">סדנה עברה</span>'
     : '';
   const confirmBtn = (status === 'draft' && !pay.advancePaid)
-    ? `<button onclick="quickPayAdvance('${w.id}')" class="text-xs border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-full font-bold transition-colors">💳 אשר מקדמה וסגור</button>`
+    ? `<button onclick="quickPayAdvance('${w.id}')" class="text-xs border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-full font-bold transition-colors"><i data-lucide='credit-card' class='w-3 h-3 inline-block'></i> אשר מקדמה וסגור</button>`
     : '';
 
   // Payment status badge
@@ -4837,9 +4862,9 @@ function renderWorkshopCard(w, opts = {}) {
   let quickPayBtns = '';
   if (status === 'confirmed' && !isPast) {
     if (!pay.advancePaid) {
-      quickPayBtns += `<button onclick="quickPayAdvance('${w.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1 rounded-full font-bold transition-colors">💳 אשר מקדמה</button>`;
+      quickPayBtns += `<button onclick="quickPayAdvance('${w.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide='credit-card' class='w-3 h-3 inline-block'></i> אשר מקדמה</button>`;
     } else if (!pay.balancePaid) {
-      quickPayBtns += `<button onclick="quickPayBalance('${w.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1 rounded-full font-bold transition-colors">💳 אשר יתרה</button>`;
+      quickPayBtns += `<button onclick="quickPayBalance('${w.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide='credit-card' class='w-3 h-3 inline-block'></i> אשר יתרה</button>`;
     }
   }
 
@@ -5200,7 +5225,7 @@ function renderWaTemplates() {
           <p class="text-xs text-gray-400 mt-1 whitespace-pre-wrap line-clamp-3">${esc(tpl.body || '').slice(0, 200)}${(tpl.body||'').length > 200 ? '...' : ''}</p>
         </div>
         <div class="flex gap-1 flex-shrink-0">
-          <button onclick="sendWaTplToWorkshop('${tpl.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1.5 rounded-full font-bold transition-colors" title="שלח לסדנא הנוכחית">📤 שלח</button>
+          <button onclick="sendWaTplToWorkshop('${tpl.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1.5 rounded-full font-bold transition-colors" title="שלח לסדנא הנוכחית"><i data-lucide='send' class='w-3 h-3 inline-block'></i> שלח</button>
           <button onclick="openWaTplForm('${tpl.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
           <button onclick="deleteWaTpl('${tpl.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2.5 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
         </div>
@@ -5306,12 +5331,12 @@ window.sendWaTplToWorkshop = sendWaTplToWorkshop;
 
 // ── Expenses ─────────────────────────────────────────────────────
 const EXPENSE_CATEGORIES = {
-  materials: { label: 'חומרי גלם', icon: '🧵', color: 'text-[#d4a373]' },
-  marketing: { label: 'שיווק ממומן', icon: '📣', color: 'text-purple-500' },
-  staff: { label: 'תשלום לעובדת', icon: '👩‍🔧', color: 'text-blue-500' },
-  equipment: { label: 'ציוד קבוע', icon: '🔧', color: 'text-gray-600' },
-  fuel: { label: 'דלק / נסיעות', icon: '⛽', color: 'text-amber-600' },
-  other: { label: 'אחר', icon: '📦', color: 'text-gray-400' },
+  materials: { label: 'חומרי גלם', icon: '<i data-lucide="scissors" class="w-4 h-4"></i>', color: 'text-[#d4a373]' },
+  marketing: { label: 'שיווק ממומן', icon: '<i data-lucide="megaphone" class="w-4 h-4"></i>', color: 'text-purple-500' },
+  staff: { label: 'תשלום לעובדת', icon: '<i data-lucide="user" class="w-4 h-4"></i>', color: 'text-blue-500' },
+  equipment: { label: 'ציוד קבוע', icon: '<i data-lucide="wrench" class="w-4 h-4"></i>', color: 'text-gray-600' },
+  fuel: { label: 'דלק / נסיעות', icon: '<i data-lucide="fuel" class="w-4 h-4"></i>', color: 'text-amber-600' },
+  other: { label: 'אחר', icon: '', color: 'text-gray-400' },
 };
 const EXPENSE_METHODS = { cash:'מזומן', bit:'Bit', transfer:'העברה', credit:'אשראי' };
 
@@ -5480,7 +5505,7 @@ function renderExpensesList() {
   }
 
   body.innerHTML = filtered.map(e => {
-    const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
+    const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '', color: 'text-gray-400' };
     const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL') : '—';
     return `<tr class="hover:bg-[#fdf6ee] transition-colors text-sm">
       <td class="px-4 py-3 text-gray-600">${dateStr}</td>
@@ -5859,7 +5884,7 @@ function renderWsgGrid() {
          draggable="true" data-wsg-id="${img.id}" data-wsg-idx="${i}" onclick="openWsgEdit('${img.id}')">
       <img src="${esc(img.url)}" alt="${esc(img.alt||'')}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
       <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-        <span class="opacity-0 group-hover:opacity-100 text-white text-xs font-bold bg-black/50 px-3 py-1.5 rounded-full transition-opacity">✏️ עריכה</span>
+        <span class="opacity-0 group-hover:opacity-100 text-white text-xs font-bold bg-black/50 px-3 py-1.5 rounded-full transition-opacity"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</span>
       </div>
       ${img.layout ? `<span class="absolute top-2 right-2 text-[10px] bg-white/90 text-[#d4a373] px-2 py-0.5 rounded-full font-bold">${img.layout === 'tall' ? 'גבוה' : 'רחב'}</span>` : ''}
       <span class="absolute bottom-2 left-2 text-[10px] bg-white/90 text-gray-500 w-5 h-5 flex items-center justify-center rounded-full font-bold">${i+1}</span>
@@ -6394,18 +6419,18 @@ function renderBiRealtime() {
     html += '<p class="text-gray-300 text-sm text-center py-4">ממתינים לפעילות...</p>';
   } else {
     const eventLabels = {
-      page_view: '👁 צפייה בדף',
-      add_to_cart: '🛒 הוספה לסל',
-      checkout_start: '💳 התחלת צ\'קאאוט',
-      order_complete: '✅ הזמנה הושלמה',
-      session_ping: '📡 סשן פעיל',
-      contact_click: '📱 לחיצה ליצירת קשר',
+      page_view: 'צפייה בדף',
+      add_to_cart: 'הוספה לסל',
+      checkout_start: 'התחלת צ\'קאאוט',
+      order_complete: 'הזמנה הושלמה',
+      session_ping: 'סשן פעיל',
+      contact_click: 'לחיצה ליצירת קשר',
     };
     recentEvents.forEach(ev => {
       const d = toDate(ev.timestamp);
       const timeStr = d ? d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
       const label = eventLabels[ev.event] || ev.event;
-      const deviceIcon = ev.device === 'mobile' ? '📱' : ev.device === 'tablet' ? '📋' : '🖥';
+      const deviceIcon = ev.device === 'mobile' ? 'נייד' : ev.device === 'tablet' ? 'טאבלט' : 'מחשב';
       html += '<div class="flex items-center justify-between py-1.5 border-b border-gray-50 text-xs">';
       html += '<div class="flex items-center gap-2"><span>' + deviceIcon + '</span><span class="font-semibold text-gray-700">' + label + '</span></div>';
       html += '<span class="text-gray-400">' + timeStr + '</span>';
@@ -7769,11 +7794,11 @@ function renderBiBehavior() {
 
   // Navigation funnel
   const funnelSteps = [
-    { key: 'home', label: 'דף הבית', icon: '🏠' },
-    { key: 'shop', label: 'חנות', icon: '🛍️' },
-    { key: 'cart', label: 'עגלה', icon: '🛒' },
-    { key: 'checkout', label: 'תשלום', icon: '💳' },
-    { key: 'thank-you', label: 'הזמנה הושלמה', icon: '✅' }
+    { key: 'home', label: 'דף הבית', icon: '' },
+    { key: 'shop', label: 'חנות', icon: '' },
+    { key: 'cart', label: 'עגלה', icon: '' },
+    { key: 'checkout', label: 'תשלום', icon: '' },
+    { key: 'thank-you', label: 'הזמנה הושלמה', icon: '' }
   ];
   const funnelCounts = funnelSteps.map(s => ({
     ...s,
@@ -7980,20 +8005,20 @@ window.renderAnalytics = renderAnalytics;
     </div>
     <div class="px-6 py-4 space-y-3">
       <div class="flex items-center gap-3 p-3 bg-[#fdf6ee] rounded-xl">
-        <span class="text-xl">📅</span>
+        <i data-lucide="calendar" class="w-5 h-5 text-[#d4a373]"></i>
         <div><p id="wsc-date" class="text-sm font-bold text-gray-800"></p><p id="wsc-days-until" class="text-[10px] text-[#d4a373] font-semibold"></p></div>
       </div>
       <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-        <span class="text-xl">👤</span>
+        <i data-lucide="user" class="w-5 h-5 text-[#d4a373]"></i>
         <div class="flex-1"><p id="wsc-contact" class="text-sm font-semibold text-gray-700"></p><p id="wsc-phone" class="text-xs text-gray-400"></p></div>
-        <a id="wsc-wa-link" href="#" target="_blank" class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors text-sm">💬</a>
+        <a id="wsc-wa-link" href="#" target="_blank" class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors text-sm"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
       </div>
       <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-        <span class="text-xl">📍</span>
+        <i data-lucide="map-pin" class="w-5 h-5 text-[#d4a373]"></i>
         <div><p id="wsc-city" class="text-sm font-semibold text-gray-700"></p><p id="wsc-distance" class="text-[10px] text-gray-400"></p></div>
       </div>
       <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-        <span class="text-xl">🎨</span>
+        <i data-lucide="palette" class="w-5 h-5 text-[#d4a373]"></i>
         <div><p id="wsc-route" class="text-sm font-semibold text-gray-700"></p><p id="wsc-participants" class="text-xs text-gray-400"></p></div>
       </div>
       <div class="p-4 bg-[#fdf6ee] rounded-xl border border-[#f0dfc0]">
@@ -8006,9 +8031,9 @@ window.renderAnalytics = renderAnalytics;
       <div id="wsc-notes-section" class="p-3 bg-gray-50 rounded-xl" style="display:none"><p class="text-[10px] text-gray-400 mb-1">הערות</p><p id="wsc-notes" class="text-sm text-gray-600"></p></div>
     </div>
     <div class="px-6 py-4 border-t border-[#f0dfc0] bg-[#fdf8f5] flex flex-wrap gap-2">
-      <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all">✏️ עריכה</button>
-      <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors">💬 WhatsApp</button>
-      <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-4 py-2.5 rounded-full font-bold text-sm transition-colors">📅</button>
+      <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</button>
+      <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors"><i data-lucide="message-circle" class="w-3.5 h-3.5 inline-block"></i> WhatsApp</button>
+      <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-4 py-2.5 rounded-full font-bold text-sm transition-colors"><i data-lucide="calendar" class="w-4 h-4"></i></button>
     </div>
   </div>
 </div>
