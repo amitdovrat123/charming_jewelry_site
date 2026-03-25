@@ -896,8 +896,11 @@
             </div>
             <div>
               <label class="lbl">עלות הגעה (₪)</label>
-              <input id="ws-arrival" type="number" min="0" placeholder="0" value="0" class="inp" />
-              <p class="text-[10px] text-gray-400 mt-1">לא מושפע מההנחה</p>
+              <div class="flex gap-2 items-center">
+                <input id="ws-arrival" type="number" min="0" placeholder="0" value="0" class="inp flex-1" />
+                <button type="button" onclick="suggestArrivalFee()" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-2 rounded-lg font-bold transition-colors whitespace-nowrap" title="חישוב אוטומטי לפי עיר">📍 חשב</button>
+              </div>
+              <p id="ws-arrival-hint" class="text-[10px] text-gray-400 mt-1">לא מושפע מההנחה</p>
             </div>
             <div>
               <label class="lbl">הערות</label>
@@ -1034,6 +1037,42 @@
           </button>
           <div id="ws-list-archive" class="divide-y divide-gray-50" style="display:none;"></div>
         </div>
+
+        <!-- ══ WhatsApp Message Templates ══ -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-base">💬</span>
+              <h3 class="font-bold text-sm text-gray-800">הודעות WhatsApp מוכנות</h3>
+              <span id="wa-tpl-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
+            </div>
+            <button onclick="openWaTplForm()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-full font-bold transition-colors">+ הודעה חדשה</button>
+          </div>
+
+          <!-- Template Form (hidden by default) -->
+          <div id="wa-tpl-form" class="p-4 border-b border-[#f0dfc0] bg-[#fdf8f5]" style="display:none;">
+            <div class="space-y-3">
+              <div>
+                <label class="lbl">שם ההודעה *</label>
+                <input id="wa-tpl-name" type="text" placeholder='למשל: "הצעת מחיר", "תזכורת לפני סדנא"' class="inp" />
+              </div>
+              <div>
+                <label class="lbl">תוכן ההודעה *</label>
+                <textarea id="wa-tpl-body" rows="6" class="inp text-sm leading-relaxed" placeholder="כתוב את ההודעה כאן...&#10;&#10;משתנים זמינים: {שם_לקוח}, {שם_חוגגת}, {תאריך}, {שעה}, {מסלול}, {משתתפות}, {עיר}, {סכום}, {מקדמה}, {יתרה}"></textarea>
+                <p class="text-[10px] text-gray-400 mt-1">השתמש ב-{שם_לקוח} וכו' כדי להחליף אוטומטית בפרטי הסדנא</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="saveWaTpl()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full font-bold text-sm transition-colors">שמור</button>
+                <button onclick="closeWaTplForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-5 py-2 rounded-full font-bold text-sm transition-colors">ביטול</button>
+                <p id="wa-tpl-err" class="text-red-400 text-xs self-center"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Templates list -->
+          <div id="wa-tpl-list" class="divide-y divide-[#fdf6ee]"></div>
+        </div>
+
       </section>
 
       <!-- ─── TAB: EXPENSES ─── -->
@@ -3875,6 +3914,8 @@ function initWorkshopsTab() {
   document.getElementById('ws-advance-amount')?.addEventListener('input', updateWsTotal);
   updateWsTotal();
   updatePaymentBadge();
+  // Init WhatsApp templates
+  initWaTemplates();
 }
 
 function updateWsTotal() {
@@ -4537,6 +4578,198 @@ async function quickPayBalance(id) {
   } catch(e) { console.error(e); }
 }
 window.quickPayBalance = quickPayBalance;
+
+// ── Distance Pricing Tool ────────────────────────────────────────
+// City → arrival fee map. Cities within 30 min from Rishon LeZion = 0.
+// User can update via admin settings in the future.
+const ARRIVAL_FEE_MAP = {
+  // Free (within ~30 min from Rishon LeZion)
+  'ראשון לציון': 0, 'רחובות': 0, 'נס ציונה': 0, 'באר יעקב': 0,
+  'לוד': 0, 'רמלה': 0, 'יבנה': 0, 'חולון': 0, 'בת ים': 0,
+  'אשדוד': 0, 'גבעתיים': 0, 'רמת גן': 0, 'פתח תקווה': 0,
+  'תל אביב': 0, 'הרצליה': 0, 'מודיעין': 0,
+  // Medium distance (30-45 min)
+  'אשקלון': 100, 'נתניה': 100, 'כפר סבא': 100, 'רעננה': 100,
+  'הוד השרון': 100, 'ירושלים': 150, 'בית שמש': 150,
+  'קריית גת': 100, 'גדרה': 50, 'שוהם': 50,
+  // Far (45+ min)
+  'באר שבע': 200, 'חיפה': 250, 'עפולה': 250, 'טבריה': 300,
+  'נצרת': 300, 'קריית שמונה': 400, 'אילת': 500,
+  'חדרה': 150, 'עכו': 300, 'נהריה': 350, 'כרמיאל': 300,
+  'ערד': 250, 'דימונה': 250, 'אופקים': 200, 'שדרות': 150,
+};
+
+function suggestArrivalFee() {
+  const city = document.getElementById('ws-city')?.value.trim();
+  const hintEl = document.getElementById('ws-arrival-hint');
+  if (!city) { hintEl.textContent = 'יש להזין עיר קודם'; hintEl.className = 'text-[10px] text-red-400 mt-1'; return; }
+
+  // Exact match
+  if (ARRIVAL_FEE_MAP.hasOwnProperty(city)) {
+    const fee = ARRIVAL_FEE_MAP[city];
+    document.getElementById('ws-arrival').value = fee;
+    updateWsTotal();
+    if (fee === 0) {
+      hintEl.textContent = `✓ ${city} — ללא תוספת הגעה (עד 30 דק׳)`;
+      hintEl.className = 'text-[10px] text-emerald-500 mt-1 font-semibold';
+    } else {
+      hintEl.textContent = `✓ ${city} — תוספת ${fee}₪ מומלצת`;
+      hintEl.className = 'text-[10px] text-[#d4a373] mt-1 font-semibold';
+    }
+    return;
+  }
+
+  // Partial match
+  const partial = Object.keys(ARRIVAL_FEE_MAP).find(k => city.includes(k) || k.includes(city));
+  if (partial) {
+    const fee = ARRIVAL_FEE_MAP[partial];
+    document.getElementById('ws-arrival').value = fee;
+    updateWsTotal();
+    hintEl.textContent = `✓ נמצא: "${partial}" — תוספת ${fee}₪ (ניתן לשנות)`;
+    hintEl.className = 'text-[10px] text-amber-500 mt-1 font-semibold';
+    return;
+  }
+
+  hintEl.textContent = `⚠ "${city}" לא נמצאה ברשימה — הזן סכום ידנית`;
+  hintEl.className = 'text-[10px] text-amber-500 mt-1';
+}
+window.suggestArrivalFee = suggestArrivalFee;
+
+// ── WhatsApp Templates CRUD ─────────────────────────────────────
+const WA_TPL_COL = 'artifacts/charming-3dd6f/public/data/waTemplates';
+let allWaTemplates = [];
+let editWaTplId = null;
+
+function initWaTemplates() {
+  const q = query(collection(db, WA_TPL_COL), orderBy('createdAt','desc'));
+  onSnapshot(q, snap => {
+    allWaTemplates = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderWaTemplates();
+  }, err=>console.error('waTemplates:', err));
+}
+
+function renderWaTemplates() {
+  const list = document.getElementById('wa-tpl-list');
+  const count = document.getElementById('wa-tpl-count');
+  if (!list) return;
+  if (count) count.textContent = allWaTemplates.length;
+
+  if (!allWaTemplates.length) {
+    list.innerHTML = '<p class="text-gray-300 text-sm text-center py-8">אין הודעות מוכנות — לחץ "+ הודעה חדשה"</p>';
+    return;
+  }
+
+  list.innerHTML = allWaTemplates.map(tpl => `
+    <div class="px-5 py-4 hover:bg-[#fdf6ee] transition-colors">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm text-gray-800">${esc(tpl.name)}</p>
+          <p class="text-xs text-gray-400 mt-1 whitespace-pre-wrap line-clamp-3">${esc(tpl.body || '').slice(0, 200)}${(tpl.body||'').length > 200 ? '...' : ''}</p>
+        </div>
+        <div class="flex gap-1 flex-shrink-0">
+          <button onclick="sendWaTplToWorkshop('${tpl.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1.5 rounded-full font-bold transition-colors" title="שלח לסדנא הנוכחית">📤 שלח</button>
+          <button onclick="openWaTplForm('${tpl.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
+          <button onclick="deleteWaTpl('${tpl.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2.5 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openWaTplForm(id) {
+  const form = document.getElementById('wa-tpl-form');
+  form.style.display = '';
+  if (id) {
+    const tpl = allWaTemplates.find(x=>x.id===id);
+    if (!tpl) return;
+    editWaTplId = tpl.id;
+    document.getElementById('wa-tpl-name').value = tpl.name || '';
+    document.getElementById('wa-tpl-body').value = tpl.body || '';
+  } else {
+    editWaTplId = null;
+    document.getElementById('wa-tpl-name').value = '';
+    document.getElementById('wa-tpl-body').value = '';
+  }
+  document.getElementById('wa-tpl-err').textContent = '';
+  form.scrollIntoView({behavior:'smooth'});
+}
+window.openWaTplForm = openWaTplForm;
+
+function closeWaTplForm() {
+  document.getElementById('wa-tpl-form').style.display = 'none';
+  editWaTplId = null;
+}
+window.closeWaTplForm = closeWaTplForm;
+
+async function saveWaTpl() {
+  const name = document.getElementById('wa-tpl-name').value.trim();
+  const body = document.getElementById('wa-tpl-body').value.trim();
+  const err = document.getElementById('wa-tpl-err');
+  if (!name) { err.textContent='יש להזין שם.'; return; }
+  if (!body) { err.textContent='יש להזין תוכן.'; return; }
+  err.textContent='';
+  const data = { name, body, createdAt: serverTimestamp() };
+  try {
+    if (editWaTplId) {
+      await updateDoc(doc(db, WA_TPL_COL, editWaTplId), data);
+      logAction(`תבנית WhatsApp עודכנה — "${name}"`);
+    } else {
+      await addDoc(collection(db, WA_TPL_COL), data);
+      logAction(`תבנית WhatsApp חדשה — "${name}"`);
+    }
+    closeWaTplForm();
+  } catch(ex) { err.textContent='שגיאה.'; console.error(ex); }
+}
+window.saveWaTpl = saveWaTpl;
+
+async function deleteWaTpl(id) {
+  const tpl = allWaTemplates.find(x=>x.id===id);
+  if (tpl && confirm(`למחוק תבנית "${tpl.name}"?`)) {
+    try { await deleteDoc(doc(db, WA_TPL_COL, id)); logAction(`תבנית WhatsApp נמחקה — "${tpl.name}"`); }
+    catch(ex) { console.error(ex); }
+  }
+}
+window.deleteWaTpl = deleteWaTpl;
+
+function sendWaTplToWorkshop(tplId) {
+  const tpl = allWaTemplates.find(x=>x.id===tplId);
+  if (!tpl) return;
+
+  // Get current workshop data from form
+  const name      = document.getElementById('ws-name')?.value.trim();
+  const phone     = document.getElementById('ws-phone')?.value.trim().replace(/[-\s]/g,'');
+  const celebrant = document.getElementById('ws-celebrant')?.value.trim();
+  const occasion  = document.getElementById('ws-occasion')?.value.trim();
+  const date      = document.getElementById('ws-date')?.value;
+  const time      = document.getElementById('ws-time')?.value;
+  const count     = document.getElementById('ws-count')?.value;
+  const route     = document.getElementById('ws-route')?.value;
+  const city      = document.getElementById('ws-city')?.value.trim();
+  const total     = document.getElementById('ws-total-display')?.textContent.replace(/[^\d]/g,'') || '0';
+  const advance   = document.getElementById('ws-advance-amount')?.value || '500';
+  const balance   = document.getElementById('ws-balance-amount')?.textContent.replace(/[^\d]/g,'') || '0';
+  const dateStr   = date ? new Date(date).toLocaleDateString('he-IL') : '';
+
+  if (!phone) { alert('יש למלא טלפון בטופס הסדנא קודם'); return; }
+
+  // Replace placeholders
+  let msg = tpl.body
+    .replace(/\{שם_לקוח\}/g, name || '')
+    .replace(/\{שם_חוגגת\}/g, celebrant || '')
+    .replace(/\{תאריך\}/g, dateStr)
+    .replace(/\{שעה\}/g, time || '')
+    .replace(/\{מסלול\}/g, route || '')
+    .replace(/\{משתתפות\}/g, count || '')
+    .replace(/\{עיר\}/g, city || '')
+    .replace(/\{סכום\}/g, total)
+    .replace(/\{מקדמה\}/g, advance)
+    .replace(/\{יתרה\}/g, balance)
+    .replace(/\{סיבה\}/g, occasion || '');
+
+  const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
+  window.open('https://wa.me/' + waPhone + '?text=' + encodeURIComponent(msg), '_blank');
+}
+window.sendWaTplToWorkshop = sendWaTplToWorkshop;
 
 // ── Expenses ─────────────────────────────────────────────────────
 const EXPENSE_CATEGORIES = {
