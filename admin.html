@@ -1174,7 +1174,18 @@
             </div>
             <div>
               <label class="lbl">סכום (₪) *</label>
-              <input id="exp-amount" type="number" min="0" step="50" placeholder="0" class="inp" />
+              <div class="flex gap-2 items-center">
+                <input id="exp-amount" type="number" min="0" step="50" placeholder="0" class="inp flex-1" />
+                <select id="exp-staff-amount" class="inp w-auto" style="display:none;" title="סכום מהיר לעובדת">
+                  <option value="" disabled selected>סכום מהיר</option>
+                  <option value="150">150 ₪</option>
+                  <option value="200">200 ₪</option>
+                  <option value="250">250 ₪</option>
+                  <option value="300">300 ₪</option>
+                  <option value="350">350 ₪</option>
+                  <option value="400">400 ₪</option>
+                </select>
+              </div>
             </div>
             <div>
               <label class="lbl">אמצעי תשלום</label>
@@ -1189,17 +1200,6 @@
               <label class="lbl">שיוך לסדנא (אופציונלי)</label>
               <select id="exp-workshop" class="inp">
                 <option value="">ללא שיוך</option>
-              </select>
-            </div>
-            <div>
-              <label class="lbl">תשלום לעובדת — סכום</label>
-              <select id="exp-staff-amount" class="inp" style="display:none;">
-                <option value="150">150 ₪</option>
-                <option value="200">200 ₪</option>
-                <option value="250">250 ₪</option>
-                <option value="300">300 ₪</option>
-                <option value="350">350 ₪</option>
-                <option value="400">400 ₪</option>
               </select>
             </div>
             <div class="sm:col-span-2">
@@ -5522,15 +5522,16 @@ function initExpensesTab() {
     updateExpenseKPIs();
   }, err=>console.error('expenses:', err));
 
-  // Show/hide staff amount when category changes
+  // Show/hide staff quick-amount select when category changes
   document.getElementById('exp-category')?.addEventListener('change', function() {
-    document.getElementById('exp-staff-amount').style.display = this.value === 'staff' ? '' : 'none';
-    if (this.value === 'staff') {
-      document.getElementById('exp-amount').value = document.getElementById('exp-staff-amount').value;
+    const staffSel = document.getElementById('exp-staff-amount');
+    staffSel.style.display = this.value === 'staff' ? '' : 'none';
+    if (this.value === 'staff' && staffSel.value) {
+      document.getElementById('exp-amount').value = staffSel.value;
     }
   });
   document.getElementById('exp-staff-amount')?.addEventListener('change', function() {
-    document.getElementById('exp-amount').value = this.value;
+    if (this.value) document.getElementById('exp-amount').value = this.value;
   });
 
   // Populate workshop select
