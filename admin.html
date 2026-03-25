@@ -843,10 +843,62 @@
       <section id="tab-workshops" data-erp-tab class="p-6 space-y-6">
         <div class="flex flex-wrap justify-between items-center gap-3">
           <h2 class="font-black text-gray-800 text-lg">ניהול סדנאות</h2>
-          <button onclick="openWorkshopModal()"
-            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-            + סיכום סדנה חדשה</button>
+          <div class="flex items-center gap-2">
+            <!-- View toggle -->
+            <div class="flex items-center bg-gray-100 rounded-full p-0.5">
+              <button id="ws-view-list" onclick="switchWsView('list')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all bg-white text-[#d4a373] shadow-sm">📋 רשימה</button>
+              <button id="ws-view-crm" onclick="switchWsView('crm')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all text-gray-400">📊 CRM</button>
+            </div>
+            <button onclick="openWorkshopModal()"
+              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              + סדנה חדשה</button>
+          </div>
         </div>
+
+        <!-- CRM Kanban View -->
+        <div id="ws-crm-view" style="display:none;" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start" id="crm-board">
+            <!-- Column: Leads (Drafts) -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-amber-200 flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                <h4 class="font-bold text-sm text-amber-700">לידים חדשים</h4>
+                <span id="crm-count-draft" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5 mr-auto"></span>
+              </div>
+              <div id="crm-col-draft" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+            </div>
+            <!-- Column: Advance Paid (Confirmed) -->
+            <div class="bg-[#fdf6ee] border border-[#f0dfc0] rounded-2xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-[#f0dfc0] flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-[#d4a373]"></div>
+                <h4 class="font-bold text-sm text-[#a8705a]">מקדמה שולמה</h4>
+                <span id="crm-count-advance" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5 mr-auto"></span>
+              </div>
+              <div id="crm-col-advance" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+            </div>
+            <!-- Column: Fully Paid -->
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-emerald-200 flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                <h4 class="font-bold text-sm text-emerald-700">שולם במלואו</h4>
+                <span id="crm-count-paid" class="text-[10px] font-bold bg-emerald-200 text-emerald-700 rounded-full px-2 py-0.5 mr-auto"></span>
+              </div>
+              <div id="crm-col-paid" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+            </div>
+            <!-- Column: Completed (Past) -->
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
+                <h4 class="font-bold text-sm text-gray-500">הושלמו</h4>
+                <span id="crm-count-done" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
+              </div>
+              <div id="crm-col-done" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- List View (default) -->
+        <div id="ws-list-view">
 
         <!-- Calendar view -->
         <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
@@ -1069,6 +1121,8 @@
           </button>
           <div id="ws-list-archive" class="divide-y divide-gray-50" style="display:none;"></div>
         </div>
+
+        </div><!-- END ws-list-view -->
 
         <!-- ══ WhatsApp Message Templates ══ -->
         <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
@@ -4362,6 +4416,7 @@ function initWorkshopsTab() {
     allWorkshops = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderCalendar();
     renderWorkshopsList();
+    if (wsCurrentView === 'crm') renderCrmBoard();
     if (currentDashView === 'workshops') { renderWsDashboard(); renderFinancialReports(); }
   }, err=>console.error('workshops:', err));
 
@@ -5218,6 +5273,96 @@ window.openWsCard = openWsCard;
 
 function closeWsCard(){document.getElementById('ws-card-modal')?.setAttribute('data-v','');wsCardCurrentId=null;}
 window.closeWsCard = closeWsCard;
+
+// ── CRM Kanban View ─────────────────────────────────────────────
+let wsCurrentView = 'list';
+function switchWsView(view) {
+  wsCurrentView = view;
+  document.getElementById('ws-list-view').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('ws-crm-view').style.display = view === 'crm' ? '' : 'none';
+  document.getElementById('ws-view-list').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
+    (view === 'list' ? 'bg-white text-[#d4a373] shadow-sm' : 'text-gray-400');
+  document.getElementById('ws-view-crm').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
+    (view === 'crm' ? 'bg-white text-[#d4a373] shadow-sm' : 'text-gray-400');
+  if (view === 'crm') renderCrmBoard();
+}
+window.switchWsView = switchWsView;
+
+function renderCrmBoard() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  function wsDate(w) { return w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null; }
+  const mn = { paybox:'PayBox', bit:'Bit', cash:'מזומן', transfer:'העברה' };
+
+  // Categorize
+  const drafts = [];
+  const advancePaid = [];
+  const fullyPaid = [];
+  const done = [];
+
+  allWorkshops.forEach(w => {
+    const status = w.bookingStatus || 'confirmed';
+    const pay = w.payment || {};
+    const d = wsDate(w);
+    const isPast = d && d < now;
+
+    if (status === 'draft') drafts.push(w);
+    else if (isPast) done.push(w);
+    else if (pay.advancePaid && pay.balancePaid) fullyPaid.push(w);
+    else advancePaid.push(w);
+  });
+
+  // Sort each by date
+  const sortByDate = arr => arr.sort((a,b) => ((wsDate(a)?.getTime()||0) - (wsDate(b)?.getTime()||0)));
+  sortByDate(drafts); sortByDate(advancePaid); sortByDate(fullyPaid);
+  done.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
+
+  // Counts
+  const el = i => document.getElementById(i);
+  if (el('crm-count-draft')) el('crm-count-draft').textContent = drafts.length;
+  if (el('crm-count-advance')) el('crm-count-advance').textContent = advancePaid.length;
+  if (el('crm-count-paid')) el('crm-count-paid').textContent = fullyPaid.length;
+  if (el('crm-count-done')) el('crm-count-done').textContent = done.length;
+
+  function crmCard(w, opts = {}) {
+    const d = wsDate(w);
+    const dateStr = d ? d.toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
+    const pay = w.payment || {};
+    const diff = d ? Math.ceil((d - now) / 86400000) : null;
+    const daysLabel = diff === null ? '' : diff < 0 ? '<span class="text-gray-400">עבר</span>' : diff === 0 ? '<span class="text-emerald-500 font-bold">היום</span>' : `<span class="text-blue-500">בעוד ${diff} ימים</span>`;
+
+    // Action button based on state
+    let actionBtn = '';
+    if (!pay.advancePaid) {
+      actionBtn = `<button onclick="event.stopPropagation();quickPayAdvance('${w.id}')" class="text-[9px] bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1 rounded-full font-bold transition-colors">💳 אשר מקדמה</button>`;
+    } else if (!pay.balancePaid && !opts.isPast) {
+      actionBtn = `<button onclick="event.stopPropagation();quickPayBalance('${w.id}')" class="text-[9px] bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-full font-bold transition-colors">💳 אשר יתרה</button>`;
+    }
+
+    return `<div class="bg-white rounded-xl border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isPast ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <p class="font-bold text-sm text-gray-800 leading-tight">${esc(w.celebrant || w.customerName)}</p>
+        <span class="text-[10px] text-gray-400 flex-shrink-0">${dateStr}</span>
+      </div>
+      <div class="flex flex-wrap gap-1.5 text-[10px] mb-2">
+        <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${w.time || ''}</span>
+        <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">📍 ${esc(w.city || '—')}</span>
+        <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">👥 ${w.participantCount}</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="font-black text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')}₪</span>
+        <span class="text-[10px]">${daysLabel}</span>
+      </div>
+      ${w.customerName !== w.celebrant ? `<p class="text-[9px] text-gray-400 mt-1">👤 ${esc(w.customerName)} · ${esc(w.phone||'')}</p>` : ''}
+      ${actionBtn ? `<div class="mt-2">${actionBtn}</div>` : ''}
+    </div>`;
+  }
+
+  if (el('crm-col-draft')) el('crm-col-draft').innerHTML = drafts.length ? drafts.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">אין לידים</p>';
+  if (el('crm-col-advance')) el('crm-col-advance').innerHTML = advancePaid.length ? advancePaid.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+  if (el('crm-col-paid')) el('crm-col-paid').innerHTML = fullyPaid.length ? fullyPaid.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+  if (el('crm-col-done')) el('crm-col-done').innerHTML = done.slice(0,15).map(w=>crmCard(w,{isPast:true})).join('') || '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+}
+window.renderCrmBoard = renderCrmBoard;
 
 // ── WhatsApp Templates CRUD ─────────────────────────────────────
 const WA_TPL_COL = 'artifacts/charming-3dd6f/public/data/waTemplates';
