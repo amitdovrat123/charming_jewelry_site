@@ -5907,7 +5907,8 @@ function openExpenseCard(id) {
       ${e.notes ? `<div class="flex justify-between"><span class="text-xs text-gray-500">הערות</span><span class="text-sm text-gray-600">${esc(e.notes)}</span></div>` : ''}
     </div>
     <div class="px-5 py-3 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2">
-      <button onclick="this.closest('.fixed').remove();openExpenseForm('${e.id}')" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2 rounded-full font-bold text-sm transition-colors">✏️ עריכה</button>
+      <button onclick="this.closest('.fixed').remove();openExpenseForm('${e.id}')" class="flex-1 flex items-center justify-center gap-1.5 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2.5 rounded-full font-bold text-sm transition-colors"><i data-lucide="pencil" class="w-3.5 h-3.5"></i> עריכה</button>
+      <button onclick="this.closest('.fixed').remove();confirmDeleteExpense('${e.id}')" class="flex items-center justify-center gap-1.5 border border-red-200/60 hover:bg-red-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors" style="color:rgba(239,68,68,.6)"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> מחיקה</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
