@@ -1072,11 +1072,12 @@
 
         <!-- Section 1: Drafts -->
         <div id="ws-section-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
-          <div class="px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
-            <i data-lucide="file-edit" class="w-4 h-4 inline-block"></i>
+          <button onclick="document.getElementById('ws-list-drafts').classList.toggle('hidden')" class="w-full px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2 cursor-pointer hover:bg-amber-100/50 transition-colors">
+            <i data-lucide="file-edit" class="w-4 h-4 text-amber-600"></i>
             <h3 class="font-bold text-sm text-amber-700">סדנאות שטרם נסגרו</h3>
             <span id="ws-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
-          </div>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-amber-400 mr-auto"></i>
+          </button>
           <div id="ws-list-drafts" class="divide-y divide-amber-50"></div>
         </div>
 
@@ -3129,19 +3130,38 @@ function renderFinancialReports() {
   const periodWs = confirmed.filter(w => inRange(wsDate(w)));
   const revenue = periodWs.reduce((s, w) => s + (w.total || 0), 0);
 
-  // ── P&L: Expenses ──
+  // ── P&L: Expenses (real cost, not cash-based) ──
+  // Material cost = per-participant cost × participants (from workshop data, NOT from expenses collection)
+  const pnlMaterialCost = periodWs.reduce((s, w) => s + calcWsMaterialCost(w), 0);
+
+  // Other expenses from expenses collection (excluding materials — those are calculated above)
   const periodExp = allExpenses.filter(e => {
     if (!e.date) return false;
     const d = new Date(e.date);
     return d >= startDate && d <= endDate;
   });
   const expByCategory = {};
-  let totalExp = 0;
+  let totalExpOther = 0;
   periodExp.forEach(e => {
+    if (e.category === 'materials') return; // skip — we use real cost instead
     expByCategory[e.category] = (expByCategory[e.category] || 0) + (e.amount || 0);
-    totalExp += (e.amount || 0);
+    totalExpOther += (e.amount || 0);
+  });
+  // Fuel cost for P&L = actual distance-based cost for workshops in period
+  const pnlFuelCost = periodWs.reduce((s, w) => {
+    const dist = getCityDistance(w.city);
+    return s + (dist ? calcFuelCost(dist) : 0);
+  }, 0);
+  // Override fuel in expByCategory with calculated value
+  expByCategory.fuel = pnlFuelCost;
+  // Recalculate other expenses without fuel from expense records (avoid double counting)
+  totalExpOther = 0;
+  periodExp.forEach(e => {
+    if (e.category === 'materials' || e.category === 'fuel') return;
+    totalExpOther += (e.amount || 0);
   });
 
+  const totalExp = pnlMaterialCost + pnlFuelCost + totalExpOther;
   const profit = revenue - totalExp;
   const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 
@@ -3153,7 +3173,7 @@ function renderFinancialReports() {
   if (el('wsd-pnl-margin')) el('wsd-pnl-margin').textContent = margin + '%';
   // P&L detail
   if (el('fin-revenue')) el('fin-revenue').textContent = revenue.toLocaleString('he-IL') + ' ₪';
-  if (el('wsd-pnl-materials')) el('wsd-pnl-materials').textContent = (expByCategory.materials || 0).toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-materials')) el('wsd-pnl-materials').textContent = pnlMaterialCost.toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-staff')) el('wsd-pnl-staff').textContent = (expByCategory.staff || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-marketing')) el('wsd-pnl-marketing').textContent = (expByCategory.marketing || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-fuel')) el('wsd-pnl-fuel').textContent = (expByCategory.fuel || 0).toLocaleString('he-IL') + ' ₪';
@@ -3174,8 +3194,7 @@ function renderFinancialReports() {
     }
   }
 
-  // ── Cash Flow ──
-  // Advances received in period
+  // ── Cash Flow (actual money in/out, not calculated costs) ──
   let advancesIn = 0, balancesIn = 0;
   confirmed.forEach(w => {
     const pay = w.payment || {};
@@ -3189,12 +3208,17 @@ function renderFinancialReports() {
     }
   });
   const totalIn = advancesIn + balancesIn;
-  const cfNet = totalIn - totalExp;
+  // Cash-based expenses = ALL expenses from the expenses collection (actual money out)
+  const cfTotalOut = periodExp.reduce((s, e) => s + (e.amount || 0), 0)
+    + allExpenses.filter(e => e.category === 'materials' && e.date && (() => { const d = new Date(e.date); return d >= startDate && d <= endDate; })()).reduce((s, e) => s + (e.amount || 0), 0);
+  // Simpler: just sum ALL period expenses from collection (includes 400₪ materials + fuel + everything)
+  const cfExpenses = allExpenses.filter(e => { if (!e.date) return false; const d = new Date(e.date); return d >= startDate && d <= endDate; }).reduce((s, e) => s + (e.amount || 0), 0);
+  const cfNet = totalIn - cfExpenses;
 
   if (el('wsd-cf-advances')) el('wsd-cf-advances').textContent = advancesIn.toLocaleString('he-IL') + ' ₪';
   if (el('wsd-cf-balances')) el('wsd-cf-balances').textContent = balancesIn.toLocaleString('he-IL') + ' ₪';
   if (el('wsd-cf-total-in')) el('wsd-cf-total-in').textContent = totalIn.toLocaleString('he-IL') + ' ₪';
-  if (el('wsd-cf-total-out')) el('wsd-cf-total-out').textContent = totalExp.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-cf-total-out')) el('wsd-cf-total-out').textContent = cfExpenses.toLocaleString('he-IL') + ' ₪';
   if (el('wsd-cf-net')) el('wsd-cf-net').textContent = cfNet.toLocaleString('he-IL') + ' ₪';
 
   const cfNetRow = el('wsd-cf-net-row');
@@ -4361,6 +4385,19 @@ const WS_PRICES = {
   25: { 'מסלול 1 - שרשרת / צמיד': 4190, 'מסלול 2 - שרשרת ועגילים': 4890, 'מסלול 2 משודרג - שרשרת וצמיד': 5490, 'מסלול 3 - שרשרת צמיד ועגילים': 5990 },
   30: { 'מסלול 1 - שרשרת / צמיד': 4790, 'מסלול 2 - שרשרת ועגילים': 5690, 'מסלול 2 משודרג - שרשרת וצמיד': 6290, 'מסלול 3 - שרשרת צמיד ועגילים': 6890 },
 };
+
+// Material cost per participant by route (for P&L calculation)
+const WS_MATERIAL_COST_PER_PARTICIPANT = {
+  'מסלול 1 - שרשרת / צמיד': 25,
+  'מסלול 2 - שרשרת ועגילים': 31,
+  'מסלול 2 משודרג - שרשרת וצמיד': 43,
+  'מסלול 3 - שרשרת צמיד ועגילים': 49,
+};
+
+function calcWsMaterialCost(w) {
+  const costPerP = WS_MATERIAL_COST_PER_PARTICIPANT[w.route] || 0;
+  return costPerP * (w.participantCount || 0);
+}
 
 function getWsBasePrice() {
   const count = parseInt(document.getElementById('ws-count')?.value) || 0;
