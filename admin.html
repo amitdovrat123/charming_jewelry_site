@@ -441,32 +441,55 @@
             </div>
           </div>
 
-          <!-- Weekly Goal + Payment Status -->
+          <!-- Goals + Payment Status -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Weekly Goal -->
+            <!-- Goals Card -->
             <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
-              <div class="flex items-center justify-between mb-3">
-                <h3 class="font-bold text-sm text-gray-800">🎯 יעד שבועי</h3>
-                <div class="flex items-center gap-2">
-                  <label class="text-[10px] text-gray-400">יעד:</label>
-                  <input id="wsd-weekly-goal" type="number" min="1" max="20" value="3" class="w-14 text-center text-sm border border-gray-200 rounded-lg px-2 py-1 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-sm text-gray-800">🎯 יעדים</h3>
+                <button onclick="document.getElementById('wsd-goals-editor').classList.toggle('hidden')" class="text-[10px] border border-gray-200 text-gray-400 hover:text-[#d4a373] hover:border-[#f0dfc0] px-2.5 py-1 rounded-full font-bold transition-colors">⚙️ ערוך יעדים</button>
+              </div>
+              <!-- Goals editor (hidden) -->
+              <div id="wsd-goals-editor" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2">
+                <div class="flex items-center gap-3">
+                  <label class="text-xs text-gray-500 w-24">יעד שבועי:</label>
+                  <input id="wsd-weekly-goal" type="number" min="1" max="20" value="3" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1.5 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
+                </div>
+                <div class="flex items-center gap-3">
+                  <label class="text-xs text-gray-500 w-24">יעד חודשי:</label>
+                  <input id="wsd-monthly-goal" type="number" min="1" max="50" value="10" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1.5 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
                 </div>
               </div>
-              <div class="flex items-center gap-4">
-                <div id="wsd-goal-ring" class="relative w-24 h-24 flex-shrink-0">
-                  <svg viewBox="0 0 36 36" class="w-full h-full">
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f0dfc0" stroke-width="3"/>
-                    <path id="wsd-goal-arc" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#d4a373" stroke-width="3" stroke-dasharray="0, 100" stroke-linecap="round"/>
-                  </svg>
+              <!-- Weekly meter -->
+              <div class="mb-4">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs font-semibold text-gray-600">שבועי</span>
+                  <span id="wsd-goal-weekly-label" class="text-xs font-bold text-[#d4a373]">0/3</span>
+                </div>
+                <div class="relative h-5 bg-[#f0dfc0] rounded-full overflow-hidden">
+                  <div id="wsd-goal-weekly-bar" class="absolute inset-y-0 right-0 bg-gradient-to-l from-[#d4a373] to-[#e8b894] rounded-full transition-all duration-700 ease-out" style="width:0%"></div>
                   <div class="absolute inset-0 flex items-center justify-center">
-                    <span id="wsd-goal-text" class="text-lg font-black text-[#d4a373]">0/3</span>
+                    <span id="wsd-goal-weekly-pct" class="text-[10px] font-black text-white drop-shadow-sm"></span>
                   </div>
                 </div>
-                <div>
-                  <p id="wsd-goal-status" class="text-sm font-semibold text-gray-600"></p>
-                  <p class="text-[10px] text-gray-400 mt-1">סגירות השבוע הנוכחי</p>
-                </div>
+                <p id="wsd-goal-weekly-status" class="text-[10px] text-gray-400 mt-1"></p>
               </div>
+              <!-- Monthly meter -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs font-semibold text-gray-600">חודשי</span>
+                  <span id="wsd-goal-monthly-label" class="text-xs font-bold text-blue-500">0/10</span>
+                </div>
+                <div class="relative h-5 bg-blue-100 rounded-full overflow-hidden">
+                  <div id="wsd-goal-monthly-bar" class="absolute inset-y-0 right-0 bg-gradient-to-l from-blue-500 to-blue-400 rounded-full transition-all duration-700 ease-out" style="width:0%"></div>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span id="wsd-goal-monthly-pct" class="text-[10px] font-black text-white drop-shadow-sm"></span>
+                  </div>
+                </div>
+                <p id="wsd-goal-monthly-status" class="text-[10px] text-gray-400 mt-1"></p>
+              </div>
+              <!-- Confetti container -->
+              <div id="wsd-confetti" class="relative pointer-events-none" style="height:0;overflow:visible;"></div>
             </div>
 
             <!-- Payment Status Overview -->
@@ -2807,21 +2830,39 @@ function renderWsDashboard() {
   const avgRev = monthConfirmed.length ? Math.round(monthRevenue / monthConfirmed.length) : 0;
   if (el('wsd-avg-revenue')) el('wsd-avg-revenue').textContent = avgRev ? avgRev.toLocaleString('he-IL') + ' ��' : '—';
 
-  // ── Weekly Goal ──
-  const goal = parseInt(el('wsd-weekly-goal')?.value) || 3;
+  // ── Weekly Goal (linear meter) ──
+  const wGoal = parseInt(el('wsd-weekly-goal')?.value) || 3;
   const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - now.getDay()); // Sunday
+  weekStart.setDate(now.getDate() - now.getDay());
   weekStart.setHours(0, 0, 0, 0);
   const weekConfirmed = confirmed.filter(w => {
     const created = w.createdAt?.seconds ? new Date(w.createdAt.seconds * 1000) : null;
     return created && created >= weekStart;
   }).length;
-  const pct = Math.min(100, Math.round((weekConfirmed / goal) * 100));
-  if (el('wsd-goal-arc')) el('wsd-goal-arc').setAttribute('stroke-dasharray', pct + ', 100');
-  if (el('wsd-goal-text')) el('wsd-goal-text').textContent = weekConfirmed + '/' + goal;
-  if (el('wsd-goal-status')) {
-    if (weekConfirmed >= goal) el('wsd-goal-status').textContent = '🎉 עמדת ביעד השבועי!';
-    else el('wsd-goal-status').textContent = 'עוד ' + (goal - weekConfirmed) + ' סגירות ליעד';
+  const wPct = Math.min(100, Math.round((weekConfirmed / wGoal) * 100));
+  if (el('wsd-goal-weekly-bar')) el('wsd-goal-weekly-bar').style.width = wPct + '%';
+  if (el('wsd-goal-weekly-pct')) el('wsd-goal-weekly-pct').textContent = wPct > 10 ? wPct + '%' : '';
+  if (el('wsd-goal-weekly-label')) el('wsd-goal-weekly-label').textContent = weekConfirmed + '/' + wGoal;
+  if (el('wsd-goal-weekly-status')) {
+    if (weekConfirmed >= wGoal) el('wsd-goal-weekly-status').textContent = '🎉 עמדת ביעד השבועי!';
+    else el('wsd-goal-weekly-status').textContent = 'עוד ' + (wGoal - weekConfirmed) + ' סגירות ליעד';
+  }
+
+  // ── Monthly Goal (linear meter) ──
+  const mGoal = parseInt(el('wsd-monthly-goal')?.value) || 10;
+  const mPct = Math.min(100, Math.round((monthConfirmed.length / mGoal) * 100));
+  if (el('wsd-goal-monthly-bar')) el('wsd-goal-monthly-bar').style.width = mPct + '%';
+  if (el('wsd-goal-monthly-pct')) el('wsd-goal-monthly-pct').textContent = mPct > 10 ? mPct + '%' : '';
+  if (el('wsd-goal-monthly-label')) el('wsd-goal-monthly-label').textContent = monthConfirmed.length + '/' + mGoal;
+  if (el('wsd-goal-monthly-status')) {
+    if (monthConfirmed.length >= mGoal) el('wsd-goal-monthly-status').textContent = '🎉 עמדת ביעד החודשי!';
+    else el('wsd-goal-monthly-status').textContent = 'עוד ' + (mGoal - monthConfirmed.length) + ' סגירות ליעד';
+  }
+
+  // Confetti on goal reached
+  if ((weekConfirmed >= wGoal || monthConfirmed.length >= mGoal) && el('wsd-confetti') && !el('wsd-confetti').dataset.fired) {
+    el('wsd-confetti').dataset.fired = '1';
+    launchConfetti(el('wsd-confetti'));
   }
 
   // ── Payment Status ──
@@ -2975,6 +3016,21 @@ function renderWsDashboard() {
   }
 }
 window.renderWsDashboard = renderWsDashboard;
+
+function launchConfetti(container) {
+  const colors = ['#d4a373','#f0dfc0','#e8b894','#a8705a','#fdf6ee','#16a34a','#facc15','#f472b6'];
+  for (let i = 0; i < 40; i++) {
+    const c = document.createElement('div');
+    const size = 4 + Math.random() * 6;
+    c.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:${colors[i%colors.length]};border-radius:${Math.random()>.5?'50%':'2px'};top:-10px;right:${Math.random()*100}%;opacity:1;pointer-events:none;z-index:50;`;
+    c.animate([
+      { transform: `translate(${(Math.random()-.5)*120}px, 0) rotate(0)`, opacity: 1 },
+      { transform: `translate(${(Math.random()-.5)*200}px, ${150+Math.random()*100}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+    ], { duration: 1200 + Math.random()*800, easing: 'cubic-bezier(.25,.46,.45,.94)', fill: 'forwards', delay: Math.random()*300 });
+    container.appendChild(c);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 2500);
+}
 
 function renderFinancialReports() {
   const el = id => document.getElementById(id);
