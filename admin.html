@@ -883,12 +883,11 @@
 
         <!-- Section 1: Drafts (top priority) -->
         <div id="ws-section-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
-          <button onclick="const l=document.getElementById('ws-list-drafts');const o=l.style.display!=='none';l.style.display=o?'none':'';this.querySelector('.ws-chevron').style.transform=o?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2 cursor-pointer hover:bg-amber-100/50 transition-colors">
+          <div class="px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
             <i data-lucide="file-edit" class="w-4 h-4 text-amber-600"></i>
             <h3 class="font-bold text-sm text-amber-700">סדנאות שטרם נסגרו</h3>
             <span id="ws-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
-            <i data-lucide="chevron-up" class="ws-chevron w-4 h-4 text-amber-400 mr-auto transition-transform duration-200"></i>
-          </button>
+          </div>
           <div id="ws-list-drafts" class="divide-y divide-amber-50"></div>
         </div>
 
@@ -927,8 +926,8 @@
           </div>
         </div>
 
-        <div id="ws-list-view">
-        <!-- Workshop booking form -->
+        <!-- Workshop booking form -->'
+
         <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm hidden overflow-hidden">
           <button onclick="document.getElementById('ws-form-section').classList.add('hidden')" class="w-full px-5 py-3 flex items-center justify-between bg-[#fdf6ee] border-b border-[#f0dfc0]/40 hover:bg-[#f5ece7] transition-colors cursor-pointer">
             <h3 class="font-bold text-sm text-gray-800">סיכום סדנה טלפונית</h3>
@@ -1194,12 +1193,12 @@
                 <option value="other">אחר</option>
               </select>
             </div>
-            <div>
+            <div id="exp-amount-wrapper">
               <label class="lbl">סכום (₪) *</label>
               <div class="flex gap-2 items-center">
-                <input id="exp-amount" type="number" min="0" step="50" placeholder="0" class="inp flex-1" />
-                <select id="exp-staff-amount" class="inp w-auto" style="display:none;" title="סכום מהיר לעובדת">
-                  <option value="" disabled selected>סכום מהיר</option>
+                <input id="exp-amount" type="number" min="0" step="50" placeholder="0" class="inp flex-1 min-w-0" />
+                <select id="exp-staff-amount" class="inp flex-1 min-w-0" style="display:none;" title="סכום מהיר לעובדת">
+                  <option value="" disabled selected>סכום קבוע</option>
                   <option value="150">150 ₪</option>
                   <option value="200">200 ₪</option>
                   <option value="250">250 ₪</option>
