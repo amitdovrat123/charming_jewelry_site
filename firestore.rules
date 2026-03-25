@@ -85,6 +85,23 @@ service cloud.firestore {
       match /settings/{settingId} {
         allow read, write: if isAdmin();
       }
+
+      // הוצאות: רק אדמין
+      match /expenses/{expenseId} {
+        allow read, write: if isAdmin();
+      }
+
+      // תבניות WhatsApp: רק אדמין
+      match /waTemplates/{templateId} {
+        allow read, write: if isAdmin();
+      }
+
+      // תעבורת אתר: כולם כותבים, רק אדמין קורא
+      match /site_traffic/{docId} {
+        allow create: if true;
+        allow read:   if isAdmin();
+        allow update, delete: if false;
+      }
     }
 
     // ══════════════════════════════════════════════════════

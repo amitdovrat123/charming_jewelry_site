@@ -903,7 +903,7 @@
         </div>
 
         <!-- Workshop booking form -->
-        <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+        <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm hidden">
           <h3 class="font-bold text-sm text-gray-800 mb-4">סיכום סדנה טלפונית</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -4656,7 +4656,13 @@ async function saveWorkshop() {
         logAction(`הוצאת סחורה 400₪ — "${celebrant || name}" (אוטומטי)`);
       }
     }
-    clearWorkshopForm();
+    // Keep form open with data after save — don't clear
+    // If it was a new workshop, switch to edit mode for the saved doc
+    if (!editWorkshopId && typeof ref !== 'undefined') {
+      editWorkshopId = ref.id;
+    }
+    errEl.innerHTML = '<span class="text-emerald-600 font-bold">נשמר בהצלחה!</span>';
+    setTimeout(() => { errEl.textContent = ''; }, 3000);
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
 }
 window.saveWorkshop = saveWorkshop;
@@ -4729,6 +4735,7 @@ function openWorkshopModal(id) {
   } else {
     clearWorkshopForm();
   }
+  document.getElementById('ws-form-section')?.classList.remove('hidden');
   document.getElementById('ws-form-section')?.scrollIntoView({behavior:'smooth'});
 }
 window.openWorkshopModal = openWorkshopModal;
