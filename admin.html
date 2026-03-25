@@ -1102,8 +1102,7 @@
 
         <!-- Section 3: Archive -->
         <div id="ws-section-archive" class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
-          <button id="ws-archive-toggle" onclick="toggleWsArchive()" class="w-full px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
-            <div class="flex items-center gap-2">
+          <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
               <i data-lucide="folder" class="w-4 h-4 opacity-60 inline-block"></i>
               <h3 class="font-bold text-sm text-gray-400">ארכיון סדנאות</h3>
               <span id="ws-archive-count" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5"></span>
@@ -5008,28 +5007,44 @@ function renderWorkshopsList() {
       return (db?.getTime() || 0) - (da?.getTime() || 0);
     });
 
+  // Helper: render list with max 5 + "show all" button
+  function renderLimitedList(items, container, renderFn, btnClass, btnTextColor) {
+    const visible = items.slice(0, 5);
+    let html = visible.map(renderFn).join('');
+    if (items.length > 5) {
+      html += '<button onclick="this.style.display=\'none\';this.previousElementSibling?.remove();this.parentElement.dataset.expanded=\'1\'" data-showmore class="w-full py-3 text-center text-xs font-bold ' + btnTextColor + ' hover:bg-gray-50/50 border-t ' + btnClass + ' transition-colors">\u05d4\u05e6\u05d2 \u05d0\u05ea \u05db\u05dc ' + items.length + ' \u05d4\u05e1\u05d3\u05e0\u05d0\u05d5\u05ea \u2192</button>';
+    }
+    container.innerHTML = html;
+    // Store full items for expand
+    container._allItems = items;
+    container._renderFn = renderFn;
+    const showBtn = container.querySelector('[data-showmore]');
+    if (showBtn) {
+      showBtn.onclick = function() {
+        container.innerHTML = container._allItems.map(container._renderFn).join('');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      };
+    }
+  }
+
   // Section 1: Drafts
   const secDrafts = document.getElementById('ws-section-drafts');
   const listDrafts = document.getElementById('ws-list-drafts');
   document.getElementById('ws-drafts-count').textContent = drafts.length;
   if (drafts.length) {
     secDrafts.style.display = '';
-    listDrafts.innerHTML = drafts.map(w => renderWorkshopCard(w)).join('');
+    renderLimitedList(drafts, listDrafts, w => renderWorkshopCard(w), 'border-amber-100', 'text-amber-600');
   } else {
     secDrafts.style.display = 'none';
   }
 
-  // Section 2: Confirmed & Upcoming (show 5, expandable)
+  // Section 2: Confirmed & Upcoming
   const listConfirmed = document.getElementById('ws-list-confirmed');
-  const showAllBtn = document.getElementById('ws-confirmed-show-all');
   document.getElementById('ws-confirmed-count').textContent = confirmed.length;
   if (confirmed.length) {
-    const visibleConfirmed = confirmed.slice(0, 5);
-    listConfirmed.innerHTML = visibleConfirmed.map(w => renderWorkshopCard(w)).join('');
-    if (showAllBtn) showAllBtn.style.display = confirmed.length > 5 ? '' : 'none';
+    renderLimitedList(confirmed, listConfirmed, w => renderWorkshopCard(w), 'border-[#f0dfc0]', 'text-[#d4a373]');
   } else {
     listConfirmed.innerHTML = '<p class="text-gray-300 text-sm text-center py-8">אין סדנאות קרובות</p>';
-    if (showAllBtn) showAllBtn.style.display = 'none';
   }
 
   // Section 3: Archive
@@ -5038,7 +5053,7 @@ function renderWorkshopsList() {
   document.getElementById('ws-archive-count').textContent = archive.length;
   if (archive.length) {
     secArchive.style.display = '';
-    listArchive.innerHTML = archive.map(w => renderWorkshopCard(w, { isPast: true })).join('');
+    renderLimitedList(archive, listArchive, w => renderWorkshopCard(w, { isPast: true }), 'border-gray-100', 'text-gray-400');
   } else {
     secArchive.style.display = 'none';
   }
@@ -5066,13 +5081,7 @@ function showAllConfirmedWorkshops() {
 }
 window.showAllConfirmedWorkshops = showAllConfirmedWorkshops;
 
-let wsArchiveOpen = false;
-function toggleWsArchive() {
-  wsArchiveOpen = !wsArchiveOpen;
-  document.getElementById('ws-list-archive').style.display = wsArchiveOpen ? '' : 'none';
-  document.getElementById('ws-archive-arrow').style.transform = wsArchiveOpen ? 'rotate(180deg)' : '';
-}
-window.toggleWsArchive = toggleWsArchive;
+window.toggleWsArchive = function() {};
 
 async function deleteWorkshop(id) {
   const w = allWorkshops.find(x=>x.id===id);
@@ -5695,11 +5704,11 @@ function renderExpensesList() {
     const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
     const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
     return `<div class="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="if(!event.target.closest('button'))openExpenseCard('${e.id}')">
-      <span class="text-xs text-gray-400 w-14 flex-shrink-0">${dateStr}</span>
-      <span class="text-xs text-gray-600 w-20 flex-shrink-0 truncate">${cat.icon} ${cat.label}</span>
-      <span class="text-xs font-bold text-red-500 w-16 flex-shrink-0">${(e.amount||0).toLocaleString('he-IL')}₪</span>
-      <span class="text-xs text-gray-400 flex-1 truncate">${e.workshopName ? esc(e.workshopName) : ''}</span>
-      <button onclick="openExpenseForm('${e.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2 py-1 rounded-full font-bold transition-colors flex-shrink-0">✏️</button>
+      <span class="text-xs text-gray-500 w-14 flex-shrink-0">${dateStr}</span>
+      <span class="text-xs text-gray-600 w-24 flex-shrink-0 truncate">${cat.label}</span>
+      <span class="text-xs font-semibold text-red-500 w-14 flex-shrink-0">${(e.amount||0).toLocaleString('he-IL')}₪</span>
+      <span class="text-xs text-gray-400 flex-1 truncate">${e.notes ? esc(e.notes) : (e.workshopName ? esc(e.workshopName) : '')}</span>
+      <button onclick="openExpenseForm('${e.id}')" class="text-xs text-gray-300 hover:text-[#d4a373] transition-colors flex-shrink-0">✏️</button>
     </div>`;
   }).join('');
 
