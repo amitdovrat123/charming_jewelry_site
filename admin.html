@@ -881,6 +881,31 @@
         <!-- List View (default) -->
         <div id="ws-list-view">
 
+        <!-- Section 1: Drafts (top priority) -->
+        <div id="ws-section-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
+          <button onclick="const l=document.getElementById('ws-list-drafts');l.style.display=l.style.display==='none'?'':'none';this.querySelector('.ws-chevron').classList.toggle('rotate-180')" class="w-full px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2 cursor-pointer hover:bg-amber-100/50 transition-colors">
+            <i data-lucide="file-edit" class="w-4 h-4 text-amber-600"></i>
+            <h3 class="font-bold text-sm text-amber-700">סדנאות שטרם נסגרו</h3>
+            <span id="ws-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
+            <i data-lucide="chevron-down" class="ws-chevron w-4 h-4 text-amber-400 mr-auto transition-transform duration-200"></i>
+          </button>
+          <div id="ws-list-drafts" class="divide-y divide-amber-50"></div>
+        </div>
+
+        <!-- Section 2: Confirmed & Upcoming (5 latest + show all) -->
+        <div id="ws-section-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <button onclick="const l=document.getElementById('ws-list-confirmed');l.style.display=l.style.display==='none'?'':'none';this.querySelector('.ws-chevron').classList.toggle('rotate-180')" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5ece7] transition-colors">
+            <i data-lucide="check-circle" class="w-4 h-4 inline-block text-emerald-500"></i>
+            <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — קרובות</h3>
+            <span id="ws-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
+            <i data-lucide="chevron-down" class="ws-chevron w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
+          </button>
+          <div id="ws-list-confirmed" class="divide-y divide-[#fdf6ee]"></div>
+          <div id="ws-confirmed-show-all" class="text-center py-3 border-t border-[#f0dfc0]" style="display:none;">
+            <button onclick="showAllConfirmedWorkshops()" class="text-xs font-bold text-[#d4a373] hover:text-[#a8705a] transition-colors">הצג את כל הסדנאות הסגורות...</button>
+          </div>
+        </div>
+
         <!-- Calendar view -->
         <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
           <div class="flex items-center justify-between mb-4">
@@ -903,8 +928,12 @@
         </div>
 
         <!-- Workshop booking form -->
-        <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm hidden">
-          <h3 class="font-bold text-sm text-gray-800 mb-4">סיכום סדנה טלפונית</h3>
+        <div id="ws-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm hidden overflow-hidden">
+          <button onclick="document.getElementById('ws-form-section').classList.add('hidden')" class="w-full px-5 py-3 flex items-center justify-between bg-[#fdf6ee] border-b border-[#f0dfc0]/40 hover:bg-[#f5ece7] transition-colors cursor-pointer">
+            <h3 class="font-bold text-sm text-gray-800">סיכום סדנה טלפונית</h3>
+            <i data-lucide="chevron-up" class="w-4 h-4 text-gray-400"></i>
+          </button>
+          <div class="p-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="lbl">שם מלא איש קשר *</label>
@@ -1068,29 +1097,8 @@
             <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">שלח סיכום בוואטסאפ</button>
             <p id="ws-err" class="text-red-400 text-xs self-center"></p>
           </div>
-        </div>
-
-        <!-- Section 1: Drafts -->
-        <div id="ws-section-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
-          <button onclick="const l=document.getElementById('ws-list-drafts');l.style.display=l.style.display==='none'?'':'none';this.querySelector('.ws-chevron').classList.toggle('rotate-180')" class="w-full px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2 cursor-pointer hover:bg-amber-100/50 transition-colors">
-            <i data-lucide="file-edit" class="w-4 h-4 text-amber-600"></i>
-            <h3 class="font-bold text-sm text-amber-700">סדנאות שטרם נסגרו</h3>
-            <span id="ws-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
-            <i data-lucide="chevron-down" class="ws-chevron w-4 h-4 text-amber-400 mr-auto transition-transform duration-200"></i>
-          </button>
-          <div id="ws-list-drafts" class="divide-y divide-amber-50"></div>
-        </div>
-
-        <!-- Section 2: Confirmed & Upcoming -->
-        <div id="ws-section-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
-          <button onclick="const l=document.getElementById('ws-list-confirmed');l.style.display=l.style.display==='none'?'':'none';this.querySelector('.ws-chevron').classList.toggle('rotate-180')" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5ece7] transition-colors">
-            <i data-lucide="check-circle" class="w-4 h-4 inline-block text-emerald-500"></i>
-            <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — קרובות</h3>
-            <span id="ws-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
-            <i data-lucide="chevron-down" class="ws-chevron w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
-          </button>
-          <div id="ws-list-confirmed" class="divide-y divide-[#fdf6ee]"></div>
-        </div>
+          </div><!-- /p-5 inner -->
+        </div><!-- /ws-form-section -->
 
         <!-- Section 3: Archive -->
         <div id="ws-section-archive" class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
@@ -5028,13 +5036,17 @@ function renderWorkshopsList() {
     secDrafts.style.display = 'none';
   }
 
-  // Section 2: Confirmed & Upcoming
+  // Section 2: Confirmed & Upcoming (show 5, expandable)
   const listConfirmed = document.getElementById('ws-list-confirmed');
+  const showAllBtn = document.getElementById('ws-confirmed-show-all');
   document.getElementById('ws-confirmed-count').textContent = confirmed.length;
   if (confirmed.length) {
-    listConfirmed.innerHTML = confirmed.map(w => renderWorkshopCard(w)).join('');
+    const visibleConfirmed = confirmed.slice(0, 5);
+    listConfirmed.innerHTML = visibleConfirmed.map(w => renderWorkshopCard(w)).join('');
+    if (showAllBtn) showAllBtn.style.display = confirmed.length > 5 ? '' : 'none';
   } else {
     listConfirmed.innerHTML = '<p class="text-gray-300 text-sm text-center py-8">אין סדנאות קרובות</p>';
+    if (showAllBtn) showAllBtn.style.display = 'none';
   }
 
   // Section 3: Archive
@@ -5057,6 +5069,19 @@ async function confirmWorkshop(id) {
   } catch(e) { console.error(e); }
 }
 window.confirmWorkshop = confirmWorkshop;
+
+function showAllConfirmedWorkshops() {
+  const now = new Date();
+  const confirmed = allWorkshops
+    .filter(w => (w.bookingStatus || 'confirmed') === 'confirmed')
+    .filter(w => { const d = getWsDate(w); return d && d >= new Date(now.getFullYear(), now.getMonth(), now.getDate()); })
+    .sort((a, b) => { const da = getWsDate(a), db = getWsDate(b); return (da?.getTime() || 0) - (db?.getTime() || 0); });
+  const listConfirmed = document.getElementById('ws-list-confirmed');
+  listConfirmed.innerHTML = confirmed.map(w => renderWorkshopCard(w)).join('');
+  document.getElementById('ws-confirmed-show-all').style.display = 'none';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.showAllConfirmedWorkshops = showAllConfirmedWorkshops;
 
 let wsArchiveOpen = false;
 function toggleWsArchive() {
