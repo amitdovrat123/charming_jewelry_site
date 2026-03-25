@@ -221,8 +221,9 @@ function getErrorMsg(code) {
     'auth/popup-blocked':           'חלון הכניסה נחסם — אפשרי חלונות קופצים בדפדפן ונסי שוב.',
     'auth/operation-not-allowed':   'שיטת התחברות זו אינה מופעלת. אנא פני לתמיכה.',
     'auth/network-request-failed':  'שגיאת רשת. בדקי את החיבור ונסי שוב.',
+    'permission-denied':            'אין הרשאה לשמירת הנתונים. נסי שוב או פני לתמיכה.',
   };
-  return map[code] ?? 'אירעה שגיאה. נסי שנית.';
+  return map[code] ?? `אירעה שגיאה (${code || 'unknown'}). נסי שנית.`;
 }
 
 function setBtnLoading(id, loading) {
@@ -274,8 +275,10 @@ function switchTab(tab) {
 }
 
 // ── Firestore ─────────────────────────────────────────────────
+const USERS_ROOT = 'artifacts/charming-3dd6f/users';
+
 async function saveUserToFirestore(user, extras = {}) {
-  await setDoc(doc(db, 'users', user.uid), {
+  await setDoc(doc(db, USERS_ROOT, user.uid), {
     uid:               user.uid,
     name:              extras.name  ?? user.displayName ?? '',
     email:             user.email,
@@ -288,7 +291,7 @@ async function saveUserToFirestore(user, extras = {}) {
 }
 
 async function userExistsInFirestore(uid) {
-  const snap = await getDoc(doc(db, 'users', uid));
+  const snap = await getDoc(doc(db, USERS_ROOT, uid));
   return snap.exists();
 }
 

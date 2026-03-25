@@ -6,6 +6,7 @@ import {
 import {
   onAuthStateChanged, signOut,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { trackEvent } from './tracker.js';
 
 // ── Environment ────────────────────────────────────────────────
 const isLocal = window.location.hostname === 'localhost' ||
@@ -20,53 +21,7 @@ const USERS_ROOT          = 'artifacts/charming-3dd6f/users';
 const ORDERS_COL          = 'artifacts/charming-3dd6f/public/data/orders';
 const LOGS_COL            = 'artifacts/charming-3dd6f/public/data/logs';
 const FORM_KEY            = 'charming-checkout-form';
-const TRAFFIC_COL         = 'artifacts/charming-3dd6f/public/data/site_traffic';
-
-// ── Session Tracking ────────────────────────────────────────────
-const _sid = sessionStorage.getItem('charming_sid') || crypto.randomUUID();
-sessionStorage.setItem('charming_sid', _sid);
-
-function _detectDevice() {
-  const w = window.innerWidth;
-  return w < 768 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop';
-}
-function _detectSource() {
-  const params = new URLSearchParams(window.location.search);
-  const utm = params.get('utm_source');
-  if (utm) return utm;
-  const ref = document.referrer;
-  if (!ref) return 'direct';
-  try {
-    const host = new URL(ref).hostname.replace('www.', '');
-    if (host.includes('google'))   return 'google';
-    if (host.includes('facebook') || host.includes('fb'))  return 'facebook';
-    if (host.includes('instagram'))return 'instagram';
-    if (host.includes('tiktok'))   return 'tiktok';
-    return host;
-  } catch { return 'direct'; }
-}
-
-function trackEvent(event, meta = {}) {
-  try {
-    addDoc(collection(db, TRAFFIC_COL), {
-      sessionId: _sid,
-      event,
-      page: currentView || 'home',
-      referrer: document.referrer || '',
-      source: _detectSource(),
-      device: _detectDevice(),
-      screenW: window.innerWidth,
-      uid: auth.currentUser?.uid || null,
-      meta,
-      timestamp: serverTimestamp(),
-    });
-  } catch (e) { /* silent */ }
-}
-
-// Auto page-view on load
-trackEvent('page_view', { page: window.location.pathname });
-// Session ping every 30s
-setInterval(() => trackEvent('session_ping'), 30000);
+// Tracking is handled by tracker.js (loaded separately on all pages)
 
 // Audit log helper
 async function logAction(description) {
@@ -1970,7 +1925,7 @@ function subscribeAuth() {
     // Admin link: only reveal for the admin email
     const adminLink = document.querySelector('.footer-admin-link');
     if (adminLink) {
-      const isAdmin = user && user.email === 'amitdovrat123@gmail.com';
+      const isAdmin = user && ['amitdovrat123@gmail.com', 'viki.golkov1@gmail.com'].includes(user.email);
       adminLink.classList.toggle('footer-admin-link--visible', isAdmin);
     }
 

@@ -2,46 +2,53 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper: is the request from a logged-in user? ──
+    // ── Helper: האם המשתמש מחובר? ──
     function isAuth() {
       return request.auth != null;
     }
 
-    // ── Helper: is the request from the admin? ──
+    // ── Helper: האם זה האדמין? ──
     function isAdmin() {
       return request.auth != null
-          && request.auth.token.email == 'amitdovrat123@gmail.com';
+          && (request.auth.token.email == 'amitdovrat123@gmail.com'
+           || request.auth.token.email == 'viki.golkov1@gmail.com');
     }
 
-    // ── Helper: is this the document owner? ──
+    // ── Helper: האם זה בעל המידע? ──
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
     // ══════════════════════════════════════════════════════
-    //  PUBLIC DATA — under artifacts/{appId}/public/data
+    //  PUBLIC DATA — נתונים ציבוריים (מוצרים, גלריה וכו')
     // ══════════════════════════════════════════════════════
     match /artifacts/{appId}/public/data/{document=**} {
 
-      // ── Products: anyone can read, only admin can write ──
+      // תיקון קריטי: הרשאה לגלריית הסדנאות
+      match /workshopGallery/{docId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // מוצרים: כולם רואים, רק אדמין משנה
       match /products/{productId} {
         allow read:  if true;
         allow write: if isAdmin();
       }
 
-      // ── Workshops: anyone can read, only admin can write ──
+      // סדנאות (מידע שיווקי): כולם רואים, רק אדמין משנה
       match /workshops/{workshopId} {
         allow read:  if true;
         allow write: if isAdmin();
       }
 
-      // ── Banner Messages: anyone can read, only admin can write ──
+      // באנר הודעות: כולם רואים
       match /bannerMessages/{messageId} {
         allow read:  if true;
         allow write: if isAdmin();
       }
 
-      // ── Orders: only the order creator or admin can read/write ──
+      // הזמנות: רק המזמין או האדמין יכולים לראות/ליצור
       match /orders/{orderId} {
         allow read:  if isAdmin()
                      || (isAuth() && resource.data.userId == request.auth.uid);
@@ -49,12 +56,11 @@ service cloud.firestore {
         allow update, delete: if isAdmin();
       }
 
-      // ── Coupons: authenticated users can read, admin can write ──
+      // קופונים: רק משתמשים מחוברים רואים, רק אדמין יוצר
       match /coupons/{couponId} {
         allow read:  if isAuth();
         allow write: if isAdmin();
 
-        // Coupon per-user usage tracking
         match /userUsage/{usageId} {
           allow read:  if isAuth();
           allow create: if isAuth();
@@ -62,55 +68,39 @@ service cloud.firestore {
         }
       }
 
-      // ── Inquiries: anyone can create, only admin can read/update ──
+      // פניות שירות: כל אחד יכול ליצור פנייה, רק אדמין קורא
       match /inquiries/{inquiryId} {
         allow create: if true;
         allow read, update, delete: if isAdmin();
       }
 
-      // ── Logs: authenticated users can create, only admin can read ──
+      // לוגים: רק אדמין קורא
       match /logs/{logId} {
         allow create: if true;
         allow read:   if isAdmin();
         allow update, delete: if false;
       }
 
-      // ── Settings: only admin ──
+      // הגדרות מערכת: רק אדמין
       match /settings/{settingId} {
         allow read, write: if isAdmin();
-      }
-
-      // ── Workshop Gallery: anyone can read, only admin can write ──
-      match /workshopGallery/{imageId} {
-        allow read:  if true;
-        allow write: if isAdmin();
-      }
-
-      // ── Site Traffic: anyone can create, only admin can read ──
-      match /site_traffic/{docId} {
-        allow create: if true;
-        allow read:   if isAdmin();
-        allow update, delete: if false;
       }
     }
 
     // ══════════════════════════════════════════════════════
-    //  USER DATA — under artifacts/{appId}/users/{uid}
+    //  USER DATA — מידע אישי של לקוחות
     // ══════════════════════════════════════════════════════
     match /artifacts/{appId}/users/{uid} {
-      // User can read/write their own profile; admin can read all
       allow read:   if isOwner(uid) || isAdmin();
       allow create: if isOwner(uid);
       allow update: if isOwner(uid) || isAdmin();
       allow delete: if isAdmin();
 
-      // User's personal orders
       match /orders/{orderId} {
         allow read, create: if isOwner(uid);
         allow update, delete: if isAdmin();
       }
 
-      // User's assigned coupons
       match /assignedCoupons/{couponId} {
         allow read:  if isOwner(uid);
         allow write: if isAdmin();
@@ -118,7 +108,7 @@ service cloud.firestore {
     }
 
     // ══════════════════════════════════════════════════════
-    //  DENY ALL OTHER PATHS
+    //  DENY ALL OTHER PATHS — חסימת כל השאר
     // ══════════════════════════════════════════════════════
     match /{document=**} {
       allow read, write: if false;
