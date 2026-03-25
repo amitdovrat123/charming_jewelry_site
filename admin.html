@@ -1072,22 +1072,23 @@
 
         <!-- Section 1: Drafts -->
         <div id="ws-section-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
-          <button onclick="document.getElementById('ws-list-drafts').classList.toggle('hidden')" class="w-full px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2 cursor-pointer hover:bg-amber-100/50 transition-colors">
+          <button onclick="const l=document.getElementById('ws-list-drafts');l.style.display=l.style.display==='none'?'':'none';this.querySelector('.ws-chevron').classList.toggle('rotate-180')" class="w-full px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2 cursor-pointer hover:bg-amber-100/50 transition-colors">
             <i data-lucide="file-edit" class="w-4 h-4 text-amber-600"></i>
             <h3 class="font-bold text-sm text-amber-700">סדנאות שטרם נסגרו</h3>
             <span id="ws-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
-            <i data-lucide="chevron-down" class="w-4 h-4 text-amber-400 mr-auto"></i>
+            <i data-lucide="chevron-down" class="ws-chevron w-4 h-4 text-amber-400 mr-auto transition-transform duration-200"></i>
           </button>
           <div id="ws-list-drafts" class="divide-y divide-amber-50"></div>
         </div>
 
         <!-- Section 2: Confirmed & Upcoming -->
         <div id="ws-section-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
-          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2">
+          <button onclick="const l=document.getElementById('ws-list-confirmed');l.style.display=l.style.display==='none'?'':'none';this.querySelector('.ws-chevron').classList.toggle('rotate-180')" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5ece7] transition-colors">
             <i data-lucide="check-circle" class="w-4 h-4 inline-block text-emerald-500"></i>
             <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — קרובות</h3>
             <span id="ws-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
-          </div>
+            <i data-lucide="chevron-down" class="ws-chevron w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
+          </button>
           <div id="ws-list-confirmed" class="divide-y divide-[#fdf6ee]"></div>
         </div>
 
