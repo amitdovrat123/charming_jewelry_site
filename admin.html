@@ -5400,18 +5400,38 @@ function openWsCard(id) {
 
   // Payment section
   const pe = el('wsc-payment'); let ph='';
+  const advAmt = pay.advanceAmount || 500;
+  const balAmt = Math.max(0, (w.total||0) - advAmt);
+
   if (pay.advancePaid) {
     const ad=pay.advancePaidDate?.seconds?new Date(pay.advancePaidDate.seconds*1000).toLocaleDateString('he-IL'):'';
-    ph+=`<div class="flex justify-between"><span class="text-xs text-gray-600">מקדמה</span><span class="text-sm font-bold text-emerald-600">${(pay.advanceAmount||500).toLocaleString('he-IL')}₪ · ${mn[pay.advanceMethod]||''} · ${ad}</span></div>`;
+    ph+=`<div class="flex justify-between items-center"><span class="text-xs text-gray-600">מקדמה</span><span class="text-sm font-bold text-emerald-600">${advAmt.toLocaleString('he-IL')}₪ · ${mn[pay.advanceMethod]||''} · ${ad}</span></div>`;
   }
   if (pay.balancePaid) {
     const bd=pay.balancePaidDate?.seconds?new Date(pay.balancePaidDate.seconds*1000).toLocaleDateString('he-IL'):'';
-    ph+=`<div class="flex justify-between"><span class="text-xs text-gray-600">יתרה</span><span class="text-sm font-bold text-emerald-600">${(pay.balanceAmount||0).toLocaleString('he-IL')}₪ · ${mn[pay.balanceMethod]||''} · ${bd}</span></div>`;
+    ph+=`<div class="flex justify-between items-center"><span class="text-xs text-gray-600">יתרה</span><span class="text-sm font-bold text-emerald-600">${(pay.balanceAmount||0).toLocaleString('he-IL')}₪ · ${mn[pay.balanceMethod]||''} · ${bd}</span></div>`;
   } else if (pay.advancePaid) {
-    ph+=`<div class="flex justify-between"><span class="text-xs text-gray-600">יתרה לתשלום</span><span class="text-sm font-bold text-red-500">${Math.max(0,(w.total||0)-(pay.advanceAmount||500)).toLocaleString('he-IL')}₪</span></div>`;
+    ph+=`<div class="flex justify-between items-center"><span class="text-xs text-gray-600">יתרה לתשלום</span><span class="text-sm font-bold text-red-500">${balAmt.toLocaleString('he-IL')}₪</span></div>`;
   }
-  if (ph) { pe.innerHTML=ph; pe.className='p-4 rounded-xl border space-y-2 '+(pay.advancePaid&&pay.balancePaid?'border-emerald-200 bg-emerald-50':'border-amber-200 bg-amber-50'); }
-  else { pe.innerHTML='<p class="text-sm text-red-500 font-semibold text-center">ממתין לתשלום מקדמה</p>'; pe.className='p-4 rounded-xl border border-red-200 bg-red-50 space-y-2'; }
+
+  // Payment action button
+  if (!pay.advancePaid) {
+    ph+=`<button id="wsc-pay-action" onclick="toggleWscPayPanel('advance','${id}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-[#d4a373] border border-[#f0dfc0] hover:bg-[#fdf6ee] transition-colors flex items-center justify-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4"></i> אשר תשלום מקדמה</button>`;
+  } else if (!pay.balancePaid) {
+    ph+=`<button id="wsc-pay-action" onclick="toggleWscPayPanel('balance','${id}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-blue-500 border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4"></i> אשר תשלום יתרה</button>`;
+  }
+  // Expandable payment panel (hidden by default)
+  ph+=`<div id="wsc-pay-panel" style="display:none" class="mt-2 p-3 rounded-xl border border-[#f0dfc0] bg-[#fdf8f5] space-y-3 fadein"></div>`;
+
+  if (pay.advancePaid && pay.balancePaid) {
+    pe.className='p-4 rounded-xl border space-y-2 border-emerald-200 bg-emerald-50';
+  } else if (pay.advancePaid) {
+    pe.className='p-4 rounded-xl border space-y-2 border-amber-200 bg-amber-50';
+  } else {
+    pe.className='p-4 rounded-xl border space-y-2 border-red-200 bg-red-50';
+  }
+  pe.innerHTML=ph;
+  if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 
   if (w.notes){el('wsc-notes-section').style.display='';el('wsc-notes').textContent=w.notes;}else{el('wsc-notes-section').style.display='none';}
 
@@ -5427,6 +5447,89 @@ window.openWsCard = openWsCard;
 
 function closeWsCard(){document.getElementById('ws-card-modal')?.setAttribute('data-v','');wsCardCurrentId=null;}
 window.closeWsCard = closeWsCard;
+
+function toggleWscPayPanel(type, wsId) {
+  const panel = document.getElementById('wsc-pay-panel');
+  if (!panel) return;
+  if (panel.style.display !== 'none') { panel.style.display='none'; return; }
+  panel.style.display='';
+
+  const w = allWorkshops.find(x=>x.id===wsId);
+  const pay = w?.payment || {};
+  const advAmt = pay.advanceAmount || 500;
+  const balAmt = Math.max(0, (w?.total||0) - advAmt);
+
+  if (type === 'advance') {
+    panel.innerHTML = `
+      <p class="text-xs font-bold text-gray-700 mb-2">אישור תשלום מקדמה</p>
+      <div class="flex gap-3">
+        <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label><input id="wsc-adv-amount" type="number" value="${advAmt}" class="inp text-sm mt-0.5" /></div>
+        <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
+          <select id="wsc-adv-method" class="inp text-sm mt-0.5"><option value="paybox" selected>PayBox</option><option value="bit">Bit</option></select>
+        </div>
+      </div>
+      <button onclick="executeWscPay('advance','${wsId}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#d4a373] hover:bg-[#b8893e] transition-colors flex items-center justify-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i> אשר מקדמה ${advAmt.toLocaleString('he-IL')}₪</button>`;
+  } else {
+    panel.innerHTML = `
+      <p class="text-xs font-bold text-gray-700 mb-2">אישור תשלום יתרה</p>
+      <div class="flex gap-3">
+        <div class="flex-1"><label class="text-[9px] text-gray-400">סכום יתרה</label><p class="text-sm font-bold text-gray-700 mt-1">${balAmt.toLocaleString('he-IL')} ₪</p></div>
+        <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
+          <select id="wsc-bal-method" class="inp text-sm mt-0.5"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option></select>
+        </div>
+      </div>
+      <button onclick="executeWscPay('balance','${wsId}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i> אשר יתרה ${balAmt.toLocaleString('he-IL')}₪</button>`;
+  }
+  if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
+}
+window.toggleWscPayPanel = toggleWscPayPanel;
+
+async function executeWscPay(type, wsId) {
+  if (type === 'advance') {
+    const amount = parseFloat(document.getElementById('wsc-adv-amount')?.value) || 500;
+    const method = document.getElementById('wsc-adv-method')?.value || 'paybox';
+    // Update workshop + create expense via existing function logic
+    const w = allWorkshops.find(x=>x.id===wsId);
+    if (!w) return;
+    try {
+      await updateDoc(doc(db, WORKSHOPS_COL, wsId), {
+        'payment.advancePaid': true, 'payment.advanceAmount': amount,
+        'payment.advanceMethod': method, 'payment.advancePaidDate': Timestamp.now(),
+        bookingStatus: 'confirmed',
+      });
+      logAction(`מקדמה אושרה + סדנא נסגרה — "${w.celebrant||w.customerName}" · ${amount}₪`);
+      await addDoc(collection(db, EXPENSES_COL), {
+        date: new Date().toISOString().split('T')[0], category:'materials', amount:400, method:'cash',
+        workshopId:wsId, workshopName:w.celebrant||w.customerName, notes:'סחורה לסדנא — אוטומטי', createdAt:serverTimestamp(),
+      });
+    } catch(e) { console.error(e); }
+  } else {
+    const method = document.getElementById('wsc-bal-method')?.value || 'cash';
+    const w = allWorkshops.find(x=>x.id===wsId);
+    if (!w) return;
+    const balAmt = Math.max(0, (w.total||0) - (w.payment?.advanceAmount||500));
+    try {
+      await updateDoc(doc(db, WORKSHOPS_COL, wsId), {
+        'payment.balancePaid': true, 'payment.balanceAmount': balAmt,
+        'payment.balanceMethod': method, 'payment.balancePaidDate': Timestamp.now(),
+      });
+      const methodNames = {cash:'מזומן',bit:'Bit',paybox:'PayBox',transfer:'העברה'};
+      logAction(`יתרה אושרה — "${w.celebrant||w.customerName}" · ${balAmt}₪ · ${methodNames[method]}`);
+      const dist = getCityDistance(w.city);
+      if (dist && dist > 0) {
+        await addDoc(collection(db, EXPENSES_COL), {
+          date: new Date().toISOString().split('T')[0], category:'fuel', amount:calcFuelCost(dist), method:'cash',
+          workshopId:wsId, workshopName:w.celebrant||w.customerName,
+          notes:`דלק ${dist} ק"מ × ${FUEL_RATE}₪ — ${w.city} — אוטומטי`, createdAt:serverTimestamp(),
+        });
+      }
+    } catch(e) { console.error(e); }
+  }
+  // Refresh card after payment
+  closeWsCard();
+  setTimeout(()=>openWsCard(wsId), 500);
+}
+window.executeWscPay = executeWscPay;
 
 // ── CRM Kanban View ─────────────────────────────────────────────
 let wsCurrentView = 'list';
@@ -8400,7 +8503,6 @@ window.renderAnalytics = renderAnalytics;
       <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
         <i data-lucide="user" class="w-5 h-5 text-[#d4a373]"></i>
         <div class="flex-1"><p id="wsc-contact" class="text-sm font-semibold text-gray-700"></p><p id="wsc-phone" class="text-xs text-gray-400"></p></div>
-        <a id="wsc-wa-link" href="#" target="_blank" class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors text-sm"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
       </div>
       <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
         <i data-lucide="map-pin" class="w-5 h-5 text-[#d4a373]"></i>
