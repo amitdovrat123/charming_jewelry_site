@@ -367,6 +367,146 @@
       <!-- ─── TAB: DASHBOARD ─── -->
       <section id="tab-dashboard" data-erp-tab class="p-6 space-y-8">
 
+        <!-- ══ Dashboard view switcher ══ -->
+        <div class="flex items-center gap-2 bg-white border border-[#f0dfc0] rounded-full p-1 w-fit shadow-sm">
+          <button id="dash-view-shop" onclick="switchDashView('shop')"
+            class="dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all bg-[#d4a373] text-white">
+            💎 חנות
+          </button>
+          <button id="dash-view-workshops" onclick="switchDashView('workshops')"
+            class="dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all text-gray-400 hover:text-[#d4a373]">
+            🎨 סדנאות
+          </button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- ══ WORKSHOP DASHBOARD ══ -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div id="dash-workshops" style="display:none;" class="space-y-8">
+
+          <!-- KPI Cards Row 1 -->
+          <div>
+            <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
+              <span class="w-1.5 h-5 bg-[#d4a373] rounded-full inline-block"></span>
+              סיכום חודשי — סדנאות
+            </h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-[#d4a373]">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">סדנאות סגורות החודש</p>
+                <p id="wsd-confirmed-month" class="text-2xl font-black text-[#d4a373]">—</p>
+              </div>
+              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-amber-400">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">לידים בטיוטה</p>
+                <p id="wsd-drafts" class="text-2xl font-black text-amber-500">—</p>
+              </div>
+              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-emerald-400">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">הכנסות חודשיות</p>
+                <p id="wsd-revenue-month" class="text-2xl font-black text-emerald-500">—</p>
+              </div>
+              <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow border-r-4 border-r-blue-400">
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">ממוצע הכנסה לסדנא</p>
+                <p id="wsd-avg-revenue" class="text-2xl font-black text-blue-500">—</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly Goal + Payment Status -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Weekly Goal -->
+            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-sm text-gray-800">🎯 יעד שבועי</h3>
+                <div class="flex items-center gap-2">
+                  <label class="text-[10px] text-gray-400">יעד:</label>
+                  <input id="wsd-weekly-goal" type="number" min="1" max="20" value="3" class="w-14 text-center text-sm border border-gray-200 rounded-lg px-2 py-1 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <div id="wsd-goal-ring" class="relative w-24 h-24 flex-shrink-0">
+                  <svg viewBox="0 0 36 36" class="w-full h-full">
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f0dfc0" stroke-width="3"/>
+                    <path id="wsd-goal-arc" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#d4a373" stroke-width="3" stroke-dasharray="0, 100" stroke-linecap="round"/>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span id="wsd-goal-text" class="text-lg font-black text-[#d4a373]">0/3</span>
+                  </div>
+                </div>
+                <div>
+                  <p id="wsd-goal-status" class="text-sm font-semibold text-gray-600"></p>
+                  <p class="text-[10px] text-gray-400 mt-1">סגירות השבוע הנוכחי</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Status Overview -->
+            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+              <h3 class="font-bold text-sm text-gray-800 mb-3">💳 סטטוס תשלומים — קרובות</h3>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+                  <span class="text-xs font-semibold text-emerald-700">שולם במלואו</span>
+                  <span id="wsd-pay-full" class="text-sm font-black text-emerald-600">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-lg bg-amber-50 border border-amber-100">
+                  <span class="text-xs font-semibold text-amber-700">מקדמה בלבד</span>
+                  <span id="wsd-pay-advance" class="text-sm font-black text-amber-600">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-lg bg-red-50 border border-red-100">
+                  <span class="text-xs font-semibold text-red-600">ממתין לתשלום</span>
+                  <span id="wsd-pay-none" class="text-sm font-black text-red-500">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-lg bg-gray-50 border border-gray-200 mt-1">
+                  <span class="text-xs font-bold text-gray-600">סה"כ חוב פתוח</span>
+                  <span id="wsd-open-debt" class="text-sm font-black text-red-500">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next Workshop Quick View -->
+          <div id="wsd-next-workshop" class="bg-gradient-to-l from-[#fdf6ee] to-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-sm text-gray-800">⚡ הסדנא הקרובה ביותר</h3>
+              <button id="wsd-next-goto" onclick="" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">פתח לעריכה →</button>
+            </div>
+            <div id="wsd-next-content" class="text-sm text-gray-600">אין סדנאות קרובות</div>
+          </div>
+
+          <!-- 7-Day Calendar -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+            <h3 class="font-bold text-sm text-gray-800 mb-4">📅 שבוע קדימה</h3>
+            <div id="wsd-week-calendar" class="grid grid-cols-7 gap-2"></div>
+          </div>
+
+          <!-- Monthly Revenue Trend -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+            <h3 class="font-bold text-sm text-gray-800 mb-4">📈 מגמת הכנסות — 6 חודשים</h3>
+            <div id="wsd-revenue-chart" class="flex items-end gap-2 h-[120px]"></div>
+          </div>
+
+          <!-- Popular Routes + Cities -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+              <h3 class="font-bold text-sm text-gray-800 mb-3">🏆 מסלולים פופולריים</h3>
+              <div id="wsd-popular-routes" class="space-y-2"></div>
+            </div>
+            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+              <h3 class="font-bold text-sm text-gray-800 mb-3">📍 ערים מובילות</h3>
+              <div id="wsd-popular-cities" class="space-y-2"></div>
+            </div>
+          </div>
+
+          <!-- Conversion Funnel -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+            <h3 class="font-bold text-sm text-gray-800 mb-3">🔄 משפך המרה</h3>
+            <div id="wsd-funnel" class="space-y-2"></div>
+          </div>
+
+        </div>
+        <!-- ═══ END WORKSHOP DASHBOARD ═══ -->
+
+        <!-- ══ SHOP DASHBOARD (original) ══ -->
+        <div id="dash-shop">
+
         <!-- ══ סיכום חודשי ══ -->
         <div>
           <h2 class="text-sm font-black text-gray-700 mb-3 flex items-center gap-2">
@@ -489,6 +629,8 @@
             </div>
           </div>
         </div>
+
+        </div><!-- END dash-shop -->
 
       </section>
 
@@ -776,6 +918,73 @@
               <div class="text-center">
                 <p class="text-xs text-gray-400 mb-0.5">סה"כ לתשלום</p>
                 <p id="ws-total-display" class="text-2xl font-black text-[#d4a373]">0 ₪</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── CRM: Payment Tracking ── -->
+          <div id="ws-payment-section" class="mt-4 border border-[#f0dfc0] rounded-xl overflow-hidden">
+            <div class="px-4 py-3 bg-[#fdf6ee] border-b border-[#f0dfc0] flex items-center gap-2">
+              <span class="text-base">💳</span>
+              <h4 class="font-bold text-sm text-gray-800">מעקב תשלומים</h4>
+              <span id="ws-payment-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full"></span>
+            </div>
+            <div class="p-4 space-y-4">
+              <!-- Advance payment -->
+              <div class="flex flex-wrap items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+                <div class="flex items-center gap-2 min-w-[140px]">
+                  <label class="tog flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="ws-advance-paid" onchange="updatePaymentBadge()">
+                    <span class="tog-track"></span>
+                  </label>
+                  <span class="text-sm font-semibold text-gray-700">מקדמה שולמה</span>
+                </div>
+                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                  <div>
+                    <label class="text-[10px] text-gray-400">סכום</label>
+                    <input id="ws-advance-amount" type="number" min="0" value="500" class="inp text-sm w-24" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400">אמצעי</label>
+                    <select id="ws-advance-method" class="inp text-sm w-28">
+                      <option value="paybox">PayBox</option>
+                      <option value="bit">Bit</option>
+                    </select>
+                  </div>
+                  <div id="ws-advance-date-wrap" class="hidden">
+                    <label class="text-[10px] text-gray-400">תאריך</label>
+                    <p id="ws-advance-date-display" class="text-xs text-gray-500 mt-1">—</p>
+                  </div>
+                </div>
+              </div>
+              <!-- Balance payment -->
+              <div class="flex flex-wrap items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+                <div class="flex items-center gap-2 min-w-[140px]">
+                  <label class="tog flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="ws-balance-paid" onchange="updatePaymentBadge()">
+                    <span class="tog-track"></span>
+                  </label>
+                  <span class="text-sm font-semibold text-gray-700">יתרה שולמה</span>
+                </div>
+                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                  <div>
+                    <label class="text-[10px] text-gray-400">סכום יתרה</label>
+                    <p id="ws-balance-amount" class="text-sm font-bold text-gray-600 mt-1">— ₪</p>
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400">אמצעי</label>
+                    <select id="ws-balance-method" class="inp text-sm w-28">
+                      <option value="cash">מזומן</option>
+                      <option value="bit">Bit</option>
+                      <option value="paybox">PayBox</option>
+                      <option value="transfer">העברה בנקאית</option>
+                    </select>
+                  </div>
+                  <div id="ws-balance-date-wrap" class="hidden">
+                    <label class="text-[10px] text-gray-400">תאריך</label>
+                    <p id="ws-balance-date-display" class="text-xs text-gray-500 mt-1">—</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2182,6 +2391,223 @@ function initDashboardTab() {
   }
 }
 
+// ── Workshop Dashboard ──────────────────────────────────────────
+let currentDashView = 'shop';
+function switchDashView(view) {
+  currentDashView = view;
+  document.getElementById('dash-shop').style.display = view === 'shop' ? '' : 'none';
+  document.getElementById('dash-workshops').style.display = view === 'workshops' ? '' : 'none';
+  // Toggle button styles
+  document.getElementById('dash-view-shop').className = 'dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all ' +
+    (view === 'shop' ? 'bg-[#d4a373] text-white' : 'text-gray-400 hover:text-[#d4a373]');
+  document.getElementById('dash-view-workshops').className = 'dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all ' +
+    (view === 'workshops' ? 'bg-[#d4a373] text-white' : 'text-gray-400 hover:text-[#d4a373]');
+  if (view === 'workshops') {
+    // Ensure workshops data is loaded
+    if (!tabsInited.workshops) { tabsInited.workshops = true; initWorkshopsTab(); }
+    renderWsDashboard();
+  }
+}
+window.switchDashView = switchDashView;
+
+function renderWsDashboard() {
+  const now = new Date();
+  const curY = now.getFullYear(), curM = now.getMonth();
+  const el = id => document.getElementById(id);
+
+  // Helper
+  function wsDate(w) {
+    return w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate ? new Date(w.eventDate) : null);
+  }
+
+  // Filter by status
+  const confirmed = allWorkshops.filter(w => (w.bookingStatus || 'confirmed') === 'confirmed');
+  const drafts = allWorkshops.filter(w => (w.bookingStatus || 'confirmed') === 'draft');
+
+  // Monthly confirmed
+  const monthConfirmed = confirmed.filter(w => {
+    const d = wsDate(w);
+    return d && d.getFullYear() === curY && d.getMonth() === curM;
+  });
+
+  // ── KPI Cards ──
+  if (el('wsd-confirmed-month')) el('wsd-confirmed-month').textContent = monthConfirmed.length;
+  if (el('wsd-drafts')) el('wsd-drafts').textContent = drafts.length;
+
+  const monthRevenue = monthConfirmed.reduce((s, w) => s + (w.total || 0), 0);
+  if (el('wsd-revenue-month')) el('wsd-revenue-month').textContent = monthRevenue.toLocaleString('he-IL') + ' ₪';
+  const avgRev = monthConfirmed.length ? Math.round(monthRevenue / monthConfirmed.length) : 0;
+  if (el('wsd-avg-revenue')) el('wsd-avg-revenue').textContent = avgRev ? avgRev.toLocaleString('he-IL') + ' ��' : '—';
+
+  // ── Weekly Goal ──
+  const goal = parseInt(el('wsd-weekly-goal')?.value) || 3;
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay()); // Sunday
+  weekStart.setHours(0, 0, 0, 0);
+  const weekConfirmed = confirmed.filter(w => {
+    const created = w.createdAt?.seconds ? new Date(w.createdAt.seconds * 1000) : null;
+    return created && created >= weekStart;
+  }).length;
+  const pct = Math.min(100, Math.round((weekConfirmed / goal) * 100));
+  if (el('wsd-goal-arc')) el('wsd-goal-arc').setAttribute('stroke-dasharray', pct + ', 100');
+  if (el('wsd-goal-text')) el('wsd-goal-text').textContent = weekConfirmed + '/' + goal;
+  if (el('wsd-goal-status')) {
+    if (weekConfirmed >= goal) el('wsd-goal-status').textContent = '🎉 עמדת ביעד השבועי!';
+    else el('wsd-goal-status').textContent = 'עוד ' + (goal - weekConfirmed) + ' סגירות ליעד';
+  }
+
+  // ── Payment Status ──
+  const upcoming = confirmed.filter(w => { const d = wsDate(w); return d && d >= now; });
+  let payFull = 0, payAdvance = 0, payNone = 0, openDebt = 0;
+  upcoming.forEach(w => {
+    const pay = w.payment || {};
+    if (pay.advancePaid && pay.balancePaid) payFull++;
+    else if (pay.advancePaid) { payAdvance++; openDebt += (w.total || 0) - (pay.advanceAmount || 500); }
+    else { payNone++; openDebt += (w.total || 0); }
+  });
+  if (el('wsd-pay-full')) el('wsd-pay-full').textContent = payFull;
+  if (el('wsd-pay-advance')) el('wsd-pay-advance').textContent = payAdvance;
+  if (el('wsd-pay-none')) el('wsd-pay-none').textContent = payNone;
+  if (el('wsd-open-debt')) el('wsd-open-debt').textContent = openDebt > 0 ? openDebt.toLocaleString('he-IL') + ' ₪' : '0 ₪';
+
+  // ── Next Workshop ──
+  const futureConfirmed = confirmed
+    .filter(w => { const d = wsDate(w); return d && d >= now; })
+    .sort((a, b) => (wsDate(a)?.getTime() || 0) - (wsDate(b)?.getTime() || 0));
+  const next = futureConfirmed[0];
+  if (next) {
+    const nd = wsDate(next);
+    const pay = next.payment || {};
+    const payStatus = (pay.advancePaid && pay.balancePaid) ? '💚 שולם' : pay.advancePaid ? '🟡 מקדמה' : '🔴 לא שולם';
+    const daysUntil = Math.ceil((nd - now) / 86400000);
+    const daysText = daysUntil === 0 ? 'היום!' : daysUntil === 1 ? 'מחר' : 'בעוד ' + daysUntil + ' ימים';
+    el('wsd-next-content').innerHTML = `
+      <div class="flex flex-wrap gap-4 items-center">
+        <div class="flex-1 min-w-[200px]">
+          <p class="font-bold text-gray-800">${esc(next.celebrant || next.customerName)} <span class="text-xs text-gray-400">(${esc(next.customerName)})</span></p>
+          <p class="text-xs text-gray-500 mt-1">📅 ${nd.toLocaleDateString('he-IL')} · ${next.time || ''} · 📍 ${esc(next.city || '')}</p>
+          <p class="text-xs text-gray-500 mt-0.5">🎨 ${esc(next.route)} · 👥 עד ${next.participantCount} משתתפות</p>
+          ${next.occasion ? `<p class="text-xs text-gray-400 mt-0.5">🎉 ${esc(next.occasion)}</p>` : ''}
+        </div>
+        <div class="text-left">
+          <p class="text-2xl font-black text-[#d4a373]">${(next.total || 0).toLocaleString('he-IL')} ₪</p>
+          <p class="text-xs mt-1">${payStatus}</p>
+          <p class="text-xs text-blue-500 font-bold mt-1">${daysText}</p>
+        </div>
+      </div>`;
+    el('wsd-next-goto').onclick = () => { showTab('workshops'); setTimeout(() => openWorkshopModal(next.id), 300); };
+  } else {
+    el('wsd-next-content').innerHTML = '<p class="text-gray-300 text-sm">אין סדנאות קרובות</p>';
+  }
+
+  // ── 7-Day Calendar ──
+  const weekEl = el('wsd-week-calendar');
+  if (weekEl) {
+    const days = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(now);
+      day.setDate(now.getDate() + i);
+      const dayStr = day.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
+      const dayName = days[day.getDay()];
+      const isToday = i === 0;
+      const dayWs = confirmed.filter(w => {
+        const d = wsDate(w);
+        return d && d.toDateString() === day.toDateString();
+      });
+      html += `<div class="text-center p-2 rounded-xl ${isToday ? 'bg-[#fdf6ee] border border-[#f0dfc0]' : 'bg-gray-50 border border-gray-100'} transition-all">
+        <p class="text-[10px] font-bold ${isToday ? 'text-[#d4a373]' : 'text-gray-400'}">${dayName}</p>
+        <p class="text-xs font-semibold ${isToday ? 'text-[#d4a373]' : 'text-gray-600'} mt-1">${dayStr}</p>
+        ${dayWs.length ? `<div class="mt-2 space-y-1">${dayWs.map(w => `<div class="text-[9px] bg-white rounded-lg px-1.5 py-1 border border-[#f0dfc0] truncate font-semibold text-gray-700 cursor-pointer hover:border-[#d4a373]" onclick="showTab('workshops');setTimeout(()=>openWorkshopModal('${w.id}'),300)" title="${esc(w.celebrant||w.customerName)}">${esc(w.celebrant||w.customerName)}</div>`).join('')}</div>` : '<p class="text-[9px] text-gray-300 mt-2">—</p>'}
+      </div>`;
+    }
+    weekEl.innerHTML = html;
+  }
+
+  // ── 6-Month Revenue Chart ──
+  const chartEl = el('wsd-revenue-chart');
+  if (chartEl) {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      let m = curM - i, y = curY;
+      if (m < 0) { m += 12; y--; }
+      const mws = confirmed.filter(w => { const d = wsDate(w); return d && d.getFullYear() === y && d.getMonth() === m; });
+      const rev = mws.reduce((s, w) => s + (w.total || 0), 0);
+      const label = new Date(y, m).toLocaleDateString('he-IL', { month: 'short' });
+      months.push({ label, rev, count: mws.length });
+    }
+    const maxRev = Math.max(...months.map(m => m.rev), 1);
+    chartEl.innerHTML = months.map(m => {
+      const h = Math.max(4, Math.round((m.rev / maxRev) * 100));
+      return `<div class="flex-1 flex flex-col items-center gap-1">
+        <span class="text-[9px] font-bold text-gray-500">${m.rev > 0 ? (m.rev/1000).toFixed(1)+'K' : '0'}</span>
+        <div class="w-full bg-[#d4a373] rounded-t-lg transition-all" style="height:${h}px;" title="${m.count} סדנאות · ${m.rev.toLocaleString('he-IL')} ₪"></div>
+        <span class="text-[10px] text-gray-400">${m.label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Popular Routes ──
+  const routesEl = el('wsd-popular-routes');
+  if (routesEl) {
+    const routeMap = {};
+    confirmed.forEach(w => { routeMap[w.route] = (routeMap[w.route] || 0) + 1; });
+    const sorted = Object.entries(routeMap).sort((a, b) => b[1] - a[1]);
+    const maxR = sorted[0]?.[1] || 1;
+    routesEl.innerHTML = sorted.length ? sorted.map(([route, count]) => `
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-semibold text-gray-700 w-48 truncate">${esc(route)}</span>
+        <div class="flex-1 h-2 bg-[#f0dfc0] rounded-full overflow-hidden"><div class="h-full bg-[#d4a373] rounded-full" style="width:${Math.round((count/maxR)*100)}%"></div></div>
+        <span class="text-xs font-bold text-[#d4a373] w-8 text-left">${count}</span>
+      </div>`).join('') : '<p class="text-gray-300 text-sm">אין נתונים</p>';
+  }
+
+  // ── Popular Cities ──
+  const citiesEl = el('wsd-popular-cities');
+  if (citiesEl) {
+    const cityMap = {};
+    confirmed.forEach(w => { if (w.city) cityMap[w.city] = (cityMap[w.city] || 0) + 1; });
+    const sorted = Object.entries(cityMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const maxC = sorted[0]?.[1] || 1;
+    citiesEl.innerHTML = sorted.length ? sorted.map(([city, count]) => `
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-semibold text-gray-700 w-28 truncate">${esc(city)}</span>
+        <div class="flex-1 h-2 bg-[#f0dfc0] rounded-full overflow-hidden"><div class="h-full bg-blue-400 rounded-full" style="width:${Math.round((count/maxC)*100)}%"></div></div>
+        <span class="text-xs font-bold text-blue-500 w-8 text-left">${count}</span>
+      </div>`).join('') : '<p class="text-gray-300 text-sm">אין נתונים</p>';
+  }
+
+  // ── Conversion Funnel ──
+  const funnelEl = el('wsd-funnel');
+  if (funnelEl) {
+    const total = allWorkshops.length;
+    const confirmedCount = confirmed.length;
+    const paidAdvance = confirmed.filter(w => w.payment?.advancePaid).length;
+    const paidFull = confirmed.filter(w => w.payment?.advancePaid && w.payment?.balancePaid).length;
+    const steps = [
+      { label: 'סה"כ לידים', count: total, color: 'bg-gray-400' },
+      { label: 'סדנאות סגורות', count: confirmedCount, color: 'bg-[#d4a373]' },
+      { label: 'שולמה מקדמה', count: paidAdvance, color: 'bg-amber-400' },
+      { label: 'שולם במלואו', count: paidFull, color: 'bg-emerald-400' },
+    ];
+    const maxF = Math.max(total, 1);
+    funnelEl.innerHTML = steps.map(s => {
+      const w = Math.max(15, Math.round((s.count / maxF) * 100));
+      const rate = total > 0 ? Math.round((s.count / total) * 100) : 0;
+      return `<div class="flex items-center gap-3">
+        <span class="text-xs font-semibold text-gray-600 w-32">${s.label}</span>
+        <div class="flex-1 h-7 bg-gray-100 rounded-lg overflow-hidden relative">
+          <div class="${s.color} h-full rounded-lg transition-all flex items-center justify-end px-2" style="width:${w}%">
+            <span class="text-[10px] font-bold text-white">${s.count}</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold text-gray-400 w-10 text-left">${rate}%</span>
+      </div>`;
+    }).join('');
+  }
+}
+window.renderWsDashboard = renderWsDashboard;
+
 function updateInventoryStats() {
   const el = id => document.getElementById(id);
   if (el('s-total')) el('s-total').textContent = allProducts.length;
@@ -3304,6 +3730,7 @@ function initWorkshopsTab() {
     allWorkshops = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderCalendar();
     renderWorkshopsList();
+    if (currentDashView === 'workshops') renderWsDashboard();
   }, err=>console.error('workshops:', err));
 
   // Live price calculation on any relevant field change
@@ -3311,7 +3738,10 @@ function initWorkshopsTab() {
     document.getElementById(id)?.addEventListener('change', updateWsTotal);
     document.getElementById(id)?.addEventListener('input', updateWsTotal);
   });
+  // Advance amount changes → recalculate balance
+  document.getElementById('ws-advance-amount')?.addEventListener('input', updateWsTotal);
   updateWsTotal();
+  updatePaymentBadge();
 }
 
 function updateWsTotal() {
@@ -3324,8 +3754,35 @@ function updateWsTotal() {
   const totalEl = document.getElementById('ws-total-display');
   if (baseEl) baseEl.textContent = base ? base.toLocaleString('he-IL') + ' ₪' : '— ₪';
   if (totalEl) totalEl.textContent = (base ? total.toLocaleString('he-IL') : '0') + ' ₪';
+  // Update balance amount display
+  const advanceAmt = parseFloat(document.getElementById('ws-advance-amount')?.value) || 500;
+  const balanceAmt = Math.max(0, total - advanceAmt);
+  const balEl = document.getElementById('ws-balance-amount');
+  if (balEl) balEl.textContent = (base ? balanceAmt.toLocaleString('he-IL') : '—') + ' ₪';
 }
 window.updateWsTotal = updateWsTotal;
+
+// ── CRM: Payment badge & helpers ──
+function updatePaymentBadge() {
+  const adv = document.getElementById('ws-advance-paid')?.checked;
+  const bal = document.getElementById('ws-balance-paid')?.checked;
+  const badge = document.getElementById('ws-payment-badge');
+  if (!badge) return;
+  if (adv && bal) {
+    badge.textContent = 'שולם במלואו';
+    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200';
+  } else if (adv) {
+    badge.textContent = 'מקדמה בלבד';
+    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200';
+  } else {
+    badge.textContent = 'לא שולם';
+    badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-500 border border-red-200';
+  }
+  // Show/hide date wrappers
+  document.getElementById('ws-advance-date-wrap')?.classList.toggle('hidden', !adv);
+  document.getElementById('ws-balance-date-wrap')?.classList.toggle('hidden', !bal);
+}
+window.updatePaymentBadge = updatePaymentBadge;
 
 function changeCalMonth(dir) {
   calMonth += dir;
@@ -3475,12 +3932,38 @@ async function saveWorkshop() {
 
   const bookingStatus = document.getElementById('ws-status').value || 'confirmed';
 
+  // Payment tracking
+  const advancePaid   = document.getElementById('ws-advance-paid').checked;
+  const advanceAmount = parseFloat(document.getElementById('ws-advance-amount').value) || 500;
+  const advanceMethod = document.getElementById('ws-advance-method').value || 'paybox';
+  const balancePaid   = document.getElementById('ws-balance-paid').checked;
+  const balanceMethod = document.getElementById('ws-balance-method').value || 'cash';
+  const balanceAmount = total - advanceAmount;
+
+  // Build payment object — preserve existing dates if already set
+  const existingWs = editWorkshopId ? allWorkshops.find(x => x.id === editWorkshopId) : null;
+  const payment = {
+    advancePaid,
+    advanceAmount,
+    advanceMethod,
+    advancePaidDate: advancePaid
+      ? (existingWs?.payment?.advancePaidDate || Timestamp.now())
+      : null,
+    balancePaid,
+    balanceAmount: Math.max(0, balanceAmount),
+    balanceMethod,
+    balancePaidDate: balancePaid
+      ? (existingWs?.payment?.balancePaidDate || Timestamp.now())
+      : null,
+  };
+
   const data = {
     customerName: name, phone, celebrant, occasion, city,
     eventDate: Timestamp.fromDate(new Date(date+'T'+time)),
     time, participantCount: count, route, basePrice: base,
     discount: disc, arrivalFee: arrival, total, notes: notes||null,
     bookingStatus,
+    payment,
     createdAt: serverTimestamp(),
   };
 
@@ -3507,8 +3990,20 @@ function clearWorkshopForm() {
   document.getElementById('ws-arrival').value='0';
   document.getElementById('ws-status').value='confirmed';
   document.getElementById('ws-err').textContent='';
+  // Reset payment fields
+  document.getElementById('ws-advance-paid').checked = false;
+  document.getElementById('ws-advance-amount').value = '500';
+  document.getElementById('ws-advance-method').value = 'paybox';
+  document.getElementById('ws-balance-paid').checked = false;
+  document.getElementById('ws-balance-method').value = 'cash';
+  document.getElementById('ws-balance-amount').textContent = '— ₪';
+  document.getElementById('ws-advance-date-wrap').classList.add('hidden');
+  document.getElementById('ws-balance-date-wrap').classList.add('hidden');
+  document.getElementById('ws-advance-date-display').textContent = '—';
+  document.getElementById('ws-balance-date-display').textContent = '—';
   editWorkshopId=null;
   updateWsTotal();
+  updatePaymentBadge();
 }
 
 function openWorkshopModal(id) {
@@ -3530,7 +4025,26 @@ function openWorkshopModal(id) {
     document.getElementById('ws-arrival').value = w.arrivalFee||0;
     document.getElementById('ws-notes').value = w.notes||'';
     document.getElementById('ws-status').value = w.bookingStatus || 'confirmed';
+    // Payment fields
+    const pay = w.payment || {};
+    document.getElementById('ws-advance-paid').checked = !!pay.advancePaid;
+    document.getElementById('ws-advance-amount').value = pay.advanceAmount ?? 500;
+    document.getElementById('ws-advance-method').value = pay.advanceMethod || 'paybox';
+    document.getElementById('ws-balance-paid').checked = !!pay.balancePaid;
+    document.getElementById('ws-balance-method').value = pay.balanceMethod || 'cash';
+    // Show date displays if paid
+    if (pay.advancePaid && pay.advancePaidDate) {
+      document.getElementById('ws-advance-date-wrap').classList.remove('hidden');
+      const ad = pay.advancePaidDate?.seconds ? new Date(pay.advancePaidDate.seconds*1000) : new Date(pay.advancePaidDate);
+      document.getElementById('ws-advance-date-display').textContent = ad.toLocaleDateString('he-IL');
+    }
+    if (pay.balancePaid && pay.balancePaidDate) {
+      document.getElementById('ws-balance-date-wrap').classList.remove('hidden');
+      const bd = pay.balancePaidDate?.seconds ? new Date(pay.balancePaidDate.seconds*1000) : new Date(pay.balancePaidDate);
+      document.getElementById('ws-balance-date-display').textContent = bd.toLocaleDateString('he-IL');
+    }
     updateWsTotal();
+    updatePaymentBadge();
   } else {
     clearWorkshopForm();
   }
@@ -3690,19 +4204,56 @@ function renderWorkshopCard(w, opts = {}) {
     ? `<button onclick="confirmWorkshop('${w.id}')" class="text-xs border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-full font-bold transition-colors">סגור הזמנה ✅</button>`
     : '';
 
+  // Payment status badge
+  const pay = w.payment || {};
+  let payBadge = '';
+  if (status === 'confirmed') {
+    if (pay.advancePaid && pay.balancePaid) {
+      payBadge = '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">שולם ✓</span>';
+    } else if (pay.advancePaid) {
+      payBadge = '<span class="text-[10px] font-bold bg-amber-100 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-full">מקדמה ✓</span>';
+    } else {
+      payBadge = '<span class="text-[10px] font-bold bg-red-100 text-red-500 border border-red-200 px-2 py-0.5 rounded-full">ממתין לתשלום</span>';
+    }
+  }
+
+  // Quick payment buttons for confirmed workshops
+  let quickPayBtns = '';
+  if (status === 'confirmed' && !isPast) {
+    if (!pay.advancePaid) {
+      quickPayBtns += `<button onclick="quickPayAdvance('${w.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1 rounded-full font-bold transition-colors">💳 אשר מקדמה</button>`;
+    } else if (!pay.balancePaid) {
+      quickPayBtns += `<button onclick="quickPayBalance('${w.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1 rounded-full font-bold transition-colors">💳 אשר יתרה</button>`;
+    }
+  }
+
+  // Payment details line
+  let payDetails = '';
+  if (pay.advancePaid) {
+    const methodNames = { paybox:'PayBox', bit:'Bit', cash:'מזומן', transfer:'העברה' };
+    const advDate = pay.advancePaidDate?.seconds ? new Date(pay.advancePaidDate.seconds*1000).toLocaleDateString('he-IL') : '';
+    payDetails += `<span class="text-[10px] text-emerald-600">מקדמה: ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪ ${methodNames[pay.advanceMethod]||pay.advanceMethod}${advDate ? ' · '+advDate : ''}</span>`;
+    if (pay.balancePaid) {
+      const balDate = pay.balancePaidDate?.seconds ? new Date(pay.balancePaidDate.seconds*1000).toLocaleDateString('he-IL') : '';
+      payDetails += `<span class="text-[10px] text-emerald-600 mr-3">יתרה: ${(pay.balanceAmount||0).toLocaleString('he-IL')}₪ ${methodNames[pay.balanceMethod]||pay.balanceMethod}${balDate ? ' · '+balDate : ''}</span>`;
+    }
+  }
+
   return `<div data-ws-id="${w.id}" class="px-5 py-4 hover:bg-[#fdf6ee] transition-colors flex flex-wrap items-center gap-3${isPast ? ' opacity-70' : ''}">
     <div class="flex-1 min-w-[200px]">
       <div class="flex items-center gap-2 flex-wrap">
         <p class="font-semibold text-sm text-gray-800">${esc(w.celebrant || w.customerName)}</p>
         <span class="text-xs text-gray-400">(${esc(w.customerName)} · ${esc(w.phone || '')})</span>
-        ${statusBadge}${pastBadge}
+        ${statusBadge}${pastBadge}${payBadge}
       </div>
       <p class="text-xs text-gray-500 mt-0.5">${dateStr} · ${w.time || ''} · ${esc(w.route)} · עד ${w.participantCount} משתתפות${w.city ? ' · ' + esc(w.city) : ''}</p>
       ${w.occasion ? `<p class="text-[10px] text-gray-400 mt-0.5">לכבוד: ${esc(w.occasion)}</p>` : ''}
       ${w.notes ? `<p class="text-[10px] text-gray-400 mt-0.5">${esc(w.notes)}</p>` : ''}
+      ${payDetails ? `<div class="flex flex-wrap gap-1 mt-1">${payDetails}</div>` : ''}
     </div>
     <div class="flex items-center gap-2 flex-wrap">
       <span class="font-black text-[#d4a373]">${(w.total || 0).toLocaleString('he-IL')} ₪</span>
+      ${quickPayBtns}
       ${confirmBtn}
       ${generateCalendarLinks(w)}
       <button onclick="openWorkshopModal('${w.id}')" class="text-xs border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
@@ -3797,6 +4348,46 @@ async function deleteWorkshop(id) {
   }
 }
 window.deleteWorkshop = deleteWorkshop;
+
+// ── Quick Payment Actions ──
+async function quickPayAdvance(id) {
+  const w = allWorkshops.find(x => x.id === id);
+  if (!w) return;
+  const pay = w.payment || {};
+  try {
+    await updateDoc(doc(db, WORKSHOPS_COL, id), {
+      'payment.advancePaid': true,
+      'payment.advanceAmount': pay.advanceAmount || 500,
+      'payment.advanceMethod': pay.advanceMethod || 'paybox',
+      'payment.advancePaidDate': Timestamp.now(),
+    });
+    logAction(`מקדמה אושרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
+  } catch(e) { console.error(e); }
+}
+window.quickPayAdvance = quickPayAdvance;
+
+async function quickPayBalance(id) {
+  const w = allWorkshops.find(x => x.id === id);
+  if (!w) return;
+  const pay = w.payment || {};
+  const balanceAmount = (w.total || 0) - (pay.advanceAmount || 500);
+  // Show method picker
+  const method = prompt('אמצעי תשלום יתרה:\n1 = מזומן\n2 = Bit\n3 = PayBox\n4 = העברה בנקאית', '1');
+  if (!method) return;
+  const methods = { '1':'cash', '2':'bit', '3':'paybox', '4':'transfer' };
+  const chosen = methods[method] || 'cash';
+  try {
+    await updateDoc(doc(db, WORKSHOPS_COL, id), {
+      'payment.balancePaid': true,
+      'payment.balanceAmount': Math.max(0, balanceAmount),
+      'payment.balanceMethod': chosen,
+      'payment.balancePaidDate': Timestamp.now(),
+    });
+    const methodNames = { cash:'מזומן', bit:'Bit', paybox:'PayBox', transfer:'העברה' };
+    logAction(`יתרה אושרה — "${w.celebrant || w.customerName}" · ${Math.max(0,balanceAmount).toLocaleString('he-IL')}₪ · ${methodNames[chosen]}`);
+  } catch(e) { console.error(e); }
+}
+window.quickPayBalance = quickPayBalance;
 
 // ── Settings ─────────────────────────────────────────────────────
 async function initSettingsTab() {
