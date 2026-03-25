@@ -2426,6 +2426,7 @@ function showSettingsPage(page) {
   });
   document.querySelectorAll('.settings-nav-btn').forEach(btn =>
     btn.classList.toggle('settings-nav-active', btn.dataset.settingsPage === page));
+  sessionStorage.setItem('charming_settings_page', page);
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
   // Init sub-page data on first view
   if (!settingsSubInited[page]) {
@@ -2457,6 +2458,8 @@ function showTab(name) {
   document.getElementById('tab-'+name)?.removeAttribute('data-erp-tab');
   document.querySelectorAll('[data-tab]').forEach(btn =>
     btn.classList.toggle('erp-nav-item--active', btn.dataset.tab === name));
+  // Persist current tab
+  sessionStorage.setItem('charming_tab', name);
   // Re-init Lucide icons for dynamically shown content
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 
@@ -2841,10 +2844,26 @@ function initERP(user) {
   document.getElementById('inquiries-body').addEventListener('change', handleInquiryStatusChange);
   document.getElementById('coupons-grid').addEventListener('click', handleCouponsGridClick);
 
-  showTab('dashboard');
+  // Restore last tab + scroll from session
+  const savedTab = sessionStorage.getItem('charming_tab') || 'dashboard';
+  const savedDashView = sessionStorage.getItem('charming_dash_view');
+  const savedSettingsPage = sessionStorage.getItem('charming_settings_page');
+  const savedWsView = sessionStorage.getItem('charming_ws_view');
+  showTab(savedTab);
+  if (savedDashView && savedTab === 'dashboard') switchDashView(savedDashView);
+  if (savedSettingsPage && savedTab === 'settings') setTimeout(() => showSettingsPage(savedSettingsPage), 100);
+  if (savedWsView && savedTab === 'workshops') switchWsView(savedWsView);
+  // Restore scroll position after a short delay (data needs to render)
+  const savedScroll = sessionStorage.getItem('charming_scroll');
+  if (savedScroll) setTimeout(() => window.scrollTo(0, parseInt(savedScroll) || 0), 500);
 
   // Initialize Lucide icons
   if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  // Save scroll position on page unload
+  window.addEventListener('beforeunload', () => {
+    sessionStorage.setItem('charming_scroll', String(window.scrollY));
+  });
 
   // Auto-run birthday campaign if enabled and not yet run this month
   checkAutoBirthdayCampaign();
@@ -2886,6 +2905,7 @@ function initDashboardTab() {
 let currentDashView = 'workshops';
 function switchDashView(view) {
   currentDashView = view;
+  sessionStorage.setItem('charming_dash_view', view);
   document.getElementById('dash-shop').style.display = view === 'shop' ? '' : 'none';
   document.getElementById('dash-workshops').style.display = view === 'workshops' ? '' : 'none';
   // Toggle button styles
@@ -5412,6 +5432,7 @@ window.closeWsCard = closeWsCard;
 let wsCurrentView = 'list';
 function switchWsView(view) {
   wsCurrentView = view;
+  sessionStorage.setItem('charming_ws_view', view);
   document.getElementById('ws-list-view').style.display = view === 'list' ? '' : 'none';
   document.getElementById('ws-crm-view').style.display = view === 'crm' ? '' : 'none';
   document.getElementById('ws-view-list').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
