@@ -1595,30 +1595,30 @@ Charming by Vik 💛</textarea>
   <div id="more-menu-backdrop" class="more-menu-backdrop" onclick="closeMoreMenu()"></div>
   <nav class="sm:hidden fixed bottom-5 left-5 right-5 z-20">
     <div class="bg-white/95 backdrop-blur-xl rounded-full shadow-xl shadow-black/8 border border-[#f0dfc0]/30 px-3 py-2.5 flex items-center justify-around">
-      <button data-tab="dashboard" onclick="showTab('dashboard')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
-        <i data-lucide="layout-grid" class="w-[20px] h-[20px]"></i>
-        <span>דשבורד</span>
-      </button>
-      <button data-tab="orders" onclick="showTab('orders')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
-        <i data-lucide="package" class="w-[20px] h-[20px]"></i>
-        <span>הזמנות</span>
-      </button>
       <button data-tab="workshops" onclick="showTab('workshops')"
         class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
         <i data-lucide="palette" class="w-[20px] h-[20px]"></i>
         <span>סדנאות</span>
       </button>
-      <button data-tab="inquiries" onclick="showTab('inquiries')"
+      <button data-tab="expenses" onclick="showTab('expenses')"
         class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
-        <i data-lucide="message-circle" class="w-[20px] h-[20px]"></i>
-        <span>פניות</span>
+        <i data-lucide="wallet" class="w-[20px] h-[20px]"></i>
+        <span>הוצאות</span>
+      </button>
+      <button data-tab="dashboard" onclick="showTab('dashboard')"
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
+        <i data-lucide="layout-grid" class="w-[20px] h-[20px]"></i>
+        <span>דשבורד</span>
       </button>
       <button data-tab="inventory" onclick="showTab('inventory')"
         class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
         <i data-lucide="gem" class="w-[20px] h-[20px]"></i>
         <span>קטלוג</span>
+      </button>
+      <button data-tab="inquiries" onclick="showTab('inquiries')"
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
+        <i data-lucide="message-circle" class="w-[20px] h-[20px]"></i>
+        <span>פניות</span>
       </button>
       <div class="relative">
         <button id="more-menu-btn" onclick="toggleMoreMenu()"
@@ -1627,8 +1627,8 @@ Charming by Vik 💛</textarea>
           <span>עוד</span>
         </button>
         <div id="more-menu" class="more-menu">
-          <button data-tab="expenses" onclick="showTab('expenses');closeMoreMenu()">
-            <i data-lucide="wallet" class="w-4 h-4"></i> הוצאות
+          <button data-tab="orders" onclick="showTab('orders');closeMoreMenu()">
+            <i data-lucide="package" class="w-4 h-4"></i> הזמנות
           </button>
           <button data-tab="customers" onclick="showTab('customers');closeMoreMenu()">
             <i data-lucide="users" class="w-4 h-4"></i> לקוחות
