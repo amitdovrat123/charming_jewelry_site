@@ -76,3 +76,21 @@ Responsive breakpoints: `1200px` / `768px` / `375px`.
 - Social: TikTok is the only platform — `https://www.tiktok.com/@charming.by.vik`.
 
 See `skills/copywriting_skill.md` for the full brand voice guide before writing or editing any content.
+
+## Universal Agents (תיקיית `agents/`)
+
+7 סוכנים מומחים זמינים בתיקיית `agents/`. ניתן להפעיל אותם לפי הצורך:
+
+| סוכן | קובץ | מתי להשתמש |
+|---|---|---|
+| המנצח (Orchestrator) | `agents/agent_orchestrator.md` | ניהול כללי, תכנון שלבים, חלוקת משימות |
+| מנהל מוצר (PM) | `agents/agent_pm.md` | אפיון עסקי, PRD, מבנה מערכת |
+| המעצב (Designer) | `agents/agent_designer.md` | UI/UX, שפה ויזואלית, קופי |
+| האדריכל (ERP Architect) | `agents/agent_erp_architect.md` | לוח ניהול, DB, לוגיקה עסקית |
+| השומר (Guardian) | `agents/agent_guardian.md` | אבטחה, נגישות, QA |
+| היועמ"ש (Legal) | `agents/agent_legal.md` | תקנונים, פרטיות, רגולציה |
+| מנטור הרעיונות (Idea Deepener) | `agents/agent_idea_deepener.md` | העמקה אסטרטגית של רעיונות |
+
+קבצים נוספים: `agents/reference_vault.md` (כספת ידע משותפת) ו-`agents/README_ACTIVATION_GUIDE.md` (מדריך הפעלה).
+
+**שימוש:** קרא את קובץ הסוכן הרלוונטי לפני ביצוע משימה מורכבת ופעל לפי ההנחיות שלו. הסוכנים הם **אגנוסטיים לטכנולוגיה** — יש להתאים את ההמלצות שלהם ל-Stack הנוכחי (Plain HTML/CSS, לא Tailwind).
