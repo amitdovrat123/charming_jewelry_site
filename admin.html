@@ -1921,9 +1921,33 @@ Charming by Vik 💛</textarea>
 
 <style>
   .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
-  .inp { width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s; font-family:inherit; }
-  select.inp { cursor:pointer; }
+  .inp { width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s, box-shadow .2s; font-family:inherit; }
+  .inp:hover { border-color:#f0dfc0; }
+  .inp:focus { border-color:#d4a373; box-shadow:0 0 0 3px rgba(212,163,115,.12); }
   textarea.inp { display:block; }
+
+  /* Custom select styling — desktop only */
+  @media (min-width:640px) {
+    select.inp {
+      cursor:pointer;
+      appearance:none;
+      -webkit-appearance:none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:left 12px center;
+      padding-left:32px;
+    }
+    select.inp:hover { border-color:#d4a373; background-color:#fdf8f5; }
+    select.inp:focus { border-color:#d4a373; box-shadow:0 0 0 3px rgba(212,163,115,.15); background-color:#fff; }
+    select.inp option {
+      padding:10px 14px;
+      background:#fff;
+      color:#2c2a29;
+      font-size:14px;
+    }
+    select.inp option:checked { background:#fdf6ee; color:#d4a373; }
+  }
+  @media (max-width:639px) { select.inp { cursor:pointer; } }
 </style>
 
 <script type="module">
