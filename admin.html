@@ -329,6 +329,10 @@
           </button>
           <!-- ── Secondary (same order as mobile "more" menu) ── -->
           <div class="border-t border-[#f0dfc0] my-2"></div>
+          <button data-tab="expenses" onclick="showTab('expenses')"
+            class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
+            <span class="text-base">💰</span> הוצאות
+          </button>
           <button data-tab="ws-gallery" onclick="showTab('ws-gallery')"
             class="erp-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-colors text-right">
             <span class="text-base">🖼️</span> גלריית סדנאות
@@ -1030,6 +1034,126 @@
         </div>
       </section>
 
+      <!-- ─── TAB: EXPENSES ─── -->
+      <section id="tab-expenses" data-erp-tab class="p-6 space-y-6">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <h2 class="font-black text-gray-800 text-lg">ניהול הוצאות</h2>
+          <button onclick="openExpenseForm()"
+            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+            + הוצאה חדשה</button>
+        </div>
+
+        <!-- Expense Form -->
+        <div id="exp-form-section" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm" style="display:none;">
+          <h3 class="font-bold text-sm text-gray-800 mb-4">פרטי הוצאה</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="lbl">תאריך *</label>
+              <input id="exp-date" type="date" class="inp" required />
+            </div>
+            <div>
+              <label class="lbl">קטגוריה *</label>
+              <select id="exp-category" class="inp">
+                <option value="" disabled selected>בחר קטגוריה...</option>
+                <option value="materials">חומרי גלם</option>
+                <option value="marketing">שיווק ממומן</option>
+                <option value="staff">תשלום לעובדת</option>
+                <option value="equipment">ציוד קבוע</option>
+                <option value="fuel">דלק / נסיעות</option>
+                <option value="other">אחר</option>
+              </select>
+            </div>
+            <div>
+              <label class="lbl">סכום (₪) *</label>
+              <input id="exp-amount" type="number" min="0" step="50" placeholder="0" class="inp" />
+            </div>
+            <div>
+              <label class="lbl">אמצעי תשלום</label>
+              <select id="exp-method" class="inp">
+                <option value="cash">מזומן</option>
+                <option value="bit">Bit</option>
+                <option value="transfer">העברה בנקאית</option>
+                <option value="credit">אשראי</option>
+              </select>
+            </div>
+            <div>
+              <label class="lbl">שיוך לסדנא (אופציונלי)</label>
+              <select id="exp-workshop" class="inp">
+                <option value="">ללא שיוך</option>
+              </select>
+            </div>
+            <div>
+              <label class="lbl">תשלום לעובדת — סכום</label>
+              <select id="exp-staff-amount" class="inp" style="display:none;">
+                <option value="150">150 ₪</option>
+                <option value="200">200 ₪</option>
+                <option value="250">250 ₪</option>
+                <option value="300">300 ₪</option>
+                <option value="350">350 ₪</option>
+                <option value="400">400 ₪</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="lbl">הערות</label>
+              <input id="exp-notes" type="text" placeholder="פירוט נוסף" class="inp" />
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3 mt-4">
+            <button onclick="saveExpense()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור הוצאה</button>
+            <button onclick="closeExpenseForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-6 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
+            <p id="exp-err" class="text-red-400 text-xs self-center"></p>
+          </div>
+        </div>
+
+        <!-- Monthly Summary -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-red-400">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">הוצאות החודש</p>
+            <p id="exp-total-month" class="text-2xl font-black text-red-500">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-[#d4a373]">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">חומרי גלם</p>
+            <p id="exp-materials-month" class="text-xl font-black text-[#d4a373]">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-blue-400">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">עובדות</p>
+            <p id="exp-staff-month" class="text-xl font-black text-blue-500">—</p>
+          </div>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md border-r-4 border-r-purple-400">
+            <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-1">שיווק</p>
+            <p id="exp-marketing-month" class="text-xl font-black text-purple-500">—</p>
+          </div>
+        </div>
+
+        <!-- Expenses List -->
+        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center justify-between">
+            <h3 class="font-bold text-sm text-gray-800">רשימת הוצאות</h3>
+            <select id="exp-filter-month" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer">
+              <option value="current">החודש</option>
+              <option value="prev">חודש קודם</option>
+              <option value="all">הכל</option>
+            </select>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-[#fdf6ee] text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  <th class="px-4 py-2 text-right">תאריך</th>
+                  <th class="px-4 py-2 text-right">קטגוריה</th>
+                  <th class="px-4 py-2 text-right">סכום</th>
+                  <th class="px-4 py-2 text-right">אמצעי</th>
+                  <th class="px-4 py-2 text-right">סדנא</th>
+                  <th class="px-4 py-2 text-right">הערות</th>
+                  <th class="px-4 py-2 text-right">פעולות</th>
+                </tr>
+              </thead>
+              <tbody id="exp-table-body" class="divide-y divide-[#fdf6ee]"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ─── TAB: LOGS ─── -->
       <section id="tab-logs" data-erp-tab class="p-6 space-y-4">
         <h2 class="font-black text-gray-800 text-lg">יומן שינויים</h2>
@@ -1639,11 +1763,16 @@ const WORKSHOPS_COL  = 'artifacts/charming-3dd6f/public/data/workshops';
 const SETTINGS_COL   = 'artifacts/charming-3dd6f/public/data/settings';
 const WS_GALLERY_COL = 'artifacts/charming-3dd6f/public/data/workshopGallery';
 const TRAFFIC_COL    = 'artifacts/charming-3dd6f/public/data/site_traffic';
+const EXPENSES_COL   = 'artifacts/charming-3dd6f/public/data/expenses';
 
 // ── State ────────────────────────────────────────────────────────
 // Products (inventory)
 let allProducts     = [];
 let uploadedImages  = [];
+
+// Expenses
+let allExpenses     = [];
+let editExpenseId   = null;
 let sortField       = 'createdAt';
 let sortDir         = 'desc';
 let searchQ         = '';
@@ -1964,7 +2093,7 @@ window.toggleMoreMenu = toggleMoreMenu;
 window.closeMoreMenu  = closeMoreMenu;
 
 function showTab(name) {
-  ['dashboard','orders','inventory','customers','coupons','inquiries','banner','workshops','ws-gallery','notifications','logs','settings','analytics'].forEach(t => {
+  ['dashboard','orders','inventory','customers','coupons','inquiries','banner','workshops','expenses','ws-gallery','notifications','logs','settings','analytics'].forEach(t => {
     document.getElementById('tab-'+t)?.setAttribute('data-erp-tab','');
   });
   document.getElementById('tab-'+name)?.removeAttribute('data-erp-tab');
@@ -1981,6 +2110,7 @@ function showTab(name) {
     else if (name === 'inquiries') initInquiriesTab();
     else if (name === 'banner')    initBannerTab();
     else if (name === 'workshops') initWorkshopsTab();
+    else if (name === 'expenses')  initExpensesTab();
     else if (name === 'ws-gallery') initWsGalleryTab();
     else if (name === 'notifications') renderFullNotifications();
     else if (name === 'logs')      initLogsTab();
@@ -1994,6 +2124,7 @@ function showTab(name) {
     if (name === 'inquiries') renderInquiriesTable();
     if (name === 'banner')    renderBannerList();
     if (name === 'workshops') { renderCalendar(); renderWorkshopsList(); }
+    if (name === 'expenses')  renderExpensesList();
     if (name === 'notifications') renderFullNotifications();
     if (name === 'logs')      renderLogsList();
     if (name === 'analytics') refreshCurrentBiPage();
@@ -4388,6 +4519,203 @@ async function quickPayBalance(id) {
   } catch(e) { console.error(e); }
 }
 window.quickPayBalance = quickPayBalance;
+
+// ── Expenses ─────────────────────────────────────────────────────
+const EXPENSE_CATEGORIES = {
+  materials: { label: 'חומרי גלם', icon: '🧵', color: 'text-[#d4a373]' },
+  marketing: { label: 'שיווק ממומן', icon: '📣', color: 'text-purple-500' },
+  staff: { label: 'תשלום לעובדת', icon: '👩‍🔧', color: 'text-blue-500' },
+  equipment: { label: 'ציוד קבוע', icon: '🔧', color: 'text-gray-600' },
+  fuel: { label: 'דלק / נסיעות', icon: '⛽', color: 'text-amber-600' },
+  other: { label: 'אחר', icon: '📦', color: 'text-gray-400' },
+};
+const EXPENSE_METHODS = { cash:'מזומן', bit:'Bit', transfer:'העברה', credit:'אשראי' };
+
+function initExpensesTab() {
+  const q = query(collection(db, EXPENSES_COL), orderBy('date','desc'));
+  onSnapshot(q, snap => {
+    allExpenses = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderExpensesList();
+    updateExpenseKPIs();
+  }, err=>console.error('expenses:', err));
+
+  // Show/hide staff amount when category changes
+  document.getElementById('exp-category')?.addEventListener('change', function() {
+    document.getElementById('exp-staff-amount').style.display = this.value === 'staff' ? '' : 'none';
+    if (this.value === 'staff') {
+      document.getElementById('exp-amount').value = document.getElementById('exp-staff-amount').value;
+    }
+  });
+  document.getElementById('exp-staff-amount')?.addEventListener('change', function() {
+    document.getElementById('exp-amount').value = this.value;
+  });
+
+  // Populate workshop select
+  populateExpenseWorkshops();
+}
+
+function populateExpenseWorkshops() {
+  const sel = document.getElementById('exp-workshop');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">ללא שיוך</option>';
+  const upcoming = [...allWorkshops]
+    .filter(w => (w.bookingStatus || 'confirmed') === 'confirmed')
+    .sort((a, b) => {
+      const da = a.eventDate?.seconds || 0, db = b.eventDate?.seconds || 0;
+      return db - da;
+    })
+    .slice(0, 30);
+  upcoming.forEach(w => {
+    const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000).toLocaleDateString('he-IL') : '';
+    sel.innerHTML += `<option value="${w.id}">${esc(w.celebrant||w.customerName)} · ${d}</option>`;
+  });
+}
+
+function openExpenseForm(id) {
+  const form = document.getElementById('exp-form-section');
+  form.style.display = '';
+  populateExpenseWorkshops();
+  if (id) {
+    const e = allExpenses.find(x=>x.id===id);
+    if (!e) return;
+    editExpenseId = e.id;
+    document.getElementById('exp-date').value = e.date || '';
+    document.getElementById('exp-category').value = e.category || '';
+    document.getElementById('exp-amount').value = e.amount || '';
+    document.getElementById('exp-method').value = e.method || 'cash';
+    document.getElementById('exp-workshop').value = e.workshopId || '';
+    document.getElementById('exp-notes').value = e.notes || '';
+    if (e.category === 'staff') {
+      document.getElementById('exp-staff-amount').style.display = '';
+      document.getElementById('exp-staff-amount').value = e.amount || '150';
+    }
+  } else {
+    editExpenseId = null;
+    document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('exp-category').value = '';
+    document.getElementById('exp-amount').value = '';
+    document.getElementById('exp-method').value = 'cash';
+    document.getElementById('exp-workshop').value = '';
+    document.getElementById('exp-notes').value = '';
+    document.getElementById('exp-staff-amount').style.display = 'none';
+  }
+  form.scrollIntoView({behavior:'smooth'});
+}
+window.openExpenseForm = openExpenseForm;
+
+function closeExpenseForm() {
+  document.getElementById('exp-form-section').style.display = 'none';
+  editExpenseId = null;
+}
+window.closeExpenseForm = closeExpenseForm;
+
+async function saveExpense() {
+  const date     = document.getElementById('exp-date').value;
+  const category = document.getElementById('exp-category').value;
+  const amount   = parseFloat(document.getElementById('exp-amount').value) || 0;
+  const method   = document.getElementById('exp-method').value || 'cash';
+  const workshopId = document.getElementById('exp-workshop').value || null;
+  const notes    = document.getElementById('exp-notes').value.trim();
+  const errEl    = document.getElementById('exp-err');
+
+  if (!date) { errEl.textContent='יש לבחור תאריך.'; return; }
+  if (!category) { errEl.textContent='יש לבחור קטגוריה.'; return; }
+  if (!amount || amount <= 0) { errEl.textContent='יש להזין סכום.'; return; }
+  errEl.textContent='';
+
+  // If linked to workshop, get workshop name
+  let workshopName = null;
+  if (workshopId) {
+    const w = allWorkshops.find(x=>x.id===workshopId);
+    if (w) workshopName = w.celebrant || w.customerName;
+  }
+
+  const data = { date, category, amount, method, workshopId, workshopName, notes: notes||null, createdAt: serverTimestamp() };
+
+  try {
+    if (editExpenseId) {
+      await updateDoc(doc(db, EXPENSES_COL, editExpenseId), data);
+      logAction(`הוצאה עודכנה — ${EXPENSE_CATEGORIES[category]?.label} · ${amount}₪`);
+    } else {
+      await addDoc(collection(db, EXPENSES_COL), data);
+      logAction(`הוצאה חדשה — ${EXPENSE_CATEGORIES[category]?.label} · ${amount}₪`);
+    }
+    closeExpenseForm();
+  } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
+}
+window.saveExpense = saveExpense;
+
+async function deleteExpense(id) {
+  const e = allExpenses.find(x=>x.id===id);
+  if (e && confirm(`למחוק הוצאה "${EXPENSE_CATEGORIES[e.category]?.label || e.category}" · ${e.amount}₪?`)) {
+    try { await deleteDoc(doc(db, EXPENSES_COL, id)); logAction(`הוצאה נמחקה — ${e.amount}₪`); }
+    catch(ex) { console.error(ex); }
+  }
+}
+window.deleteExpense = deleteExpense;
+
+function updateExpenseKPIs() {
+  const el = id => document.getElementById(id);
+  const now = new Date();
+  const curY = now.getFullYear(), curM = now.getMonth();
+  const month = allExpenses.filter(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    return d.getFullYear() === curY && d.getMonth() === curM;
+  });
+
+  const total = month.reduce((s,e) => s+(e.amount||0), 0);
+  const byCategory = {};
+  month.forEach(e => { byCategory[e.category] = (byCategory[e.category]||0) + (e.amount||0); });
+
+  if (el('exp-total-month')) el('exp-total-month').textContent = total.toLocaleString('he-IL')+' ₪';
+  if (el('exp-materials-month')) el('exp-materials-month').textContent = (byCategory.materials||0).toLocaleString('he-IL')+' ₪';
+  if (el('exp-staff-month')) el('exp-staff-month').textContent = (byCategory.staff||0).toLocaleString('he-IL')+' ₪';
+  if (el('exp-marketing-month')) el('exp-marketing-month').textContent = (byCategory.marketing||0).toLocaleString('he-IL')+' ₪';
+}
+
+function renderExpensesList() {
+  const body = document.getElementById('exp-table-body');
+  if (!body) return;
+
+  const filter = document.getElementById('exp-filter-month')?.value || 'current';
+  const now = new Date();
+  const curY = now.getFullYear(), curM = now.getMonth();
+
+  let filtered = allExpenses;
+  if (filter === 'current') {
+    filtered = allExpenses.filter(e => { const d = new Date(e.date); return d.getFullYear() === curY && d.getMonth() === curM; });
+  } else if (filter === 'prev') {
+    const pm = curM === 0 ? 11 : curM - 1, py = curM === 0 ? curY - 1 : curY;
+    filtered = allExpenses.filter(e => { const d = new Date(e.date); return d.getFullYear() === py && d.getMonth() === pm; });
+  }
+
+  if (!filtered.length) {
+    body.innerHTML = '<tr><td colspan="7" class="text-center text-gray-300 py-8 text-sm">אין הוצאות לתקופה זו</td></tr>';
+    return;
+  }
+
+  body.innerHTML = filtered.map(e => {
+    const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
+    const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL') : '—';
+    return `<tr class="hover:bg-[#fdf6ee] transition-colors text-sm">
+      <td class="px-4 py-3 text-gray-600">${dateStr}</td>
+      <td class="px-4 py-3"><span class="${cat.color} font-semibold">${cat.icon} ${cat.label}</span></td>
+      <td class="px-4 py-3 font-bold text-red-500">${(e.amount||0).toLocaleString('he-IL')} ₪</td>
+      <td class="px-4 py-3 text-gray-500 text-xs">${EXPENSE_METHODS[e.method] || e.method || '—'}</td>
+      <td class="px-4 py-3 text-gray-400 text-xs">${e.workshopName ? esc(e.workshopName) : '—'}</td>
+      <td class="px-4 py-3 text-gray-400 text-xs truncate max-w-[120px]">${e.notes ? esc(e.notes) : '—'}</td>
+      <td class="px-4 py-3">
+        <div class="flex gap-1">
+          <button onclick="openExpenseForm('${e.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2 py-1 rounded-full font-bold transition-colors">עריכה</button>
+          <button onclick="deleteExpense('${e.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2 py-1 rounded-full font-bold transition-colors">מחיקה</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateExpenseKPIs();
+}
 
 // ── Settings ─────────────────────────────────────────────────────
 async function initSettingsTab() {
