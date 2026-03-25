@@ -905,10 +905,12 @@
             </div>
             <div>
               <label class="lbl">סטטוס הזמנה</label>
-              <select id="ws-status" class="inp">
-                <option value="confirmed">הזמנה סגורה ✅</option>
-                <option value="draft">טיוטה / טרם נסגר 📝</option>
-              </select>
+              <input id="ws-status" type="hidden" value="draft" />
+              <div id="ws-status-display" class="flex items-center gap-2 mt-1 px-3 py-2 bg-gray-50 rounded-lg">
+                <span id="ws-status-icon" class="text-base">📝</span>
+                <span id="ws-status-text" class="text-sm font-semibold text-amber-600">טיוטה — ממתין למקדמה</span>
+              </div>
+              <p class="text-[10px] text-gray-400 mt-1">הסדנא תיסגר אוטומטית עם אישור מקדמה</p>
             </div>
           </div>
 
@@ -3912,6 +3914,23 @@ function updatePaymentBadge() {
   // Show/hide date wrappers
   document.getElementById('ws-advance-date-wrap')?.classList.toggle('hidden', !adv);
   document.getElementById('ws-balance-date-wrap')?.classList.toggle('hidden', !bal);
+  // Update status display
+  const statusIcon = document.getElementById('ws-status-icon');
+  const statusText = document.getElementById('ws-status-text');
+  const statusInput = document.getElementById('ws-status');
+  if (statusIcon && statusText && statusInput) {
+    if (adv) {
+      statusIcon.textContent = '✅';
+      statusText.textContent = 'הזמנה סגורה';
+      statusText.className = 'text-sm font-semibold text-emerald-600';
+      statusInput.value = 'confirmed';
+    } else {
+      statusIcon.textContent = '📝';
+      statusText.textContent = 'טיוטה — ממתין למקדמה';
+      statusText.className = 'text-sm font-semibold text-amber-600';
+      statusInput.value = 'draft';
+    }
+  }
 }
 window.updatePaymentBadge = updatePaymentBadge;
 
@@ -4061,8 +4080,6 @@ async function saveWorkshop() {
   const base  = getWsBasePrice();
   const total = Math.round(base * (1 - disc/100) + arrival);
 
-  const bookingStatus = document.getElementById('ws-status').value || 'confirmed';
-
   // Payment tracking
   const advancePaid   = document.getElementById('ws-advance-paid').checked;
   const advanceAmount = parseFloat(document.getElementById('ws-advance-amount').value) || 500;
@@ -4093,7 +4110,7 @@ async function saveWorkshop() {
     eventDate: Timestamp.fromDate(new Date(date+'T'+time)),
     time, participantCount: count, route, basePrice: base,
     discount: disc, arrivalFee: arrival, total, notes: notes||null,
-    bookingStatus,
+    bookingStatus: advancePaid ? 'confirmed' : 'draft',
     payment,
     createdAt: serverTimestamp(),
   };
@@ -4119,7 +4136,7 @@ function clearWorkshopForm() {
   document.getElementById('ws-route').value='';
   document.getElementById('ws-discount').value='0';
   document.getElementById('ws-arrival').value='0';
-  document.getElementById('ws-status').value='confirmed';
+  document.getElementById('ws-status').value='draft';
   document.getElementById('ws-err').textContent='';
   // Reset payment fields
   document.getElementById('ws-advance-paid').checked = false;
@@ -4331,8 +4348,8 @@ function renderWorkshopCard(w, opts = {}) {
   const pastBadge = isPast
     ? '<span class="text-[10px] font-bold bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">סדנה עברה</span>'
     : '';
-  const confirmBtn = status === 'draft'
-    ? `<button onclick="confirmWorkshop('${w.id}')" class="text-xs border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-full font-bold transition-colors">סגור הזמנה ✅</button>`
+  const confirmBtn = (status === 'draft' && !pay.advancePaid)
+    ? `<button onclick="quickPayAdvance('${w.id}')" class="text-xs border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-full font-bold transition-colors">💳 אשר מקדמה וסגור</button>`
     : '';
 
   // Payment status badge
@@ -4491,8 +4508,9 @@ async function quickPayAdvance(id) {
       'payment.advanceAmount': pay.advanceAmount || 500,
       'payment.advanceMethod': pay.advanceMethod || 'paybox',
       'payment.advancePaidDate': Timestamp.now(),
+      bookingStatus: 'confirmed',
     });
-    logAction(`מקדמה אושרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
+    logAction(`מקדמה אושרה + סדנא נסגרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
   } catch(e) { console.error(e); }
 }
 window.quickPayAdvance = quickPayAdvance;
