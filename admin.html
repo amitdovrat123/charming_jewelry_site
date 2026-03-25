@@ -74,6 +74,7 @@
       #erp-content { padding-bottom: 100px; overflow-x: hidden; }
       [data-erp-tab] { overflow-x: auto; }
       section[id^="tab-"] { padding-left: 12px; padding-right: 12px; }
+      nav.fixed .erp-nav-item--active { background: rgba(212,163,115,0.20); color: #e8b894; }
 
       /* Orders table — prevent cut-off on mobile */
       #tab-orders .bg-white { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -261,18 +262,21 @@
 
   <!-- Header -->
   <header class="bg-[#fcf8f3]/95 backdrop-blur-xl fixed top-0 left-0 right-0 z-30 border-b border-[#f0dfc0]/30">
-    <!-- Row 1: Brand -->
-    <div class="px-5 sm:px-6 pt-3 pb-1">
-      <div class="flex items-baseline gap-2 justify-center sm:justify-start">
+    <div class="px-5 sm:px-6 h-16 flex items-center justify-between">
+      <!-- Right: Hamburger (mobile only) -->
+      <button id="sidebar-toggle" class="sm:hidden w-11 h-11 rounded-full bg-white/80 border border-[#e8ddd5] flex items-center justify-center text-gray-500 hover:text-[#d4a373] hover:border-[#d4a373]/40 transition-all shadow-sm" aria-label="תפריט">
+        <i data-lucide="menu" class="w-[20px] h-[20px]"></i>
+      </button>
+      <!-- Center: Brand -->
+      <div class="absolute left-1/2 -translate-x-1/2 flex items-baseline gap-1.5">
+        <span class="text-gray-400 text-[11px] font-light tracking-wide hidden sm:inline">BY VIK</span>
         <span class="font-black tracking-[3px] text-gray-800 text-[15px]">C H A R M I N G</span>
-        <span class="text-gray-400 text-[13px] font-light tracking-wide">BY VIK</span>
       </div>
-    </div>
-    <!-- Row 2: Icons -->
-    <div class="px-5 sm:px-6 pb-3 flex items-center justify-between">
-      <!-- Left: Bell + Settings -->
+      <!-- Left: Settings + Bell + Desktop extras -->
       <div class="flex items-center gap-2.5">
-        <!-- Notification Bell -->
+        <button onclick="showTab('settings')" class="w-11 h-11 rounded-full bg-white/80 border border-[#e8ddd5] flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373]/40 transition-all shadow-sm" title="הגדרות">
+          <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
+        </button>
         <div class="relative" id="notif-wrapper">
           <button id="notif-bell" class="relative w-11 h-11 rounded-full bg-white/80 border border-[#e8ddd5] flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373]/40 transition-all shadow-sm" title="התראות">
             <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
@@ -296,10 +300,6 @@
             </button>
           </div>
         </div>
-        <!-- Settings Button -->
-        <button onclick="showTab('settings')" class="w-11 h-11 rounded-full bg-white/80 border border-[#e8ddd5] flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373]/40 transition-all shadow-sm" title="הגדרות">
-          <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
-        </button>
         <a href="index.html" target="_blank"
           class="hidden sm:inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#d4a373] border border-[#e8ddd5] hover:border-[#d4a373]/40 bg-white/80 px-3.5 py-2 rounded-full transition-all font-semibold shadow-sm">
           <i data-lucide="external-link" class="w-3.5 h-3.5"></i> האתר
@@ -309,21 +309,17 @@
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i> התנתק
         </button>
       </div>
-      <!-- Right: Hamburger (mobile) -->
-      <button id="sidebar-toggle" class="sm:hidden w-11 h-11 rounded-full bg-white/80 border border-[#e8ddd5] flex items-center justify-center text-gray-500 hover:text-[#d4a373] hover:border-[#d4a373]/40 transition-all shadow-sm" aria-label="תפריט">
-        <i data-lucide="menu" class="w-[20px] h-[20px]"></i>
-      </button>
     </div>
   </header>'
 
 
-  <div class="flex flex-1 overflow-hidden relative mt-[88px]">
+  <div class="flex flex-1 overflow-hidden relative mt-16">
 
     <!-- ════ SIDEBAR OVERLAY (mobile) ════ -->
     <div id="sidebar-overlay" class="sm:hidden fixed inset-0 bg-black/50 z-40 transition-opacity" style="display:none;" onclick="closeSidebar()"></div>
 
     <!-- ════ SIDEBAR ════ -->
-    <aside id="erp-sidebar" class="fixed right-0 top-0 sm:top-[88px] bottom-0 w-[260px] sm:w-[250px] bg-white z-50 sm:z-20 overflow-y-auto transition-transform duration-300 translate-x-full sm:translate-x-0 shadow-2xl sm:shadow-none border-l border-[#f0dfc0]/40">
+    <aside id="erp-sidebar" class="fixed right-0 top-0 sm:top-16 bottom-0 w-[260px] sm:w-[250px] bg-white z-50 sm:z-20 overflow-y-auto transition-transform duration-300 translate-x-full sm:translate-x-0 shadow-2xl sm:shadow-none border-l border-[#f0dfc0]/40">
       <!-- Mobile sidebar header -->
       <div class="sm:hidden flex items-center justify-between px-5 h-16 border-b border-[#f0dfc0]/40">
         <div class="flex items-center gap-2.5">
@@ -1579,31 +1575,31 @@ Charming by Vik 💛</textarea>
   <!-- Mobile bottom nav — Floating Pill -->
   <div id="more-menu-backdrop" class="more-menu-backdrop" onclick="closeMoreMenu()"></div>
   <nav class="sm:hidden fixed bottom-5 left-5 right-5 z-20">
-    <div class="bg-white/95 backdrop-blur-xl rounded-full shadow-xl shadow-black/8 border border-[#f0dfc0]/30 px-3 py-2.5 flex items-center justify-around">
+    <div class="bg-[#2c2a29]/90 backdrop-blur-xl rounded-full shadow-xl shadow-black/20 border border-[#4a3f3c]/40 px-3 py-2.5 flex items-center justify-around">
       <button data-tab="workshops" onclick="showTab('workshops')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
         <i data-lucide="palette" class="w-[20px] h-[20px]"></i>
         <span>סדנאות</span>
       </button>
       <button data-tab="expenses" onclick="showTab('expenses')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
         <i data-lucide="wallet" class="w-[20px] h-[20px]"></i>
         <span>הוצאות</span>
       </button>
       <button data-tab="dashboard" onclick="showTab('dashboard')"
         class="erp-nav-item flex flex-col items-center gap-0.5 -mt-3 transition-all">
-        <span class="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-br from-[#d4a373] to-[#b8893e] text-white shadow-lg shadow-[#d4a373]/30">
+        <span class="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-br from-[#d4a373] to-[#b8893e] text-white shadow-lg shadow-[#d4a373]/40">
           <i data-lucide="layout-grid" class="w-[20px] h-[20px]"></i>
         </span>
-        <span class="text-[10px] font-bold text-[#d4a373]">דשבורד</span>
+        <span class="text-[10px] font-bold text-[#e8b894]">דשבורד</span>
       </button>
       <button data-tab="inventory" onclick="showTab('inventory')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
         <i data-lucide="gem" class="w-[20px] h-[20px]"></i>
         <span>קטלוג</span>
       </button>
       <button data-tab="inquiries" onclick="showTab('inquiries')"
-        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400 hover:text-[#d4a373] transition-all">
+        class="erp-nav-item flex flex-col items-center gap-1 py-1.5 px-3 rounded-full text-[10px] font-bold text-gray-400/70 hover:text-[#e8b894] transition-all">
         <i data-lucide="message-circle" class="w-[20px] h-[20px]"></i>
         <span>פניות</span>
       </button>
@@ -5410,7 +5406,7 @@ async function saveWaTpl() {
       logAction(`תבנית WhatsApp חדשה — "${name}"`);
     }
     closeWaTplForm();
-  } catch(ex) { err.textContent='שגיאה.'; console.error(ex); }
+  } catch(ex) { err.textContent='שגיאה: ' + (ex.code || ex.message || ex); console.error('saveWaTpl error:', ex); }
 }
 window.saveWaTpl = saveWaTpl;
 
