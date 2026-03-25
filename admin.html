@@ -1022,14 +1022,15 @@
             </div>
           </div>
 
-          <!-- ── CRM: Payment Tracking ── -->
+          <!-- ── CRM: Payment Tracking (collapsible) ── -->
           <div id="ws-payment-section" class="mt-4 border border-[#f0dfc0] rounded-xl overflow-hidden">
-            <div class="px-4 py-3 bg-[#fdf6ee] border-b border-[#f0dfc0] flex items-center gap-2">
-              <i data-lucide="credit-card" class="w-4 h-4 inline-block"></i>
-              <h4 class="font-bold text-sm text-gray-800">מעקב תשלומים</h4>
+            <button onclick="const b=document.getElementById('ws-payment-body');const o=b.style.display!=='none';b.style.display=o?'none':'';this.querySelector('.ws-pay-chevron').style.transform=o?'rotate(180deg)':''" class="w-full px-4 py-2.5 bg-[#fdf6ee] border-b border-[#f0dfc0] flex items-center gap-2 cursor-pointer hover:bg-[#f5ece7] transition-colors">
+              <i data-lucide="credit-card" class="w-3.5 h-3.5 inline-block text-[#d4a373]"></i>
+              <h4 class="font-bold text-xs text-gray-700">מעקב תשלומים</h4>
               <span id="ws-payment-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full"></span>
-            </div>
-            <div class="p-4 space-y-4">
+              <i data-lucide="chevron-down" class="ws-pay-chevron w-3.5 h-3.5 text-gray-400 mr-auto transition-transform duration-200" style="transform:rotate(180deg)"></i>
+            </button>
+            <div id="ws-payment-body" class="p-4 space-y-4" style="display:none;">
               <!-- Advance payment -->
               <div class="flex flex-wrap items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
                 <div class="flex items-center gap-2 min-w-[140px]">
