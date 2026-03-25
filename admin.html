@@ -506,6 +506,108 @@
           </div>
 
         </div>
+          <!-- Financial Reports Section -->
+          <div class="border-t border-[#f0dfc0] pt-6">
+            <h2 class="text-sm font-black text-gray-700 mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-5 bg-emerald-400 rounded-full inline-block"></span>
+              דוחות כספיים
+            </h2>
+
+            <!-- Report period selector -->
+            <div class="flex items-center gap-3 mb-4">
+              <select id="wsd-report-period" onchange="renderFinancialReports()" class="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-600 cursor-pointer font-semibold">
+                <option value="current">החודש הנוכחי</option>
+                <option value="prev">חודש קודם</option>
+                <option value="quarter">רבעון אחרון</option>
+                <option value="year">שנה נוכחית</option>
+              </select>
+              <span id="wsd-report-label" class="text-xs text-gray-400"></span>
+            </div>
+
+            <!-- P&L Report -->
+            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md mb-6">
+              <h3 class="font-bold text-sm text-gray-800 mb-4">📊 דוח רווח והפסד</h3>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                  <span class="text-sm font-semibold text-emerald-700">הכנסות מסדנאות</span>
+                  <span id="wsd-pnl-revenue" class="text-lg font-black text-emerald-600">—</span>
+                </div>
+                <div class="border-t border-gray-100 my-1"></div>
+                <div class="flex items-center justify-between p-2 px-3">
+                  <span class="text-xs text-gray-500">חומרי גלם</span>
+                  <span id="wsd-pnl-materials" class="text-sm font-bold text-red-400">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 px-3">
+                  <span class="text-xs text-gray-500">עובדות</span>
+                  <span id="wsd-pnl-staff" class="text-sm font-bold text-red-400">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 px-3">
+                  <span class="text-xs text-gray-500">שיווק ממומן</span>
+                  <span id="wsd-pnl-marketing" class="text-sm font-bold text-red-400">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 px-3">
+                  <span class="text-xs text-gray-500">דלק / נסיעות</span>
+                  <span id="wsd-pnl-fuel" class="text-sm font-bold text-red-400">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 px-3">
+                  <span class="text-xs text-gray-500">ציוד קבוע</span>
+                  <span id="wsd-pnl-equipment" class="text-sm font-bold text-red-400">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 px-3">
+                  <span class="text-xs text-gray-500">אחר</span>
+                  <span id="wsd-pnl-other" class="text-sm font-bold text-red-400">—</span>
+                </div>
+                <div class="border-t border-gray-100 my-1"></div>
+                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+                  <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
+                  <span id="wsd-pnl-expenses" class="text-lg font-black text-red-500">—</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg border-2" id="wsd-pnl-profit-row">
+                  <span class="text-sm font-bold">רווח נקי</span>
+                  <span id="wsd-pnl-profit" class="text-xl font-black">—</span>
+                </div>
+                <div class="flex items-center justify-between p-2 px-3">
+                  <span class="text-[10px] text-gray-400">אחוז רווחיות</span>
+                  <span id="wsd-pnl-margin" class="text-xs font-bold text-gray-500">—</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cash Flow -->
+            <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-md">
+              <h3 class="font-bold text-sm text-gray-800 mb-4">💰 תזרים מזומנים</h3>
+              <p class="text-[10px] text-gray-400 mb-3">מבוסס על תשלומים שבוצעו בפועל (לא על סדנאות שנסגרו)</p>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                  <span class="text-sm font-semibold text-emerald-700">מקדמות שהתקבלו</span>
+                  <span id="wsd-cf-advances" class="text-sm font-black text-emerald-600">—</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                  <span class="text-sm font-semibold text-emerald-700">יתרות שהתקבלו</span>
+                  <span id="wsd-cf-balances" class="text-sm font-black text-emerald-600">—</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <span class="text-sm font-bold text-blue-700">סה"כ כניסות</span>
+                  <span id="wsd-cf-total-in" class="text-lg font-black text-blue-600">—</span>
+                </div>
+                <div class="border-t border-gray-100 my-1"></div>
+                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+                  <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
+                  <span id="wsd-cf-total-out" class="text-sm font-black text-red-500">—</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg border-2" id="wsd-cf-net-row">
+                  <span class="text-sm font-bold">תזרים נטו</span>
+                  <span id="wsd-cf-net" class="text-xl font-black">—</span>
+                </div>
+              </div>
+              <!-- Monthly cash flow chart -->
+              <div class="mt-4">
+                <h4 class="text-xs font-bold text-gray-500 mb-2">תזרים חודשי — 6 חודשים</h4>
+                <div id="wsd-cf-chart" class="flex items-end gap-2 h-[100px]"></div>
+              </div>
+            </div>
+          </div>
+
         <!-- ═══ END WORKSHOP DASHBOARD ═══ -->
 
         <!-- ══ SHOP DASHBOARD (original) ══ -->
@@ -2577,7 +2679,9 @@ function switchDashView(view) {
   if (view === 'workshops') {
     // Ensure workshops data is loaded
     if (!tabsInited.workshops) { tabsInited.workshops = true; initWorkshopsTab(); }
+    if (!tabsInited.expenses) { tabsInited.expenses = true; initExpensesTab(); }
     renderWsDashboard();
+    renderFinancialReports();
   }
 }
 window.switchDashView = switchDashView;
@@ -2779,6 +2883,163 @@ function renderWsDashboard() {
   }
 }
 window.renderWsDashboard = renderWsDashboard;
+
+function renderFinancialReports() {
+  const el = id => document.getElementById(id);
+  const period = el('wsd-report-period')?.value || 'current';
+  const now = new Date();
+  const curY = now.getFullYear(), curM = now.getMonth();
+
+  // Determine date range
+  let startDate, endDate, label;
+  if (period === 'current') {
+    startDate = new Date(curY, curM, 1);
+    endDate = new Date(curY, curM + 1, 0, 23, 59, 59);
+    label = startDate.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+  } else if (period === 'prev') {
+    const pm = curM === 0 ? 11 : curM - 1, py = curM === 0 ? curY - 1 : curY;
+    startDate = new Date(py, pm, 1);
+    endDate = new Date(py, pm + 1, 0, 23, 59, 59);
+    label = startDate.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+  } else if (period === 'quarter') {
+    startDate = new Date(curY, curM - 2, 1);
+    endDate = new Date(curY, curM + 1, 0, 23, 59, 59);
+    label = '3 חודשים אחרונים';
+  } else {
+    startDate = new Date(curY, 0, 1);
+    endDate = new Date(curY, 11, 31, 23, 59, 59);
+    label = curY.toString();
+  }
+  if (el('wsd-report-label')) el('wsd-report-label').textContent = label;
+
+  function wsDate(w) {
+    return w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
+  }
+  function inRange(d) { return d && d >= startDate && d <= endDate; }
+
+  // ── P&L: Revenue ──
+  const confirmed = allWorkshops.filter(w => (w.bookingStatus || 'confirmed') === 'confirmed');
+  const periodWs = confirmed.filter(w => inRange(wsDate(w)));
+  const revenue = periodWs.reduce((s, w) => s + (w.total || 0), 0);
+
+  // ── P&L: Expenses ──
+  const periodExp = allExpenses.filter(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    return d >= startDate && d <= endDate;
+  });
+  const expByCategory = {};
+  let totalExp = 0;
+  periodExp.forEach(e => {
+    expByCategory[e.category] = (expByCategory[e.category] || 0) + (e.amount || 0);
+    totalExp += (e.amount || 0);
+  });
+
+  const profit = revenue - totalExp;
+  const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
+
+  // Render P&L
+  if (el('wsd-pnl-revenue')) el('wsd-pnl-revenue').textContent = revenue.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-materials')) el('wsd-pnl-materials').textContent = (expByCategory.materials || 0).toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-staff')) el('wsd-pnl-staff').textContent = (expByCategory.staff || 0).toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-marketing')) el('wsd-pnl-marketing').textContent = (expByCategory.marketing || 0).toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-fuel')) el('wsd-pnl-fuel').textContent = (expByCategory.fuel || 0).toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-equipment')) el('wsd-pnl-equipment').textContent = (expByCategory.equipment || 0).toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-other')) el('wsd-pnl-other').textContent = (expByCategory.other || 0).toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-expenses')) el('wsd-pnl-expenses').textContent = totalExp.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-profit')) el('wsd-pnl-profit').textContent = profit.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-margin')) el('wsd-pnl-margin').textContent = margin + '%';
+
+  // Color profit row
+  const profitRow = el('wsd-pnl-profit-row');
+  if (profitRow) {
+    if (profit >= 0) {
+      profitRow.className = 'flex items-center justify-between p-3 rounded-lg border-2 border-emerald-200 bg-emerald-50';
+      el('wsd-pnl-profit').className = 'text-xl font-black text-emerald-600';
+    } else {
+      profitRow.className = 'flex items-center justify-between p-3 rounded-lg border-2 border-red-200 bg-red-50';
+      el('wsd-pnl-profit').className = 'text-xl font-black text-red-500';
+    }
+  }
+
+  // ── Cash Flow ──
+  // Advances received in period
+  let advancesIn = 0, balancesIn = 0;
+  confirmed.forEach(w => {
+    const pay = w.payment || {};
+    if (pay.advancePaid && pay.advancePaidDate) {
+      const d = pay.advancePaidDate.seconds ? new Date(pay.advancePaidDate.seconds * 1000) : new Date(pay.advancePaidDate);
+      if (inRange(d)) advancesIn += (pay.advanceAmount || 500);
+    }
+    if (pay.balancePaid && pay.balancePaidDate) {
+      const d = pay.balancePaidDate.seconds ? new Date(pay.balancePaidDate.seconds * 1000) : new Date(pay.balancePaidDate);
+      if (inRange(d)) balancesIn += (pay.balanceAmount || 0);
+    }
+  });
+  const totalIn = advancesIn + balancesIn;
+  const cfNet = totalIn - totalExp;
+
+  if (el('wsd-cf-advances')) el('wsd-cf-advances').textContent = advancesIn.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-cf-balances')) el('wsd-cf-balances').textContent = balancesIn.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-cf-total-in')) el('wsd-cf-total-in').textContent = totalIn.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-cf-total-out')) el('wsd-cf-total-out').textContent = totalExp.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-cf-net')) el('wsd-cf-net').textContent = cfNet.toLocaleString('he-IL') + ' ₪';
+
+  const cfNetRow = el('wsd-cf-net-row');
+  if (cfNetRow) {
+    if (cfNet >= 0) {
+      cfNetRow.className = 'flex items-center justify-between p-3 rounded-lg border-2 border-emerald-200 bg-emerald-50';
+      el('wsd-cf-net').className = 'text-xl font-black text-emerald-600';
+    } else {
+      cfNetRow.className = 'flex items-center justify-between p-3 rounded-lg border-2 border-red-200 bg-red-50';
+      el('wsd-cf-net').className = 'text-xl font-black text-red-500';
+    }
+  }
+
+  // ── 6-month cash flow chart ──
+  const cfChart = el('wsd-cf-chart');
+  if (cfChart) {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      let m = curM - i, y = curY;
+      if (m < 0) { m += 12; y--; }
+      const ms = new Date(y, m, 1), me = new Date(y, m + 1, 0, 23, 59, 59);
+      let mIn = 0;
+      confirmed.forEach(w => {
+        const pay = w.payment || {};
+        if (pay.advancePaid && pay.advancePaidDate) {
+          const d = pay.advancePaidDate.seconds ? new Date(pay.advancePaidDate.seconds*1000) : new Date(pay.advancePaidDate);
+          if (d >= ms && d <= me) mIn += (pay.advanceAmount || 500);
+        }
+        if (pay.balancePaid && pay.balancePaidDate) {
+          const d = pay.balancePaidDate.seconds ? new Date(pay.balancePaidDate.seconds*1000) : new Date(pay.balancePaidDate);
+          if (d >= ms && d <= me) mIn += (pay.balanceAmount || 0);
+        }
+      });
+      let mOut = 0;
+      allExpenses.forEach(e => {
+        if (!e.date) return;
+        const d = new Date(e.date);
+        if (d >= ms && d <= me) mOut += (e.amount || 0);
+      });
+      months.push({ label: ms.toLocaleDateString('he-IL', { month: 'short' }), in: mIn, out: mOut, net: mIn - mOut });
+    }
+    const maxVal = Math.max(...months.map(m => Math.max(m.in, m.out)), 1);
+    cfChart.innerHTML = months.map(m => {
+      const hIn = Math.max(2, Math.round((m.in / maxVal) * 80));
+      const hOut = Math.max(2, Math.round((m.out / maxVal) * 80));
+      return `<div class="flex-1 flex flex-col items-center gap-0.5">
+        <span class="text-[8px] font-bold ${m.net >= 0 ? 'text-emerald-500' : 'text-red-400'}">${m.net >= 0 ? '+' : ''}${(m.net/1000).toFixed(1)}K</span>
+        <div class="flex gap-0.5 items-end w-full justify-center">
+          <div class="w-2.5 bg-emerald-400 rounded-t" style="height:${hIn}px" title="כניסות: ${m.in.toLocaleString('he-IL')}₪"></div>
+          <div class="w-2.5 bg-red-300 rounded-t" style="height:${hOut}px" title="יציאות: ${m.out.toLocaleString('he-IL')}₪"></div>
+        </div>
+        <span class="text-[9px] text-gray-400">${m.label}</span>
+      </div>`;
+    }).join('');
+  }
+}
+window.renderFinancialReports = renderFinancialReports;
 
 function updateInventoryStats() {
   const el = id => document.getElementById(id);
@@ -3902,7 +4163,7 @@ function initWorkshopsTab() {
     allWorkshops = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderCalendar();
     renderWorkshopsList();
-    if (currentDashView === 'workshops') renderWsDashboard();
+    if (currentDashView === 'workshops') { renderWsDashboard(); renderFinancialReports(); }
   }, err=>console.error('workshops:', err));
 
   // Live price calculation on any relevant field change
