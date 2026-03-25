@@ -260,7 +260,7 @@
 <div id="v-dash" data-v class="fadein flex flex-col min-h-screen">
 
   <!-- Header -->
-  <header class="bg-[#fcf8f3] sticky top-0 z-30">
+  <header class="bg-[#fcf8f3]/95 backdrop-blur-xl fixed top-0 left-0 right-0 z-30 border-b border-[#f0dfc0]/30">
     <div class="max-w-7xl mx-auto px-5 sm:px-6 h-16 flex items-center justify-between gap-3">
       <!-- Right side: Hamburger (mobile) + Brand (desktop) -->
       <div class="flex items-center gap-3">
@@ -318,7 +318,7 @@
   </header>'
 
 
-  <div class="flex flex-1 overflow-hidden relative">
+  <div class="flex flex-1 overflow-hidden relative mt-16">
 
     <!-- ════ SIDEBAR OVERLAY (mobile) ════ -->
     <div id="sidebar-overlay" class="sm:hidden fixed inset-0 bg-black/50 z-40 transition-opacity" style="display:none;" onclick="closeSidebar()"></div>
@@ -2317,6 +2317,8 @@ function closeSidebar() {
 }
 document.getElementById('sidebar-toggle')?.addEventListener('click', openSidebar);
 document.getElementById('sidebar-logout-btn')?.addEventListener('click', () => { import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js').then(m => m.signOut(auth)); });
+window.openSidebar = openSidebar;
+window.closeSidebar = closeSidebar;
 
 // ── Mobile bottom-nav "More" menu ──
 function toggleMoreMenu() {
@@ -2940,7 +2942,7 @@ function renderWsDashboard() {
       html += `<div class="text-center p-2 rounded-xl ${isToday ? 'bg-[#fdf6ee] border border-[#f0dfc0]' : 'bg-gray-50 border border-gray-100'} transition-all">
         <p class="text-[10px] font-bold ${isToday ? 'text-[#d4a373]' : 'text-gray-400'}">${dayName}</p>
         <p class="text-xs font-semibold ${isToday ? 'text-[#d4a373]' : 'text-gray-600'} mt-1">${dayStr}</p>
-        ${dayWs.length ? `<div class="mt-2 space-y-1">${dayWs.map(w => `<div class="text-[9px] bg-white rounded-lg px-1.5 py-1 border border-[#f0dfc0] font-semibold text-gray-700 cursor-pointer hover:border-[#d4a373] hover:shadow-sm transition-all" onclick="openWsCard('${w.id}')" title="${esc(w.celebrant||w.customerName)}"><span class="text-[#d4a373]">${w.time||''}</span> ${esc(w.celebrant||w.customerName)}${w.city?' · <span class=&quot;text-gray-400&quot;>'+esc(w.city)+'</span>':''}</div>`).join('')}</div>` : '<p class="text-[9px] text-gray-300 mt-2">—</p>'}
+        ${dayWs.length ? `<div class="mt-2 space-y-1">${dayWs.map(w => `<div class="text-[9px] bg-white rounded-lg px-1.5 py-1 border border-[#f0dfc0] font-semibold text-gray-700 cursor-pointer hover:border-[#d4a373] hover:shadow-sm transition-all" onclick="openWsCard('${w.id}')" title="${esc(w.celebrant||w.customerName)}"><span class="text-[#d4a373]">${w.time||''}</span> ${esc(w.celebrant||w.customerName)}</div>`).join('')}</div>` : '<p class="text-[9px] text-gray-300 mt-2">—</p>'}
       </div>`;
     }
     weekEl.innerHTML = html;
