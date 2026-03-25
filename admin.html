@@ -322,9 +322,9 @@
     <aside id="erp-sidebar" class="fixed right-0 top-0 sm:top-16 bottom-0 w-[260px] sm:w-[250px] bg-white z-50 sm:z-20 overflow-y-auto transition-transform duration-300 translate-x-full sm:translate-x-0 shadow-2xl sm:shadow-none border-l border-[#f0dfc0]/40">
       <!-- Mobile sidebar header -->
       <div class="sm:hidden flex items-center justify-between px-5 h-16 border-b border-[#f0dfc0]/40">
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2" dir="ltr">
+          <span class="text-[11px] text-[#d4a373] font-semibold">by Vik</span>
           <span class="font-black tracking-[2px] text-gray-800 text-sm">CHARMING</span>
-          <span class="text-[10px] text-[#d4a373] font-semibold">by Vik</span>
         </div>
         <button onclick="closeSidebar()" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1115,41 +1115,6 @@
 
         </div><!-- END ws-list-view -->
 
-        <!-- ══ WhatsApp Message Templates ══ -->
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
-          <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <i data-lucide="message-circle" class="w-4 h-4 inline-block"></i>
-              <h3 class="font-bold text-sm text-gray-800">הודעות WhatsApp מוכנות</h3>
-              <span id="wa-tpl-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
-            </div>
-            <button onclick="openWaTplForm()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-full font-bold transition-colors">+ הודעה חדשה</button>
-          </div>
-
-          <!-- Template Form (hidden by default) -->
-          <div id="wa-tpl-form" class="p-4 border-b border-[#f0dfc0] bg-[#fdf8f5]" style="display:none;">
-            <div class="space-y-3">
-              <div>
-                <label class="lbl">שם ההודעה *</label>
-                <input id="wa-tpl-name" type="text" placeholder='למשל: "הצעת מחיר", "תזכורת לפני סדנא"' class="inp" />
-              </div>
-              <div>
-                <label class="lbl">תוכן ההודעה *</label>
-                <textarea id="wa-tpl-body" rows="6" class="inp text-sm leading-relaxed" placeholder="כתוב את ההודעה כאן...&#10;&#10;משתנים זמינים: {שם_לקוח}, {שם_חוגגת}, {תאריך}, {שעה}, {מסלול}, {משתתפות}, {עיר}, {סכום}, {מקדמה}, {יתרה}"></textarea>
-                <p class="text-[10px] text-gray-400 mt-1">השתמש ב-{שם_לקוח} וכו' כדי להחליף אוטומטית בפרטי הסדנא</p>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <button onclick="saveWaTpl()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full font-bold text-sm transition-colors">שמור</button>
-                <button onclick="closeWaTplForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-5 py-2 rounded-full font-bold text-sm transition-colors">ביטול</button>
-                <p id="wa-tpl-err" class="text-red-400 text-xs self-center"></p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Templates list -->
-          <div id="wa-tpl-list" class="divide-y divide-[#fdf6ee]"></div>
-        </div>
-
       </section>
 
       <!-- ─── TAB: EXPENSES ─── -->
@@ -1384,6 +1349,7 @@
             <button class="settings-nav-btn" data-settings-page="banner" onclick="showSettingsPage('banner')">📢 באנר עליון</button>
             <button class="settings-nav-btn" data-settings-page="coupons" onclick="showSettingsPage('coupons')"><i data-lucide="tag" class="w-3.5 h-3.5 inline-block"></i> קופונים</button>
             <button class="settings-nav-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">🖼️ גלריית סדנאות</button>
+            <button class="settings-nav-btn" data-settings-page="wa-templates" onclick="showSettingsPage('wa-templates')">💬 הודעות WhatsApp</button>
           </div>
         </div>
 
@@ -1523,6 +1489,44 @@ Charming by Vik 💛</textarea>
             </div>
           </div>
         </div>
+
+        <!-- Sub-page: WhatsApp Templates -->
+        <div id="settings-page-wa-templates" class="settings-page p-6 space-y-6" style="display:none;">
+          <div class="flex flex-wrap justify-between items-center gap-3">
+            <div>
+              <h2 class="font-black text-gray-800 text-lg">הודעות WhatsApp מוכנות</h2>
+              <p class="text-xs text-gray-400 mt-1">תבניות הודעות שניתן לשלוח בלחיצה מכרטיס סדנא</p>
+            </div>
+            <button onclick="openWaTplForm()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">+ הודעה חדשה</button>
+          </div>
+
+          <!-- Template Form (hidden by default) -->
+          <div id="wa-tpl-form" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm" style="display:none;">
+            <h3 class="font-bold text-sm text-gray-800 mb-4">פרטי הודעה</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="lbl">שם ההודעה *</label>
+                <input id="wa-tpl-name" type="text" placeholder='למשל: "הצעת מחיר", "תזכורת לפני סדנא"' class="inp" />
+              </div>
+              <div>
+                <label class="lbl">תוכן ההודעה *</label>
+                <textarea id="wa-tpl-body" rows="6" class="inp text-sm leading-relaxed" placeholder="כתוב את ההודעה כאן...&#10;&#10;משתנים זמינים: {שם_לקוח}, {שם_חוגגת}, {תאריך}, {שעה}, {מסלול}, {משתתפות}, {עיר}, {סכום}, {מקדמה}, {יתרה}"></textarea>
+                <p class="text-[10px] text-gray-400 mt-1">השתמש ב-{שם_לקוח} וכו' כדי להחליף אוטומטית בפרטי הסדנא</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="saveWaTpl()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full font-bold text-sm transition-colors">שמור</button>
+                <button onclick="closeWaTplForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-5 py-2 rounded-full font-bold text-sm transition-colors">ביטול</button>
+                <p id="wa-tpl-err" class="text-red-400 text-xs self-center"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Templates list -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
+            <div id="wa-tpl-list" class="divide-y divide-[#fdf6ee]"></div>
+          </div>
+        </div>
+
       </section>
 
       <!-- ─── TAB: NOTIFICATIONS (full page) ─── -->
@@ -2366,7 +2370,7 @@ window.toggleMoreMenu = toggleMoreMenu;
 window.closeMoreMenu  = closeMoreMenu;
 
 // ── Settings sub-page navigation ──────────────────────────────────
-const settingsSubPages = ['general','banner','coupons','ws-gallery'];
+const settingsSubPages = ['general','banner','coupons','ws-gallery','wa-templates'];
 let settingsSubInited = {};
 function showSettingsPage(page) {
   settingsSubPages.forEach(p => {
@@ -2375,15 +2379,18 @@ function showSettingsPage(page) {
   });
   document.querySelectorAll('.settings-nav-btn').forEach(btn =>
     btn.classList.toggle('settings-nav-active', btn.dataset.settingsPage === page));
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
   // Init sub-page data on first view
   if (!settingsSubInited[page]) {
     settingsSubInited[page] = true;
     if (page === 'coupons' && typeof initCouponsTab === 'function') initCouponsTab();
     else if (page === 'banner' && typeof initBannerTab === 'function') initBannerTab();
     else if (page === 'ws-gallery' && typeof initWsGalleryTab === 'function') initWsGalleryTab();
+    else if (page === 'wa-templates' && typeof initWaTemplates === 'function') initWaTemplates();
   } else {
     if (page === 'coupons' && typeof renderCouponsGrid === 'function') renderCouponsGrid();
     else if (page === 'banner' && typeof renderBannerList === 'function') renderBannerList();
+    else if (page === 'wa-templates' && typeof renderWaTemplates === 'function') renderWaTemplates();
   }
 }
 window.showSettingsPage = showSettingsPage;
@@ -4420,8 +4427,6 @@ function initWorkshopsTab() {
   document.getElementById('ws-advance-amount')?.addEventListener('input', updateWsTotal);
   updateWsTotal();
   updatePaymentBadge();
-  // Init WhatsApp templates
-  initWaTemplates();
 }
 
 function updateWsTotal() {
@@ -4587,15 +4592,7 @@ window.closeDayPopup = closeDayPopup;
 
 function drillToWorkshop(wsId) {
   closeDayPopup();
-  showTab('workshops');
-  setTimeout(() => {
-    const card = document.querySelector(`[data-ws-id="${wsId}"]`);
-    if (card) {
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.classList.add('ring-2', 'ring-[#d4a373]');
-      setTimeout(() => card.classList.remove('ring-2', 'ring-[#d4a373]'), 2500);
-    }
-  }, 300);
+  openWsCard(wsId);
 }
 window.drillToWorkshop = drillToWorkshop;
 
