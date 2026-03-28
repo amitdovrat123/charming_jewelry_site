@@ -7,6 +7,8 @@ import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/fir
 import { getAuth, GoogleAuthProvider, browserLocalPersistence, setPersistence }
                              from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore }      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { initializeAppCheck, ReCaptchaV3Provider }
+                             from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js';
 
 const firebaseConfig = {
   apiKey:            'AIzaSyACTKkedUuHhYNOSBPsVxPV9YMM7agtILk',
@@ -18,6 +20,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// ── App Check — blocks requests not from the real site ───────
+initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider('6Lew1ZssAAAAAAkFQcaMLzM3n7z458OdDT8UkOdt'),
+  isTokenAutoRefreshEnabled: true,
+});
 
 export const auth = getAuth(app);
 

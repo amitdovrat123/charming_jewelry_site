@@ -68,15 +68,23 @@ service cloud.firestore {
         }
       }
 
-      // פניות שירות: כל אחד יכול ליצור פנייה, רק אדמין קורא
+      // פניות שירות: validation בסיסי למניעת ספאם
       match /inquiries/{inquiryId} {
-        allow create: if true;
+        allow create: if request.resource.data.keys().hasAll(['name', 'phone'])
+                      && request.resource.data.name is string
+                      && request.resource.data.name.size() > 1
+                      && request.resource.data.name.size() < 100
+                      && request.resource.data.phone is string
+                      && request.resource.data.phone.size() > 8
+                      && request.resource.data.phone.size() < 20
+                      && request.resource.data.keys().size() < 12;
         allow read, update, delete: if isAdmin();
       }
 
-      // לוגים: רק אדמין קורא
+      // לוגים: רק אדמין קורא, validation בסיסי
       match /logs/{logId} {
-        allow create: if true;
+        allow create: if request.resource.data.keys().size() < 10
+                      && request.resource.data.size() < 5000;
         allow read:   if isAdmin();
         allow update, delete: if false;
       }
@@ -96,9 +104,14 @@ service cloud.firestore {
         allow read, write: if isAdmin();
       }
 
-      // תעבורת אתר: כולם כותבים, רק אדמין קורא
+      // תעבורת אתר: validation למניעת הצפה
       match /site_traffic/{docId} {
-        allow create: if true;
+        allow create: if request.resource.data.keys().hasAll(['sessionId', 'event', 'page'])
+                      && request.resource.data.sessionId is string
+                      && request.resource.data.sessionId.size() < 50
+                      && request.resource.data.event is string
+                      && request.resource.data.event.size() < 30
+                      && request.resource.data.keys().size() < 15;
         allow read:   if isAdmin();
         allow update, delete: if false;
       }

@@ -45,12 +45,17 @@ function _pageName() {
   return 'home';
 }
 
+// ── Rate limiting — max events per session ──────────────────
+const MAX_EVENTS_PER_SESSION = 200;
+let _eventCount = 0;
+
 /**
- * Fire-and-forget event tracking.
+ * Fire-and-forget event tracking (rate-limited).
  * @param {string} event  - Event name (page_view, add_to_cart, etc.)
  * @param {object} meta   - Additional metadata
  */
 export function trackEvent(event, meta = {}) {
+  if (++_eventCount > MAX_EVENTS_PER_SESSION) return;
   addDoc(collection(db, TRAFFIC_COL), {
     sessionId: _sid,
     event,
