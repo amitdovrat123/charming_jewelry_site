@@ -5127,6 +5127,7 @@ function renderWorkshopCard(w, opts = {}) {
       <span>${esc(shortRoute)}</span>
       <span class="text-gray-200">|</span>
       <span>${w.participantCount || 0} משתתפות</span>
+      ${w.city ? `<span class="text-gray-200">|</span><span>${esc(w.city)}</span>` : ''}
     </div>
   </div>`;
 }
@@ -5398,7 +5399,7 @@ function openWsCard(id) {
   el('wsc-contact').textContent = w.customerName;
   el('wsc-phone').textContent = w.phone||'';
   const wp = (w.phone||'').replace(/[-\s]/g,'');
-  el('wsc-wa-link').href = `https://wa.me/${wp.startsWith('0')?'972'+wp.slice(1):wp}`;
+  const waLink = el('wsc-wa-link'); if (waLink) waLink.href = `https://wa.me/${wp.startsWith('0')?'972'+wp.slice(1):wp}`;
   el('wsc-city').textContent = w.city||'—';
   const dist = getCityDistance(w.city);
   el('wsc-distance').textContent = dist?`${dist} ק"מ מראשון · דלק: ~${calcFuelCost(dist)}₪`:'';
