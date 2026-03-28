@@ -202,7 +202,7 @@ ul { list-style: none; }
   padding: 130px 48px 90px;
   background:
     linear-gradient(rgba(253, 248, 245, 0.75), rgba(253, 248, 245, 0.75)),
-    url('images/workshop/1112.png') center / cover no-repeat;
+    url('https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1774700866/1112_axxkwm.png') center / cover no-repeat;
   position: relative;
 }
 
@@ -1118,7 +1118,7 @@ ul { list-style: none; }
     padding: 120px 24px 72px;
     background:
       linear-gradient(rgba(253, 248, 245, 0.78), rgba(253, 248, 245, 0.78)),
-      url('images/workshop/1112.png') center / cover no-repeat;
+      url('https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1774700866/1112_axxkwm.png') center / cover no-repeat;
   }
 
   .hero-content { max-width: 100%; width: 100%; }
