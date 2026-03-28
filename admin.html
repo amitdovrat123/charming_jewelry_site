@@ -272,8 +272,8 @@
         <span class="text-gray-400 text-[11px] font-light tracking-wide hidden sm:inline">BY VIK</span>
         <span class="font-black tracking-[3px] text-gray-800 text-[15px]">C H A R M I N G</span>
       </div>
-      <!-- Left: Settings + Bell + Desktop extras -->
-      <div class="flex items-center gap-2.5">
+      <!-- Left: Desktop extras + Bell + Settings -->
+      <div class="flex items-center gap-2.5 flex-row-reverse mr-auto">
         <button onclick="showTab('settings')" class="w-11 h-11 rounded-full bg-white/80 border border-[#e8ddd5] flex items-center justify-center text-gray-400 hover:text-[#d4a373] hover:border-[#d4a373]/40 transition-all shadow-sm" title="הגדרות">
           <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
         </button>
@@ -395,18 +395,24 @@
     <main id="erp-content" class="flex-1 overflow-y-auto">
 
       <!-- ─── TAB: DASHBOARD ─── -->
-      <section id="tab-dashboard" data-erp-tab class="p-4 sm:p-6 space-y-5">
+      <section id="tab-dashboard" data-erp-tab class="px-4 pt-2 pb-4 sm:px-6 sm:pt-2 sm:pb-6 space-y-3">
 
-        <!-- ══ Dashboard view switcher ══ -->
-        <div class="flex items-center gap-1 bg-gray-100 rounded-full p-0.5 w-fit">
-          <button id="dash-view-workshops" onclick="switchDashView('workshops')"
-            class="dash-view-btn px-3 py-1 rounded-full text-[11px] font-bold transition-all bg-[#d4a373] text-white shadow-sm">
-            סדנאות
-          </button>
-          <button id="dash-view-shop" onclick="switchDashView('shop')"
-            class="dash-view-btn px-3 py-1 rounded-full text-[11px] font-bold transition-all text-gray-400 hover:text-[#d4a373]">
-            חנות
-          </button>
+        <!-- ══ Dashboard header: title + view switcher ══ -->
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-black text-gray-700 flex items-center gap-2">
+            <span class="w-1.5 h-4 bg-[#d4a373] rounded-full inline-block"></span>
+            <span id="dash-kpi-title">סיכום חודשי — סדנאות</span>
+          </h2>
+          <div class="flex items-center gap-1 bg-gray-100 rounded-full p-0.5">
+            <button id="dash-view-workshops" onclick="switchDashView('workshops')"
+              class="dash-view-btn px-3 py-1 rounded-full text-[11px] font-bold transition-all bg-[#d4a373] text-white shadow-sm">
+              סדנאות
+            </button>
+            <button id="dash-view-shop" onclick="switchDashView('shop')"
+              class="dash-view-btn px-3 py-1 rounded-full text-[11px] font-bold transition-all text-gray-400 hover:text-[#d4a373]">
+              חנות
+            </button>
+          </div>
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════ -->
@@ -416,10 +422,6 @@
 
           <!-- KPI Cards Row 1 -->
           <div>
-            <h2 class="text-xs font-black text-gray-700 mb-2 flex items-center gap-2">
-              <span class="w-1.5 h-4 bg-[#d4a373] rounded-full inline-block"></span>
-              סיכום חודשי — סדנאות
-            </h2>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
                 <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">סדנאות סגורות</p>
@@ -1095,7 +1097,7 @@
           <div class="px-6 py-4 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2 sticky bottom-0">
             <button onclick="saveWorkshop()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור סדנה</button>
             <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp</button>
-            <button onclick="closeWsForm()" class="border border-gray-200 text-gray-400 hover:text-gray-600 px-5 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
+            <a id="ws-call-btn" href="tel:" onclick="var p=document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');if(p)this.href='tel:'+p;" class="border border-blue-300 text-blue-500 hover:bg-blue-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="phone" class="w-3.5 h-3.5"></i> חייג</a>
           </div>
           </div><!-- /modal inner -->
         </div><!-- /ws-form-section -->
@@ -2858,7 +2860,7 @@ function initERP(user) {
   const savedSettingsPage = sessionStorage.getItem('charming_settings_page');
   const savedWsView = sessionStorage.getItem('charming_ws_view');
   showTab(savedTab);
-  if (savedDashView && savedTab === 'dashboard') switchDashView(savedDashView);
+  if (savedTab === 'dashboard') switchDashView(savedDashView || 'workshops');
   if (savedSettingsPage && savedTab === 'settings') setTimeout(() => showSettingsPage(savedSettingsPage), 100);
   if (savedWsView && savedTab === 'workshops') switchWsView(savedWsView);
   // Restore scroll position after a short delay (data needs to render)
@@ -2921,6 +2923,8 @@ function switchDashView(view) {
     (view === 'shop' ? 'bg-[#d4a373] text-white' : 'text-gray-400 hover:text-[#d4a373]');
   document.getElementById('dash-view-workshops').className = 'dash-view-btn px-5 py-2 rounded-full text-sm font-bold transition-all ' +
     (view === 'workshops' ? 'bg-[#d4a373] text-white' : 'text-gray-400 hover:text-[#d4a373]');
+  const titleEl = document.getElementById('dash-kpi-title');
+  if (titleEl) titleEl.textContent = view === 'workshops' ? 'סיכום חודשי — סדנאות' : 'סיכום חודשי — חנות';
   if (view === 'workshops') {
     // Ensure workshops data is loaded
     if (!tabsInited.workshops) { tabsInited.workshops = true; initWorkshopsTab(); }
@@ -2958,7 +2962,7 @@ function renderWsDashboard() {
   const monthRevenue = monthConfirmed.reduce((s, w) => s + (w.total || 0), 0);
   if (el('wsd-revenue-month')) el('wsd-revenue-month').textContent = monthRevenue.toLocaleString('he-IL') + ' ₪';
   const avgRev = monthConfirmed.length ? Math.round(monthRevenue / monthConfirmed.length) : 0;
-  if (el('wsd-avg-revenue')) el('wsd-avg-revenue').textContent = avgRev ? avgRev.toLocaleString('he-IL') + ' ��' : '—';
+  if (el('wsd-avg-revenue')) el('wsd-avg-revenue').textContent = avgRev ? avgRev.toLocaleString('he-IL') + ' ₪' : '—';
 
   // ── Weekly Goal (linear meter) ──
   const wGoal = parseInt(el('wsd-weekly-goal')?.value) || 3;
@@ -5386,10 +5390,16 @@ function openWsCard(id) {
   el('wsc-celebrant').textContent = w.celebrant || w.customerName;
   el('wsc-occasion').textContent = w.occasion || '';
   // Status badge
-  if (status === 'draft') el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-amber-100 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full">📝 טיוטה</span>';
-  else if (pay.advancePaid && pay.balancePaid) el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">✅ שולם במלואו</span>';
-  else if (pay.advancePaid) el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-2.5 py-1 rounded-full">✅ סגורה — מקדמה שולמה</span>';
-  else el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-2.5 py-1 rounded-full">✅ סגורה</span>';
+  const isPast = d && d < now;
+  if (status === 'draft') {
+    el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded-full">טיוטה</span>';
+  } else {
+    el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-600 border border-emerald-200 px-2.5 py-1 rounded-full">סגורה — מקדמה שולמה</span>';
+  }
+  // Reminder for past workshops where balance not marked as paid
+  if (status === 'confirmed' && isPast && !pay.balancePaid) {
+    el('wsc-status-badge').innerHTML += '<span class="text-[10px] font-semibold bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full mr-2">טרם הושלם התשלום</span>';
+  }
 
   if (d) {
     el('wsc-date').textContent = d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) + ' · ' + (w.time||'');
@@ -8504,42 +8514,46 @@ window.renderAnalytics = renderAnalytics;
   style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
   onclick="if(event.target===this)closeWsCard()">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md fadein overflow-hidden max-h-[90vh] overflow-y-auto">
-    <div class="relative bg-gradient-to-l from-[#fdf6ee] to-[#f5ece7] px-6 py-5 border-b border-[#f0dfc0]">
-      <button onclick="closeWsCard()" class="absolute top-4 left-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-white/60 transition-all text-lg">✕</button>
-      <p id="wsc-celebrant" class="font-black text-xl text-gray-800"></p>
-      <p id="wsc-occasion" class="text-sm text-[#d4a373] mt-0.5"></p>
-      <div id="wsc-status-badge" class="mt-2"></div>
+    <div class="relative bg-gradient-to-l from-[#fdf6ee] to-[#f5ece7] px-5 py-3.5 border-b border-[#f0dfc0]">
+      <button onclick="closeWsCard()" class="absolute top-3 left-3 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-white/60 transition-all text-lg">✕</button>
+      <div class="flex items-center justify-between gap-2 pl-10">
+        <p id="wsc-celebrant" class="font-black text-lg text-gray-800"></p>
+        <div id="wsc-status-badge"></div>
+      </div>
+      <p id="wsc-occasion" class="text-xs text-[#d4a373] mt-0.5"></p>
     </div>
-    <div class="px-6 py-4 space-y-3">
-      <div class="flex items-center gap-3 p-3 bg-[#fdf6ee] rounded-xl">
-        <i data-lucide="calendar" class="w-5 h-5 text-[#d4a373]"></i>
-        <div><p id="wsc-date" class="text-sm font-bold text-gray-800"></p><p id="wsc-days-until" class="text-[10px] text-[#d4a373] font-semibold"></p></div>
+    <div class="px-5 py-3 space-y-2">
+      <div class="flex items-center gap-2.5 p-2.5 bg-[#fdf6ee] rounded-xl">
+        <i data-lucide="calendar" class="w-4 h-4 text-[#d4a373]"></i>
+        <div><p id="wsc-date" class="text-[13px] font-bold text-gray-800"></p><p id="wsc-days-until" class="text-[10px] text-[#d4a373] font-semibold"></p></div>
       </div>
-      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-        <i data-lucide="user" class="w-5 h-5 text-[#d4a373]"></i>
-        <div class="flex-1"><p id="wsc-contact" class="text-sm font-semibold text-gray-700"></p><p id="wsc-phone" class="text-xs text-gray-400"></p></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex items-center gap-2 p-2.5 bg-gray-50 rounded-xl">
+          <i data-lucide="user" class="w-4 h-4 text-[#d4a373]"></i>
+          <div class="min-w-0"><p id="wsc-contact" class="text-[13px] font-semibold text-gray-700 truncate"></p><p id="wsc-phone" class="text-[10px] text-gray-400"></p></div>
+        </div>
+        <div class="flex items-center gap-2 p-2.5 bg-gray-50 rounded-xl">
+          <i data-lucide="map-pin" class="w-4 h-4 text-[#d4a373]"></i>
+          <div class="min-w-0"><p id="wsc-city" class="text-[13px] font-semibold text-gray-700 truncate"></p><p id="wsc-distance" class="text-[10px] text-gray-400"></p></div>
+        </div>
       </div>
-      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-        <i data-lucide="map-pin" class="w-5 h-5 text-[#d4a373]"></i>
-        <div><p id="wsc-city" class="text-sm font-semibold text-gray-700"></p><p id="wsc-distance" class="text-[10px] text-gray-400"></p></div>
+      <div class="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-xl">
+        <i data-lucide="palette" class="w-4 h-4 text-[#d4a373]"></i>
+        <div><p id="wsc-route" class="text-[13px] font-semibold text-gray-700"></p><p id="wsc-participants" class="text-[10px] text-gray-400"></p></div>
       </div>
-      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-        <i data-lucide="palette" class="w-5 h-5 text-[#d4a373]"></i>
-        <div><p id="wsc-route" class="text-sm font-semibold text-gray-700"></p><p id="wsc-participants" class="text-xs text-gray-400"></p></div>
+      <div class="p-3 bg-[#fdf6ee] rounded-xl border border-[#f0dfc0]">
+        <div class="flex justify-between mb-1.5"><span class="text-[11px] text-gray-500">מחיר בסיס</span><span id="wsc-base-price" class="text-[13px] font-bold text-gray-600"></span></div>
+        <div id="wsc-discount-row" class="flex justify-between mb-1.5" style="display:none"><span class="text-[11px] text-gray-500">הנחה</span><span id="wsc-discount" class="text-[13px] font-bold text-emerald-500"></span></div>
+        <div id="wsc-arrival-row" class="flex justify-between mb-1.5" style="display:none"><span class="text-[11px] text-gray-500">עלות הגעה</span><span id="wsc-arrival" class="text-[13px] font-bold text-gray-600"></span></div>
+        <div class="border-t border-[#f0dfc0] pt-1.5 flex justify-between"><span class="text-[13px] font-bold text-gray-700">סה"כ</span><span id="wsc-total" class="text-lg font-black text-[#d4a373]"></span></div>
       </div>
-      <div class="p-4 bg-[#fdf6ee] rounded-xl border border-[#f0dfc0]">
-        <div class="flex justify-between mb-2"><span class="text-xs text-gray-500">מחיר בסיס</span><span id="wsc-base-price" class="text-sm font-bold text-gray-600"></span></div>
-        <div id="wsc-discount-row" class="flex justify-between mb-2" style="display:none"><span class="text-xs text-gray-500">הנחה</span><span id="wsc-discount" class="text-sm font-bold text-emerald-500"></span></div>
-        <div id="wsc-arrival-row" class="flex justify-between mb-2" style="display:none"><span class="text-xs text-gray-500">עלות הגעה</span><span id="wsc-arrival" class="text-sm font-bold text-gray-600"></span></div>
-        <div class="border-t border-[#f0dfc0] pt-2 flex justify-between"><span class="text-sm font-bold text-gray-700">סה"כ</span><span id="wsc-total" class="text-xl font-black text-[#d4a373]"></span></div>
-      </div>
-      <div id="wsc-payment" class="p-4 rounded-xl border space-y-2"></div>
-      <div id="wsc-notes-section" class="p-3 bg-gray-50 rounded-xl" style="display:none"><p class="text-[10px] text-gray-400 mb-1">הערות</p><p id="wsc-notes" class="text-sm text-gray-600"></p></div>
+      <div id="wsc-payment" class="p-3 rounded-xl border space-y-1.5"></div>
+      <div id="wsc-notes-section" class="p-2.5 bg-gray-50 rounded-xl" style="display:none"><p class="text-[10px] text-gray-400 mb-0.5">הערות</p><p id="wsc-notes" class="text-[13px] text-gray-600"></p></div>
     </div>
-    <div class="px-6 py-4 border-t border-[#f0dfc0] bg-[#fdf8f5] flex flex-wrap gap-2">
-      <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</button>
-      <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors"><i data-lucide="message-circle" class="w-3.5 h-3.5 inline-block"></i> WhatsApp</button>
-      <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-4 py-2.5 rounded-full font-bold text-sm transition-colors"><i data-lucide="calendar" class="w-4 h-4"></i></button>
+    <div class="px-5 py-3 border-t border-[#f0dfc0] bg-[#fdf8f5] flex flex-wrap gap-2">
+      <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2 rounded-full font-bold text-sm transition-all"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</button>
+      <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-full font-bold text-sm transition-colors"><i data-lucide="message-circle" class="w-3.5 h-3.5 inline-block"></i> WhatsApp</button>
+      <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-2 rounded-full font-bold text-sm transition-colors"><i data-lucide="calendar" class="w-4 h-4"></i></button>
     </div>
   </div>
 </div>
