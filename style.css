@@ -1,3 +1,6 @@
+/* ===== Hide reCAPTCHA badge (App Check runs in background) ===== */
+.grecaptcha-badge { visibility: hidden !important; }
+
 /* ===== i18n Loading Screen ===== */
 .lang-loading body { opacity: 0; }
 .lang-loading.lang-loading body { transition: opacity 0.15s ease; }
