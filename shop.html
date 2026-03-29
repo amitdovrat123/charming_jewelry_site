@@ -17,8 +17,8 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MBC09YG3HY"></script>
   <script>
     window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
-    gtag('consent','default',{'analytics_storage':'denied'});
-    if(localStorage.getItem('charming_cookie_accepted')){gtag('consent','update',{'analytics_storage':'granted'});}
+    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied'});
+    (function(){var p=localStorage.getItem('charming_cookie_prefs');if(p){p=JSON.parse(p);gtag('consent','update',{'analytics_storage':p.analytics?'granted':'denied','ad_storage':p.marketing?'granted':'denied','ad_user_data':p.marketing?'granted':'denied','ad_personalization':p.marketing?'granted':'denied'});}})();
     gtag('js',new Date());gtag('config','G-MBC09YG3HY');
   </script>
 </head>
@@ -126,6 +126,7 @@
           <a href="legal.html#shipping"   class="footer-policy-btn" data-i18n="footer_shipping">מדיניות משלוחים</a>
           <a href="legal.html#terms"      class="footer-policy-btn" data-i18n="footer_terms">תנאי האתר</a>
           <a href="legal.html#disclaimer" class="footer-policy-btn" data-i18n="footer_privacy">מדיניות פרטיות</a>
+          <a href="javascript:void(0)" onclick="openCookieSettings()" class="footer-policy-btn">הגדרות עוגיות</a>
         </div>
       </div>
 
@@ -157,22 +158,80 @@
 
   <!-- Cookie Consent Banner -->
   <div id="cookie-banner" class="cookie-banner" role="banner" aria-label="הסכמת קוקיז">
-    <p class="cookie-banner-text">אנחנו משתמשים בקוקיז ובגוגל אנליטיקס כדי להעניק לך את חוויית הקנייה הטובה ביותר. בהמשך הגלישה את מאשרת את השימוש בהם. <a href="legal.html#cookies">למידע נוסף</a></p>
-    <button class="cookie-banner-btn" id="cookie-accept">מאשרת וממשיכה</button>
+    <p class="cookie-banner-text">האתר שלנו משתמש בעוגיות כדי להעניק לך חוויית גלישה מותאמת אישית. את יכולה לבחור אילו עוגיות לאשר.</p>
+    <div class="cookie-banner-actions">
+      <button class="cookie-btn-accept" id="cookie-accept-all">קבלת הכל</button>
+      <button class="cookie-btn-settings" id="cookie-open-settings">הגדרות עוגיות</button>
+      <button class="cookie-btn-reject" id="cookie-reject">חיוניות בלבד</button>
+    </div>
+  </div>
+  <div id="cookie-modal-overlay" class="cookie-modal-overlay" role="dialog" aria-label="הגדרות עוגיות">
+    <div class="cookie-modal">
+      <div class="cookie-modal-header">
+        <h3>הגדרות עוגיות</h3>
+        <p>כאן את יכולה לבחור בדיוק אילו עוגיות את מאשרת. עוגיות חיוניות נדרשות לפעולה תקינה של האתר ולא ניתן לבטלן.</p>
+      </div>
+      <div class="cookie-modal-body">
+        <div class="cookie-category is-open">
+          <div class="cookie-category-head" onclick="this.parentElement.classList.toggle('is-open')">
+            <span class="cookie-category-title">עוגיות חיוניות</span>
+            <span class="cookie-category-locked">תמיד פעילות</span>
+          </div>
+          <p class="cookie-category-desc">עוגיות אלו הכרחיות לפעולה בסיסית של האתר — ניווט בין עמודים, שמירת העדפות פרטיות, ואבטחה. לא ניתן לכבות אותן.</p>
+        </div>
+        <div class="cookie-category">
+          <div class="cookie-category-head" onclick="this.parentElement.classList.toggle('is-open')">
+            <span class="cookie-category-title">עוגיות אנליטיקס</span>
+            <label class="cookie-toggle"><input type="checkbox" id="cookie-analytics" checked><span class="cookie-toggle-track"></span></label>
+          </div>
+          <p class="cookie-category-desc">עוזרות לנו להבין כיצד גולשות משתמשות באתר — אילו עמודים הכי פופולריים, כיצד מנווטות, ומה ניתן לשפר. המידע אנונימי ומשמש לשיפור החוויה בלבד.</p>
+        </div>
+        <div class="cookie-category">
+          <div class="cookie-category-head" onclick="this.parentElement.classList.toggle('is-open')">
+            <span class="cookie-category-title">עוגיות שיווק</span>
+            <label class="cookie-toggle"><input type="checkbox" id="cookie-marketing"><span class="cookie-toggle-track"></span></label>
+          </div>
+          <p class="cookie-category-desc">מאפשרות לנו להציג לך תוכן ופרסומות רלוונטיים ברשתות החברתיות. ללא עוגיות אלו, עדיין תראי פרסומות — אך הן יהיו פחות מותאמות אלייך.</p>
+        </div>
+      </div>
+      <div class="cookie-modal-footer">
+        <button class="cookie-save-btn" id="cookie-save">שמירת ההעדפות שלי</button>
+        <button class="cookie-accept-all-btn" id="cookie-modal-accept-all">קבלת הכל</button>
+      </div>
+    </div>
   </div>
   <script>
   (function(){
-    if(localStorage.getItem('charming_cookie_accepted'))return;
-    var b=document.getElementById('cookie-banner');
-    if(!b)return;
-    requestAnimationFrame(function(){requestAnimationFrame(function(){b.classList.add('is-visible');});});
-    document.getElementById('cookie-accept').addEventListener('click',function(){
-      localStorage.setItem('charming_cookie_accepted',Date.now().toString());
-      if(typeof gtag==='function')gtag('consent','update',{'analytics_storage':'granted'});
-      b.classList.remove('is-visible');
-      b.addEventListener('transitionend',function(){b.remove();},{once:true});
+    var STORAGE_KEY = 'charming_cookie_prefs';
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) { applyConsent(JSON.parse(saved)); return; }
+    var banner = document.getElementById('cookie-banner');
+    var overlay = document.getElementById('cookie-modal-overlay');
+    if (!banner) return;
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ banner.classList.add('is-visible'); }); });
+    document.getElementById('cookie-accept-all').addEventListener('click', function(){ saveAndClose({analytics:true, marketing:true}); });
+    document.getElementById('cookie-reject').addEventListener('click', function(){ saveAndClose({analytics:false, marketing:false}); });
+    document.getElementById('cookie-open-settings').addEventListener('click', function(){ overlay.classList.add('is-visible'); });
+    document.getElementById('cookie-modal-accept-all').addEventListener('click', function(){ saveAndClose({analytics:true, marketing:true}); });
+    document.getElementById('cookie-save').addEventListener('click', function(){
+      saveAndClose({ analytics: document.getElementById('cookie-analytics').checked, marketing: document.getElementById('cookie-marketing').checked });
     });
+    overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.classList.remove('is-visible'); });
+    function saveAndClose(prefs){
+      prefs.ts = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+      applyConsent(prefs);
+      overlay.classList.remove('is-visible');
+      banner.classList.remove('is-visible');
+      banner.addEventListener('transitionend', function(){ banner.remove(); overlay.remove(); }, {once:true});
+    }
+    function applyConsent(p){
+      if(typeof gtag==='function'){
+        gtag('consent','update',{ 'analytics_storage': p.analytics ? 'granted' : 'denied', 'ad_storage': p.marketing ? 'granted' : 'denied', 'ad_user_data': p.marketing ? 'granted' : 'denied', 'ad_personalization': p.marketing ? 'granted' : 'denied' });
+      }
+    }
   })();
+  window.openCookieSettings = function(){ localStorage.removeItem('charming_cookie_prefs'); location.reload(); };
   </script>
 
   <script src="lang.js"></script>
