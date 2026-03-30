@@ -1510,15 +1510,11 @@ ul { list-style: none; }
   margin-bottom: 40px;
 }
 
-/* Smooth auto-scroll marquee with manual drag */
+/* Smooth auto-scroll marquee — pause on hover/touch */
 .tst-marquee {
   overflow: hidden;
   mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
   -webkit-mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
-  cursor: grab;
-}
-.tst-marquee.is-dragging {
-  cursor: grabbing;
 }
 
 .tst-marquee-track {
@@ -1528,7 +1524,7 @@ ul { list-style: none; }
   animation: tstScroll 40s linear infinite;
 }
 
-.tst-marquee.is-dragging .tst-marquee-track {
+.tst-marquee:hover .tst-marquee-track {
   animation-play-state: paused;
 }
 

@@ -27,40 +27,13 @@ if (hamburger && navLinks) {
   });
 }
 
-// ===== Testimonials Marquee — drag/swipe to browse manually =====
+// ===== Testimonials Marquee — pause on hover/touch =====
 (function () {
-  var m = document.querySelector('.tst-marquee');
-  if (!m) return;
-
-  // Wrap the marquee in a scrollable outer so drag works alongside CSS animation
-  m.style.overflowX = 'auto';
-  m.style.scrollbarWidth = 'none';
-
-  var dragging = false, startX = 0, scrollStart = 0;
-
-  function onDown(e) {
-    dragging = true;
-    m.classList.add('is-dragging');
-    startX = e.touches ? e.touches[0].clientX : e.clientX;
-    scrollStart = m.scrollLeft;
-  }
-  function onMove(e) {
-    if (!dragging) return;
-    var x = e.touches ? e.touches[0].clientX : e.clientX;
-    m.scrollLeft = scrollStart - (x - startX);
-  }
-  function onUp() {
-    dragging = false;
-    m.classList.remove('is-dragging');
-  }
-
-  m.addEventListener('mousedown', function(e) { onDown(e); e.preventDefault(); });
-  m.addEventListener('mousemove', onMove);
-  m.addEventListener('mouseup', onUp);
-  m.addEventListener('mouseleave', onUp);
-  m.addEventListener('touchstart', onDown, { passive: true });
-  m.addEventListener('touchmove', onMove, { passive: true });
-  m.addEventListener('touchend', onUp);
+  var track = document.querySelector('.tst-marquee-track');
+  if (!track) return;
+  // Touch: pause while finger is down
+  track.addEventListener('touchstart', function() { track.style.animationPlayState = 'paused'; }, { passive: true });
+  track.addEventListener('touchend', function() { track.style.animationPlayState = ''; });
 })();
 
 // ===== Product Image Gallery (arrows) =====
