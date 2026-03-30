@@ -24,8 +24,14 @@ service cloud.firestore {
     // ══════════════════════════════════════════════════════
     match /artifacts/{appId}/public/data/{document=**} {
 
-      // תיקון קריטי: הרשאה לגלריית הסדנאות
+      // גלריית הסדנאות
       match /workshopGallery/{docId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // המלצות לקוחות (צילומי מסך WhatsApp)
+      match /testimonials/{docId} {
         allow read: if true;
         allow write: if isAdmin();
       }
