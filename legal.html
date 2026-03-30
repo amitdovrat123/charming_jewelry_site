@@ -430,7 +430,6 @@
     <div class="cookie-banner-actions">
       <button class="cookie-btn-accept" id="cookie-accept-all">קבלת הכל</button>
       <button class="cookie-btn-settings" id="cookie-open-settings">הגדרות עוגיות</button>
-      <button class="cookie-btn-reject" id="cookie-reject">חיוניות בלבד</button>
     </div>
   </div>
   <div id="cookie-modal-overlay" class="cookie-modal-overlay" role="dialog" aria-label="הגדרות עוגיות">
@@ -478,8 +477,7 @@
     if (!banner) return;
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ banner.classList.add('is-visible'); }); });
     document.getElementById('cookie-accept-all').addEventListener('click', function(){ saveAndClose({analytics:true, marketing:true}); });
-    document.getElementById('cookie-reject').addEventListener('click', function(){ saveAndClose({analytics:false, marketing:false}); });
-    document.getElementById('cookie-open-settings').addEventListener('click', function(){ overlay.classList.add('is-visible'); });
+document.getElementById('cookie-open-settings').addEventListener('click', function(){ overlay.classList.add('is-visible'); });
     document.getElementById('cookie-modal-accept-all').addEventListener('click', function(){ saveAndClose({analytics:true, marketing:true}); });
     document.getElementById('cookie-save').addEventListener('click', function(){
       saveAndClose({ analytics: document.getElementById('cookie-analytics').checked, marketing: document.getElementById('cookie-marketing').checked });
