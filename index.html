@@ -324,17 +324,11 @@
       <h2 class="section-title" data-i18n="testimonials_title">לקוחות ממליצות</h2>
     </div>
 
-    <div class="testimonials-outer">
-      <button class="testimonials-arrow testimonials-prev" aria-label="הקודם">&#8249;</button>
-
-      <div class="testimonials-viewport" id="testimonialsViewport">
-        <div class="testimonials-track" id="testimonialsTrack">
-          <!-- Loaded dynamically from Firestore -->
-          <div id="tst-placeholder" style="display:flex;align-items:center;justify-content:center;width:300px;height:220px;color:var(--muted);font-size:0.85rem;">טוענת המלצות...</div>
-        </div>
+    <div class="tst-marquee">
+      <div class="tst-marquee-track" id="testimonialsTrack">
+        <!-- Loaded dynamically from Firestore -->
+        <div id="tst-placeholder" style="display:flex;align-items:center;justify-content:center;width:300px;height:200px;color:var(--muted);font-size:0.85rem;">טוענת המלצות...</div>
       </div>
-
-      <button class="testimonials-arrow testimonials-next" aria-label="הבא">&#8250;</button>
     </div>
   </section>
 

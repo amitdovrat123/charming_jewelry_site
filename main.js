@@ -27,23 +27,6 @@ if (hamburger && navLinks) {
   });
 }
 
-// ===== Testimonials Arrow Navigation =====
-(function () {
-  const viewport = document.getElementById('testimonialsViewport');
-  const prevBtn  = document.querySelector('.testimonials-prev');
-  const nextBtn  = document.querySelector('.testimonials-next');
-  if (!viewport) return;
-
-  const STEP = 320; // card width (300) + gap (20)
-
-  if (prevBtn) prevBtn.addEventListener('click', function() {
-    viewport.scrollBy({ left: STEP, behavior: 'smooth' });
-  });
-  if (nextBtn) nextBtn.addEventListener('click', function() {
-    viewport.scrollBy({ left: -STEP, behavior: 'smooth' });
-  });
-})();
-
 // ===== Product Image Gallery (arrows) =====
 (function () {
   function switchSlide(container, dir) {

@@ -1510,129 +1510,59 @@ ul { list-style: none; }
   margin-bottom: 40px;
 }
 
-.testimonials-outer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 20px;
-  position: relative;
+/* Smooth auto-scroll marquee */
+.tst-marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
 }
 
-.testimonials-viewport {
-  flex: 1;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  position: relative;
-}
-
-.testimonials-viewport::-webkit-scrollbar {
-  display: none;
-}
-
-.testimonials-track {
+.tst-marquee-track {
   display: flex;
   gap: 20px;
   width: max-content;
+  animation: tstScroll 40s linear infinite;
 }
 
-.testimonial-card {
-  width: 300px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  scroll-snap-align: end;
+.tst-marquee:hover .tst-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes tstScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(50%); }
 }
 
 /* Image-based testimonial cards (WhatsApp screenshots) */
 .testimonial-card--img {
   width: 320px;
   height: 220px;
+  flex-shrink: 0;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(26, 20, 0, 0.1);
+  box-shadow: 0 6px 28px rgba(26, 20, 0, 0.1);
   background: var(--sand-light);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.testimonial-card--img:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(201, 149, 122, 0.2);
 }
 .testimonial-card--img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
   display: block;
 }
 
-.testimonial-bubble {
-  background: var(--white);
-  border-radius: 18px 18px 4px 18px;
-  padding: 22px 24px;
-  box-shadow: 0 4px 24px rgba(26, 20, 0, 0.08);
-  position: relative;
+@media (max-width: 768px) {
+  .testimonial-card--img { width: 280px; height: 193px; }
+  .tst-marquee-track { gap: 14px; }
 }
 
-.testimonial-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  right: 24px;
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-top: 10px solid var(--white);
-}
-
-.testimonial-bubble p {
-  font-size: 0.95rem;
-  color: var(--ink-soft);
-  line-height: 1.75;
-  direction: rtl;
-}
-
-.testimonial-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 4px;
-  direction: rtl;
-}
-
-.testimonial-name {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.testimonial-stars {
-  font-size: 0.8rem;
-  color: var(--pink);
-  letter-spacing: 1px;
-}
-
-/* Testimonials Arrows */
-.testimonials-arrow {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1.5px solid var(--sand-dark);
-  background: var(--white);
-  color: var(--ink);
-  font-size: 1.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.25s, border-color 0.25s, transform 0.2s;
-  line-height: 1;
-}
-
-.testimonials-arrow:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--white);
-  transform: scale(1.08);
+@media (max-width: 375px) {
+  .testimonial-card--img { width: 240px; height: 165px; }
+  .tst-marquee-track { gap: 12px; }
 }
 
 /* ===== Gallery Collage ===== */
@@ -2098,8 +2028,6 @@ ul { list-style: none; }
   .journey-steps { gap: 56px; }
   .journey-step-img { height: 240px; }
 
-  .testimonials-arrow { width: 36px; height: 36px; font-size: 1.1rem; }
-  .testimonials-outer { padding: 0 0; }
 
   .collage-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -3477,20 +3405,23 @@ ul { list-style: none; }
   overflow: hidden;
   background: var(--pink-light);
 }
-.sp-card-img-wrap img.sp-slide {
-  position: absolute;
-  top: 0;
-  left: 0;
+.sp-card-img-wrap img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+}
+.sp-card-img-wrap img.sp-slide {
+  position: absolute;
+  inset: 0;
   opacity: 0;
   transition: opacity 0.35s ease, transform 0.35s ease;
   pointer-events: none;
 }
 .sp-card-img-wrap img.sp-slide--active {
   opacity: 1;
-  position: relative;
+  position: static;
   pointer-events: auto;
 }
 .sp-shop-card:hover .sp-card-img-wrap img {
