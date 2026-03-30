@@ -843,6 +843,23 @@
     import { db } from './firebase-config.js';
     import { collection, query, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+    // ── Dynamic Testimonials from Firestore ──
+    const tstTrack = document.getElementById('testimonialsTrack');
+    if (tstTrack) {
+      try {
+        const tstCol = collection(db,'artifacts/charming-3dd6f/public/data/testimonials');
+        const tstSnap = await getDocs(query(tstCol, orderBy('order','asc')));
+        if (tstSnap.size > 0) {
+          const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+          const cards = tstSnap.docs.map(d => {
+            const t = d.data();
+            return '<div class="testimonial-card testimonial-card--img"><img src="' + esc(t.url) + '" alt="' + esc(t.name || 'המלצת לקוחה') + '" loading="lazy" decoding="async" /></div>';
+          }).join('');
+          tstTrack.innerHTML = cards + cards;
+        }
+      } catch(e) { console.warn('Testimonials load fallback to static:', e); }
+    }
+
     const grid = document.getElementById('collage-grid');
     if (grid) {
       const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
