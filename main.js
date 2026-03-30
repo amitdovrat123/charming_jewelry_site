@@ -36,20 +36,21 @@ if (hamburger && navLinks) {
   var paused = false, dragging = false;
   var startX, scrollStart;
 
-  // Auto-scroll loop
+  // Auto-scroll loop — waits until content is wider than viewport
   function tick() {
-    if (!paused && !dragging) {
+    if (!paused && !dragging && m.scrollWidth > m.clientWidth + 10) {
       m.scrollLeft += speed;
-      // Loop: when we've scrolled past half (the duplicate set), reset
-      if (m.scrollLeft >= m.scrollWidth / 2) m.scrollLeft = 0;
+      var half = m.scrollWidth / 2;
+      if (half > 0 && m.scrollLeft >= half) m.scrollLeft = 0;
     }
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
-  // Pause on hover (desktop)
-  m.addEventListener('mouseenter', function () { paused = true; });
-  m.addEventListener('mouseleave', function () { paused = false; dragging = false; m.classList.remove('is-dragging'); });
+  // Pause on hover (desktop) — resume 0.6s after leave for smoother UX
+  var resumeTimer;
+  m.addEventListener('mouseenter', function () { clearTimeout(resumeTimer); paused = true; });
+  m.addEventListener('mouseleave', function () { dragging = false; m.classList.remove('is-dragging'); resumeTimer = setTimeout(function(){ paused = false; }, 600); });
 
   // Drag (desktop + mobile)
   function onDown(e) {
