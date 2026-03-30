@@ -27,53 +27,59 @@ if (hamburger && navLinks) {
   });
 }
 
-// ===== Testimonials Marquee — auto-scroll + drag/swipe =====
+// ===== Testimonials Marquee — drag/swipe to browse manually =====
 (function () {
   var m = document.querySelector('.tst-marquee');
-  if (!m) return;
+  var track = m && m.querySelector('.tst-marquee-track');
+  if (!m || !track) return;
 
-  var speed = 0.8; // px per frame
-  var paused = false, dragging = false;
-  var startX, scrollStart;
+  var dragging = false, startX = 0, startTranslate = 0;
 
-  // Auto-scroll loop — waits until content is wider than viewport
-  function tick() {
-    if (!paused && !dragging && m.scrollWidth > m.clientWidth + 10) {
-      m.scrollLeft += speed;
-      var half = m.scrollWidth / 2;
-      if (half > 0 && m.scrollLeft >= half) m.scrollLeft = 0;
-    }
-    requestAnimationFrame(tick);
+  function getCurrentTranslate() {
+    var style = getComputedStyle(track);
+    var matrix = new DOMMatrix(style.transform);
+    return matrix.m41;
   }
-  requestAnimationFrame(tick);
 
-  // Pause on hover (desktop) — resume 0.6s after leave for smoother UX
-  var resumeTimer;
-  m.addEventListener('mouseenter', function () { clearTimeout(resumeTimer); paused = true; });
-  m.addEventListener('mouseleave', function () { dragging = false; m.classList.remove('is-dragging'); resumeTimer = setTimeout(function(){ paused = false; }, 600); });
-
-  // Drag (desktop + mobile)
   function onDown(e) {
     dragging = true;
     m.classList.add('is-dragging');
-    startX = (e.touches ? e.touches[0].clientX : e.clientX);
-    scrollStart = m.scrollLeft;
-    e.preventDefault();
+    startX = e.touches ? e.touches[0].clientX : e.clientX;
+    startTranslate = getCurrentTranslate();
+    track.style.transform = 'translateX(' + startTranslate + 'px)';
+    track.style.animation = 'none';
   }
+
   function onMove(e) {
     if (!dragging) return;
-    var x = (e.touches ? e.touches[0].clientX : e.clientX);
-    m.scrollLeft = scrollStart - (x - startX);
+    var x = e.touches ? e.touches[0].clientX : e.clientX;
+    var diff = x - startX;
+    track.style.transform = 'translateX(' + (startTranslate + diff) + 'px)';
   }
+
   function onUp() {
+    if (!dragging) return;
     dragging = false;
     m.classList.remove('is-dragging');
+    // Resume CSS animation from current position
+    var current = getCurrentTranslate();
+    var totalWidth = track.scrollWidth / 2;
+    if (totalWidth > 0) {
+      var progress = (-current % totalWidth) / totalWidth;
+      if (progress < 0) progress += 1;
+      track.style.transform = '';
+      track.style.animation = 'none';
+      track.offsetHeight; // force reflow
+      track.style.animation = 'tstScroll 40s linear infinite';
+      track.style.animationDelay = '-' + (progress * 40) + 's';
+    }
   }
 
   m.addEventListener('mousedown', onDown);
   m.addEventListener('mousemove', onMove);
   m.addEventListener('mouseup', onUp);
-  m.addEventListener('touchstart', onDown, { passive: false });
+  m.addEventListener('mouseleave', function() { if (dragging) onUp(); });
+  m.addEventListener('touchstart', onDown, { passive: true });
   m.addEventListener('touchmove', onMove, { passive: true });
   m.addEventListener('touchend', onUp);
 })();

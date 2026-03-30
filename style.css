@@ -1512,15 +1512,11 @@ ul { list-style: none; }
 
 /* Smooth auto-scroll marquee with manual drag */
 .tst-marquee {
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: hidden;
   mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
   -webkit-mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
   cursor: grab;
 }
-.tst-marquee::-webkit-scrollbar { display: none; }
 .tst-marquee.is-dragging {
   cursor: grabbing;
 }
@@ -1529,6 +1525,16 @@ ul { list-style: none; }
   display: flex;
   gap: 20px;
   width: max-content;
+  animation: tstScroll 40s linear infinite;
+}
+
+.tst-marquee.is-dragging .tst-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes tstScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(50%); }
 }
 
 /* Image-based testimonial cards (WhatsApp screenshots) */
