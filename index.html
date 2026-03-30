@@ -851,9 +851,12 @@
         const tstSnap = await getDocs(query(tstCol, orderBy('order','asc')));
         if (tstSnap.size > 0) {
           const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+          function tstThumb(url) {
+            return url.replace('/upload/', '/upload/c_fill,w_640,h_440,g_auto,q_auto,f_auto/');
+          }
           const cards = tstSnap.docs.map(d => {
             const t = d.data();
-            return '<div class="testimonial-card testimonial-card--img"><img src="' + esc(t.url) + '" alt="' + esc(t.name || 'המלצת לקוחה') + '" loading="lazy" decoding="async" /></div>';
+            return '<div class="testimonial-card testimonial-card--img"><img src="' + esc(tstThumb(t.url)) + '" alt="' + esc(t.name || 'המלצת לקוחה') + '" loading="lazy" decoding="async" /></div>';
           }).join('');
           tstTrack.innerHTML = cards + cards;
         }
