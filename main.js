@@ -27,6 +27,37 @@ if (hamburger && navLinks) {
   });
 }
 
+// ===== Testimonials Marquee — drag/swipe to scroll manually =====
+(function () {
+  var m = document.querySelector('.tst-marquee');
+  if (!m) return;
+  var startX, scrollStart, dragging = false;
+
+  function onDown(e) {
+    dragging = true;
+    m.classList.add('is-dragging');
+    startX = (e.touches ? e.touches[0].clientX : e.clientX);
+    scrollStart = m.scrollLeft;
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    var x = (e.touches ? e.touches[0].clientX : e.clientX);
+    m.scrollLeft = scrollStart - (x - startX);
+  }
+  function onUp() {
+    dragging = false;
+    m.classList.remove('is-dragging');
+  }
+
+  m.addEventListener('mousedown', onDown);
+  m.addEventListener('mousemove', onMove);
+  m.addEventListener('mouseup', onUp);
+  m.addEventListener('mouseleave', onUp);
+  m.addEventListener('touchstart', onDown, { passive: true });
+  m.addEventListener('touchmove', onMove, { passive: true });
+  m.addEventListener('touchend', onUp);
+})();
+
 // ===== Product Image Gallery (arrows) =====
 (function () {
   function switchSlide(container, dir) {

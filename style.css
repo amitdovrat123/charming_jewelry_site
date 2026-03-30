@@ -1510,11 +1510,19 @@ ul { list-style: none; }
   margin-bottom: 40px;
 }
 
-/* Smooth auto-scroll marquee */
+/* Smooth auto-scroll marquee with manual drag */
 .tst-marquee {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
   -webkit-mask-image: linear-gradient(to left, transparent, black 5%, black 95%, transparent);
+  cursor: grab;
+}
+.tst-marquee::-webkit-scrollbar { display: none; }
+.tst-marquee.is-dragging {
+  cursor: grabbing;
 }
 
 .tst-marquee-track {
@@ -1524,7 +1532,8 @@ ul { list-style: none; }
   animation: tstScroll 40s linear infinite;
 }
 
-.tst-marquee:hover .tst-marquee-track {
+.tst-marquee:hover .tst-marquee-track,
+.tst-marquee.is-dragging .tst-marquee-track {
   animation-play-state: paused;
 }
 
