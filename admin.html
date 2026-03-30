@@ -6549,8 +6549,12 @@ const tstCloudWidget = cloudinary.createUploadWidget({
   cloudName:    CLOUDINARY_CLOUD_NAME,
   uploadPreset: CLOUDINARY_UPLOAD_PRESET,
   sources:      ['local','camera'],
-  multiple:     true,
-  cropping:     false,
+  multiple:     false,
+  cropping:     true,
+  croppingAspectRatio: 1.45,
+  croppingShowDimensions: true,
+  showSkipCropButton: false,
+  croppingCoordinatesMode: 'custom',
   folder:       'charming_testimonials',
   clientAllowedFormats: ['jpg','jpeg','png','webp'],
   maxFileSize:  8000000,
@@ -6566,9 +6570,15 @@ const tstCloudWidget = cloudinary.createUploadWidget({
 }, async (error, result) => {
   if (error) { console.error('Testimonial upload error:', error); return; }
   if (result && result.event === 'success') {
-    const url = result.info.secure_url || result.info.url;
-    console.log('Testimonial uploaded:', result.info.event, url, result.info);
-    if (!url) { console.error('No URL in upload result:', result.info); return; }
+    const info = result.info;
+    let url = info.secure_url || info.url;
+    // Apply crop coordinates as Cloudinary URL transformation
+    if (info.coordinates && info.coordinates.custom && info.coordinates.custom.length) {
+      const c = info.coordinates.custom[0]; // [x, y, width, height]
+      const crop = 'c_crop,x_' + c[0] + ',y_' + c[1] + ',w_' + c[2] + ',h_' + c[3];
+      url = url.replace('/upload/', '/upload/' + crop + '/');
+    }
+    if (!url) { console.error('No URL in upload result:', info); return; }
     const order = tstImages.length;
     try {
       await addDoc(collection(db, TESTIMONIALS_COL), {
