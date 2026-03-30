@@ -5577,12 +5577,21 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
   color: #fff;
 }
 
+/* Cookie Settings Panel (in-page, legal.html) */
+.cookie-settings-panel {
+  background: var(--sand-light);
+  border: 1.5px solid var(--sand-dark);
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-top: 16px;
+}
+
 @media (max-width: 768px) {
   .cookie-banner { padding: 16px 16px; gap: 10px; }
   .cookie-banner-text { font-size: 0.78rem; }
   .cookie-btn-accept { padding: 8px 20px; font-size: 0.82rem; }
   .cookie-btn-settings, .cookie-btn-reject { padding: 7px 16px; font-size: 0.78rem; }
-  .cookie-modal-header, .cookie-modal-body, .cookie-modal-footer { padding-left: 20px; padding-right: 20px; }
+  .cookie-settings-panel { padding: 18px 16px; }
 }
 
 /* ===== Utility classes (replaces Tailwind CDN) ===== */
