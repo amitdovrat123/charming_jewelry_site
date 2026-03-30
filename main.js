@@ -30,55 +30,34 @@ if (hamburger && navLinks) {
 // ===== Testimonials Marquee — drag/swipe to browse manually =====
 (function () {
   var m = document.querySelector('.tst-marquee');
-  var track = m && m.querySelector('.tst-marquee-track');
-  if (!m || !track) return;
+  if (!m) return;
 
-  var dragging = false, startX = 0, startTranslate = 0;
+  // Wrap the marquee in a scrollable outer so drag works alongside CSS animation
+  m.style.overflowX = 'auto';
+  m.style.scrollbarWidth = 'none';
 
-  function getCurrentTranslate() {
-    var style = getComputedStyle(track);
-    var matrix = new DOMMatrix(style.transform);
-    return matrix.m41;
-  }
+  var dragging = false, startX = 0, scrollStart = 0;
 
   function onDown(e) {
     dragging = true;
     m.classList.add('is-dragging');
     startX = e.touches ? e.touches[0].clientX : e.clientX;
-    startTranslate = getCurrentTranslate();
-    track.style.transform = 'translateX(' + startTranslate + 'px)';
-    track.style.animation = 'none';
+    scrollStart = m.scrollLeft;
   }
-
   function onMove(e) {
     if (!dragging) return;
     var x = e.touches ? e.touches[0].clientX : e.clientX;
-    var diff = x - startX;
-    track.style.transform = 'translateX(' + (startTranslate + diff) + 'px)';
+    m.scrollLeft = scrollStart - (x - startX);
   }
-
   function onUp() {
-    if (!dragging) return;
     dragging = false;
     m.classList.remove('is-dragging');
-    // Resume CSS animation from current position
-    var current = getCurrentTranslate();
-    var totalWidth = track.scrollWidth / 2;
-    if (totalWidth > 0) {
-      var progress = (-current % totalWidth) / totalWidth;
-      if (progress < 0) progress += 1;
-      track.style.transform = '';
-      track.style.animation = 'none';
-      track.offsetHeight; // force reflow
-      track.style.animation = 'tstScroll 40s linear infinite';
-      track.style.animationDelay = '-' + (progress * 40) + 's';
-    }
   }
 
-  m.addEventListener('mousedown', onDown);
+  m.addEventListener('mousedown', function(e) { onDown(e); e.preventDefault(); });
   m.addEventListener('mousemove', onMove);
   m.addEventListener('mouseup', onUp);
-  m.addEventListener('mouseleave', function() { if (dragging) onUp(); });
+  m.addEventListener('mouseleave', onUp);
   m.addEventListener('touchstart', onDown, { passive: true });
   m.addEventListener('touchmove', onMove, { passive: true });
   m.addEventListener('touchend', onUp);
