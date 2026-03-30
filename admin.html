@@ -1406,6 +1406,7 @@
             <button class="settings-nav-btn" data-settings-page="banner" onclick="showSettingsPage('banner')">📢 באנר עליון</button>
             <button class="settings-nav-btn" data-settings-page="coupons" onclick="showSettingsPage('coupons')"><i data-lucide="tag" class="w-3.5 h-3.5 inline-block"></i> קופונים</button>
             <button class="settings-nav-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">🖼️ גלריית סדנאות</button>
+            <button class="settings-nav-btn" data-settings-page="testimonials" onclick="showSettingsPage('testimonials')">⭐ המלצות</button>
             <button class="settings-nav-btn" data-settings-page="wa-templates" onclick="showSettingsPage('wa-templates')">💬 הודעות WhatsApp</button>
           </div>
         </div>
@@ -1541,6 +1542,60 @@ Charming by Vik 💛</textarea>
                 <div class="flex gap-2 pt-2">
                   <button onclick="saveWsgEdit()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all">שמור</button>
                   <button onclick="deleteWsgImage()" class="border border-red-200 text-red-400 hover:bg-red-50 px-5 py-2 rounded-full font-bold text-sm transition-all">מחק</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-page: Testimonials -->
+        <div id="settings-page-testimonials" class="settings-page p-6 space-y-6" style="display:none;">
+          <div class="flex flex-wrap justify-between items-center gap-3">
+            <div>
+              <h2 class="font-black text-gray-800 text-lg">המלצות לקוחות</h2>
+              <p class="text-xs text-gray-400 mt-1">צילומי מסך מ-WhatsApp שמוצגים בגלריית ההמלצות בדף הבית</p>
+            </div>
+            <button id="tst-upload-btn"
+              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              העלאת צילום מסך
+            </button>
+          </div>
+
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <p class="text-sm text-gray-500">גררי תמונות כדי לשנות סדר  •  לחצי על תמונה לעריכה או מחיקה</p>
+              <span id="tst-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">0 המלצות</span>
+            </div>
+            <div id="tst-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            </div>
+            <div id="tst-empty" class="py-16 text-center" style="display:none;">
+              <div class="mb-3"><i data-lucide="message-circle" class="w-10 h-10 mx-auto text-[#d4a373]/40"></i></div>
+              <p class="text-gray-400 font-semibold text-sm">אין המלצות עדיין</p>
+              <p class="text-gray-300 text-xs mt-1">לחצי על "העלאת צילום מסך" כדי להוסיף המלצות מ-WhatsApp</p>
+            </div>
+            <div id="tst-loading" class="py-14 text-center">
+              <div class="w-8 h-8 border-[3px] border-[#d4a373] border-t-transparent rounded-full spin mx-auto mb-3"></div>
+              <p class="text-gray-300 text-sm">טוענת המלצות...</p>
+            </div>
+          </div>
+
+          <!-- Edit single testimonial -->
+          <div id="tst-edit-panel" class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm" style="display:none;">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-gray-700">עריכת המלצה</h3>
+              <button onclick="closeTstEdit()" class="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-5">
+              <img id="tst-edit-img" src="" alt="" class="w-full sm:w-48 h-64 object-cover rounded-xl border border-[#f0dfc0]" />
+              <div class="flex-1 space-y-3">
+                <div>
+                  <label class="text-xs font-bold text-gray-500 mb-1 block">שם הלקוחה</label>
+                  <input id="tst-edit-name" type="text" class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50" placeholder="שם (אופציונלי)..." />
+                </div>
+                <div class="flex gap-2 pt-2">
+                  <button onclick="saveTstEdit()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2 rounded-full font-bold text-sm transition-all">שמור</button>
+                  <button onclick="deleteTstImage()" class="border border-red-200 text-red-400 hover:bg-red-50 px-5 py-2 rounded-full font-bold text-sm transition-all">מחק</button>
                 </div>
               </div>
             </div>
@@ -2076,6 +2131,7 @@ const LOGS_COL       = 'artifacts/charming-3dd6f/public/data/logs';
 const WORKSHOPS_COL  = 'artifacts/charming-3dd6f/public/data/workshops';
 const SETTINGS_COL   = 'artifacts/charming-3dd6f/public/data/settings';
 const WS_GALLERY_COL = 'artifacts/charming-3dd6f/public/data/workshopGallery';
+const TESTIMONIALS_COL = 'artifacts/charming-3dd6f/public/data/testimonials';
 const TRAFFIC_COL    = 'artifacts/charming-3dd6f/public/data/site_traffic';
 const EXPENSES_COL   = 'artifacts/charming-3dd6f/public/data/expenses';
 
@@ -2427,7 +2483,7 @@ window.toggleMoreMenu = toggleMoreMenu;
 window.closeMoreMenu  = closeMoreMenu;
 
 // ── Settings sub-page navigation ──────────────────────────────────
-const settingsSubPages = ['general','banner','coupons','ws-gallery','wa-templates'];
+const settingsSubPages = ['general','banner','coupons','ws-gallery','testimonials','wa-templates'];
 let settingsSubInited = {};
 function showSettingsPage(page) {
   settingsSubPages.forEach(p => {
@@ -2444,6 +2500,7 @@ function showSettingsPage(page) {
     if (page === 'coupons' && typeof initCouponsTab === 'function') initCouponsTab();
     else if (page === 'banner' && typeof initBannerTab === 'function') initBannerTab();
     else if (page === 'ws-gallery' && typeof initWsGalleryTab === 'function') initWsGalleryTab();
+    else if (page === 'testimonials' && typeof initTestimonialsTab === 'function') initTestimonialsTab();
     else if (page === 'wa-templates' && typeof initWaTemplates === 'function') initWaTemplates();
   } else {
     if (page === 'coupons' && typeof renderCouponsGrid === 'function') renderCouponsGrid();
@@ -6480,6 +6537,173 @@ async function deleteWsgImage() {
   } catch(ex) { console.error(ex); }
 }
 window.deleteWsgImage = deleteWsgImage;
+
+// ══════════════════════════════════════════════════════════════
+//  TESTIMONIALS (WhatsApp screenshots)
+// ══════════════════════════════════════════════════════════════
+let tstImages = [];
+let tstEditId = null;
+
+const tstCloudWidget = cloudinary.createUploadWidget({
+  cloudName:    CLOUDINARY_CLOUD_NAME,
+  uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+  sources:      ['local','camera'],
+  multiple:     true,
+  cropping:     true,
+  croppingAspectRatio: null,
+  croppingShowDimensions: true,
+  croppingDefaultSelectionRatio: 0.8,
+  folder:       'charming_testimonials',
+  clientAllowedFormats: ['jpg','jpeg','png','webp'],
+  maxFileSize:  8000000,
+  styles: {
+    palette: {
+      window:'#FFFFFF', windowBorder:'#d4a373', tabIcon:'#d4a373',
+      menuIcons:'#9a8e8a', textDark:'#2c2a29', textLight:'#FFFFFF',
+      link:'#d4a373', action:'#d4a373', inactiveTabIcon:'#9a8e8a',
+      error:'#e74c3c', inProgress:'#d4a373', complete:'#27ae60', sourceBg:'#fdf8f5',
+    },
+    fonts: { default: { active: true } },
+  },
+}, async (error, result) => {
+  if (error) { console.error('Testimonial upload error:', error); return; }
+  if (result && result.event === 'success') {
+    const url = result.info.secure_url;
+    const order = tstImages.length;
+    try {
+      await addDoc(collection(db, TESTIMONIALS_COL), {
+        url,
+        name: '',
+        order,
+        createdAt: serverTimestamp(),
+      });
+      logAction('המלצה חדשה נוספה');
+    } catch(ex) {
+      console.error('Testimonial Firestore write failed:', ex);
+      alert('העלאה הצליחה אך השמירה נכשלה: ' + (ex.message || ex.code || 'שגיאה'));
+    }
+  }
+});
+
+let tstInited = false;
+function initTestimonialsTab() {
+  if (tstInited) return;
+  tstInited = true;
+
+  document.getElementById('tst-upload-btn').addEventListener('click', () => tstCloudWidget.open());
+
+  const col = collection(db, TESTIMONIALS_COL);
+  const q = query(col, orderBy('order','asc'));
+  onSnapshot(q, snap => {
+    tstImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderTstGrid();
+  }, err => {
+    console.warn('Testimonials ordered query failed, fallback:', err);
+    onSnapshot(col, snap => {
+      tstImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      tstImages.sort((a,b) => (a.order||0) - (b.order||0));
+      renderTstGrid();
+    }, err2 => {
+      console.error('Testimonials query failed:', err2);
+      document.getElementById('tst-loading').style.display = 'none';
+      document.getElementById('tst-empty').style.display = '';
+    });
+  });
+}
+
+function renderTstGrid() {
+  const grid = document.getElementById('tst-grid');
+  const empty = document.getElementById('tst-empty');
+  const loading = document.getElementById('tst-loading');
+  const count = document.getElementById('tst-count');
+
+  loading.style.display = 'none';
+  count.textContent = tstImages.length + ' המלצות';
+
+  if (!tstImages.length) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = tstImages.map((img, i) => `
+    <div class="relative group rounded-xl overflow-hidden border border-[#f0dfc0] cursor-pointer aspect-[3/4] bg-gray-50"
+         draggable="true" data-tst-id="${img.id}" data-tst-idx="${i}" onclick="openTstEdit('${img.id}')">
+      <img src="${esc(img.url)}" alt="${esc(img.name||'המלצת לקוחה')}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+      <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+        <span class="opacity-0 group-hover:opacity-100 text-white text-xs font-bold bg-black/50 px-3 py-1.5 rounded-full transition-opacity"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</span>
+      </div>
+      ${img.name ? `<span class="absolute bottom-2 right-2 text-[10px] bg-white/90 text-gray-700 px-2 py-0.5 rounded-full font-semibold">${esc(img.name)}</span>` : ''}
+      <span class="absolute bottom-2 left-2 text-[10px] bg-white/90 text-gray-500 w-5 h-5 flex items-center justify-center rounded-full font-bold">${i+1}</span>
+    </div>
+  `).join('');
+
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+
+  // Drag & drop reordering
+  grid.querySelectorAll('[data-tst-id]').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', el.dataset.tstIdx);
+      el.classList.add('opacity-50');
+    });
+    el.addEventListener('dragend', () => el.classList.remove('opacity-50'));
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('ring-2','ring-[#d4a373]'); });
+    el.addEventListener('dragleave', () => el.classList.remove('ring-2','ring-[#d4a373]'));
+    el.addEventListener('drop', async e => {
+      e.preventDefault();
+      el.classList.remove('ring-2','ring-[#d4a373]');
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      const toIdx = parseInt(el.dataset.tstIdx);
+      if (fromIdx === toIdx) return;
+      const moved = [...tstImages];
+      const [item] = moved.splice(fromIdx, 1);
+      moved.splice(toIdx, 0, item);
+      const batch = writeBatch(db);
+      moved.forEach((img, i) => batch.update(doc(db, TESTIMONIALS_COL, img.id), { order: i }));
+      try { await batch.commit(); } catch(ex) { console.error(ex); }
+    });
+  });
+}
+
+function openTstEdit(id) {
+  const img = tstImages.find(x => x.id === id);
+  if (!img) return;
+  tstEditId = id;
+  document.getElementById('tst-edit-img').src = img.url;
+  document.getElementById('tst-edit-name').value = img.name || '';
+  document.getElementById('tst-edit-panel').style.display = '';
+  document.getElementById('tst-edit-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.openTstEdit = openTstEdit;
+
+function closeTstEdit() {
+  tstEditId = null;
+  document.getElementById('tst-edit-panel').style.display = 'none';
+}
+window.closeTstEdit = closeTstEdit;
+
+async function saveTstEdit() {
+  if (!tstEditId) return;
+  const name = document.getElementById('tst-edit-name').value.trim();
+  try {
+    await updateDoc(doc(db, TESTIMONIALS_COL, tstEditId), { name });
+    logAction('המלצה עודכנה');
+    closeTstEdit();
+  } catch(ex) { console.error(ex); }
+}
+window.saveTstEdit = saveTstEdit;
+
+async function deleteTstImage() {
+  if (!tstEditId) return;
+  if (!confirm('למחוק את ההמלצה?')) return;
+  try {
+    await deleteDoc(doc(db, TESTIMONIALS_COL, tstEditId));
+    logAction('המלצה נמחקה');
+    closeTstEdit();
+  } catch(ex) { console.error(ex); }
+}
+window.deleteTstImage = deleteTstImage;
 
 // ══════════════════════════════════════════════════════════════
 //  ANALYTICS (BI) SUITE
