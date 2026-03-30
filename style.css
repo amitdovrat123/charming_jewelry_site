@@ -1529,17 +1529,6 @@ ul { list-style: none; }
   display: flex;
   gap: 20px;
   width: max-content;
-  animation: tstScroll 40s linear infinite;
-}
-
-.tst-marquee:hover .tst-marquee-track,
-.tst-marquee.is-dragging .tst-marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes tstScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(50%); }
 }
 
 /* Image-based testimonial cards (WhatsApp screenshots) */

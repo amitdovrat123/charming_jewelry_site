@@ -27,17 +27,37 @@ if (hamburger && navLinks) {
   });
 }
 
-// ===== Testimonials Marquee — drag/swipe to scroll manually =====
+// ===== Testimonials Marquee — auto-scroll + drag/swipe =====
 (function () {
   var m = document.querySelector('.tst-marquee');
   if (!m) return;
-  var startX, scrollStart, dragging = false;
 
+  var speed = 0.8; // px per frame
+  var paused = false, dragging = false;
+  var startX, scrollStart;
+
+  // Auto-scroll loop
+  function tick() {
+    if (!paused && !dragging) {
+      m.scrollLeft += speed;
+      // Loop: when we've scrolled past half (the duplicate set), reset
+      if (m.scrollLeft >= m.scrollWidth / 2) m.scrollLeft = 0;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Pause on hover (desktop)
+  m.addEventListener('mouseenter', function () { paused = true; });
+  m.addEventListener('mouseleave', function () { paused = false; dragging = false; m.classList.remove('is-dragging'); });
+
+  // Drag (desktop + mobile)
   function onDown(e) {
     dragging = true;
     m.classList.add('is-dragging');
     startX = (e.touches ? e.touches[0].clientX : e.clientX);
     scrollStart = m.scrollLeft;
+    e.preventDefault();
   }
   function onMove(e) {
     if (!dragging) return;
@@ -52,8 +72,7 @@ if (hamburger && navLinks) {
   m.addEventListener('mousedown', onDown);
   m.addEventListener('mousemove', onMove);
   m.addEventListener('mouseup', onUp);
-  m.addEventListener('mouseleave', onUp);
-  m.addEventListener('touchstart', onDown, { passive: true });
+  m.addEventListener('touchstart', onDown, { passive: false });
   m.addEventListener('touchmove', onMove, { passive: true });
   m.addEventListener('touchend', onUp);
 })();
