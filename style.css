@@ -4760,8 +4760,12 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
 }
 
 @media (max-width: 375px) {
-  .categories-grid { gap: 10px; }
+  .categories-grid { gap: 10px; grid-template-columns: 1fr; }
   .category-card-label { font-size: 0.85rem; padding: 12px 14px; }
+  .hero-logo-img { width: 150px; height: 150px; }
+  .shop-grid { grid-template-columns: 1fr; }
+  .testimonial-card { width: 260px; }
+  .collage-grid { gap: 5px; }
 }
 
 
