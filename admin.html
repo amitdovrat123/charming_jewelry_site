@@ -1568,7 +1568,7 @@ Charming by Vik 💛</textarea>
               <p class="text-sm text-gray-500">גררי תמונות כדי לשנות סדר  •  לחצי על תמונה לעריכה או מחיקה</p>
               <span id="tst-count" class="text-xs bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] px-3 py-1 rounded-full font-semibold">0 המלצות</span>
             </div>
-            <div id="tst-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div id="tst-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             </div>
             <div id="tst-empty" class="py-16 text-center" style="display:none;">
               <div class="mb-3"><i data-lucide="message-circle" class="w-10 h-10 mx-auto text-[#d4a373]/40"></i></div>
@@ -6638,7 +6638,7 @@ function renderTstGrid() {
   empty.style.display = 'none';
 
   grid.innerHTML = tstImages.map((img, i) => `
-    <div class="relative group rounded-xl overflow-hidden border border-[#f0dfc0] cursor-pointer aspect-[3/4] bg-gray-50"
+    <div class="relative group rounded-xl overflow-hidden border border-[#f0dfc0] cursor-pointer aspect-[1.45/1] bg-gray-50"
          draggable="true" data-tst-id="${img.id}" data-tst-idx="${i}" onclick="openTstEdit('${img.id}')">
       <img src="${esc(img.url)}" alt="${esc(img.name||'המלצת לקוחה')}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
       <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
