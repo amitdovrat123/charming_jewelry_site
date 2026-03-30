@@ -6548,11 +6548,12 @@ const tstCloudWidget = cloudinary.createUploadWidget({
   cloudName:    CLOUDINARY_CLOUD_NAME,
   uploadPreset: CLOUDINARY_UPLOAD_PRESET,
   sources:      ['local','camera'],
-  multiple:     true,
-  cropping:     true,
+  multiple:     false,
+  cropping:     'server',
+  showSkipCropButton: false,
   croppingAspectRatio: null,
   croppingShowDimensions: true,
-  croppingDefaultSelectionRatio: 0.8,
+  croppingValidateDimensions: false,
   folder:       'charming_testimonials',
   clientAllowedFormats: ['jpg','jpeg','png','webp'],
   maxFileSize:  8000000,
@@ -6568,7 +6569,9 @@ const tstCloudWidget = cloudinary.createUploadWidget({
 }, async (error, result) => {
   if (error) { console.error('Testimonial upload error:', error); return; }
   if (result && result.event === 'success') {
-    const url = result.info.secure_url;
+    const url = result.info.secure_url || result.info.url;
+    console.log('Testimonial uploaded:', result.info.event, url, result.info);
+    if (!url) { console.error('No URL in upload result:', result.info); return; }
     const order = tstImages.length;
     try {
       await addDoc(collection(db, TESTIMONIALS_COL), {
