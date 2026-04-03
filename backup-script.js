@@ -34,7 +34,29 @@ function doBackup() {
   const logSheet = ss.getSheetByName('יומן גיבוי') || ss.insertSheet('יומן גיבוי');
   logSheet.appendRow([new Date(), 'גיבוי הושלם בהצלחה']);
 
+  // Save spreadsheet ID to Firestore so dashboard can use the same sheet
+  saveSheetIdToFirestore(ssId);
+
   Logger.log('Backup completed at ' + new Date().toISOString());
+}
+
+function saveSheetIdToFirestore(sheetId) {
+  try {
+    const token = ScriptApp.getOAuthToken();
+    const docPath = 'projects/' + PROJECT_ID + '/databases/(default)/documents/' + BASE_PATH + '/settings/backup';
+    const url = 'https://firestore.googleapis.com/v1/' + docPath + '?updateMask.fieldPaths=spreadsheetId&updateMask.fieldPaths=lastAutoBackup';
+    UrlFetchApp.fetch(url, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      payload: JSON.stringify({
+        fields: {
+          spreadsheetId: { stringValue: sheetId },
+          lastAutoBackup: { timestampValue: new Date().toISOString() }
+        }
+      }),
+      muteHttpExceptions: true
+    });
+  } catch(e) { Logger.log('Save sheet ID to Firestore: ' + e.message); }
 }
 
 // ── Firestore REST API ──
