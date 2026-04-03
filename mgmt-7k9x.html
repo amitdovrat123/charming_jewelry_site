@@ -9223,16 +9223,18 @@ async function getBackupData() {
         const w = d.data();
         const total = w.total || 0;
         const pay = w.payment || {};
-        const advAmt = pay.advanceAmount || 0;
-        const balAmt = pay.balanceAmount || 0;
+        const advPaid = pay.advancePaid === true;
+        const balPaid = pay.balancePaid === true;
+        const advAmt = advPaid ? (pay.advanceAmount || 500) : 0;
+        const balAmt = balPaid ? (pay.balanceAmount || 0) : 0;
         const remaining = Math.max(0, total - advAmt - balAmt);
         return [
           w.customerName||'', w.phone||'', w.celebrant||'', w.occasion||'',
           w.city||'', bkDateShort(w.eventDate), w.time||'', w.participantCount||'', w.route||'',
           w.basePrice||0, w.discount||0, w.arrivalFee||0, total,
           WS_STATUS_HE[w.bookingStatus] || w.bookingStatus || '',
-          pay.advancePaid?'כן':'לא', advAmt, PAY_METHOD_HE[pay.advanceMethod]||pay.advanceMethod||'', bkDateShort(pay.advancePaidDate),
-          pay.balancePaid?'כן':'לא', balAmt, PAY_METHOD_HE[pay.balanceMethod]||pay.balanceMethod||'', bkDateShort(pay.balancePaidDate),
+          advPaid?'כן':'לא', advPaid?advAmt:'', advPaid?(PAY_METHOD_HE[pay.advanceMethod]||pay.advanceMethod||''):'', advPaid?bkDateShort(pay.advancePaidDate):'',
+          balPaid?'כן':'לא', balPaid?balAmt:'', balPaid?(PAY_METHOD_HE[pay.balanceMethod]||pay.balanceMethod||''):'', balPaid?bkDateShort(pay.balancePaidDate):'',
           remaining, w.archived?'כן':'לא', w.notes||'', bkDate(w.createdAt)
         ];
       })
