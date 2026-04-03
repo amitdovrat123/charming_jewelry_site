@@ -5463,15 +5463,16 @@ function calcTravelEstimate(baseMinutes, wsDate, wsTime) {
   return { estMinutes: travelMin, departureTime: departure, multiplier, label };
 }
 
-// Arrival fee based on estimated travel time (minutes)
-function calcArrivalFeeByTime(minutes) {
-  if (minutes <= 20) return 0;
-  if (minutes <= 35) return 50;
-  if (minutes <= 50) return 100;
-  if (minutes <= 70) return 150;
-  if (minutes <= 90) return 200;
-  if (minutes <= 120) return 250;
-  return 300;
+// Arrival fee based on estimated travel time
+// חינם: עד 60 דק' (עם פקקים) או עד 30 דק' (ללא פקקים)
+// אחרי זה: 100₪ לכל שעה נוספת
+function calcArrivalFeeByTime(estMinutes, baseMinutes) {
+  // Free if base (no traffic) <= 30 min OR estimated (with traffic) <= 60 min
+  if (baseMinutes <= 30 || estMinutes <= 60) return 0;
+  // Extra hours beyond the first free hour
+  var extraMinutes = estMinutes - 60;
+  var extraHours = Math.ceil(extraMinutes / 60);
+  return extraHours * 100;
 }
 
 // Sync fallback for non-async contexts (card display etc.)
@@ -5495,7 +5496,7 @@ async function suggestArrivalFee() {
     const route = await getRouteInfo(city);
     if (route) {
       const est = calcTravelEstimate(route.baseMinutes, wsDate, wsTime);
-      const fee = calcArrivalFeeByTime(est.estMinutes);
+      const fee = calcArrivalFeeByTime(est.estMinutes, route.baseMinutes);
       const fuel = calcFuelCost(route.km);
       document.getElementById('ws-arrival').value = fee;
       updateWsTotal();
