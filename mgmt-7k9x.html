@@ -1410,6 +1410,7 @@
             <button class="settings-nav-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">🖼️ גלריית סדנאות</button>
             <button class="settings-nav-btn" data-settings-page="testimonials" onclick="showSettingsPage('testimonials')">⭐ המלצות</button>
             <button class="settings-nav-btn" data-settings-page="wa-templates" onclick="showSettingsPage('wa-templates')">💬 הודעות WhatsApp</button>
+            <button class="settings-nav-btn" data-settings-page="ai-style" onclick="showSettingsPage('ai-style')"><i data-lucide="wand-2" class="w-3.5 h-3.5 inline-block"></i> סגנון AI</button>
             <button class="settings-nav-btn" data-settings-page="backup" onclick="showSettingsPage('backup')"><i data-lucide="hard-drive-download" class="w-3.5 h-3.5 inline-block"></i> גיבוי נתונים</button>
           </div>
         </div>
@@ -1640,6 +1641,57 @@ Charming by Vik 💛</textarea>
           <!-- Templates list -->
           <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
             <div id="wa-tpl-list" class="divide-y divide-[#fdf6ee]"></div>
+          </div>
+        </div>
+
+        <!-- Sub-page: AI Style -->
+        <div id="settings-page-ai-style" class="settings-page p-6 space-y-6" style="display:none;">
+          <h2 class="font-black text-gray-800 text-lg flex items-center gap-2"><i data-lucide="wand-2" class="w-5 h-5 text-[#d4a373]"></i> סגנון כתיבת AI</h2>
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm space-y-4">
+            <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700 leading-relaxed">
+              כאן תוכלי להגדיר את סגנון הכתיבה של ה-AI כשהוא יוצר תיאורי מוצרים. ההנחיות שלך ישפיעו על הטון, המבנה והמילים שהוא ישתמש בהם.
+            </div>
+            <div>
+              <label class="lbl">טון כתיבה</label>
+              <select id="ai-tone" class="inp" onchange="saveAiStyle()">
+                <option value="elegant">אלגנטי וחם</option>
+                <option value="playful">שובב וצעיר</option>
+                <option value="minimal">מינימליסטי וקצר</option>
+                <option value="luxurious">יוקרתי ומפנק</option>
+                <option value="custom">מותאם אישית</option>
+              </select>
+            </div>
+            <div>
+              <label class="lbl">מילות מפתח חובה (מופרדות בפסיק)</label>
+              <input id="ai-keywords" type="text" class="inp" value="ניצוץ, צ'ארמינג, קיץ, פלדת אל-חלד, עמיד במים" onchange="saveAiStyle()" />
+            </div>
+            <div>
+              <label class="lbl">מילות מפתח באנגלית (מופרדות בפסיק)</label>
+              <input id="ai-keywords-en" type="text" class="inp" value="sparkle, Charming, summer, stainless steel, water-resistant" onchange="saveAiStyle()" />
+            </div>
+            <div>
+              <label class="lbl">אורך תיאור רצוי</label>
+              <select id="ai-length" class="inp" onchange="saveAiStyle()">
+                <option value="short">קצר (2-3 משפטים)</option>
+                <option value="medium" selected>בינוני (3-5 משפטים)</option>
+                <option value="long">ארוך (5-7 משפטים)</option>
+              </select>
+            </div>
+            <div>
+              <label class="lbl">הנחיות מותאמות אישית (חופשי)</label>
+              <textarea id="ai-custom-prompt" rows="5" class="inp resize-none" placeholder="כתבי כאן הנחיות נוספות, לדוגמה:&#10;- תמיד תסיימי עם משפט על עמידות&#10;- אל תשתמשי במילה 'מושלם'&#10;- תוסיפי אימוג'י בסוף" onchange="saveAiStyle()"></textarea>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="testAiStyle()" class="border border-[#d4a373] text-[#d4a373] hover:bg-[#fdf6ee] px-5 py-2.5 rounded-full font-bold text-sm transition-colors">
+                🧪 בדקי סגנון (מוצר לדוגמה)
+              </button>
+              <span id="ai-style-status" class="text-xs text-green-600 font-semibold"></span>
+            </div>
+            <div id="ai-style-preview" style="display:none;" class="space-y-2">
+              <p class="text-xs font-bold text-gray-500">תצוגה מקדימה:</p>
+              <div class="p-3 bg-[#fdf8f5] border border-[#e8cfc4] rounded-xl text-sm text-gray-700 leading-relaxed whitespace-pre-wrap" id="ai-preview-he"></div>
+              <div class="p-3 bg-[#fdf8f5] border border-[#e8cfc4] rounded-xl text-sm text-gray-700 leading-relaxed whitespace-pre-wrap" dir="ltr" id="ai-preview-en"></div>
+            </div>
           </div>
         </div>
 
@@ -4107,6 +4159,92 @@ document.getElementById('del-confirm').addEventListener('click', async ()=>{
   closeDelete();
 });
 
+// ── AI Style Settings ─────────────────────────────────────────────
+const AI_STYLE_KEY = 'charming_ai_style';
+function getAiStyle() {
+  try { return JSON.parse(localStorage.getItem(AI_STYLE_KEY)) || {}; } catch { return {}; }
+}
+function saveAiStyle() {
+  const style = {
+    tone: document.getElementById('ai-tone').value,
+    keywords: document.getElementById('ai-keywords').value,
+    keywordsEn: document.getElementById('ai-keywords-en').value,
+    length: document.getElementById('ai-length').value,
+    custom: document.getElementById('ai-custom-prompt').value,
+  };
+  localStorage.setItem(AI_STYLE_KEY, JSON.stringify(style));
+  const st = document.getElementById('ai-style-status');
+  st.textContent = '✓ נשמר'; setTimeout(() => st.textContent = '', 2000);
+}
+function loadAiStyle() {
+  const s = getAiStyle();
+  if (s.tone) document.getElementById('ai-tone').value = s.tone;
+  if (s.keywords) document.getElementById('ai-keywords').value = s.keywords;
+  if (s.keywordsEn) document.getElementById('ai-keywords-en').value = s.keywordsEn;
+  if (s.length) document.getElementById('ai-length').value = s.length;
+  if (s.custom) document.getElementById('ai-custom-prompt').value = s.custom;
+}
+document.addEventListener('DOMContentLoaded', loadAiStyle);
+
+function buildAiSystemPrompt() {
+  const s = getAiStyle();
+  const toneMap = {
+    elegant: 'אלגנטי, חם, מזמין ומקצועי — שירי אך ברור',
+    playful: 'שובב, צעיר, אנרגטי — כיפי אך לא ילדותי',
+    minimal: 'מינימליסטי, קצר ותכליתי — כל מילה במקומה',
+    luxurious: 'יוקרתי, מפנק, בוטיק — שפה עשירה ומוקפדת',
+    custom: 'מותאם אישית (ראי הנחיות נוספות למטה)',
+  };
+  const tone = toneMap[s.tone] || toneMap.elegant;
+  const kwHe = s.keywords || 'ניצוץ, צ\'ארמינג, קיץ, פלדת אל-חלד, עמיד במים';
+  const kwEn = s.keywordsEn || 'sparkle, Charming, summer, stainless steel, water-resistant';
+  const lengthMap = { short: '2-3 משפטים', medium: '3-5 משפטים', long: '5-7 משפטים' };
+  const len = lengthMap[s.length] || lengthMap.medium;
+  const custom = s.custom ? `\n\nהנחיות נוספות מהמשתמש:\n${s.custom}` : '';
+
+  return `אתה קופירייטר מקצועי של המותג "Charming by Vik" — מותג תכשיטים יוקרתי בסגנון קיץ.
+עליך לכתוב שני תיאורים — אחד בעברית ואחד באנגלית.
+הטון: ${tone}.
+אסור: ז'רגון, שפה מכירתית אגרסיבית, קלישאות זולות.
+אורך כל תיאור: ${len}.
+מילות מפתח בעברית: ${kwHe.split(',').map(w=>'"'+w.trim()+'"').join(', ')}.
+מילות מפתח באנגלית: ${kwEn.split(',').map(w=>'"'+w.trim()+'"').join(', ')}.${custom}
+
+הפורמט חייב להיות בדיוק:
+---HE---
+(תיאור בעברית)
+---EN---
+(תיאור באנגלית)`;
+}
+
+async function callGeminiAi(systemPrompt, userPrompt) {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system_instruction: { parts: [{ text: systemPrompt }] }, contents: [{ parts: [{ text: userPrompt }] }], generationConfig: { temperature: 0.9, maxOutputTokens: 800 } }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('תגובה ריקה');
+  return text;
+}
+
+async function testAiStyle() {
+  const status = document.getElementById('ai-style-status');
+  const previewEl = document.getElementById('ai-style-preview');
+  status.textContent = '⏳ מייצרת תצוגה מקדימה...';
+  try {
+    const text = await callGeminiAi(buildAiSystemPrompt(), 'צרי תיאור מוצר עבור:\nשם בעברית: שרשרת 5 צ\'ארמים דגם ג\'יזל\nשם באנגלית: 5-Charm Necklace Giselle\nקטגוריה: שרשראות\nחומר: פלדת אל-חלד');
+    const he = text.split('---EN---')[0].replace('---HE---','').trim();
+    const en = (text.split('---EN---')[1]||'').trim();
+    document.getElementById('ai-preview-he').textContent = he;
+    document.getElementById('ai-preview-en').textContent = en;
+    previewEl.style.display = '';
+    status.textContent = '✓ תצוגה מקדימה מוכנה';
+  } catch (ex) { status.textContent = '✗ שגיאה: ' + ex.message; console.error(ex); }
+  setTimeout(() => status.textContent = '', 5000);
+}
+
 // ── AI Description ────────────────────────────────────────────────
 document.getElementById('ai-btn').addEventListener('click', async ()=>{
   const aiBtn   = document.getElementById('ai-btn');
@@ -4121,32 +4259,9 @@ document.getElementById('ai-btn').addEventListener('click', async ()=>{
   const mat =document.getElementById('p-mat').value;
   if (!name){aiErr.textContent='יש להזין שם מוצר לפני יצירת תיאור.';return;}
   aiBtn.disabled=true;label.textContent='מייצרת תיאור...';aiBtn.classList.add('ai-loading');aiErr.textContent='';
-  const systemPrompt=`אתה קופירייטר מקצועי של המותג "Charming by Vik" — מותג תכשיטים יוקרתי בסגנון קיץ.
-עליך לכתוב שני תיאורים — אחד בעברית ואחד באנגלית.
-הטון: אלגנטי, חם, מזמין ומקצועי — שירי אך ברור.
-אסור: ז'רגון, שפה מכירתית אגרסיבית, קלישאות זולות.
-מבנה חובה לכל תיאור:
-1. כותרת קליטה (שורה אחת, ללא נקודתיים)
-2. 2-3 משפטי תיאור עשירים
-3. משפט סיום אחד על עמידות
-מילות מפתח בעברית: "ניצוץ", "צ'ארמינג", "קיץ", "פלדת אל-חלד", "עמיד במים".
-מילות מפתח באנגלית: "sparkle", "Charming", "summer", "stainless steel", "water-resistant".
-
-הפורמט חייב להיות בדיוק:
----HE---
-(תיאור בעברית)
----EN---
-(תיאור באנגלית)`;
   const userPrompt=`צרי תיאור מוצר עבור:\nשם בעברית: ${name}\nשם באנגלית: ${nameEn||name}\nקטגוריה: ${cat||'תכשיט'}\nחומר: ${mat||'פלדת אל-חלד'}`;
   try {
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({system_instruction:{parts:[{text:systemPrompt}]},contents:[{parts:[{text:userPrompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:600}}),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data=await res.json();
-    const text=data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error('תגובה ריקה');
+    const text = await callGeminiAi(buildAiSystemPrompt(), userPrompt);
     const hePart = text.split('---EN---')[0].replace('---HE---','').trim();
     const enPart = (text.split('---EN---')[1]||'').trim();
     textareaHe.value = hePart;
