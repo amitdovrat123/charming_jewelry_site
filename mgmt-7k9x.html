@@ -5500,10 +5500,23 @@ async function suggestArrivalFee() {
       document.getElementById('ws-arrival').value = fee;
       updateWsTotal();
 
-      const feeText = fee === 0 ? 'ללא תוספת' : `תוספת ${fee}₪`;
-      const timeNote = (!wsDate || !wsTime) ? '<br>&nbsp;&nbsp;&nbsp;הזן תאריך ושעה לחישוב מדויק יותר' : '';
-      hintEl.innerHTML = `✓ <b>${city}</b> — ${route.km} ק"מ · ~${est.estMinutes} דק\' נסיעה · ${est.label}<br>&nbsp;&nbsp;&nbsp;${feeText} · דלק: ~${fuel}₪${timeNote}`;
-      hintEl.className = `text-[10px] ${fee === 0 ? 'text-emerald-500' : 'text-[#d4a373]'} mt-1 font-semibold leading-relaxed`;
+      const feeText = fee === 0 ? 'ללא תוספת הגעה' : `תוספת הגעה: ${fee}₪`;
+      const hours = Math.floor(est.estMinutes / 60);
+      const mins = est.estMinutes % 60;
+      const timeStr = hours > 0 ? `${hours} שע\' ו-${mins} דק\'` : `${mins} דק\'`;
+      const missingDate = (!wsDate || !wsTime) ? '<br>⚠ הזן תאריך ושעה לחישוב מדויק יותר' : '';
+
+      hintEl.innerHTML = `
+        <div style="background:var(--pink-light,#f5ece7);border:1px solid #f0dfc0;border-radius:10px;padding:8px 12px;margin-top:6px;line-height:1.7;">
+          <div style="font-weight:700;color:#2c2a29;margin-bottom:2px;">✓ ${city}</div>
+          <div>📍 מרחק: <b>${route.km} ק"מ</b> (מסלול נסיעה)</div>
+          <div>🕐 זמן נסיעה משוער: <b>${timeStr}</b></div>
+          <div>🚗 ${est.label}</div>
+          <div>⛽ עלות דלק משוערת: <b>${fuel}₪</b></div>
+          <div style="border-top:1px solid #f0dfc0;margin-top:4px;padding-top:4px;font-weight:700;color:${fee === 0 ? '#16a34a' : '#d4a373'};">${feeText}</div>
+          ${missingDate}
+        </div>`;
+      hintEl.className = 'text-[10px] mt-1';
       return;
     }
   } catch(e) { console.warn('Route calc failed:', e); }
