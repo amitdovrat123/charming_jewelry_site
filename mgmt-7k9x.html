@@ -9473,6 +9473,8 @@ async function runBackupToSheets() {
           'בוטל':           {red:0.96,green:0.84,blue:0.84},  // red
           'חדשה':           {red:1.0, green:0.95,blue:0.80},  // yellow
           'טופל':           {red:0.83,green:0.93,blue:0.85},  // green
+          'published':      {red:0.83,green:0.93,blue:0.85},  // green
+          'draft':          {red:1.0, green:0.95,blue:0.80},  // yellow
         };
 
         // Column group definitions per sheet (0-based col indices → color)
@@ -9505,6 +9507,23 @@ async function runBackupToSheets() {
             {start:2,end:5,color:C.customer},
             {start:5,end:9,color:C.pricing},
             {start:9,end:10,color:C.status},
+          ],
+          'מוצרים': [
+            {start:0,end:3,color:C.customer},    // שם, שם באנגלית, מק"ט
+            {start:3,end:7,color:C.event},        // קטגוריה, קולקציה, חומר, צבע
+            {start:7,end:11,color:C.pricing},     // מחיר מלא, מבצע, עלות, מלאי
+            {start:11,end:12,color:{red:1.0,green:0.95,blue:0.80}}, // תג (yellow)
+            {start:12,end:13,color:C.status},     // סטטוס
+            {start:13,end:15,color:C.payment},    // מותאם אישית, מוצר מובלט
+            {start:15,end:17,color:{red:0.90,green:0.95,blue:1.0}}, // תיאורים (light sky)
+            {start:17,end:19,color:C.meta},       // תמונות
+            {start:19,end:21,color:C.meta},       // תאריכים
+          ],
+          'קופונים': [
+            {start:0,end:1,color:C.customer},     // קוד
+            {start:1,end:3,color:C.pricing},      // סוג, ערך
+            {start:3,end:5,color:C.event},        // מגבלה, שימושים
+            {start:5,end:7,color:C.meta},         // תוקף, נוצר
           ],
         };
 
