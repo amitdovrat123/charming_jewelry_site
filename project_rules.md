@@ -79,11 +79,20 @@
 ## 4. File Structure
 
 ```
-newalias/
-├── index.html          # Home page
-├── workshops.html      # Workshops page
-├── style.css           # Global stylesheet (single source of styles)
-└── project_rules.md    # This file — Source of Truth
+charming_website/
+├── index.html            # Home page
+├── shop.html             # Shop / catalog
+├── workshops.html        # Workshops page
+├── legal.html            # Privacy, terms, cookie settings
+├── terms.html            # Terms of service
+├── mgmt-7k9x.html       # Admin dashboard (HIDDEN — do NOT rename or expose)
+├── style.css             # Global stylesheet (single source of styles)
+├── netlify.toml          # Netlify config: security headers + redirects
+├── _headers              # Netlify fallback headers
+├── robots.txt            # Search engine directives
+├── firestore.rules       # Firebase security rules
+├── firebase-config.js    # Firebase + App Check initialization
+└── project_rules.md      # This file — Source of Truth
 ```
 
 > New pages go in the same root directory and follow the naming convention: `lowercase-kebab-case.html`.
@@ -101,6 +110,17 @@ newalias/
 5. Google Fonts link for `Assistant`
 6. The **standard Navigation Bar** (see template below)
 7. The **standard Footer** (see template below)
+8. `<script src="lang-init.js"></script>` in `<head>` (language detection)
+9. `<script async src="https://www.googletagmanager.com/gtag/js?id=G-MBC09YG3HY"></script>` + `<script src="gtag-init.js"></script>` in `<head>` (GA4)
+10. `<script src="cookie-consent.js"></script>` before closing `</body>` (cookie banner)
+
+### Security Rules for HTML:
+
+- **NO inline `<script>` blocks** — all JS must be in external `.js` files
+- **NO `onclick`, `onload`, `onerror`** or any inline event handlers — use `addEventListener` in JS files or `data-*` attributes with a handler script
+- **NO `javascript:void(0)`** in href — use direct links or `#`
+- These rules exist to maintain a strict Content-Security-Policy (CSP) that blocks XSS attacks
+- When adding new external scripts/styles/APIs, update the CSP in **both** `netlify.toml` and `_headers`
 
 ### Navigation Bar Template
 

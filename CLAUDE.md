@@ -32,8 +32,12 @@ python3 -m http.server 8000
 **Static site** with a single shared stylesheet:
 - `index.html` — Home page (hero, charm jewelry shop, workshops overview)
 - `workshops.html` — Workshops page (gallery, signup form)
-- `style.css` — One global stylesheet, shared by all pages (~960 lines, 19 sections)
-- `main.js` — 8 lines; toggles `.scrolled` on `<header class="navbar">` at `scrollY > 60px`
+- `shop.html` — Shop page (product catalog, filters, cart)
+- `legal.html` — Legal page (privacy, terms, cookie settings)
+- `terms.html` — Terms page
+- `mgmt-7k9x.html` — Admin dashboard (**hidden path — do NOT rename or expose**)
+- `style.css` — One global stylesheet, shared by all pages
+- `main.js` — navbar scroll, hamburger menu, testimonials, lightbox
 - `project_rules.md` — source of truth for design and technical rules
 - `skills/copywriting_skill.md` — brand voice and content guidelines
 
@@ -76,6 +80,60 @@ Responsive breakpoints: `1200px` / `768px` / `375px`.
 - Social: TikTok is the only platform — `https://www.tiktok.com/@charming.by.vik`.
 
 See `skills/copywriting_skill.md` for the full brand voice guide before writing or editing any content.
+
+## Security Rules (DO NOT REMOVE OR WEAKEN)
+
+### Netlify Configuration
+Two files control security headers and access rules. **Both must stay in sync:**
+- `netlify.toml` — primary config (headers + redirects)
+- `_headers` — fallback headers
+
+### HTTP Security Headers (applied to all pages)
+These headers are defined in `netlify.toml` and `_headers`. **Never remove them:**
+
+| Header | Value | Purpose |
+|---|---|---|
+| `Content-Security-Policy` | Full whitelist policy | Prevents XSS — only allows scripts/styles from approved domains |
+| `X-Frame-Options` | `DENY` | Prevents clickjacking (iframe embedding) |
+| `X-Content-Type-Options` | `nosniff` | Prevents MIME sniffing attacks |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Prevents URL leakage to external sites |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Blocks browser APIs not needed by the site |
+
+### CSP Whitelist
+When adding a **new external script, font, image CDN, or API**, you must update the CSP in **both** `netlify.toml` and `_headers`. The relevant directives:
+- `script-src` — JavaScript sources
+- `style-src` — CSS sources
+- `img-src` — Image sources
+- `font-src` — Font sources
+- `connect-src` — API/fetch destinations
+- `frame-src` — iframe sources
+
+### Admin Dashboard Protection
+- The admin page is at `mgmt-7k9x.html` — **do NOT rename back to `admin.html`**
+- `/admin` and `/admin.html` return 404 (redirect in `netlify.toml`)
+- `X-Robots-Tag: noindex, nofollow` is set on the admin page
+- The admin path must NOT appear in `robots.txt`
+
+### Sensitive File Blocking
+These files are blocked from public access via redirects in `netlify.toml` (return 404):
+- `*.md` files (CLAUDE.md, task_list.md, project_rules.md, etc.)
+- `firestore.rules`
+- `netlify.toml`, `_headers`
+- `agents/`, `skills/` directories
+
+**When adding new `.md` files or config files**, add a corresponding redirect in `netlify.toml`.
+
+### Firebase Security
+- **Firestore Rules** (`firestore.rules`) — validation on `inquiries`, `logs`, `site_traffic` to prevent spam flooding
+- **App Check** (reCAPTCHA v3) — configured in `firebase-config.js`, blocks requests not from the real site
+- **Rate limiting** — `tracker.js` limits to 200 events per session
+
+### No Inline Scripts in Public Pages
+All JavaScript was extracted to external files to enable strict CSP. **Do NOT add inline `<script>` blocks or `onclick` handlers to HTML files.** Use external `.js` files instead. Shared scripts:
+- `lang-init.js` — language detection (loaded in `<head>`)
+- `gtag-init.js` — Google Analytics consent + config
+- `cookie-consent.js` — cookie banner logic
+- `nav-handler.js` — `[data-nav]` attribute click handler (replaces onclick)
 
 ## Universal Agents (תיקיית `agents/`)
 
