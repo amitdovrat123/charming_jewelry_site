@@ -1,4 +1,2 @@
 User-agent: *
 Allow: /
-Disallow: /mgmt-7k9x
-Disallow: /mgmt-7k9x.html
