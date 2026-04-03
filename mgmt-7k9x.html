@@ -1754,7 +1754,6 @@ Charming by Vik 💛</textarea>
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i> פתח את ה-Sheet
                 </a>
               </div>
-              <button onclick="resetBackupSheet()" class="border border-gray-200 text-gray-400 hover:text-red-400 hover:border-red-200 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors">איפוס גיליון</button>
               <div id="backup-last-run" class="text-xs text-gray-400"></div>
               <div id="backup-progress" class="text-xs text-[#d4a373] font-semibold" style="display:none;"></div>
             </div>
@@ -9495,14 +9494,6 @@ async function runBackupToSheets() {
 }
 window.runBackupToSheets = runBackupToSheets;
 
-async function resetBackupSheet() {
-  if (!confirm('זה ימחק את הקישור לגיליון הנוכחי וייצור חדש בגיבוי הבא. להמשיך?')) return;
-  backupSpreadsheetId = null;
-  await setDoc(doc(db, SETTINGS_COL, 'backup'), { spreadsheetId: null }, { merge: true });
-  document.getElementById('backup-sheet-link').style.display = 'none';
-  document.getElementById('backup-last-run').textContent = 'הגיליון אופס — לחץ "גבה עכשיו" ליצירת גיליון חדש';
-}
-window.resetBackupSheet = resetBackupSheet;
 
 async function exportToExcel() {
   const progress = document.getElementById('excel-progress');
