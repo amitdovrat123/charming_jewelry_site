@@ -160,6 +160,11 @@
     .settings-nav-btn { padding:10px 16px; font-size:13px; font-weight:600; color:#6b7280; border-bottom:2px solid transparent; white-space:nowrap; transition:color .2s, border-color .2s; background:none; cursor:pointer; }
     .settings-nav-btn:hover { color:#d4a373; }
     .settings-nav-btn.settings-nav-active { color:#d4a373; border-bottom-color:#d4a373; font-weight:700; }
+    .settings-card-btn { display:flex; flex-direction:column; align-items:center; gap:8px; padding:18px 12px; border-radius:16px; border:1.5px solid #f0dfc0; background:#fff; color:#6b7280; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; }
+    .settings-card-btn:hover { border-color:#d4a373; color:#d4a373; box-shadow:0 2px 8px rgba(212,163,115,.15); transform:translateY(-2px); }
+    .settings-card-btn i { color:#d4a373; }
+    .settings-back-btn { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#9a8e8a; background:none; border:none; cursor:pointer; padding:0; margin-bottom:12px; }
+    .settings-back-btn:hover { color:#d4a373; }
     .no-scrollbar::-webkit-scrollbar { display:none; }
     .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
     .bi-kpi-card { background:#fff; border:1px solid #f0dfc0; border-radius:16px; padding:20px; transition:transform .2s, box-shadow .2s; }
@@ -1394,23 +1399,40 @@
 
       <!-- ─── TAB: SETTINGS (with sub-pages) ─── -->
       <section id="tab-settings" data-erp-tab class="p-0">
-        <!-- Settings sub-nav -->
-        <div class="border-b border-[#f0dfc0] bg-white sticky top-0 z-10">
-          <div class="flex overflow-x-auto no-scrollbar px-2 sm:px-4">
-            <button class="settings-nav-btn settings-nav-active" data-settings-page="general" onclick="showSettingsPage('general')"><i data-lucide="settings" class="w-3.5 h-3.5 inline-block"></i> כללי</button>
-            <button class="settings-nav-btn" data-settings-page="banner" onclick="showSettingsPage('banner')">📢 באנר עליון</button>
-            <button class="settings-nav-btn" data-settings-page="coupons" onclick="showSettingsPage('coupons')"><i data-lucide="tag" class="w-3.5 h-3.5 inline-block"></i> קופונים</button>
-            <button class="settings-nav-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">🖼️ גלריית סדנאות</button>
-            <button class="settings-nav-btn" data-settings-page="testimonials" onclick="showSettingsPage('testimonials')">⭐ המלצות</button>
-            <button class="settings-nav-btn" data-settings-page="wa-templates" onclick="showSettingsPage('wa-templates')">💬 הודעות WhatsApp</button>
-            <button class="settings-nav-btn" data-settings-page="ai-style" onclick="showSettingsPage('ai-style')"><i data-lucide="wand-2" class="w-3.5 h-3.5 inline-block"></i> סגנון AI</button>
-            <button class="settings-nav-btn" data-settings-page="backup" onclick="showSettingsPage('backup')"><i data-lucide="hard-drive-download" class="w-3.5 h-3.5 inline-block"></i> גיבוי נתונים</button>
+        <!-- Settings sub-nav — grid cards -->
+        <div id="settings-grid-nav" class="p-4 sm:p-6">
+          <h2 class="font-black text-gray-800 text-lg mb-4">הגדרות</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            <button class="settings-card-btn" data-settings-page="general" onclick="showSettingsPage('general')">
+              <i data-lucide="settings" class="w-5 h-5"></i><span>כללי</span>
+            </button>
+            <button class="settings-card-btn" data-settings-page="banner" onclick="showSettingsPage('banner')">
+              <i data-lucide="megaphone" class="w-5 h-5"></i><span>באנר עליון</span>
+            </button>
+            <button class="settings-card-btn" data-settings-page="coupons" onclick="showSettingsPage('coupons')">
+              <i data-lucide="tag" class="w-5 h-5"></i><span>קופונים</span>
+            </button>
+            <button class="settings-card-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">
+              <i data-lucide="image" class="w-5 h-5"></i><span>גלריית סדנאות</span>
+            </button>
+            <button class="settings-card-btn" data-settings-page="testimonials" onclick="showSettingsPage('testimonials')">
+              <i data-lucide="star" class="w-5 h-5"></i><span>המלצות</span>
+            </button>
+            <button class="settings-card-btn" data-settings-page="wa-templates" onclick="showSettingsPage('wa-templates')">
+              <i data-lucide="message-circle" class="w-5 h-5"></i><span>הודעות WhatsApp</span>
+            </button>
+            <button class="settings-card-btn" data-settings-page="ai-style" onclick="showSettingsPage('ai-style')">
+              <i data-lucide="wand-2" class="w-5 h-5"></i><span>סגנון AI</span>
+            </button>
+            <button class="settings-card-btn" data-settings-page="backup" onclick="showSettingsPage('backup')">
+              <i data-lucide="hard-drive-download" class="w-5 h-5"></i><span>גיבוי נתונים</span>
+            </button>
           </div>
         </div>
 
         <!-- Sub-page: General -->
-        <div id="settings-page-general" class="settings-page p-6 space-y-6">
-          <h2 class="font-black text-gray-800 text-lg">הגדרות</h2>
+        <div id="settings-page-general" class="settings-page p-6 space-y-6" style="display:none;">
+          <h2 class="font-black text-gray-800 text-lg">כללי</h2>
 
         </div>
 
@@ -2620,12 +2642,37 @@ window.closeMoreMenu  = closeMoreMenu;
 // ── Settings sub-page navigation ──────────────────────────────────
 const settingsSubPages = ['general','banner','coupons','ws-gallery','testimonials','wa-templates','ai-style','backup'];
 let settingsSubInited = {};
+function showSettingsGrid() {
+  const grid = document.getElementById('settings-grid-nav');
+  if (grid) grid.style.display = '';
+  settingsSubPages.forEach(p => {
+    const el = document.getElementById('settings-page-'+p);
+    if (el) el.style.display = 'none';
+  });
+  sessionStorage.removeItem('charming_settings_page');
+}
+window.showSettingsGrid = showSettingsGrid;
+// Inject back button into each settings sub-page
+document.addEventListener('DOMContentLoaded', () => {
+  settingsSubPages.forEach(p => {
+    const el = document.getElementById('settings-page-'+p);
+    if (!el) return;
+    const back = document.createElement('button');
+    back.className = 'settings-back-btn';
+    back.innerHTML = '<i data-lucide="arrow-right" class="w-4 h-4"></i> חזרה להגדרות';
+    back.onclick = showSettingsGrid;
+    el.insertBefore(back, el.firstChild);
+  });
+});
+
 function showSettingsPage(page) {
+  const grid = document.getElementById('settings-grid-nav');
+  if (grid) grid.style.display = 'none';
   settingsSubPages.forEach(p => {
     const el = document.getElementById('settings-page-'+p);
     if (el) el.style.display = p === page ? '' : 'none';
   });
-  document.querySelectorAll('.settings-nav-btn').forEach(btn =>
+  document.querySelectorAll('.settings-card-btn').forEach(btn =>
     btn.classList.toggle('settings-nav-active', btn.dataset.settingsPage === page));
   sessionStorage.setItem('charming_settings_page', page);
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
