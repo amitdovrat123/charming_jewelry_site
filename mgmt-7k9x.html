@@ -5503,16 +5503,24 @@ async function suggestArrivalFee() {
       const hasDateTime = wsDate && wsTime;
 
       const feeColor = fee === 0 ? '#16a34a' : '#d4a373';
-      hintEl.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#fdf6ee;border:1px solid #f0dfc0;border-radius:12px;overflow:hidden;margin-top:8px;font-size:11px;">
-        <tr style="background:#f5ece7;"><td colspan="2" style="padding:8px 12px;font-weight:800;color:#2c2a29;font-size:12px;">✓ ${city}</td></tr>
-        <tr><td style="padding:5px 12px;color:#9a8e8a;">מרחק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${route.km} ק"מ</td></tr>
-        <tr><td style="padding:5px 12px;color:#9a8e8a;">נסיעה (ללא פקקים)</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${baseTimeStr}</td></tr>
-        <tr><td style="padding:5px 12px;color:#9a8e8a;">עלות דלק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">~${fuel}₪</td></tr>
-        <tr style="border-top:1px solid #f0dfc0;"><td style="padding:7px 12px;font-weight:700;color:${feeColor};">תוספת הגעה מומלצת</td><td style="padding:7px 12px;font-weight:800;color:${feeColor};font-size:13px;">${fee === 0 ? 'ללא תוספת' : fee + '₪'}</td></tr>
-        ${hasDateTime ? `<tr style="border-top:1px solid #f0dfc0;background:#f9f5f1;"><td colspan="2" style="padding:6px 12px;color:#9a8e8a;font-size:10px;font-weight:600;">🔒 תכנון פנימי</td></tr>
-        <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">נסיעה עם פקקים</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${estTimeStr}</td></tr>
-        <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">שעת יציאה</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${est.label}</td></tr>` : ''}
-      </table>${!hasDateTime ? '<p style="font-size:10px;color:#9a8e8a;margin-top:4px;">הזן תאריך ושעה לחישוב זמן נסיעה עם פקקים</p>' : ''}`;
+      const feeLabel = fee === 0 ? 'ללא תוספת' : fee + '₪';
+      const detailId = 'arrival-detail-' + Date.now();
+      hintEl.innerHTML = `<div style="background:#fdf6ee;border:1px solid #f0dfc0;border-radius:12px;overflow:hidden;margin-top:8px;font-size:11px;">
+        <div onclick="var d=document.getElementById('${detailId}');var a=this.querySelector('.arr-arrow');if(d.style.display==='none'){d.style.display='';a.style.transform='rotate(180deg)';}else{d.style.display='none';a.style.transform='';}" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;cursor:pointer;background:#f5ece7;">
+          <span style="font-weight:800;color:#2c2a29;font-size:12px;">✓ ${city} — <span style="color:${feeColor}">${feeLabel}</span></span>
+          <span class="arr-arrow" style="font-size:10px;color:#9a8e8a;transition:transform 0.2s;display:inline-block;">▼</span>
+        </div>
+        <div id="${detailId}" style="display:none;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:5px 12px;color:#9a8e8a;">מרחק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${route.km} ק"מ</td></tr>
+            <tr><td style="padding:5px 12px;color:#9a8e8a;">נסיעה (ללא פקקים)</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${baseTimeStr}</td></tr>
+            <tr><td style="padding:5px 12px;color:#9a8e8a;">עלות דלק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">~${fuel}₪</td></tr>
+            ${hasDateTime ? `<tr style="border-top:1px solid #f0dfc0;background:#f9f5f1;"><td colspan="2" style="padding:6px 12px;color:#9a8e8a;font-size:10px;font-weight:600;">🔒 תכנון פנימי</td></tr>
+            <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">נסיעה עם פקקים</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${estTimeStr}</td></tr>
+            <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">שעת יציאה</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${est.label}</td></tr>` : ''}
+          </table>
+        </div>
+      </div>${!hasDateTime ? '<p style="font-size:10px;color:#9a8e8a;margin-top:4px;">הזן תאריך ושעה לחישוב זמן נסיעה עם פקקים</p>' : ''}`;
       hintEl.className = 'mt-1';
       return;
     }
