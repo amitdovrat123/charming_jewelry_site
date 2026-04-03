@@ -4245,6 +4245,9 @@ async function testAiStyle() {
   setTimeout(() => status.textContent = '', 5000);
 }
 
+window.saveAiStyle = saveAiStyle;
+window.testAiStyle = testAiStyle;
+
 // ── AI Description ────────────────────────────────────────────────
 document.getElementById('ai-btn').addEventListener('click', async ()=>{
   const aiBtn   = document.getElementById('ai-btn');
