@@ -955,21 +955,28 @@ function renderProfileView() {
           const orderId = order.orderId || order.id || '';
 
           const itemsHtml = items.map(i => {
-            const img = i.image
-              ? `<img src="${i.image}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--sand-dark);flex-shrink:0;" />`
-              : `<div style="width:52px;height:52px;border-radius:10px;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">💎</div>`;
             const productId = i.productId || '';
-            const clickable = productId ? `data-goto-product="${productId}" style="cursor:pointer;"` : '';
+            // Try order item image, then look up from current catalog
+            let imgSrc = i.image || '';
+            if (!imgSrc && productId) {
+              const catalogProduct = allProducts.find(p => p.id === productId);
+              if (catalogProduct) imgSrc = getImages(catalogProduct.data)[0] || '';
+            }
+            const img = imgSrc
+              ? `<img src="${imgSrc}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:12px;border:1px solid var(--sand-dark);flex-shrink:0;" />`
+              : `<div style="width:56px;height:56px;border-radius:12px;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">💎</div>`;
+            const hasProduct = productId && allProducts.some(p => p.id === productId);
             return `
-              <div class="order-item-row" ${clickable} title="${productId ? 'לחצי לצפייה במוצר' : ''}"
-                style="display:flex;gap:12px;align-items:center;padding:8px 0;${productId ? 'cursor:pointer;' : ''}">
+              <div ${hasProduct ? `data-goto-product="${productId}"` : ''}
+                style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--sand-dark);${hasProduct ? 'cursor:pointer;' : ''}"
+                ${hasProduct ? 'title="לחצי לצפייה במוצר"' : ''}>
                 ${img}
                 <div style="flex:1;min-width:0;">
                   <p style="margin:0;font-size:0.88rem;font-weight:600;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(i.name)}</p>
                   <p style="margin:2px 0 0;font-size:0.78rem;color:var(--muted);">${i.quantity || i.qty || 1} × ${i.price || 0} ₪</p>
                   ${i.customizationNote ? `<p style="margin:2px 0 0;font-size:0.75rem;color:var(--pink-deep);font-style:italic;">✎ ${esc(i.customizationNote)}</p>` : ''}
                 </div>
-                ${productId ? '<span style="font-size:0.75rem;color:var(--muted);flex-shrink:0;">›</span>' : ''}
+                ${hasProduct ? '<span style="font-size:1.1rem;color:var(--muted);flex-shrink:0;">‹</span>' : ''}
               </div>`;
           }).join('');
 
@@ -992,13 +999,20 @@ function renderProfileView() {
             </div>`;
         }).join('');
 
-        // Make product items clickable
+        // Remove last item border + make product items clickable
         listEl.querySelectorAll('[data-goto-product]').forEach(row => {
+          row.addEventListener('mouseenter', () => row.style.background = 'var(--pink-light)');
+          row.addEventListener('mouseleave', () => row.style.background = '');
           row.addEventListener('click', () => {
             const pid = row.dataset.gotoProduct;
             const product = allProducts.find(p => p.id === pid);
             if (product) showProduct(product);
           });
+        });
+        // Remove bottom border from last item in each order card
+        listEl.querySelectorAll('[style*="padding:10px 18px"]').forEach(container => {
+          const lastItem = container.lastElementChild;
+          if (lastItem) lastItem.style.borderBottom = 'none';
         });
       })
       .catch(() => {
