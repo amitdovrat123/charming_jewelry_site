@@ -23,6 +23,71 @@ const LOGS_COL            = 'artifacts/charming-3dd6f/public/data/logs';
 const FORM_KEY            = 'charming-checkout-form';
 // Tracking is handled by tracker.js (loaded separately on all pages)
 
+// ── Israeli cities list (for validation + autocomplete) ─────────
+const IL_CITIES = [
+  'אבו גוש','אבו סנאן','אבן יהודה','אופקים','אור יהודה','אור עקיבא','אילת',
+  'אלעד','אריאל','אשדוד','אשקלון','באר יעקב','באר שבע','בית שאן','בית שמש',
+  'בני ברק','בנימינה','בת ים','גבעת זאב','גבעת שמואל','גבעתיים','גדרה',
+  'גן יבנה','גני תקווה','דימונה','הוד השרון','הרצליה','זכרון יעקב','חדרה',
+  'חולון','חיפה','חריש','טבריה','טירת כרמל','יבנה','יהוד-מונוסון','יקנעם',
+  'ירושלים','ירוחם','ישובי אזור','כפר יונה','כפר סבא','כפר קאסם','כרמיאל',
+  'לוד','לב השרון','מגדל העמק','מודיעין-מכבים-רעות','מודיעין עילית','מזכרת בתיה',
+  'מעלה אדומים','מעלות-תרשיחא','מצפה רמון','נהריה','נוף הגליל','נס ציונה',
+  'נשר','נתיבות','נתניה','עכו','עפולה','ערד','פרדס חנה-כרכור','פתח תקווה',
+  'צפת','קדימה-צורן','קרית אונו','קרית אתא','קרית ביאליק','קרית גת',
+  'קרית ים','קרית מוצקין','קרית מלאכי','קרית שמונה','ראש העין','ראשון לציון',
+  'רחובות','רמלה','רמת גן','רמת השרון','רעננה','שדרות','שוהם','תל אביב-יפו',
+  'אום אל-פחם','באקה אל-גרבייה','דאלית אל-כרמל','טייבה','טמרה','כפר קרע',
+  'מגאר','נצרת','סח\'נין','רהט','שפרעם','עראבה','ג\'סר א-זרקא','ג\'לג\'וליה',
+  'אבן שמואל','אלקנה','ביתר עילית','גבע בנימין','גוש עציון','כוכב יאיר',
+  'מבשרת ציון','מיתר','עומר','להבים','מרחבים','גדרות'
+];
+
+function setupCityAutocomplete(inputEl) {
+  if (!inputEl) return;
+  let listEl = null;
+  const hide = () => { if (listEl) { listEl.remove(); listEl = null; } };
+  inputEl.addEventListener('input', () => {
+    hide();
+    const val = inputEl.value.trim();
+    if (val.length < 2) return;
+    const matches = IL_CITIES.filter(c => c.includes(val)).slice(0, 8);
+    if (!matches.length) return;
+    listEl = document.createElement('div');
+    listEl.style.cssText = 'position:absolute;z-index:999;background:#fff;border:1.5px solid var(--sand-dark);border-radius:10px;max-height:200px;overflow-y:auto;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.08);';
+    matches.forEach(city => {
+      const opt = document.createElement('div');
+      opt.textContent = city;
+      opt.style.cssText = 'padding:8px 14px;cursor:pointer;font-size:0.9rem;';
+      opt.addEventListener('mouseenter', () => opt.style.background = 'var(--pink-light)');
+      opt.addEventListener('mouseleave', () => opt.style.background = '');
+      opt.addEventListener('mousedown', e => {
+        e.preventDefault();
+        inputEl.value = city;
+        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        hide();
+      });
+      listEl.appendChild(opt);
+    });
+    const parent = inputEl.parentElement;
+    if (parent.style.position !== 'relative' && parent.style.position !== 'absolute') parent.style.position = 'relative';
+    parent.appendChild(listEl);
+  });
+  inputEl.addEventListener('blur', () => setTimeout(hide, 150));
+}
+
+function isValidIsraeliCity(val) {
+  return IL_CITIES.some(c => c === val.trim());
+}
+
+function isValidPhone(phone) {
+  return /^0[2-9]\d{7,8}$/.test(phone.replace(/[\s\-()]/g, ''));
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
 // Audit log helper
 async function logAction(description) {
   try { await addDoc(collection(db, LOGS_COL), { action: description, user: auth.currentUser?.email || 'guest', timestamp: serverTimestamp() }); }
@@ -794,6 +859,9 @@ function renderProfileView() {
 
   if (typeof applyLang === 'function') applyLang();
 
+  // City autocomplete on profile
+  setupCityAutocomplete(el.querySelector('#prof-city'));
+
   // Tabs
   el.querySelectorAll('.profile-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -817,15 +885,31 @@ function renderProfileView() {
   el.querySelector('#prof-save-btn').addEventListener('click', async () => {
     const btn = el.querySelector('#prof-save-btn');
     const msg = el.querySelector('#prof-save-msg');
+    msg.style.color = 'var(--pink-deep)';
+
+    const phone = el.querySelector('#prof-phone').value.trim();
+    const city  = el.querySelector('#prof-city').value.trim();
+
+    if (phone && !isValidPhone(phone)) {
+      msg.style.color = '#dc2626';
+      msg.textContent = 'מספר טלפון לא תקין. יש להזין מספר ישראלי (למשל 0521234567).';
+      return;
+    }
+    if (city && !isValidIsraeliCity(city)) {
+      msg.style.color = '#dc2626';
+      msg.textContent = 'העיר שהוזנה לא נמצאה. יש לבחור עיר מהרשימה.';
+      return;
+    }
+
     btn.disabled = true;
     const profileData = {
       fullName:  el.querySelector('#prof-name').value.trim(),
-      phone:     el.querySelector('#prof-phone').value.trim(),
+      phone,
       birthDate: el.querySelector('#prof-dob').value || '',
       street:    el.querySelector('#prof-street').value.trim(),
       floor:    el.querySelector('#prof-floor').value.trim(),
       apt:      el.querySelector('#prof-apt').value.trim(),
-      city:     el.querySelector('#prof-city').value.trim(),
+      city,
       zip:      el.querySelector('#prof-zip').value.trim(),
       email:    currentUser.email,
     };
@@ -862,19 +946,60 @@ function renderProfileView() {
         snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
         orders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         listEl.innerHTML = orders.map(order => {
-          const date         = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('he-IL') : '';
-          const itemsSummary = (order.items || []).map(i => `${i.name} ×${i.qty || 1}`).join(', ');
-          const dlvLabel     = order.delivery === 'delivery' ? t('profile_delivery','משלוח עד הבית') : t('profile_pickup','איסוף עצמי');
+          const date     = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('he-IL') : '';
+          const items    = order.items || [];
+          const dlvLabel = order.delivery === 'delivery' ? t('profile_delivery','משלוח עד הבית') : t('profile_pickup','איסוף עצמי');
+          const statusMap = { pending: 'ממתינה', confirmed: 'אושרה', shipped: 'נשלחה', completed: 'הושלמה', cancelled: 'בוטלה' };
+          const statusLabel = statusMap[order.status] || statusMap.pending;
+          const statusColor = order.status === 'completed' ? '#16a34a' : order.status === 'cancelled' ? '#dc2626' : order.status === 'shipped' ? '#2563eb' : '#d4a373';
+          const orderId = order.orderId || order.id || '';
+
+          const itemsHtml = items.map(i => {
+            const img = i.image
+              ? `<img src="${i.image}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--sand-dark);flex-shrink:0;" />`
+              : `<div style="width:52px;height:52px;border-radius:10px;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">💎</div>`;
+            const productId = i.productId || '';
+            const clickable = productId ? `data-goto-product="${productId}" style="cursor:pointer;"` : '';
+            return `
+              <div class="order-item-row" ${clickable} title="${productId ? 'לחצי לצפייה במוצר' : ''}"
+                style="display:flex;gap:12px;align-items:center;padding:8px 0;${productId ? 'cursor:pointer;' : ''}">
+                ${img}
+                <div style="flex:1;min-width:0;">
+                  <p style="margin:0;font-size:0.88rem;font-weight:600;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(i.name)}</p>
+                  <p style="margin:2px 0 0;font-size:0.78rem;color:var(--muted);">${i.quantity || i.qty || 1} × ${i.price || 0} ₪</p>
+                  ${i.customizationNote ? `<p style="margin:2px 0 0;font-size:0.75rem;color:var(--pink-deep);font-style:italic;">✎ ${esc(i.customizationNote)}</p>` : ''}
+                </div>
+                ${productId ? '<span style="font-size:0.75rem;color:var(--muted);flex-shrink:0;">›</span>' : ''}
+              </div>`;
+          }).join('');
+
           return `
-            <div style="border:1px solid var(--sand-dark);border-radius:14px;padding:16px 20px;background:var(--sand-light);">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-                <span style="font-size:0.8rem;color:var(--muted);">${date}</span>
-                <span style="font-weight:700;color:var(--ink-soft);">${order.total || 0} ₪</span>
+            <div style="border:1px solid var(--sand-dark);border-radius:16px;background:var(--sand-light);overflow:hidden;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:linear-gradient(135deg,var(--sand-light),var(--pink-light));border-bottom:1px solid var(--sand-dark);">
+                <div>
+                  <span style="font-size:0.78rem;color:var(--muted);">${date}</span>
+                  ${orderId ? `<span style="font-size:0.72rem;color:var(--muted);margin-right:8px;">#${esc(orderId)}</span>` : ''}
+                </div>
+                <span style="font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${statusColor}15;color:${statusColor};">${statusLabel}</span>
               </div>
-              <p style="margin:0 0 4px;font-size:0.9rem;color:var(--ink-soft);">${itemsSummary}</p>
-              <p style="margin:0;font-size:0.8rem;color:var(--muted);">${dlvLabel}</p>
+              <div style="padding:10px 18px;">
+                ${itemsHtml}
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-top:1px solid var(--sand-dark);background:var(--sand-light);">
+                <span style="font-size:0.8rem;color:var(--muted);">${dlvLabel}</span>
+                <span style="font-weight:700;font-size:1rem;color:var(--ink);">${order.total || 0} ₪</span>
+              </div>
             </div>`;
         }).join('');
+
+        // Make product items clickable
+        listEl.querySelectorAll('[data-goto-product]').forEach(row => {
+          row.addEventListener('click', () => {
+            const pid = row.dataset.gotoProduct;
+            const product = allProducts.find(p => p.id === pid);
+            if (product) showProduct(product);
+          });
+        });
       })
       .catch(() => {
         if (loadingEl) loadingEl.style.display = 'none';
@@ -1489,6 +1614,9 @@ function renderCheckoutForm(el) {
     setCouponApplied(null);
   });
 
+  // City autocomplete on checkout
+  setupCityAutocomplete(document.getElementById('co-city'));
+
   // Input persistence
   ['co-name', 'co-email', 'co-phone', 'co-city', 'co-street', 'co-house', 'co-apt'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', saveFormToStorage);
@@ -1512,14 +1640,14 @@ function renderCheckoutForm(el) {
 
     // Validate
     if (!name)                              { errEl.textContent = t('co_err_name','יש למלא שם מלא.'); return; }
-    if (!email || !email.includes('@') || !email.includes('.'))
-                                            { errEl.textContent = t('co_err_email','יש למלא כתובת אימייל תקינה.'); return; }
-    if (!/^\d{10}$/.test(phone))            { errEl.textContent = t('co_err_phone','יש למלא מספר טלפון בן 10 ספרות.'); return; }
+    if (!isValidEmail(email))               { errEl.textContent = t('co_err_email','יש למלא כתובת אימייל תקינה.'); return; }
+    if (!isValidPhone(phone))               { errEl.textContent = t('co_err_phone','מספר טלפון לא תקין. יש להזין מספר ישראלי (למשל 0521234567).'); return; }
     if (ship === 'delivery') {
       const city   = document.getElementById('co-city')?.value.trim()   || '';
       const street = document.getElementById('co-street')?.value.trim() || '';
       const house  = document.getElementById('co-house')?.value.trim()  || '';
       if (!city || !street || !house) { errEl.textContent = t('co_err_address','יש למלא עיר, רחוב ומספר בית.'); return; }
+      if (!isValidIsraeliCity(city)) { errEl.textContent = t('co_err_city','העיר שהוזנה לא נמצאה. יש לבחור עיר מהרשימה.'); return; }
     }
     if (!terms) { errEl.textContent = t('co_err_terms','יש לאשר את תנאי השימוש.'); return; }
     errEl.textContent = '';
