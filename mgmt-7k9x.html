@@ -5469,10 +5469,10 @@ function calcTravelEstimate(baseMinutes, wsDate, wsTime) {
 function calcArrivalFeeByTime(estMinutes, baseMinutes) {
   // Free if base (no traffic) <= 30 min OR estimated (with traffic) <= 60 min
   if (baseMinutes <= 30 || estMinutes <= 60) return 0;
-  // Extra hours beyond the first free hour
+  // Extra time beyond free hour, in 30-min steps of 50₪
   var extraMinutes = estMinutes - 60;
-  var extraHours = Math.ceil(extraMinutes / 60);
-  return extraHours * 100;
+  var steps = Math.ceil(extraMinutes / 30);
+  return steps * 50;
 }
 
 // Sync fallback for non-async contexts (card display etc.)
