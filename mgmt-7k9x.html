@@ -1749,6 +1749,7 @@ Charming by Vik 💛</textarea>
                 </a>
               </div>
               <div id="backup-last-run" class="text-xs text-gray-400"></div>
+              <button onclick="(async()=>{await setDoc(doc(db,SETTINGS_COL,'backup'),{spreadsheetId:null},{merge:true});backupSpreadsheetId=null;localStorage.removeItem('backup_token');backupAccessToken=null;alert('אופס! לחץ גבה עכשיו ליצירת גיליון חדש')})()" class="text-[10px] text-gray-300 hover:text-red-400 mt-1 underline">איפוס גיליון</button>
               <div id="backup-progress" class="text-xs text-[#d4a373] font-semibold" style="display:none;"></div>
             </div>
           </div>
