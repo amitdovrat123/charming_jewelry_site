@@ -9067,8 +9067,33 @@ window.renderAnalytics = renderAnalytics;
 // ══════════════════════════════════════════════════════════════
 const BACKUP_CLIENT_ID = '130259110676-k2ef85o71ig2j1pgnpucc3lvljh45tlg.apps.googleusercontent.com';
 const BACKUP_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
-let backupAccessToken = null;
+let backupAccessToken = localStorage.getItem('backup_token') || null;
 let backupSpreadsheetId = null;
+
+function setBackupConnectedUI() {
+  const notConn = document.getElementById('backup-not-connected');
+  const conn = document.getElementById('backup-connected');
+  const status = document.getElementById('backup-status');
+  if (notConn) notConn.style.display = 'none';
+  if (conn) conn.style.display = '';
+  if (status) {
+    status.className = 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-50 text-emerald-600';
+    status.textContent = 'מחובר';
+  }
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+}
+
+function setBackupDisconnectedUI() {
+  const notConn = document.getElementById('backup-not-connected');
+  const conn = document.getElementById('backup-connected');
+  const status = document.getElementById('backup-status');
+  if (notConn) notConn.style.display = '';
+  if (conn) conn.style.display = 'none';
+  if (status) {
+    status.className = 'text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-400';
+    status.textContent = 'לא מחובר';
+  }
+}
 
 async function initBackupTab() {
   try {
@@ -9087,6 +9112,8 @@ async function initBackupTab() {
       }
     }
   } catch(e) { console.log('Backup settings load:', e); }
+  // Restore connection if token saved
+  if (backupAccessToken) setBackupConnectedUI();
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 }
 
@@ -9101,11 +9128,8 @@ function connectGoogleDrive() {
     callback: (resp) => {
       if (resp.error) { console.error('OAuth error:', resp); return; }
       backupAccessToken = resp.access_token;
-      document.getElementById('backup-not-connected').style.display = 'none';
-      document.getElementById('backup-connected').style.display = '';
-      document.getElementById('backup-status').className = 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-50 text-emerald-600';
-      document.getElementById('backup-status').textContent = 'מחובר';
-      if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+      localStorage.setItem('backup_token', backupAccessToken);
+      setBackupConnectedUI();
     }
   });
   tokenClient.requestAccessToken();
@@ -9225,7 +9249,7 @@ async function runBackupToSheets() {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          properties: { title: 'Charming by Vik — גיבוי נתונים', locale: 'he' },
+          properties: { title: 'Charming by Vik — גיבוי נתונים', locale: 'iw' },
           sheets: keys.map((k, i) => ({ properties: { sheetId: i, title: data[k].name, rightToLeft: true } }))
         })
       });
@@ -9315,10 +9339,9 @@ async function runBackupToSheets() {
     progress.textContent = 'שגיאה: ' + e.message;
     if (String(e).includes('401') || String(e).includes('Invalid')) {
       backupAccessToken = null;
-      document.getElementById('backup-not-connected').style.display = '';
-      document.getElementById('backup-connected').style.display = 'none';
-      document.getElementById('backup-status').className = 'text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-400';
-      document.getElementById('backup-status').textContent = 'לא מחובר';
+      localStorage.removeItem('backup_token');
+      setBackupDisconnectedUI();
+      progress.textContent = 'הטוקן פג תוקף — לחץ "חבר Google Drive" מחדש';
     }
   }
 }
