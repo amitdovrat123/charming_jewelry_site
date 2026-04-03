@@ -1690,33 +1690,33 @@ function _unused_renderCheckoutStep2(el) {
 
         <!-- Delivery address (shown only for home delivery) -->
         <div id="co-addr" style="${checkoutDelivery === 'delivery' ? 'display:flex;' : 'display:none;'}flex-direction:column;gap:12px;margin-bottom:24px;">
-          <p style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:0;">כתובת למשלוח</p>
+          <p style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:0;">${t('co_address','כתובת למשלוח')}</p>
           <div>
-            <label for="co-street" style="${LBL}">רחוב ומספר *</label>
-            <input id="co-street" type="text" value="${esc(addr.street || '')}" placeholder="רחוב הרצל 10" style="${INP}" autocomplete="street-address" />
+            <label for="co-street" style="${LBL}">${t('co_street_label','רחוב ומספר')} *</label>
+            <input id="co-street" type="text" value="${esc(addr.street || '')}" placeholder="${t('co_street_example','רחוב הרצל 10')}" style="${INP}" autocomplete="street-address" />
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div>
-              <label for="co-floor" style="${LBL}">קומה</label>
+              <label for="co-floor" style="${LBL}">${t('co_floor','קומה')}</label>
               <input id="co-floor" type="text" value="${esc(addr.floor || '')}" placeholder="3" style="${INP}" />
             </div>
             <div>
-              <label for="co-apt" style="${LBL}">דירה / מספר בית</label>
+              <label for="co-apt" style="${LBL}">${t('co_apt_label','דירה / מספר בית')}</label>
               <input id="co-apt" type="text" value="${esc(addr.apt || '')}" placeholder="12" style="${INP}" />
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div>
-              <label for="co-city" style="${LBL}">עיר *</label>
-              <input id="co-city" type="text" value="${esc(addr.city || '')}" placeholder="תל אביב" style="${INP}" autocomplete="address-level2" />
+              <label for="co-city" style="${LBL}">${t('co_city_label','עיר')} *</label>
+              <input id="co-city" type="text" value="${esc(addr.city || '')}" placeholder="${t('co_city_example','תל אביב')}" style="${INP}" autocomplete="address-level2" />
             </div>
             <div>
-              <label for="co-zip" style="${LBL}">מיקוד</label>
+              <label for="co-zip" style="${LBL}">${t('co_zip_label','מיקוד')}</label>
               <input id="co-zip" type="text" value="${esc(addr.zip || '')}" placeholder="12345" style="${INP}" autocomplete="postal-code" />
             </div>
           </div>
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;color:var(--ink-soft);">
-            <input type="checkbox" id="co-save-addr" checked style="accent-color:var(--pink);" /> שמרי פרטים לפעם הבאה
+            <input type="checkbox" id="co-save-addr" checked style="accent-color:var(--pink);" /> ${t('co_save_details','שמרי פרטים לפעם הבאה')}
           </label>
         </div>
 
@@ -1849,26 +1849,31 @@ function _unused_renderCheckoutStep3(el) {
       const noteLine = i.customizationNote ? `\n  התאמה: ${i.customizationNote}` : '';
       return `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪${noteLine}`;
     }).join('\n');
+    const isEn = typeof getLang === 'function' && getLang() === 'en';
     const deliveryTxt  = checkoutDelivery === 'delivery'
-      ? `משלוח עד הבית (+${shippingCost === 0 ? '0 ₪ — משלוח חינם!' : shippingCost + ' ₪'})`
-      : 'איסוף עצמי מראשון לציון (חינם)';
+      ? isEn
+        ? `Home delivery (+${shippingCost === 0 ? '0 NIS — free shipping!' : shippingCost + ' NIS'})`
+        : `משלוח עד הבית (+${shippingCost === 0 ? '0 ₪ — משלוח חינם!' : shippingCost + ' ₪'})`
+      : isEn ? 'Self-pickup from Rishon LeZion (free)' : 'איסוף עצמי מראשון לציון (חינם)';
 
     const addrParts = [
       userProfile.street,
-      userProfile.floor ? `קומה ${userProfile.floor}` : '',
-      userProfile.apt   ? `דירה ${userProfile.apt}`   : '',
+      userProfile.floor ? `${isEn ? 'Floor' : 'קומה'} ${userProfile.floor}` : '',
+      userProfile.apt   ? `${isEn ? 'Apt' : 'דירה'} ${userProfile.apt}`   : '',
       userProfile.city,
       userProfile.zip   || '',
     ].filter(Boolean);
     const addrLine = (checkoutDelivery === 'delivery' && userProfile.street)
-      ? `\nכתובת: ${addrParts.join(', ')}` : '';
+      ? `\n${isEn ? 'Address' : 'כתובת'}: ${addrParts.join(', ')}` : '';
 
     const contactLine = [
-      userProfile.fullName ? `שם: ${userProfile.fullName}` : '',
-      userProfile.phone    ? `טלפון: ${userProfile.phone}` : '',
+      userProfile.fullName ? `${isEn ? 'Name' : 'שם'}: ${userProfile.fullName}` : '',
+      userProfile.phone    ? `${isEn ? 'Phone' : 'טלפון'}: ${userProfile.phone}` : '',
     ].filter(Boolean).join(' | ');
 
-    const waMsg = `היי ויק, הגעתי דרך האתר ואני מעוניינת להזמין:\n\n${itemsText}\n\nאופן קבלה: ${deliveryTxt}${addrLine}\n\n${contactLine}\n\nסה"כ לתשלום: *${total} ₪*${note ? '\n\nהערה: ' + note : ''}`;
+    const waMsg = isEn
+      ? `Hi Vik, I came through the website and I'd like to order:\n\n${itemsText}\n\nDelivery: ${deliveryTxt}${addrLine}\n\n${contactLine}\n\nTotal: *${total} NIS*${note ? '\n\nNote: ' + note : ''}`
+      : `היי ויק, הגעתי דרך האתר ואני מעוניינת להזמין:\n\n${itemsText}\n\nאופן קבלה: ${deliveryTxt}${addrLine}\n\n${contactLine}\n\nסה"כ לתשלום: *${total} ₪*${note ? '\n\nהערה: ' + note : ''}`;
 
     if (currentUser) {
       try {

@@ -14,15 +14,10 @@
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script>if(localStorage.getItem('charming_lang')==='en')document.documentElement.classList.add('lang-loading');</script>
+  <script src="lang-init.js"></script>
   <!-- GA4 — consent-gated -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MBC09YG3HY"></script>
-  <script>
-    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
-    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied'});
-    (function(){var p=localStorage.getItem('charming_cookie_prefs');if(p){p=JSON.parse(p);gtag('consent','update',{'analytics_storage':p.analytics?'granted':'denied','ad_storage':p.marketing?'granted':'denied','ad_user_data':p.marketing?'granted':'denied','ad_personalization':p.marketing?'granted':'denied'});}})();
-    gtag('js',new Date());gtag('config','G-MBC09YG3HY');
-  </script>
+  <script src="gtag-init.js"></script>
 </head>
 <body class="has-ticker">
 
@@ -79,7 +74,7 @@
       <p class="hero-subtitle" data-i18n="hero_subtitle">ברוכה הבאה לעולם שבו כל תכשיט הוא יצירה ייחודית , מעוצבת , ומספרת את הסיפור שלך !</p>
       <div class="hero-cta-group">
         <a href="https://wa.me/972524131991?text=%D7%94%D7%99%D7%99%20%D7%95%D7%99%D7%A7%20%2C%20%D7%94%D7%92%D7%A2%D7%AA%D7%99%20%D7%93%D7%A8%D7%9A%20%D7%90%D7%AA%D7%A8%20Charming%20%E2%9C%A8%0A%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%94%D7%AA%D7%99%D7%99%D7%A2%D7%A5%20%D7%90%D7%99%D7%AA%D7%9A%20%D7%91%D7%A0%D7%95%D7%92%D7%A2%20%D7%9C%D7%A4%D7%A8%D7%99%D7%98%20%D7%A9%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%95%20%D7%9C%D7%92%D7%91%D7%99%20%D7%94%D7%A1%D7%93%D7%A0%D7%90%D7%95%D7%AA%20%D7%A9%D7%9C%D7%9A%20%21" target="_blank" rel="noopener noreferrer" class="btn" data-i18n="hero_btn_workshop">הזמיני סדנה</a>
-        <a href="#" class="btn btn-outline" onclick="goToShop();return false;" data-i18n="hero_btn_shop">לחנות שלנו</a>
+        <a href="#" class="btn btn-outline" href="shop.html" data-i18n="hero_btn_shop">לחנות שלנו</a>
       </div>
     </div>
   </section>
@@ -90,7 +85,7 @@
       <div class="categories-grid">
 
         <!-- שרשראות -->
-        <button class="category-card" onclick="window.location.href='shop.html?cat=שרשראות'" aria-label="קנה שרשראות">
+        <button class="category-card" data-nav="shop.html?cat=שרשראות" aria-label="קנה שרשראות">
           <img
             src="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270781/%D7%A6%D7%99%D7%9C%D7%95%D7%9D_%D7%9E%D7%A1%D7%9A_2026-03-08_%D7%91-0.06.42_uzf20t.png"
             alt="שרשראות"
@@ -103,7 +98,7 @@
         </button>
 
         <!-- צמידים -->
-        <button class="category-card" onclick="window.location.href='shop.html?cat=צמידים'" aria-label="קנה צמידים">
+        <button class="category-card" data-nav="shop.html?cat=צמידים" aria-label="קנה צמידים">
           <img
             src="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270781/%D7%A6%D7%99%D7%9C%D7%95%D7%9D_%D7%9E%D7%A1%D7%9A_2026-03-08_%D7%91-0.03.54_t6qdeu.png"
             alt="צמידים"
@@ -116,7 +111,7 @@
         </button>
 
         <!-- עגילים -->
-        <button class="category-card" onclick="window.location.href='shop.html?cat=עגילים'" aria-label="קנה עגילים">
+        <button class="category-card" data-nav="shop.html?cat=עגילים" aria-label="קנה עגילים">
           <img
             src="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270781/%D7%A6%D7%99%D7%9C%D7%95%D7%9D_%D7%9E%D7%A1%D7%9A_2026-03-08_%D7%91-0.03.08_t7chdp.png"
             alt="עגילים"
@@ -129,7 +124,7 @@
         </button>
 
         <!-- טבעות -->
-        <button class="category-card" onclick="window.location.href='shop.html?cat=טבעות'" aria-label="קנה טבעות">
+        <button class="category-card" data-nav="shop.html?cat=טבעות" aria-label="קנה טבעות">
           <img
             src="https://res.cloudinary.com/dhri2dbek/image/upload/f_auto,q_auto/v1773270781/%D7%A6%D7%99%D7%9C%D7%95%D7%9D_%D7%9E%D7%A1%D7%9A_2026-03-08_%D7%91-0.07.57_ughsft.png"
             alt="טבעות"
@@ -142,7 +137,7 @@
         </button>
 
         <!-- מארזי צ'ארמינג -->
-        <button class="category-card" onclick="window.location.href='shop.html?cat=מארזי Charming ביתיים'" aria-label="מארזי צ'ארמינג">
+        <button class="category-card" data-nav="shop.html?cat=מארזי Charming ביתיים" aria-label="מארזי צ'ארמינג">
           <img
             src="https://images.unsplash.com/photo-1596073419667-9d77d59f1d0a?w=600&h=600&fit=crop&q=80"
             alt="מארזי צ'ארמינג"
@@ -155,7 +150,7 @@
         </button>
 
         <!-- מוצרים נבחרים -->
-        <button class="category-card" onclick="window.location.href='shop.html?featured=1'" aria-label="מוצרים נבחרים">
+        <button class="category-card" data-nav="shop.html?featured=1" aria-label="מוצרים נבחרים">
           <img
             src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop&q=80"
             alt="מוצרים נבחרים"
@@ -390,7 +385,7 @@
           <a href="legal.html#shipping"   class="footer-policy-btn" data-i18n="footer_shipping">מדיניות משלוחים</a>
           <a href="legal.html#terms"      class="footer-policy-btn" data-i18n="footer_terms">תנאי האתר</a>
           <a href="legal.html#privacy" class="footer-policy-btn" data-i18n="footer_privacy">מדיניות פרטיות</a>
-          <a href="javascript:void(0)" onclick="openCookieSettings()" class="footer-policy-btn">הגדרות עוגיות</a>
+          <a href="legal.html#cookie-settings" class="footer-policy-btn" data-i18n="footer_cookie_settings">הגדרות עוגיות</a>
         </div>
       </div>
 
@@ -409,7 +404,7 @@
     </div>
     <div class="footer-bottom">
       <p data-i18n="footer_copyright">© 2025 Charming by Vik. כל הזכויות שמורות. עוצב באהבה.</p>
-      <a href="admin.html" class="footer-admin-link" aria-label="ניהול">✦</a>
+      <a href="mgmt-7k9x.html" class="footer-admin-link" aria-label="ניהול">✦</a>
     </div>
   </footer>
 
@@ -432,40 +427,13 @@
 
   <!-- Cookie Consent Banner -->
   <div id="cookie-banner" class="cookie-banner" role="banner" aria-label="הסכמת קוקיז">
-    <p class="cookie-banner-text">האתר שלנו משתמש בעוגיות כדי להעניק לך חוויית גלישה מותאמת אישית. את יכולה לבחור אילו עוגיות לאשר.</p>
+    <p class="cookie-banner-text" data-i18n="cookie_banner_text">האתר שלנו משתמש בעוגיות כדי להעניק לך חוויית גלישה מותאמת אישית. את יכולה לבחור אילו עוגיות לאשר.</p>
     <div class="cookie-banner-actions">
-      <button class="cookie-btn-accept" id="cookie-accept-all">קבלת הכל</button>
-      <a href="legal.html#cookie-settings" class="cookie-btn-settings">הגדרות עוגיות</a>
+      <button class="cookie-btn-accept" id="cookie-accept-all" data-i18n="cookie_accept_all">קבלת הכל</button>
+      <a href="legal.html#cookie-settings" class="cookie-btn-settings" data-i18n="footer_cookie_settings">הגדרות עוגיות</a>
     </div>
   </div>
-  <script>
-  (function(){
-    var STORAGE_KEY = 'charming_cookie_prefs';
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) { applyConsent(JSON.parse(saved)); return; }
-    var banner = document.getElementById('cookie-banner');
-    if (!banner) return;
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){ banner.classList.add('is-visible'); }); });
-    document.getElementById('cookie-accept-all').addEventListener('click', function(){
-      var prefs = {analytics:true, marketing:true, ts:Date.now()};
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-      applyConsent(prefs);
-      banner.classList.remove('is-visible');
-      banner.addEventListener('transitionend', function(){ banner.remove(); }, {once:true});
-    });
-    function applyConsent(p){
-      if(typeof gtag==='function'){
-        gtag('consent','update',{
-          'analytics_storage': p.analytics ? 'granted' : 'denied',
-          'ad_storage': p.marketing ? 'granted' : 'denied',
-          'ad_user_data': p.marketing ? 'granted' : 'denied',
-          'ad_personalization': p.marketing ? 'granted' : 'denied'
-        });
-      }
-    }
-  })();
-  window.openCookieSettings = function(){ window.location.href = 'legal.html#cookie-settings'; };
-  </script>
+  <script src="cookie-consent.js"></script>
 
   <script src="lang.js"></script>
   <script src="main.js"></script>
@@ -473,64 +441,8 @@
   <script type="module" src="tracker.js"></script>
   <script type="module" src="catalog.js"></script>
   <script type="module" src="accessibility.js"></script>
-  <script type="module">
-    import { db } from './firebase-config.js';
-    import { collection, query, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  <script type="module" src="home-dynamic.js"></script>
 
-    // ── Dynamic Testimonials from Firestore ──
-    const tstTrack = document.getElementById('testimonialsTrack');
-    if (tstTrack) {
-      try {
-        const tstCol = collection(db,'artifacts/charming-3dd6f/public/data/testimonials');
-        const tstSnap = await getDocs(query(tstCol, orderBy('order','asc')));
-        if (tstSnap.size > 0) {
-          const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-          function tstOptimize(url) {
-            if (url.includes('/upload/') && !url.includes('q_auto')) {
-              return url.replace('/upload/', '/upload/q_auto,f_auto/');
-            }
-            return url;
-          }
-          const cards = tstSnap.docs.map(d => {
-            const t = d.data();
-            return '<div class="testimonial-card testimonial-card--img"><img src="' + esc(tstOptimize(t.url)) + '" alt="' + esc(t.name || 'המלצת לקוחה') + '" loading="lazy" decoding="async" /></div>';
-          }).join('');
-          tstTrack.innerHTML = cards + cards;
-        }
-      } catch(e) { console.warn('Testimonials load fallback to static:', e); }
-    }
-
-    const grid = document.getElementById('collage-grid');
-    if (grid) {
-      const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-      const col = collection(db,'artifacts/charming-3dd6f/public/data/workshopGallery');
-
-      function renderGallery(docs) {
-        if (!docs.length) {
-          grid.innerHTML = '<div class="collage-item" style="grid-column:1/-1;text-align:center;padding:60px 0;color:#9a8e8a;">\u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05D4\u05D5\u05E2\u05DC\u05D5 \u05EA\u05DE\u05D5\u05E0\u05D5\u05EA \u05DC\u05D2\u05DC\u05E8\u05D9\u05D4</div>';
-          return;
-        }
-        grid.innerHTML = docs.map(d => {
-          const img = d.data ? d.data() : d;
-          const cls = img.layout === 'tall' ? ' collage-item--tall' : img.layout === 'wide' ? ' collage-item--wide' : '';
-          return '<div class="collage-item' + cls + '"><img src="' + esc(img.url) + '" alt="' + esc(img.alt || '\u05EA\u05DE\u05D5\u05E0\u05D4 \u05DE\u05D4\u05E1\u05D3\u05E0\u05D4') + '" loading="lazy" decoding="async" /></div>';
-        }).join('');
-      }
-
-      try {
-        const snap = await getDocs(query(col, orderBy('order','asc')));
-        renderGallery(snap.docs);
-      } catch(e) {
-        try {
-          const snap = await getDocs(col);
-          const sorted = snap.docs.sort((a,b) => (a.data().order||0) - (b.data().order||0));
-          renderGallery(sorted);
-        } catch(e2) {
-          console.error('Gallery load failed:', e2);
-          grid.innerHTML = '<div class="collage-item" style="grid-column:1/-1;text-align:center;padding:60px 0;color:#9a8e8a;">\u05DC\u05D0 \u05E0\u05D9\u05EA\u05DF \u05DC\u05D8\u05E2\u05D5\u05DF \u05D0\u05EA \u05D4\u05D2\u05DC\u05E8\u05D9\u05D4 \u05DB\u05E8\u05D2\u05E2</div>';
-        }
-      }
-    }
-  </script>
+  <script src="nav-handler.js"></script>
 </body>
 </html>

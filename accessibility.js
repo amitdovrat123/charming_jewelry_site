@@ -1,44 +1,58 @@
 // accessibility.js — Standalone Accessibility Widget
 // Israeli Standard 5568 / WCAG 2.0 AA — 16 features in 4 sections
 
-const A11Y_SECTIONS = [
+function _a11yLang() { return (typeof getLang === 'function') ? getLang() : 'he'; }
+function _a(he, en) { return _a11yLang() === 'en' ? en : he; }
+
+const A11Y_SECTIONS_HE = [
   {
-    key: 'text', label: 'טקסט',
+    key: 'text', he: 'טקסט', en: 'Text',
     features: [
-      { key: 'text-larger',    label: 'הגדלת טקסט',   icon: 'A+' },
-      { key: 'text-smaller',   label: 'הקטנת טקסט',   icon: 'A−' },
-      { key: 'line-height',    label: 'ריווח שורות',  icon: '↕'  },
-      { key: 'letter-spacing', label: 'ריווח אותיות', icon: 'A↔' },
-      { key: 'readable-font',  label: 'פונט קריא',    icon: 'Aa' },
+      { key: 'text-larger',    he: 'הגדלת טקסט',   en: 'Increase Text',    icon: 'A+' },
+      { key: 'text-smaller',   he: 'הקטנת טקסט',   en: 'Decrease Text',    icon: 'A−' },
+      { key: 'line-height',    he: 'ריווח שורות',  en: 'Line Spacing',     icon: '↕'  },
+      { key: 'letter-spacing', he: 'ריווח אותיות', en: 'Letter Spacing',   icon: 'A↔' },
+      { key: 'readable-font',  he: 'פונט קריא',    en: 'Readable Font',    icon: 'Aa' },
     ],
   },
   {
-    key: 'visual', label: 'ויזואלי',
+    key: 'visual', he: 'ויזואלי', en: 'Visual',
     features: [
-      { key: 'grayscale',         label: 'גווני אפור',     icon: '◑' },
-      { key: 'high-contrast',     label: 'ניגודיות גבוהה', icon: '◐' },
-      { key: 'negative-contrast', label: 'ניגודיות הפוכה', icon: '●' },
-      { key: 'light-background',  label: 'רקע בהיר',       icon: '☀' },
-      { key: 'pause-animations',  label: 'עצירת אנימציות', icon: '⏸' },
+      { key: 'grayscale',         he: 'גווני אפור',     en: 'Grayscale',          icon: '◑' },
+      { key: 'high-contrast',     he: 'ניגודיות גבוהה', en: 'High Contrast',      icon: '◐' },
+      { key: 'negative-contrast', he: 'ניגודיות הפוכה', en: 'Inverted Contrast',  icon: '●' },
+      { key: 'light-background',  he: 'רקע בהיר',       en: 'Light Background',   icon: '☀' },
+      { key: 'pause-animations',  he: 'עצירת אנימציות', en: 'Pause Animations',   icon: '⏸' },
     ],
   },
   {
-    key: 'markers', label: 'סמנים',
+    key: 'markers', he: 'סמנים', en: 'Markers',
     features: [
-      { key: 'highlight-links',    label: 'הדגשת קישורים', icon: '🔗' },
-      { key: 'highlight-headings', label: 'הדגשת כותרות',  icon: 'H'  },
+      { key: 'highlight-links',    he: 'הדגשת קישורים', en: 'Highlight Links',    icon: '🔗' },
+      { key: 'highlight-headings', he: 'הדגשת כותרות',  en: 'Highlight Headings', icon: 'H'  },
     ],
   },
   {
-    key: 'helpers', label: 'עזרים',
+    key: 'helpers', he: 'עזרים', en: 'Helpers',
     features: [
-      { key: 'big-cursor-white', label: 'סמן לבן גדול',  icon: '➤' },
-      { key: 'big-cursor-black', label: 'סמן שחור גדול', icon: '➤' },
-      { key: 'reading-guide',    label: 'קו קריאה',       icon: '━' },
-      { key: 'reading-mask',     label: 'מסיכת קריאה',    icon: '▬' },
+      { key: 'big-cursor-white', he: 'סמן לבן גדול',  en: 'Large White Cursor', icon: '➤' },
+      { key: 'big-cursor-black', he: 'סמן שחור גדול', en: 'Large Black Cursor', icon: '➤' },
+      { key: 'reading-guide',    he: 'קו קריאה',       en: 'Reading Guide',      icon: '━' },
+      { key: 'reading-mask',     he: 'מסיכת קריאה',    en: 'Reading Mask',       icon: '▬' },
     ],
   },
 ];
+
+function getA11ySections() {
+  const lang = _a11yLang();
+  return A11Y_SECTIONS_HE.map(s => ({
+    key: s.key,
+    label: lang === 'en' ? s.en : s.he,
+    features: s.features.map(f => ({ key: f.key, label: lang === 'en' ? f.en : f.he, icon: f.icon })),
+  }));
+}
+
+const A11Y_SECTIONS = getA11ySections();
 
 const MUTEX_GROUPS = [
   ['text-larger', 'text-smaller'],
@@ -163,7 +177,8 @@ function restoreSettings() {
 const A11Y_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M256 48a208 208 0 1 1 0 416A208 208 0 0 1 256 48zm0-48C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 128a48 48 0 1 0 0-96 48 48 0 0 0 0 96zm-32 32c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h8v80c0 13.3 10.7 24 24 24s24-10.7 24-24v-80h8v80c0 13.3 10.7 24 24 24s24-10.7 24-24v-80h8c17.7 0 32-14.3 32-32V240c0-17.7-14.3-32-32-32H224z"/></svg>`;
 
 function buildMenuHTML(saved) {
-  return A11Y_SECTIONS.map(section => `
+  const sections = getA11ySections();
+  return sections.map(section => `
     <div class="a11y-section">
       <div class="a11y-section-label">${section.label}</div>
       <div class="a11y-section-grid">
@@ -184,9 +199,9 @@ function buildMenuHTML(saved) {
 function injectWidget() {
   const saved = getSettings();
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="a11y-widget" dir="rtl">
+    <div id="a11y-widget" dir="${_a11yLang() === 'en' ? 'ltr' : 'rtl'}"
       <button id="a11y-toggle"
-        aria-label="פתחי תפריט נגישות"
+        aria-label="${_a('פתחי תפריט נגישות','Open accessibility menu')}"
         aria-expanded="false"
         aria-controls="a11y-menu"
         aria-haspopup="dialog">
@@ -198,15 +213,15 @@ function injectWidget() {
         aria-hidden="true"
         hidden>
         <div class="a11y-header">
-          <h3 class="a11y-title" id="a11y-dialog-title">הגדרות נגישות</h3>
-          <button id="a11y-close" aria-label="סגרי תפריט נגישות">×</button>
+          <h3 class="a11y-title" id="a11y-dialog-title">${_a('הגדרות נגישות','Accessibility Settings')}</h3>
+          <button id="a11y-close" aria-label="${_a('סגרי תפריט נגישות','Close accessibility menu')}">×</button>
         </div>
         <div class="a11y-body">
           ${buildMenuHTML(saved)}
         </div>
         <div class="a11y-footer">
-          <button id="a11y-reset" type="button">איפוס הכל</button>
-          <button id="a11y-statement-btn" type="button">הצהרת נגישות</button>
+          <button id="a11y-reset" type="button">${_a('איפוס הכל','Reset All')}</button>
+          <button id="a11y-statement-btn" type="button">${_a('הצהרת נגישות','Accessibility Statement')}</button>
         </div>
       </div>
     </div>`);
@@ -283,22 +298,27 @@ function showStatement() {
     modal.id = 'a11y-statement-modal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-label', 'הצהרת נגישות');
-    modal.setAttribute('dir', 'rtl');
+    modal.setAttribute('aria-label', _a('הצהרת נגישות','Accessibility Statement'));
+    modal.setAttribute('dir', _a11yLang() === 'en' ? 'ltr' : 'rtl');
     modal.innerHTML = `
       <div class="a11y-statement-overlay"></div>
       <div class="a11y-statement-content">
-        <button class="a11y-statement-close" aria-label="סגרי הצהרת נגישות" type="button">×</button>
-        <h2 style="font-size:1.3rem;font-weight:700;color:var(--ink);margin:0 0 16px;">הצהרת נגישות</h2>
+        <button class="a11y-statement-close" aria-label="${_a('סגרי הצהרת נגישות','Close accessibility statement')}" type="button">×</button>
+        <h2 style="font-size:1.3rem;font-weight:700;color:var(--ink);margin:0 0 16px;">${_a('הצהרת נגישות','Accessibility Statement')}</h2>
         <p style="color:var(--ink-soft);line-height:1.75;font-size:0.9rem;margin:0 0 10px;">
-          אתר <strong>Charming by Vik</strong> מחויב לנגישות דיגיטלית לאנשים עם מוגבלויות.
-          אנו פועלים בהתאם לתקן הישראלי 5568 ולהנחיות WCAG 2.0 ברמה AA.
+          ${_a(
+            'אתר <strong>Charming by Vik</strong> מחויב לנגישות דיגיטלית לאנשים עם מוגבלויות. אנו פועלים בהתאם לתקן הישראלי 5568 ולהנחיות WCAG 2.0 ברמה AA.',
+            'The <strong>Charming by Vik</strong> website is committed to digital accessibility for people with disabilities. We comply with Israeli Standard 5568 and WCAG 2.0 Level AA guidelines.'
+          )}
         </p>
         <p style="color:var(--ink-soft);line-height:1.75;font-size:0.9rem;margin:0 0 10px;">
-          האתר כולל: ניווט מקלדת מלא, תגיות ARIA לקוראי מסך, יחס ניגודיות עומד בתקן, ואפשרויות נגישות מתכווננות.
+          ${_a(
+            'האתר כולל: ניווט מקלדת מלא, תגיות ARIA לקוראי מסך, יחס ניגודיות עומד בתקן, ואפשרויות נגישות מתכווננות.',
+            'The site includes: full keyboard navigation, ARIA tags for screen readers, standard contrast ratios, and adjustable accessibility options.'
+          )}
         </p>
         <p style="color:var(--ink-soft);line-height:1.75;font-size:0.9rem;margin:0;">
-          לפרטים ולדיווח על בעיות נגישות:
+          ${_a('לפרטים ולדיווח על בעיות נגישות:','For details or to report accessibility issues:')}
           <a href="mailto:charming.by.vik@gmail.com" style="color:var(--pink-deep);">charming.by.vik@gmail.com</a>
         </p>
       </div>`;
@@ -312,6 +332,16 @@ function showStatement() {
   document.body.style.overflow = 'hidden';
   modal.querySelector('.a11y-statement-close').focus();
 }
+
+// ── Rebuild widget on language change ─────────────────────────────────────
+function rebuildA11yWidget() {
+  const oldWidget = document.getElementById('a11y-widget');
+  if (oldWidget) oldWidget.remove();
+  const oldModal = document.getElementById('a11y-statement-modal');
+  if (oldModal) oldModal.remove();
+  injectWidget();
+}
+window._rebuildA11yWidget = rebuildA11yWidget;
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────
 restoreSettings();

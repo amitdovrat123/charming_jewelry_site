@@ -110,6 +110,9 @@ const _en = {
   footer_send_inquiry: 'Leave an Inquiry',
   footer_ship_note1: 'Home delivery: within 3 business days',
   footer_ship_note2: 'Self-pickup: from our studio in Ramat Gan',
+  footer_cookie_settings: 'Cookie Settings',
+  cookie_banner_text: 'Our site uses cookies to provide you with a personalized browsing experience. You can choose which cookies to accept.',
+  cookie_accept_all: 'Accept All',
   footer_copyright: '\u00a9 2025 Charming by Vik. All rights reserved. Designed with love.',
 
   /* ── Workshops — Hero ─────────────────────────────── */
@@ -530,6 +533,11 @@ const _en = {
   shop_loading_js: 'Loading products...',
 
   /* ── Catalog.js dynamic content ─────────────────── */
+  shop_back_home: '\u2039 Back to Home',
+  shop_filter_sort: 'Filter & Sort',
+  co_free_ship_over: '\ud83d\ude9a Free shipping on orders over',
+  co_free_ship_more: 'more',
+  co_apt_label_checkout: 'Floor / Apt',
   home_featured_title: 'Featured Products',
   home_loading: 'Loading products...',
   home_empty_featured: 'No featured products to display right now — check back soon!',
@@ -575,7 +583,20 @@ const _en = {
   cart_step1: 'Shopping Cart',
   cart_step2: 'Payment Details',
   co_zip: 'Zip Code',
+  co_zip_ph: 'Zip code',
   co_floor: 'Floor',
+  co_floor_ph: 'Floor',
+  co_street_ph: 'Street and number',
+  co_apt_ph: 'Apt / Unit',
+  co_city_ph: 'City',
+  co_err_address: 'Please fill in city, street, and house number.',
+  co_street_label: 'Street and number',
+  co_street_example: '10 Herzl St.',
+  co_apt_label: 'Apt / Unit',
+  co_city_label: 'City',
+  co_city_example: 'Tel Aviv',
+  co_zip_label: 'Zip Code',
+  co_save_details: 'Save details for next time',
   co_back_to_cart: 'Back to Cart',
   co_free_ship_note: 'Free shipping',
   co_agree_terms: 'I have read and agree to the',
@@ -597,6 +618,7 @@ const _en = {
   ty_continue: 'Continue Shopping',
 
   /* ── Product view ───────────────────────────────── */
+  pv_view_product: 'View Product',
   pv_back_shop: 'Back to Store',
   pv_back_home: 'Back to Home',
   pv_back: 'Go Back',
@@ -678,6 +700,8 @@ function setLang(lang) {
   if (typeof window._updateAuthNavbar === 'function') window._updateAuthNavbar();
   // Re-render product catalogs to show bilingual names/descriptions
   if (typeof window._rerenderProducts === 'function') window._rerenderProducts();
+  // Rebuild accessibility widget for new language
+  if (typeof window._rebuildA11yWidget === 'function') window._rebuildA11yWidget();
 }
 
 function toggleLang() {
