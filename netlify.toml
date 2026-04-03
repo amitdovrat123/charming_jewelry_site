@@ -36,6 +36,12 @@
   status = 404
   force = true
 
+[[redirects]]
+  from = "/backup-script.js"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # Root-level sensitive files
 [[redirects]]
   from = "/CLAUDE.md"
