@@ -27,6 +27,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
     * { font-family: 'Assistant', sans-serif; }
     [data-v] { display: none !important; }
@@ -1408,6 +1410,7 @@
             <button class="settings-nav-btn" data-settings-page="ws-gallery" onclick="showSettingsPage('ws-gallery')">🖼️ גלריית סדנאות</button>
             <button class="settings-nav-btn" data-settings-page="testimonials" onclick="showSettingsPage('testimonials')">⭐ המלצות</button>
             <button class="settings-nav-btn" data-settings-page="wa-templates" onclick="showSettingsPage('wa-templates')">💬 הודעות WhatsApp</button>
+            <button class="settings-nav-btn" data-settings-page="backup" onclick="showSettingsPage('backup')"><i data-lucide="hard-drive-download" class="w-3.5 h-3.5 inline-block"></i> גיבוי נתונים</button>
           </div>
         </div>
 
@@ -1637,6 +1640,84 @@ Charming by Vik 💛</textarea>
           <!-- Templates list -->
           <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
             <div id="wa-tpl-list" class="divide-y divide-[#fdf6ee]"></div>
+          </div>
+        </div>
+
+        <!-- Sub-page: Backup -->
+        <div id="settings-page-backup" class="settings-page p-6 space-y-6" style="display:none;">
+          <div class="flex flex-wrap justify-between items-center gap-3">
+            <div>
+              <h2 class="font-black text-gray-800 text-lg">גיבוי נתונים</h2>
+              <p class="text-xs text-gray-400 mt-1">גיבוי ל-Google Sheets וייצוא לאקסל — הגנה על המידע העסקי שלך</p>
+            </div>
+          </div>
+
+          <!-- Google Sheets Backup -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2">
+                  <i data-lucide="cloud" class="w-4 h-4 text-[#d4a373]"></i>
+                  גיבוי ל-Google Sheets
+                </h3>
+                <p class="text-xs text-gray-400 mt-1">לחצי על "חבר" ואז "גבה עכשיו" — הנתונים נשמרים ב-Google Sheet ב-Drive שלך</p>
+              </div>
+              <div id="backup-status" class="text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-400">לא מחובר</div>
+            </div>
+
+            <div id="backup-not-connected" class="mt-4">
+              <button onclick="connectGoogleDrive()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-2">
+                <i data-lucide="link" class="w-4 h-4"></i> חבר Google Drive
+              </button>
+              <p class="text-[10px] text-gray-400 mt-2">הגישה מוגבלת רק לקובץ הגיבוי שנוצר — אין גישה לשום קובץ אחר ב-Drive</p>
+            </div>
+
+            <div id="backup-connected" class="mt-4 space-y-3" style="display:none;">
+              <div class="flex flex-wrap items-center gap-3">
+                <button onclick="runBackupToSheets()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full font-bold text-sm transition-colors flex items-center gap-2">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> גבה עכשיו
+                </button>
+                <a id="backup-sheet-link" href="#" target="_blank" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-5 py-2 rounded-full font-bold text-sm transition-colors inline-flex items-center gap-2" style="display:none;">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> פתח את ה-Sheet
+                </a>
+              </div>
+              <div id="backup-last-run" class="text-xs text-gray-400"></div>
+              <div id="backup-progress" class="text-xs text-[#d4a373] font-semibold" style="display:none;"></div>
+            </div>
+          </div>
+
+          <!-- Excel Export -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2">
+                  <i data-lucide="download" class="w-4 h-4 text-[#d4a373]"></i>
+                  ייצוא לאקסל
+                </h3>
+                <p class="text-xs text-gray-400 mt-1">הורדת קובץ Excel מסודר עם כל הנתונים — לא דורש חיבור לגוגל</p>
+              </div>
+            </div>
+            <button onclick="exportToExcel()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-2">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> הורד אקסל
+            </button>
+            <div id="excel-progress" class="text-xs text-[#d4a373] font-semibold mt-2" style="display:none;"></div>
+          </div>
+
+          <!-- What gets backed up -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
+            <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2 mb-3">
+              <i data-lucide="info" class="w-4 h-4 text-[#d4a373]"></i>
+              מה נכלל בגיבוי?
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+              <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">סדנאות</div>
+              <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">הזמנות</div>
+              <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">הוצאות</div>
+              <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">פניות</div>
+              <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">מוצרים</div>
+              <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">לקוחות</div>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-3">כל קטגוריה מקבלת גיליון נפרד עם כותרות עמודות בעברית</p>
           </div>
         </div>
 
@@ -2484,7 +2565,7 @@ window.toggleMoreMenu = toggleMoreMenu;
 window.closeMoreMenu  = closeMoreMenu;
 
 // ── Settings sub-page navigation ──────────────────────────────────
-const settingsSubPages = ['general','banner','coupons','ws-gallery','testimonials','wa-templates'];
+const settingsSubPages = ['general','banner','coupons','ws-gallery','testimonials','wa-templates','backup'];
 let settingsSubInited = {};
 function showSettingsPage(page) {
   settingsSubPages.forEach(p => {
@@ -2503,6 +2584,7 @@ function showSettingsPage(page) {
     else if (page === 'ws-gallery' && typeof initWsGalleryTab === 'function') initWsGalleryTab();
     else if (page === 'testimonials' && typeof initTestimonialsTab === 'function') initTestimonialsTab();
     else if (page === 'wa-templates' && typeof initWaTemplates === 'function') initWaTemplates();
+    else if (page === 'backup' && typeof initBackupTab === 'function') initBackupTab();
   } else {
     if (page === 'coupons' && typeof renderCouponsGrid === 'function') renderCouponsGrid();
     else if (page === 'banner' && typeof renderBannerList === 'function') renderBannerList();
@@ -8850,6 +8932,302 @@ function _svgRadarChart(metrics) {
 // Keep backward compat
 function renderAnalytics() { refreshCurrentBiPage(); }
 window.renderAnalytics = renderAnalytics;
+
+// ══════════════════════════════════════════════════════════════
+//  BACKUP SYSTEM — Google Sheets + Excel Export
+// ══════════════════════════════════════════════════════════════
+const BACKUP_CLIENT_ID = '130259110676-k2ef85o71ig2j1pgnpucc3lvljh45tlg.apps.googleusercontent.com';
+const BACKUP_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
+let backupAccessToken = null;
+let backupSpreadsheetId = null;
+
+async function initBackupTab() {
+  try {
+    const settingsDoc = await getDoc(doc(db, SETTINGS_COL, 'backup'));
+    if (settingsDoc.exists()) {
+      const data = settingsDoc.data();
+      backupSpreadsheetId = data.spreadsheetId || null;
+      if (data.lastBackup) {
+        const d = data.lastBackup.toDate ? data.lastBackup.toDate() : new Date(data.lastBackup);
+        document.getElementById('backup-last-run').textContent = 'גיבוי אחרון: ' + d.toLocaleString('he-IL');
+      }
+      if (backupSpreadsheetId) {
+        const link = document.getElementById('backup-sheet-link');
+        link.href = 'https://docs.google.com/spreadsheets/d/' + backupSpreadsheetId;
+        link.style.display = '';
+      }
+    }
+  } catch(e) { console.log('Backup settings load:', e); }
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+}
+
+function connectGoogleDrive() {
+  if (typeof google === 'undefined' || !google.accounts?.oauth2) {
+    alert('Google Identity Services לא נטען. נסה לרענן את הדף.');
+    return;
+  }
+  const tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: BACKUP_CLIENT_ID,
+    scope: BACKUP_SCOPES,
+    callback: (resp) => {
+      if (resp.error) { console.error('OAuth error:', resp); return; }
+      backupAccessToken = resp.access_token;
+      document.getElementById('backup-not-connected').style.display = 'none';
+      document.getElementById('backup-connected').style.display = '';
+      document.getElementById('backup-status').className = 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-50 text-emerald-600';
+      document.getElementById('backup-status').textContent = 'מחובר';
+      if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    }
+  });
+  tokenClient.requestAccessToken();
+}
+window.connectGoogleDrive = connectGoogleDrive;
+
+async function getBackupData() {
+  const data = {};
+
+  // Workshops
+  try {
+    const snap = await getDocs(query(collection(db, WORKSHOPS_COL), orderBy('eventDate','desc')));
+    data.workshops = {
+      name: 'סדנאות',
+      headers: ['תאריך','שם חוגגת','איש קשר','טלפון','עיר','מסלול','משתתפות','מחיר בסיס','הנחה','תוספת הגעה','סה"כ','מקדמה ששולמה','יתרה','סטטוס','הערות'],
+      rows: snap.docs.map(d => {
+        const w = d.data();
+        const total = w.totalPrice || 0;
+        const advance = w.advancePayment || w.paidAdvance || 0;
+        return [
+          w.eventDate||'', w.celebrantName||'', w.contactName||'', w.phone||'',
+          w.city||'', w.route||w.packageName||'', w.participants||'',
+          w.basePrice||0, w.discount||0, w.arrivalFee||0, total, advance,
+          Math.max(0, total - advance), w.status||'', w.notes||''
+        ];
+      })
+    };
+  } catch(e) { console.log('Backup workshops err:', e); }
+
+  // Orders
+  try {
+    const snap = await getDocs(query(collection(db, ORDERS_COL), orderBy('timestamp','desc')));
+    data.orders = {
+      name: 'הזמנות',
+      headers: ['תאריך','מוצר','שם לקוח','טלפון','אימייל','צבע','תליון','אופן קבלה','סה"כ','סטטוס'],
+      rows: snap.docs.map(d => {
+        const o = d.data();
+        const ts = o.timestamp?.toDate ? o.timestamp.toDate().toLocaleString('he-IL') : (o.timestamp||'');
+        return [ts, o.product||'', o.customerName||o.name||'', o.phone||'', o.email||'',
+          o.color||'', o.charm||'', o.delivery||'', o.total||o.totalPrice||0, o.status||''];
+      })
+    };
+  } catch(e) { console.log('Backup orders err:', e); }
+
+  // Expenses
+  try {
+    const snap = await getDocs(query(collection(db, EXPENSES_COL), orderBy('date','desc')));
+    data.expenses = {
+      name: 'הוצאות',
+      headers: ['תאריך','קטגוריה','תיאור','סכום','סדנא קשורה'],
+      rows: snap.docs.map(d => {
+        const e = d.data();
+        return [e.date||'', e.category||'', e.description||'', e.amount||0, e.workshopName||''];
+      })
+    };
+  } catch(e) { console.log('Backup expenses err:', e); }
+
+  // Inquiries
+  try {
+    const snap = await getDocs(query(collection(db, INQUIRIES_COL), orderBy('createdAt','desc')));
+    data.inquiries = {
+      name: 'פניות',
+      headers: ['תאריך','שם','טלפון','אימייל','הודעה','סטטוס'],
+      rows: snap.docs.map(d => {
+        const i = d.data();
+        const ts = i.createdAt?.toDate ? i.createdAt.toDate().toLocaleString('he-IL') : '';
+        return [ts, i.name||'', i.phone||'', i.email||'', i.message||'', i.status||''];
+      })
+    };
+  } catch(e) { console.log('Backup inquiries err:', e); }
+
+  // Products
+  try {
+    const snap = await getDocs(collection(db, COL_PATH));
+    data.products = {
+      name: 'מוצרים',
+      headers: ['שם','מחיר','קטגוריה','מלאי','פעיל'],
+      rows: snap.docs.map(d => {
+        const p = d.data();
+        return [p.name||'', p.price||0, p.category||'', p.stock??'', p.active!==false?'כן':'לא'];
+      })
+    };
+  } catch(e) { console.log('Backup products err:', e); }
+
+  // Customers
+  try {
+    const snap = await getDocs(collection(db, CUSTOMERS_COL));
+    data.customers = {
+      name: 'לקוחות',
+      headers: ['שם','אימייל','טלפון','יום הולדת','עיר','הערות'],
+      rows: snap.docs.map(d => {
+        const c = d.data();
+        return [c.name||c.displayName||'', c.email||'', c.phone||'', c.birthday||'', c.city||'', c.notes||''];
+      })
+    };
+  } catch(e) { console.log('Backup customers err:', e); }
+
+  return data;
+}
+
+async function runBackupToSheets() {
+  if (!backupAccessToken) { connectGoogleDrive(); return; }
+  const progress = document.getElementById('backup-progress');
+  progress.style.display = '';
+  progress.className = 'text-xs text-[#d4a373] font-semibold';
+  progress.textContent = 'קורא נתונים מהמערכת...';
+
+  try {
+    const data = await getBackupData();
+    const keys = Object.keys(data);
+    let totalRows = 0;
+
+    // Create spreadsheet if first time
+    if (!backupSpreadsheetId) {
+      progress.textContent = 'יוצר גיליון Google Sheets חדש...';
+      const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          properties: { title: 'Charming by Vik — גיבוי נתונים', locale: 'he' },
+          sheets: keys.map((k, i) => ({ properties: { sheetId: i, title: data[k].name, rightToLeft: true } }))
+        })
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        if (errText.includes('not been used') || errText.includes('is not enabled')) {
+          throw new Error('יש להפעיל את Google Sheets API ב-Google Cloud Console');
+        }
+        throw new Error('שגיאה ביצירת הגיליון: ' + res.status);
+      }
+      const sheet = await res.json();
+      backupSpreadsheetId = sheet.spreadsheetId;
+      await setDoc(doc(db, SETTINGS_COL, 'backup'), { spreadsheetId: backupSpreadsheetId, createdAt: serverTimestamp() }, { merge: true });
+    } else {
+      // Ensure all sheets exist in existing spreadsheet
+      progress.textContent = 'בודק גיליונות קיימים...';
+      const metaRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '?fields=sheets.properties.title', {
+        headers: { 'Authorization': 'Bearer ' + backupAccessToken }
+      });
+      if (metaRes.ok) {
+        const meta = await metaRes.json();
+        const existing = (meta.sheets || []).map(s => s.properties.title);
+        const toAdd = keys.filter(k => !existing.includes(data[k].name));
+        if (toAdd.length) {
+          await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + ':batchUpdate', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requests: toAdd.map(k => ({ addSheet: { properties: { title: data[k].name, rightToLeft: true } } })) })
+          });
+        }
+      }
+    }
+
+    // Write data to each sheet
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const sd = data[key];
+      progress.textContent = 'מגבה ' + sd.name + ' (' + (i+1) + '/' + keys.length + ')...';
+      totalRows += sd.rows.length;
+      const range = encodeURIComponent(sd.name) + '!A:Z';
+
+      // Clear old data
+      await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '/values/' + range + ':clear', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + backupAccessToken }
+      });
+
+      // Write new data
+      await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '/values/' + encodeURIComponent(sd.name) + '!A1?valueInputOption=RAW', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: [sd.headers, ...sd.rows] })
+      });
+    }
+
+    // Format header rows (bold + background)
+    const fmtRequests = keys.map((k, i) => ({
+      repeatCell: {
+        range: { sheetId: i, startRowIndex: 0, endRowIndex: 1 },
+        cell: { userEnteredFormat: { backgroundColor: { red: 0.99, green: 0.96, blue: 0.93 }, textFormat: { bold: true } } },
+        fields: 'userEnteredFormat(backgroundColor,textFormat)'
+      }
+    }));
+    await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + ':batchUpdate', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: fmtRequests })
+    }).catch(() => {});
+
+    // Update UI + save to Firestore
+    const link = document.getElementById('backup-sheet-link');
+    link.href = 'https://docs.google.com/spreadsheets/d/' + backupSpreadsheetId;
+    link.style.display = '';
+
+    const now = new Date();
+    await setDoc(doc(db, SETTINGS_COL, 'backup'), { lastBackup: serverTimestamp() }, { merge: true });
+
+    document.getElementById('backup-last-run').textContent = 'גיבוי אחרון: ' + now.toLocaleString('he-IL');
+    progress.textContent = 'גיבוי הושלם — ' + keys.length + ' גיליונות, ' + totalRows + ' שורות';
+    if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    setTimeout(() => { progress.style.display = 'none'; }, 6000);
+
+  } catch(e) {
+    console.error('Backup error:', e);
+    progress.className = 'text-xs text-red-500 font-semibold';
+    progress.textContent = 'שגיאה: ' + e.message;
+    if (String(e).includes('401') || String(e).includes('Invalid')) {
+      backupAccessToken = null;
+      document.getElementById('backup-not-connected').style.display = '';
+      document.getElementById('backup-connected').style.display = 'none';
+      document.getElementById('backup-status').className = 'text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-400';
+      document.getElementById('backup-status').textContent = 'לא מחובר';
+    }
+  }
+}
+window.runBackupToSheets = runBackupToSheets;
+
+async function exportToExcel() {
+  const progress = document.getElementById('excel-progress');
+  progress.style.display = '';
+  progress.className = 'text-xs text-[#d4a373] font-semibold mt-2';
+  progress.textContent = 'קורא נתונים...';
+
+  try {
+    const data = await getBackupData();
+    progress.textContent = 'בונה קובץ אקסל...';
+
+    const wb = XLSX.utils.book_new();
+    for (const key of Object.keys(data)) {
+      const sd = data[key];
+      const ws = XLSX.utils.aoa_to_sheet([sd.headers, ...sd.rows]);
+      ws['!RTL'] = true;
+      ws['!cols'] = sd.headers.map((h, i) => {
+        const max = Math.max(h.length, ...sd.rows.map(r => String(r[i]||'').length));
+        return { wch: Math.min(max + 3, 40) };
+      });
+      XLSX.utils.book_append_sheet(wb, ws, sd.name);
+    }
+
+    const dateStr = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, 'Charming_Backup_' + dateStr + '.xlsx');
+
+    progress.textContent = 'הקובץ הורד בהצלחה';
+    setTimeout(() => { progress.style.display = 'none'; }, 4000);
+  } catch(e) {
+    console.error('Excel export error:', e);
+    progress.className = 'text-xs text-red-500 font-semibold mt-2';
+    progress.textContent = 'שגיאה: ' + e.message;
+  }
+}
+window.exportToExcel = exportToExcel;
 
 </script>
 
