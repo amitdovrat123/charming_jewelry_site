@@ -41,7 +41,7 @@ function _pageName() {
   if (p.endsWith('workshops.html')) return 'workshops';
   if (p.endsWith('legal.html'))     return 'legal';
   if (p.endsWith('terms.html'))     return 'terms';
-  if (p.endsWith('admin.html'))     return 'admin';
+  if (p.endsWith('mgmt-7k9x.html'))     return 'admin';
   return 'home';
 }
 

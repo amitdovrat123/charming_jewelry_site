@@ -199,7 +199,7 @@ function buildMenuHTML(saved) {
 function injectWidget() {
   const saved = getSettings();
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="a11y-widget" dir="${_a11yLang() === 'en' ? 'ltr' : 'rtl'}"
+    <div id="a11y-widget" dir="${_a11yLang() === 'en' ? 'ltr' : 'rtl'}">
       <button id="a11y-toggle"
         aria-label="${_a('פתחי תפריט נגישות','Open accessibility menu')}"
         aria-expanded="false"

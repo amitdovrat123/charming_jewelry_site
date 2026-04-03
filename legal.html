@@ -10,15 +10,10 @@
   <title>תנאי שירות ומידע משפטי | Charming by Vik</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet" />
-  <script>if(localStorage.getItem('charming_lang')==='en')document.documentElement.classList.add('lang-loading');</script>
+  <script src="lang-init.js"></script>
   <!-- GA4 — consent-gated -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MBC09YG3HY"></script>
-  <script>
-    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
-    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied'});
-    (function(){var p=localStorage.getItem('charming_cookie_prefs');if(p){p=JSON.parse(p);gtag('consent','update',{'analytics_storage':p.analytics?'granted':'denied','ad_storage':p.marketing?'granted':'denied','ad_user_data':p.marketing?'granted':'denied','ad_personalization':p.marketing?'granted':'denied'});}})();
-    gtag('js',new Date());gtag('config','G-MBC09YG3HY');
-  </script>
+  <script src="gtag-init.js"></script>
 </head>
 <body>
 
@@ -73,7 +68,7 @@
         <li><a href="#returns"   class="legal-subnav-link" data-i18n="legal_nav_returns">החזרות וביטולים</a></li>
         <li><a href="#terms"     class="legal-subnav-link" data-i18n="legal_nav_terms">תקנון ושימוש</a></li>
         <li><a href="#disclaimer" class="legal-subnav-link" data-i18n="legal_nav_disclaimer">מידע משפטי</a></li>
-        <li><a href="#privacy" class="legal-subnav-link">פרטיות ועוגיות</a></li>
+        <li><a href="#privacy" class="legal-subnav-link" data-i18n="legal_nav_privacy">פרטיות ועוגיות</a></li>
       </ul>
     </div>
   </nav>
@@ -239,15 +234,15 @@
       <section id="disclaimer" class="legal-section">
         <div class="legal-section-header">
           <span class="legal-section-number">05</span>
-          <h2 class="legal-section-title">הגבלת אחריות</h2>
+          <h2 class="legal-section-title" data-i18n="legal_s5_title2">הגבלת אחריות</h2>
         </div>
         <div class="legal-section-body">
 
-          <h3 class="legal-h3">דיוק המידע והתמונות</h3>
-          <p>המידע המופיע באתר ניתן למטרות מידע כללי בלבד. אנו עושים מאמצים לדייק ולעדכן את התוכן, אך איננו מתחייבים שהמידע יהיה נקי לחלוטין מטעויות סופר או אי-דיוקים. התמונות באתר נועדו להמחשה — מאחר שהתכשיטים מיוצרים בעבודת יד, ייתכנו הבדלים קלים בגוונים או בפרטים הקטנים בין התמונה למוצר בפועל. הבדלים אלה אינם מהווים עילה להחזרה.</p>
+          <h3 class="legal-h3" data-i18n="legal_s5_h3_accuracy">דיוק המידע והתמונות</h3>
+          <p data-i18n="legal_s5_accuracy">המידע המופיע באתר ניתן למטרות מידע כללי בלבד. אנו עושים מאמצים לדייק ולעדכן את התוכן, אך איננו מתחייבים שהמידע יהיה נקי לחלוטין מטעויות סופר או אי-דיוקים. התמונות באתר נועדו להמחשה — מאחר שהתכשיטים מיוצרים בעבודת יד, ייתכנו הבדלים קלים בגוונים או בפרטים הקטנים בין התמונה למוצר בפועל. הבדלים אלה אינם מהווים עילה להחזרה.</p>
 
-          <h3 class="legal-h3">שימוש במוצרים</h3>
-          <p>השימוש במוצרים הנמכרים באתר הוא באחריות הלקוחה בלבד. החברה לא תישא באחריות לנזקים עקיפים הנובעים משימוש לא תקין. יש לשמור את התכשיטים הרחק מהישג ידם של ילדים קטנים.</p>
+          <h3 class="legal-h3" data-i18n="legal_s5_h3_usage">שימוש במוצרים</h3>
+          <p data-i18n="legal_s5_usage">השימוש במוצרים הנמכרים באתר הוא באחריות הלקוחה בלבד. החברה לא תישא באחריות לנזקים עקיפים הנובעים משימוש לא תקין. יש לשמור את התכשיטים הרחק מהישג ידם של ילדים קטנים.</p>
 
         </div>
       </section>
@@ -302,21 +297,21 @@
             <p>כאן את יכולה לבחור בדיוק אילו עוגיות את מאשרת. לאחר הבחירה, לחצי על "שמירת ההעדפות שלי".</p>
 
             <div class="cookie-category is-open">
-              <div class="cookie-category-head" onclick="this.parentElement.classList.toggle('is-open')">
+              <div class="cookie-category-head" data-toggle-parent>
                 <span class="cookie-category-title">עוגיות חיוניות</span>
                 <span class="cookie-category-locked">תמיד פעילות</span>
               </div>
               <p class="cookie-category-desc">עוגיות אלו הכרחיות לפעולה בסיסית של האתר — ניווט בין עמודים, שמירת העדפות פרטיות, ואבטחה. לא ניתן לכבות אותן.</p>
             </div>
             <div class="cookie-category">
-              <div class="cookie-category-head" onclick="this.parentElement.classList.toggle('is-open')">
+              <div class="cookie-category-head" data-toggle-parent>
                 <span class="cookie-category-title">עוגיות אנליטיקס</span>
                 <label class="cookie-toggle"><input type="checkbox" id="cookie-analytics"><span class="cookie-toggle-track"></span></label>
               </div>
               <p class="cookie-category-desc">עוזרות לנו להבין כיצד גולשות משתמשות באתר — אילו עמודים הכי פופולריים, כיצד מנווטות, ומה ניתן לשפר. המידע אנונימי ומשמש לשיפור החוויה בלבד.</p>
             </div>
             <div class="cookie-category">
-              <div class="cookie-category-head" onclick="this.parentElement.classList.toggle('is-open')">
+              <div class="cookie-category-head" data-toggle-parent>
                 <span class="cookie-category-title">עוגיות שיווק</span>
                 <label class="cookie-toggle"><input type="checkbox" id="cookie-marketing"><span class="cookie-toggle-track"></span></label>
               </div>
@@ -464,80 +459,9 @@
       <a href="legal.html#cookie-settings" class="cookie-btn-settings" data-i18n="footer_cookie_settings">הגדרות עוגיות</a>
     </div>
   </div>
-  <script>
-  (function(){
-    var STORAGE_KEY = 'charming_cookie_prefs';
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) { applyConsent(JSON.parse(saved)); return; }
-    var banner = document.getElementById('cookie-banner');
-    if (!banner) return;
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){ banner.classList.add('is-visible'); }); });
-    document.getElementById('cookie-accept-all').addEventListener('click', function(){
-      var prefs = {analytics:true, marketing:true, ts:Date.now()};
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-      applyConsent(prefs);
-      banner.classList.remove('is-visible');
-      banner.addEventListener('transitionend', function(){ banner.remove(); }, {once:true});
-    });
-    function applyConsent(p){
-      if(typeof gtag==='function'){
-        gtag('consent','update',{
-          'analytics_storage': p.analytics ? 'granted' : 'denied',
-          'ad_storage': p.marketing ? 'granted' : 'denied',
-          'ad_user_data': p.marketing ? 'granted' : 'denied',
-          'ad_personalization': p.marketing ? 'granted' : 'denied'
-        });
-      }
-    }
-  })();
-  window.openCookieSettings = function(){ window.location.href = 'legal.html#cookie-settings'; };
-
-  // Cookie settings panel on this page
-  (function(){
-    var STORAGE_KEY = 'charming_cookie_prefs';
-    var analyticsEl = document.getElementById('cookie-analytics');
-    var marketingEl = document.getElementById('cookie-marketing');
-    var saveBtn = document.getElementById('cookie-save-prefs');
-    var acceptAllBtn = document.getElementById('cookie-page-accept-all');
-    var msg = document.getElementById('cookie-save-msg');
-    if (!saveBtn) return;
-
-    // Load saved prefs into toggles
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      var p = JSON.parse(saved);
-      if (analyticsEl) analyticsEl.checked = !!p.analytics;
-      if (marketingEl) marketingEl.checked = !!p.marketing;
-    }
-
-    function save(prefs) {
-      prefs.ts = Date.now();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-      if (typeof gtag === 'function') {
-        gtag('consent','update',{
-          'analytics_storage': prefs.analytics ? 'granted' : 'denied',
-          'ad_storage': prefs.marketing ? 'granted' : 'denied',
-          'ad_user_data': prefs.marketing ? 'granted' : 'denied',
-          'ad_personalization': prefs.marketing ? 'granted' : 'denied'
-        });
-      }
-      // Hide banner if still visible
-      var banner = document.getElementById('cookie-banner');
-      if (banner) { banner.classList.remove('is-visible'); banner.addEventListener('transitionend', function(){ banner.remove(); }, {once:true}); }
-      // Show confirmation
-      if (msg) { msg.textContent = 'ההעדפות נשמרו בהצלחה'; msg.style.display = 'block'; setTimeout(function(){ msg.style.display = 'none'; }, 3000); }
-    }
-
-    saveBtn.addEventListener('click', function(){
-      save({ analytics: analyticsEl.checked, marketing: marketingEl.checked });
-    });
-    acceptAllBtn.addEventListener('click', function(){
-      analyticsEl.checked = true;
-      marketingEl.checked = true;
-      save({ analytics: true, marketing: true });
-    });
-  })();
-  </script>
+  <script src="cookie-consent.js"></script>
+  <script src="cookie-settings.js"></script>
+  <script src="toggle-parent.js"></script>
 
   <script src="main.js"></script>
   <script src="nav.js"></script>

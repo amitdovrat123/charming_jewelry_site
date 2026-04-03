@@ -10,15 +10,10 @@
   <title>תקנון ומדיניות פרטיות | Charming by Vik</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@400;700;800;900&display=swap" rel="stylesheet" />
-  <script>if(localStorage.getItem('charming_lang')==='en')document.documentElement.classList.add('lang-loading');</script>
+  <script src="lang-init.js"></script>
   <!-- GA4 — consent-gated -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MBC09YG3HY"></script>
-  <script>
-    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
-    gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied'});
-    (function(){var p=localStorage.getItem('charming_cookie_prefs');if(p){p=JSON.parse(p);gtag('consent','update',{'analytics_storage':p.analytics?'granted':'denied','ad_storage':p.marketing?'granted':'denied','ad_user_data':p.marketing?'granted':'denied','ad_personalization':p.marketing?'granted':'denied'});}})();
-    gtag('js',new Date());gtag('config','G-MBC09YG3HY');
-  </script>
+  <script src="gtag-init.js"></script>
 </head>
 <body>
 
@@ -377,34 +372,7 @@
       <a href="legal.html#cookie-settings" class="cookie-btn-settings" data-i18n="footer_cookie_settings">הגדרות עוגיות</a>
     </div>
   </div>
-  <script>
-  (function(){
-    var STORAGE_KEY = 'charming_cookie_prefs';
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) { applyConsent(JSON.parse(saved)); return; }
-    var banner = document.getElementById('cookie-banner');
-    if (!banner) return;
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){ banner.classList.add('is-visible'); }); });
-    document.getElementById('cookie-accept-all').addEventListener('click', function(){
-      var prefs = {analytics:true, marketing:true, ts:Date.now()};
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-      applyConsent(prefs);
-      banner.classList.remove('is-visible');
-      banner.addEventListener('transitionend', function(){ banner.remove(); }, {once:true});
-    });
-    function applyConsent(p){
-      if(typeof gtag==='function'){
-        gtag('consent','update',{
-          'analytics_storage': p.analytics ? 'granted' : 'denied',
-          'ad_storage': p.marketing ? 'granted' : 'denied',
-          'ad_user_data': p.marketing ? 'granted' : 'denied',
-          'ad_personalization': p.marketing ? 'granted' : 'denied'
-        });
-      }
-    }
-  })();
-  window.openCookieSettings = function(){ window.location.href = 'legal.html#cookie-settings'; };
-  </script>
+  <script src="cookie-consent.js"></script>
 
   <script src="lang.js"></script>
   <script src="main.js"></script>
