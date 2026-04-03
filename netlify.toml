@@ -61,11 +61,6 @@
   status = 404
   force = true
 
-[[redirects]]
-  from = "/charming_master_guide.md"
-  to = "/404.html"
-  status = 404
-  force = true
 
 [[redirects]]
   from = "/firestore.rules"
@@ -98,8 +93,3 @@
   status = 404
   force = true
 
-[[redirects]]
-  from = "/Universal%20Agents%20v2/*"
-  to = "/404.html"
-  status = 404
-  force = true
