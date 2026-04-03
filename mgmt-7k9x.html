@@ -331,26 +331,26 @@
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
             <i data-lucide="layout-grid" class="w-[20px] h-[20px] flex-shrink-0"></i> דשבורד
           </button>
-          <button data-tab="orders" onclick="showTab('orders');closeSidebar()"
+          <button data-tab="expenses" onclick="showTab('expenses');closeSidebar()"
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
-            <i data-lucide="package" class="w-[20px] h-[20px] flex-shrink-0"></i> הזמנות
+            <i data-lucide="wallet" class="w-[20px] h-[20px] flex-shrink-0"></i> הוצאות
           </button>
           <button data-tab="workshops" onclick="showTab('workshops');closeSidebar()"
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
             <i data-lucide="palette" class="w-[20px] h-[20px] flex-shrink-0"></i> סדנאות
           </button>
-          <button data-tab="inquiries" onclick="showTab('inquiries');closeSidebar()"
-            class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
-            <i data-lucide="message-circle" class="w-[20px] h-[20px] flex-shrink-0"></i> פניות
-          </button>
           <button data-tab="inventory" onclick="showTab('inventory');closeSidebar()"
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
             <i data-lucide="gem" class="w-[20px] h-[20px] flex-shrink-0"></i> קטלוג ומלאי
           </button>
-          <div class="border-t border-[#f0dfc0]/40 my-3"></div>
-          <button data-tab="expenses" onclick="showTab('expenses');closeSidebar()"
+          <button data-tab="inquiries" onclick="showTab('inquiries');closeSidebar()"
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
-            <i data-lucide="wallet" class="w-[20px] h-[20px] flex-shrink-0"></i> הוצאות
+            <i data-lucide="message-circle" class="w-[20px] h-[20px] flex-shrink-0"></i> פניות
+          </button>
+          <div class="border-t border-[#f0dfc0]/40 my-3"></div>
+          <button data-tab="orders" onclick="showTab('orders');closeSidebar()"
+            class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
+            <i data-lucide="package" class="w-[20px] h-[20px] flex-shrink-0"></i> הזמנות
           </button>
           <button data-tab="finances" onclick="showTab('finances');closeSidebar()"
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
@@ -9233,7 +9233,8 @@ async function runBackupToSheets() {
         if (errText.includes('not been used') || errText.includes('is not enabled')) {
           throw new Error('יש להפעיל את Google Sheets API ב-Google Cloud Console');
         }
-        throw new Error('שגיאה ביצירת הגיליון: ' + res.status);
+        console.error('Sheets API error:', errText);
+        throw new Error('שגיאה ביצירת הגיליון: ' + res.status + ' — ' + errText.slice(0, 300));
       }
       const sheet = await res.json();
       backupSpreadsheetId = sheet.spreadsheetId;
