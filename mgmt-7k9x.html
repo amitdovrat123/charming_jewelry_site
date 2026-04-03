@@ -1733,19 +1733,13 @@ Charming by Vik 💛</textarea>
                   <i data-lucide="cloud" class="w-4 h-4 text-[#d4a373]"></i>
                   גיבוי ל-Google Sheets
                 </h3>
-                <p class="text-xs text-gray-400 mt-1">לחצי על "חבר" ואז "גבה עכשיו" — הנתונים נשמרים ב-Google Sheet ב-Drive שלך</p>
+                <p class="text-xs text-gray-400 mt-1">לחצי "גבה עכשיו" — אם פג התוקף, החיבור מתחדש אוטומטית</p>
               </div>
               <div id="backup-status" class="text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-400">לא מחובר</div>
             </div>
 
-            <div id="backup-not-connected" class="mt-4">
-              <button onclick="connectGoogleDrive()" class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-2">
-                <i data-lucide="link" class="w-4 h-4"></i> חבר Google Drive
-              </button>
-              <p class="text-[10px] text-gray-400 mt-2">הגישה מוגבלת רק לקובץ הגיבוי שנוצר — אין גישה לשום קובץ אחר ב-Drive</p>
-            </div>
-
-            <div id="backup-connected" class="mt-4 space-y-3" style="display:none;">
+            <div id="backup-not-connected" style="display:none;"></div>
+            <div id="backup-connected" class="mt-4 space-y-3">
               <div class="flex flex-wrap items-center gap-3">
                 <button onclick="runBackupToSheets()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full font-bold text-sm transition-colors flex items-center gap-2">
                   <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> גבה עכשיו
@@ -9359,7 +9353,30 @@ async function getBackupData() {
 }
 
 async function runBackupToSheets() {
-  if (!backupAccessToken) { connectGoogleDrive(); return; }
+  // If no token or token might be expired, get a fresh one first
+  if (!backupAccessToken) {
+    if (typeof google === 'undefined' || !google.accounts?.oauth2) {
+      alert('Google Identity Services לא נטען. נסה לרענן את הדף.');
+      return;
+    }
+    try {
+      await new Promise((resolve, reject) => {
+        const tc = google.accounts.oauth2.initTokenClient({
+          client_id: BACKUP_CLIENT_ID,
+          scope: BACKUP_SCOPES,
+          callback: (resp) => {
+            if (resp.error) { reject(resp); return; }
+            backupAccessToken = resp.access_token;
+            localStorage.setItem('backup_token', backupAccessToken);
+            setBackupConnectedUI();
+            resolve();
+          },
+          error_callback: reject
+        });
+        tc.requestAccessToken();
+      });
+    } catch(e) { console.error('OAuth failed:', e); return; }
+  }
   const progress = document.getElementById('backup-progress');
   progress.style.display = '';
   progress.className = 'text-xs text-[#d4a373] font-semibold';
@@ -9644,11 +9661,13 @@ async function runBackupToSheets() {
     console.error('Backup error:', e);
     progress.className = 'text-xs text-red-500 font-semibold';
     progress.textContent = 'שגיאה: ' + e.message;
-    if (String(e).includes('401') || String(e).includes('Invalid')) {
+    if (String(e).includes('401') || String(e).includes('Invalid') || String(e).includes('Unauthorized')) {
       backupAccessToken = null;
       localStorage.removeItem('backup_token');
-      setBackupDisconnectedUI();
-      progress.textContent = 'הטוקן פג תוקף — לחץ "חבר Google Drive" מחדש';
+      progress.textContent = 'הטוקן פג — מתחבר מחדש...';
+      // Auto-retry with fresh token
+      setTimeout(() => runBackupToSheets(), 500);
+      return;
     }
   }
 }
