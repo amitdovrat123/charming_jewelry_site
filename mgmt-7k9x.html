@@ -2118,8 +2118,8 @@ const isLocal = location.hostname === 'localhost' || location.hostname === '127.
 // ── Admin & App Config ──────────────────────────────────────────
 const ADMIN_EMAILS   = ['amitdovrat123@gmail.com', 'viki.golkov1@gmail.com'];
 const isAdminEmail   = (email) => ADMIN_EMAILS.includes(email);
-const GEMINI_API_KEY = '';   // TODO: migrate to Netlify Function proxy — never paste a real key here
-const GEMINI_MODEL   = 'gemini-2.5-flash-preview-05-20';
+const GEMINI_API_KEY = 'AIzaSyBpqApU-rZjDQXubRL7mfnoKMFDC-J7gME';
+const GEMINI_MODEL   = 'gemini-2.0-flash';
 
 // ── Firestore Collection Paths ──────────────────────────────────
 const COL_PATH       = 'artifacts/charming-3dd6f/public/data/products';
@@ -4030,33 +4030,45 @@ document.getElementById('ai-btn').addEventListener('click', async ()=>{
   const aiBtn   = document.getElementById('ai-btn');
   const label   = document.getElementById('ai-btn-label');
   const aiErr   = document.getElementById('ai-err');
-  const textarea= document.getElementById('p-desc');
+  const textareaHe = document.getElementById('p-desc');
+  const textareaEn = document.getElementById('p-desc-en');
   if (!GEMINI_API_KEY){aiErr.textContent='מפתח Gemini API חסר.';return;}
   const name=document.getElementById('p-name').value.trim();
+  const nameEn=document.getElementById('p-name-en')?.value?.trim()||'';
   const cat =document.getElementById('p-cat').value;
   const mat =document.getElementById('p-mat').value;
   if (!name){aiErr.textContent='יש להזין שם מוצר לפני יצירת תיאור.';return;}
   aiBtn.disabled=true;label.textContent='מייצרת תיאור...';aiBtn.classList.add('ai-loading');aiErr.textContent='';
   const systemPrompt=`אתה קופירייטר מקצועי של המותג "Charming by Vik" — מותג תכשיטים יוקרתי בסגנון קיץ.
-כתוב תיאור מוצר בעברית בלבד. אסור להשתמש בשום מילה באנגלית.
+עליך לכתוב שני תיאורים — אחד בעברית ואחד באנגלית.
 הטון: אלגנטי, חם, מזמין ומקצועי — שירי אך ברור.
 אסור: ז'רגון, שפה מכירתית אגרסיבית, קלישאות זולות.
-מבנה חובה:
+מבנה חובה לכל תיאור:
 1. כותרת קליטה (שורה אחת, ללא נקודתיים)
 2. 2-3 משפטי תיאור עשירים
 3. משפט סיום אחד על עמידות
-מילות מפתח שחובה לשלב: "ניצוץ", "צ'ארמינג", "קיץ", "פלדת אל-חלד", "עמיד במים".`;
-  const userPrompt=`צרי תיאור מוצר עבור:\nשם: ${name}\nקטגוריה: ${cat||'תכשיט'}\nחומר: ${mat||'פלדת אל-חלד'}`;
+מילות מפתח בעברית: "ניצוץ", "צ'ארמינג", "קיץ", "פלדת אל-חלד", "עמיד במים".
+מילות מפתח באנגלית: "sparkle", "Charming", "summer", "stainless steel", "water-resistant".
+
+הפורמט חייב להיות בדיוק:
+---HE---
+(תיאור בעברית)
+---EN---
+(תיאור באנגלית)`;
+  const userPrompt=`צרי תיאור מוצר עבור:\nשם בעברית: ${name}\nשם באנגלית: ${nameEn||name}\nקטגוריה: ${cat||'תכשיט'}\nחומר: ${mat||'פלדת אל-חלד'}`;
   try {
     const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({system_instruction:{parts:[{text:systemPrompt}]},contents:[{parts:[{text:userPrompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:300}}),
+      body:JSON.stringify({system_instruction:{parts:[{text:systemPrompt}]},contents:[{parts:[{text:userPrompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:600}}),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data=await res.json();
     const text=data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error('תגובה ריקה');
-    textarea.value=text.trim();
+    const hePart = text.split('---EN---')[0].replace('---HE---','').trim();
+    const enPart = (text.split('---EN---')[1]||'').trim();
+    textareaHe.value = hePart;
+    if (enPart && textareaEn) textareaEn.value = enPart;
   } catch(ex){aiErr.textContent='שגיאה בחיבור ל-AI.';console.error('Gemini error:',ex);}
   finally{aiBtn.disabled=false;label.textContent='צרי תיאור ב-AI';aiBtn.classList.remove('ai-loading');}
 });
