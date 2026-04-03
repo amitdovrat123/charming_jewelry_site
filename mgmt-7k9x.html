@@ -1412,6 +1412,31 @@
         <div id="settings-page-general" class="settings-page p-6 space-y-6">
           <h2 class="font-black text-gray-800 text-lg">הגדרות</h2>
 
+        </div>
+
+        <!-- Sub-page: Banner -->
+        <div id="settings-page-banner" class="settings-page p-6 space-y-4" style="display:none;">
+          <div class="flex justify-between items-center">
+            <h2 class="font-black text-gray-800 text-lg">הודעות באנר עליון</h2>
+            <button onclick="openBannerMsgModal()"
+              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              + הודעה חדשה</button>
+          </div>
+          <p class="text-xs text-gray-400">ההודעות מוצגות בבאנר העליון באתר ומתחלפות כל 5 שניות. גררי כדי לשנות סדר.</p>
+          <div id="banner-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Sub-page: Coupons -->
+        <div id="settings-page-coupons" class="settings-page p-6 space-y-4" style="display:none;">
+          <div class="flex justify-between items-center">
+            <h2 class="font-black text-gray-800 text-lg">קופונים</h2>
+            <button onclick="openCouponModal()"
+              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              + קופון חדש
+            </button>
+          </div>
+          <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
           <!-- Birthday campaign -->
           <div class="bg-white border border-[#f0dfc0] rounded-2xl p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
@@ -1456,30 +1481,6 @@ Charming by Vik 💛</textarea>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Sub-page: Banner -->
-        <div id="settings-page-banner" class="settings-page p-6 space-y-4" style="display:none;">
-          <div class="flex justify-between items-center">
-            <h2 class="font-black text-gray-800 text-lg">הודעות באנר עליון</h2>
-            <button onclick="openBannerMsgModal()"
-              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-              + הודעה חדשה</button>
-          </div>
-          <p class="text-xs text-gray-400">ההודעות מוצגות בבאנר העליון באתר ומתחלפות כל 5 שניות. גררי כדי לשנות סדר.</p>
-          <div id="banner-list" class="space-y-3"></div>
-        </div>
-
-        <!-- Sub-page: Coupons -->
-        <div id="settings-page-coupons" class="settings-page p-6 space-y-4" style="display:none;">
-          <div class="flex justify-between items-center">
-            <h2 class="font-black text-gray-800 text-lg">קופונים</h2>
-            <button onclick="openCouponModal()"
-              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-              + קופון חדש
-            </button>
-          </div>
-          <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
         <!-- Sub-page: Workshop Gallery -->
