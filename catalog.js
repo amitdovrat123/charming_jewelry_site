@@ -970,42 +970,51 @@ function renderProfileView() {
           const itemsHtml = items.map((i, idx) => {
             const match = findCatalogProduct(i.productId, i.name);
             const matchId = match ? match.id : '';
-            // Image: from order item → from catalog → fallback
             let imgSrc = i.image || '';
             if (!imgSrc && match) imgSrc = getImages(match.data)[0] || '';
             const img = imgSrc
-              ? `<img src="${imgSrc}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:12px;border:1px solid var(--sand-dark);flex-shrink:0;" />`
-              : `<div style="width:56px;height:56px;border-radius:12px;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">💎</div>`;
+              ? `<img src="${imgSrc}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:14px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.06);" />`
+              : `<div style="width:64px;height:64px;border-radius:14px;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">💎</div>`;
             const isLast = idx === items.length - 1;
+            const qty = i.quantity || i.qty || 1;
+            const lineTotal = (i.price || 0) * qty;
             return `
               <div ${matchId ? `data-goto-product="${matchId}"` : ''}
-                style="display:flex;gap:12px;align-items:center;padding:10px 0;${isLast ? '' : 'border-bottom:1px solid var(--sand-dark);'}${matchId ? 'cursor:pointer;' : ''}"
-                ${matchId ? 'title="לחצי לצפייה במוצר"' : ''}>
+                style="display:flex;gap:14px;align-items:center;padding:14px 4px;${isLast ? '' : 'border-bottom:1px solid rgba(232,207,196,0.4);'}${matchId ? 'cursor:pointer;border-radius:12px;transition:background .2s;' : ''}">
                 ${img}
                 <div style="flex:1;min-width:0;">
-                  <p style="margin:0;font-size:0.88rem;font-weight:600;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(i.name)}</p>
-                  <p style="margin:2px 0 0;font-size:0.78rem;color:var(--muted);">${i.quantity || i.qty || 1} × ${i.price || 0} ₪</p>
-                  ${i.customizationNote ? `<p style="margin:2px 0 0;font-size:0.75rem;color:var(--pink-deep);font-style:italic;">✎ ${esc(i.customizationNote)}</p>` : ''}
+                  <p style="margin:0;font-size:0.9rem;font-weight:600;color:var(--ink);line-height:1.3;">${esc(i.name)}</p>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                    <span style="font-size:0.78rem;color:var(--muted);">כמות: ${qty}</span>
+                    <span style="font-size:0.78rem;color:var(--muted);">|</span>
+                    <span style="font-size:0.82rem;font-weight:600;color:var(--pink-deep);">${lineTotal} ₪</span>
+                  </div>
+                  ${i.customizationNote ? `<p style="margin:4px 0 0;font-size:0.75rem;color:var(--pink-deep);background:var(--pink-light);padding:3px 8px;border-radius:6px;display:inline-block;">✎ ${esc(i.customizationNote)}</p>` : ''}
                 </div>
-                ${matchId ? '<span style="font-size:1.1rem;color:var(--muted);flex-shrink:0;">‹</span>' : ''}
+                ${matchId ? '<span style="font-size:1.2rem;color:var(--sand-deep);flex-shrink:0;opacity:0.6;">‹</span>' : ''}
               </div>`;
           }).join('');
 
+          const itemCount = items.reduce((s, i) => s + (i.quantity || i.qty || 1), 0);
+
           return `
-            <div style="border:1px solid var(--sand-dark);border-radius:16px;background:var(--sand-light);overflow:hidden;">
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:linear-gradient(135deg,var(--sand-light),var(--pink-light));border-bottom:1px solid var(--sand-dark);">
-                <div>
-                  <span style="font-size:0.78rem;color:var(--muted);">${date}</span>
-                  ${orderId ? `<span style="font-size:0.72rem;color:var(--muted);margin-right:8px;">#${esc(orderId)}</span>` : ''}
+            <div style="border:1.5px solid var(--sand-dark);border-radius:20px;background:var(--sand-light);overflow:hidden;box-shadow:0 2px 12px rgba(201,149,122,0.08);">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:var(--pink-light);border-bottom:1.5px solid var(--sand-dark);">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:0.82rem;font-weight:600;color:var(--ink-soft);">${date}</span>
+                  ${orderId ? `<span style="font-size:0.72rem;color:var(--muted);background:var(--sand-light);padding:2px 8px;border-radius:6px;">#${esc(orderId)}</span>` : ''}
                 </div>
-                <span style="font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${statusColor}15;color:${statusColor};">${statusLabel}</span>
+                <span style="font-size:0.73rem;font-weight:700;padding:4px 12px;border-radius:20px;background:${statusColor}12;color:${statusColor};letter-spacing:0.3px;">${statusLabel}</span>
               </div>
-              <div style="padding:10px 18px;">
+              <div style="padding:6px 16px;">
                 ${itemsHtml}
               </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-top:1px solid var(--sand-dark);background:var(--sand-light);">
-                <span style="font-size:0.8rem;color:var(--muted);">${dlvLabel}</span>
-                <span style="font-weight:700;font-size:1rem;color:var(--ink);">${order.total || 0} ₪</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--pink-light);border-top:1.5px solid var(--sand-dark);">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <span style="font-size:0.8rem;color:var(--muted);">${dlvLabel}</span>
+                  <span style="font-size:0.72rem;color:var(--muted);background:var(--sand-light);padding:2px 8px;border-radius:6px;">${itemCount} ${itemCount === 1 ? 'פריט' : 'פריטים'}</span>
+                </div>
+                <span style="font-weight:700;font-size:1.05rem;color:var(--ink);">${order.total || 0} ₪</span>
               </div>
             </div>`;
         }).join('');
