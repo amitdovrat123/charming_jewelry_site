@@ -5466,11 +5466,10 @@ function calcTravelEstimate(baseMinutes, wsDate, wsTime) {
 // Arrival fee based on estimated travel time
 // חינם: עד 60 דק' (עם פקקים) או עד 30 דק' (ללא פקקים)
 // אחרי זה: 100₪ לכל שעה נוספת
-function calcArrivalFeeByTime(estMinutes, baseMinutes) {
-  // Free if base (no traffic) <= 30 min
+// Arrival fee for CLIENT quote — based on base travel time only (no traffic), fixed price
+function calcArrivalFee(baseMinutes) {
   if (baseMinutes <= 30) return 0;
-  // (estimated_minutes - 30) × 4₪, rounded to nearest 50₪
-  var raw = (estMinutes - 30) * 4;
+  var raw = (baseMinutes - 30) * 4;
   return Math.round(raw / 50) * 50;
 }
 
@@ -5494,27 +5493,33 @@ async function suggestArrivalFee() {
   try {
     const route = await getRouteInfo(city);
     if (route) {
-      const est = calcTravelEstimate(route.baseMinutes, wsDate, wsTime);
-      const fee = calcArrivalFeeByTime(est.estMinutes, route.baseMinutes);
+      // Fee for client quote — fixed, based on base time only (no traffic)
+      const fee = calcArrivalFee(route.baseMinutes);
       const fuel = calcFuelCost(route.km);
       document.getElementById('ws-arrival').value = fee;
       updateWsTotal();
 
-      const feeText = fee === 0 ? 'ללא תוספת הגעה' : `תוספת הגעה: ${fee}₪`;
-      const hours = Math.floor(est.estMinutes / 60);
-      const mins = est.estMinutes % 60;
-      const timeStr = hours > 0 ? `${hours} שע\' ו-${mins} דק\'` : `${mins} דק\'`;
-      const missingDate = (!wsDate || !wsTime) ? '<br>⚠ הזן תאריך ושעה לחישוב מדויק יותר' : '';
+      // Base time display
+      const bH = Math.floor(route.baseMinutes / 60), bM = route.baseMinutes % 60;
+      const baseTimeStr = bH > 0 ? `${bH} שע' ו-${bM} דק'` : `${bM} דק'`;
+
+      // Traffic estimate — internal planning info
+      const est = calcTravelEstimate(route.baseMinutes, wsDate, wsTime);
+      const eH = Math.floor(est.estMinutes / 60), eM = est.estMinutes % 60;
+      const estTimeStr = eH > 0 ? `${eH} שע' ו-${eM} דק'` : `${eM} דק'`;
+      const hasDateTime = wsDate && wsTime;
 
       const feeColor = fee === 0 ? '#16a34a' : '#d4a373';
       hintEl.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#fdf6ee;border:1px solid #f0dfc0;border-radius:12px;overflow:hidden;margin-top:8px;font-size:11px;">
         <tr style="background:#f5ece7;"><td colspan="2" style="padding:8px 12px;font-weight:800;color:#2c2a29;font-size:12px;">✓ ${city}</td></tr>
         <tr><td style="padding:5px 12px;color:#9a8e8a;">מרחק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${route.km} ק"מ</td></tr>
-        <tr><td style="padding:5px 12px;color:#9a8e8a;">זמן נסיעה משוער</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${timeStr}</td></tr>
-        <tr><td style="padding:5px 12px;color:#9a8e8a;">שעת יציאה</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${est.label}</td></tr>
+        <tr><td style="padding:5px 12px;color:#9a8e8a;">נסיעה (ללא פקקים)</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${baseTimeStr}</td></tr>
         <tr><td style="padding:5px 12px;color:#9a8e8a;">עלות דלק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">~${fuel}₪</td></tr>
-        <tr style="border-top:1px solid #f0dfc0;"><td style="padding:7px 12px;font-weight:700;color:${feeColor};">תוספת הגעה</td><td style="padding:7px 12px;font-weight:800;color:${feeColor};font-size:13px;">${fee === 0 ? 'חינם' : fee + '₪'}</td></tr>
-      </table>${missingDate ? '<p style="font-size:10px;color:#d97706;margin-top:4px;">⚠ הזן תאריך ושעה לחישוב מדויק יותר</p>' : ''}`;
+        <tr style="border-top:1px solid #f0dfc0;"><td style="padding:7px 12px;font-weight:700;color:${feeColor};">הצעה ללקוח</td><td style="padding:7px 12px;font-weight:800;color:${feeColor};font-size:13px;">${fee === 0 ? 'ללא תוספת' : fee + '₪'}</td></tr>
+        ${hasDateTime ? `<tr style="border-top:1px solid #f0dfc0;background:#f9f5f1;"><td colspan="2" style="padding:6px 12px;color:#9a8e8a;font-size:10px;font-weight:600;">🔒 תכנון פנימי</td></tr>
+        <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">נסיעה עם פקקים</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${estTimeStr}</td></tr>
+        <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">שעת יציאה</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${est.label}</td></tr>` : ''}
+      </table>${!hasDateTime ? '<p style="font-size:10px;color:#9a8e8a;margin-top:4px;">הזן תאריך ושעה לחישוב זמן נסיעה עם פקקים</p>' : ''}`;
       hintEl.className = 'mt-1';
       return;
     }
