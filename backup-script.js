@@ -121,12 +121,60 @@ function getOrCreateSheet() {
   return ss;
 }
 
+// Color definitions
+const CLR = {
+  customer: '#D6EAF8', // light blue
+  event:    '#D5F5E3', // light green
+  pricing:  '#FEF5E7', // light gold
+  payment:  '#F5EEF8', // light purple
+  status:   '#F2F3F4', // light gray
+  meta:     '#F2F3F4', // light gray
+  desc:     '#E6F0FA', // light sky
+  tag:      '#FFF3CD', // yellow
+};
+
+// Status cell colors
+const STATUS_CLR = {
+  'טיוטה':'#FFF3CD', 'מאושרת':'#D4EDDA', 'בארכיון':'#E2E3E5',
+  'ממתין לתשלום':'#FFF3CD', 'בטיפול':'#D6EAF8', 'נשלח':'#FFE8CC', 'נמסר':'#D4EDDA', 'בוטל':'#F5D5D5',
+  'חדשה':'#FFF3CD', 'טופל':'#D4EDDA',
+  'published':'#D4EDDA', 'draft':'#FFF3CD',
+};
+
+// Column color groups per sheet
+const SHEET_COLORS = {
+  'סדנאות': [
+    {s:1,e:3,c:CLR.customer}, {s:4,e:9,c:CLR.event}, {s:10,e:13,c:CLR.pricing},
+    {s:14,e:14,c:CLR.status}, {s:15,e:23,c:CLR.payment}, {s:24,e:26,c:CLR.meta}
+  ],
+  'הזמנות': [
+    {s:1,e:2,c:CLR.meta}, {s:3,e:8,c:CLR.customer}, {s:9,e:9,c:CLR.event},
+    {s:10,e:12,c:CLR.pricing}, {s:13,e:17,c:CLR.payment}, {s:18,e:18,c:CLR.status}
+  ],
+  'הוצאות': [
+    {s:1,e:1,c:CLR.meta}, {s:2,e:2,c:CLR.event}, {s:3,e:4,c:CLR.pricing}, {s:5,e:6,c:CLR.payment}
+  ],
+  'פניות': [
+    {s:1,e:1,c:CLR.meta}, {s:2,e:2,c:CLR.event}, {s:3,e:5,c:CLR.customer},
+    {s:6,e:9,c:CLR.pricing}, {s:10,e:10,c:CLR.status}
+  ],
+  'מוצרים': [
+    {s:1,e:3,c:CLR.customer}, {s:4,e:7,c:CLR.event}, {s:8,e:11,c:CLR.pricing},
+    {s:12,e:12,c:CLR.tag}, {s:13,e:13,c:CLR.status}, {s:14,e:15,c:CLR.payment},
+    {s:16,e:17,c:CLR.desc}, {s:18,e:19,c:CLR.meta}, {s:20,e:21,c:CLR.meta}
+  ],
+  'קופונים': [
+    {s:1,e:1,c:CLR.customer}, {s:2,e:3,c:CLR.pricing}, {s:4,e:5,c:CLR.event}, {s:6,e:7,c:CLR.meta}
+  ],
+};
+
 function writeSheet(ss, sheetName, headers, rows) {
   let sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
   }
   sheet.clear();
+  sheet.clearFormats();
 
   if (rows.length === 0) {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
@@ -135,10 +183,38 @@ function writeSheet(ss, sheetName, headers, rows) {
     sheet.getRange(1, 1, data.length, headers.length).setValues(data);
   }
 
-  // Bold + freeze header
-  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  // Bold + freeze + center header
+  const headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setFontWeight('bold');
+  headerRange.setHorizontalAlignment('center');
   sheet.setFrozenRows(1);
   sheet.setRightToLeft(true);
+
+  // Apply header color groups
+  const groups = SHEET_COLORS[sheetName];
+  if (groups) {
+    for (const g of groups) {
+      sheet.getRange(1, g.s, 1, g.e - g.s + 1).setBackground(g.c);
+    }
+  } else {
+    headerRange.setBackground('#FDF5ED');
+  }
+
+  // Apply status cell colors
+  const statusCol = headers.indexOf('סטטוס הזמנה') !== -1
+    ? headers.indexOf('סטטוס הזמנה') + 1
+    : headers.indexOf('סטטוס') !== -1
+      ? headers.indexOf('סטטוס') + 1
+      : -1;
+  if (statusCol > 0 && rows.length > 0) {
+    for (let r = 0; r < rows.length; r++) {
+      const val = rows[r][statusCol - 1];
+      const bg = STATUS_CLR[val];
+      if (bg) {
+        sheet.getRange(r + 2, statusCol).setBackground(bg).setFontWeight('bold');
+      }
+    }
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
