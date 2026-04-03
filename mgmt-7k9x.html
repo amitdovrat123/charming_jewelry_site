@@ -1732,6 +1732,7 @@ Charming by Vik 💛</textarea>
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i> פתח את ה-Sheet
                 </a>
               </div>
+              <button onclick="resetBackupSheet()" class="border border-gray-200 text-gray-400 hover:text-red-400 hover:border-red-200 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors">איפוס גיליון</button>
               <div id="backup-last-run" class="text-xs text-gray-400"></div>
               <div id="backup-progress" class="text-xs text-[#d4a373] font-semibold" style="display:none;"></div>
             </div>
@@ -9335,13 +9336,20 @@ async function runBackupToSheets() {
         const meta = await metaRes.json();
         const existing = (meta.sheets || []).map(s => s.properties.title);
         const toAdd = keys.filter(k => !existing.includes(data[k].name));
-        if (toAdd.length) {
-          await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + ':batchUpdate', {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requests: toAdd.map(k => ({ addSheet: { properties: { title: data[k].name, rightToLeft: true } } })) })
-          });
+        for (const k of toAdd) {
+          try {
+            await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + ':batchUpdate', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ requests: [{ addSheet: { properties: { title: data[k].name, rightToLeft: true } } }] })
+            });
+          } catch(addErr) { console.log('Add sheet skip:', data[k].name, addErr); }
         }
+      } else if (metaRes.status === 404) {
+        // Spreadsheet was deleted — create fresh
+        backupSpreadsheetId = null;
+        await setDoc(doc(db, SETTINGS_COL, 'backup'), { spreadsheetId: null }, { merge: true });
+        return runBackupToSheets();
       }
     }
 
@@ -9367,19 +9375,31 @@ async function runBackupToSheets() {
       });
     }
 
-    // Format header rows (bold + background)
-    const fmtRequests = keys.map((k, i) => ({
-      repeatCell: {
-        range: { sheetId: i, startRowIndex: 0, endRowIndex: 1 },
-        cell: { userEnteredFormat: { backgroundColor: { red: 0.99, green: 0.96, blue: 0.93 }, textFormat: { bold: true } } },
-        fields: 'userEnteredFormat(backgroundColor,textFormat)'
+    // Format header rows — get actual sheetIds first
+    try {
+      const metaFmt = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '?fields=sheets.properties(sheetId,title)', {
+        headers: { 'Authorization': 'Bearer ' + backupAccessToken }
+      });
+      if (metaFmt.ok) {
+        const metaJson = await metaFmt.json();
+        const sheetMap = {};
+        (metaJson.sheets || []).forEach(s => { sheetMap[s.properties.title] = s.properties.sheetId; });
+        const fmtRequests = keys.filter(k => sheetMap[data[k].name] !== undefined).map(k => ({
+          repeatCell: {
+            range: { sheetId: sheetMap[data[k].name], startRowIndex: 0, endRowIndex: 1 },
+            cell: { userEnteredFormat: { backgroundColor: { red: 0.99, green: 0.96, blue: 0.93 }, textFormat: { bold: true } } },
+            fields: 'userEnteredFormat(backgroundColor,textFormat)'
+          }
+        }));
+        if (fmtRequests.length) {
+          await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + ':batchUpdate', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requests: fmtRequests })
+          });
+        }
       }
-    }));
-    await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + ':batchUpdate', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: fmtRequests })
-    }).catch(() => {});
+    } catch(fmtErr) { console.log('Format headers skip:', fmtErr); }
 
     // Update UI + save to Firestore
     const link = document.getElementById('backup-sheet-link');
@@ -9407,6 +9427,15 @@ async function runBackupToSheets() {
   }
 }
 window.runBackupToSheets = runBackupToSheets;
+
+async function resetBackupSheet() {
+  if (!confirm('זה ימחק את הקישור לגיליון הנוכחי וייצור חדש בגיבוי הבא. להמשיך?')) return;
+  backupSpreadsheetId = null;
+  await setDoc(doc(db, SETTINGS_COL, 'backup'), { spreadsheetId: null }, { merge: true });
+  document.getElementById('backup-sheet-link').style.display = 'none';
+  document.getElementById('backup-last-run').textContent = 'הגיליון אופס — לחץ "גבה עכשיו" ליצירת גיליון חדש';
+}
+window.resetBackupSheet = resetBackupSheet;
 
 async function exportToExcel() {
   const progress = document.getElementById('excel-progress');
