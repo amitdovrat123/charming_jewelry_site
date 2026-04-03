@@ -28,7 +28,7 @@ function aerialDistance(lat1, lon1, lat2, lon2) {
 }
 
 async function getRouteDistance(lon, lat, retries = 1) {
-  const url = `http://router.project-osrm.org/route/v1/driving/${ORIGIN_LON},${ORIGIN_LAT};${lon},${lat}?overview=false&exclude=toll`;
+  const url = `http://router.project-osrm.org/route/v1/driving/${ORIGIN_LON},${ORIGIN_LAT};${lon},${lat}?overview=false`;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const raw = await fetchUrl(url);
