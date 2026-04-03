@@ -1645,6 +1645,11 @@ Charming by Vik 💛</textarea>
               כאן תוכלי להגדיר את סגנון הכתיבה של ה-AI כשהוא יוצר תיאורי מוצרים. ההנחיות שלך ישפיעו על הטון, המבנה והמילים שהוא ישתמש בהם.
             </div>
             <div>
+              <label class="lbl">מפתח Gemini API</label>
+              <input id="ai-api-key" type="password" class="inp" placeholder="AIzaSy..." value="" onchange="saveGeminiKey()" />
+              <p class="text-[10px] text-gray-400 mt-1">ניתן להשיג חינם מ-aistudio.google.com → Get API Key</p>
+            </div>
+            <div>
               <label class="lbl">טון כתיבה</label>
               <select id="ai-tone" class="inp" onchange="saveAiStyle()">
                 <option value="elegant">אלגנטי וחם</option>
@@ -2244,7 +2249,7 @@ const isLocal = location.hostname === 'localhost' || location.hostname === '127.
 // ── Admin & App Config ──────────────────────────────────────────
 const ADMIN_EMAILS   = ['amitdovrat123@gmail.com', 'viki.golkov1@gmail.com'];
 const isAdminEmail   = (email) => ADMIN_EMAILS.includes(email);
-const GEMINI_API_KEY = 'AIzaSyBpqApU-rZjDQXubRL7mfnoKMFDC-J7gME';
+let   GEMINI_API_KEY = localStorage.getItem('charming_gemini_key') || '';
 const GEMINI_MODEL   = 'gemini-2.5-flash-lite';
 
 // ── Firestore Collection Paths ──────────────────────────────────
@@ -4238,6 +4243,18 @@ async function testAiStyle() {
   setTimeout(() => status.textContent = '', 5000);
 }
 
+function saveGeminiKey() {
+  const key = document.getElementById('ai-api-key').value.trim();
+  localStorage.setItem('charming_gemini_key', key);
+  GEMINI_API_KEY = key;
+}
+function loadGeminiKey() {
+  const key = localStorage.getItem('charming_gemini_key') || '';
+  const el = document.getElementById('ai-api-key');
+  if (el) el.value = key;
+}
+document.addEventListener('DOMContentLoaded', loadGeminiKey);
+window.saveGeminiKey = saveGeminiKey;
 window.saveAiStyle = saveAiStyle;
 window.testAiStyle = testAiStyle;
 
