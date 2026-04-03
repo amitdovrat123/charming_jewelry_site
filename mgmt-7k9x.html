@@ -9162,7 +9162,7 @@ async function getBackupData() {
     const snap = await getDocs(query(collection(db, WORKSHOPS_COL), orderBy('eventDate','desc')));
     data.workshops = {
       name: 'סדנאות',
-      headers: ['תאריך','שעה','אירוע','שם חוגגת','איש קשר','טלפון','עיר','מסלול','משתתפות','מחיר בסיס','הנחה (%)','תוספת הגעה','סה"כ','מקדמה ששולמה','אמצעי תשלום מקדמה','תאריך מקדמה','יתרה ששולמה','אמצעי תשלום יתרה','תאריך יתרה','יתרה לתשלום','סטטוס','הערות'],
+      headers: ['תאריך','שעה','אירוע','שם חוגגת','איש קשר','טלפון','עיר','מסלול','משתתפות','מחיר בסיס','הנחה (%)','תוספת הגעה','סה"כ','מקדמה ששולמה','אמצעי תשלום מקדמה','תאריך מקדמה','יתרה ששולמה','אמצעי תשלום יתרה','תאריך יתרה','יתרה לתשלום','סטטוס','בארכיון','הערות','תאריך יצירה'],
       rows: snap.docs.map(d => {
         const w = d.data();
         const total = w.total || 0;
@@ -9177,7 +9177,8 @@ async function getBackupData() {
           w.basePrice||0, w.discount||0, w.arrivalFee||0, total,
           advAmt, pay.advanceMethod||'', bkDateShort(pay.advancePaidDate),
           balAmt, pay.balanceMethod||'', bkDateShort(pay.balancePaidDate),
-          remaining, WS_STATUS_HE[w.bookingStatus] || w.bookingStatus || '', w.notes||''
+          remaining, WS_STATUS_HE[w.bookingStatus] || w.bookingStatus || '',
+          w.archived?'כן':'לא', w.notes||'', bkDate(w.createdAt)
         ];
       })
     };
@@ -9188,21 +9189,27 @@ async function getBackupData() {
     const snap = await getDocs(query(collection(db, ORDERS_COL), orderBy('timestamp','desc')));
     data.orders = {
       name: 'הזמנות',
-      headers: ['תאריך','מס. הזמנה','שם לקוח','טלפון','אימייל','עיר','רחוב','אופן קבלה','מוצרים','כמות פריטים','סכום ביניים','משלוח','הנחה/קופון','סה"כ','סטטוס'],
+      headers: ['תאריך','מס. הזמנה','שם לקוח','טלפון','אימייל','עיר','רחוב','דירה','אופן קבלה','מוצרים','פרטי מוצרים','כמות פריטים','סכום ביניים','משלוח','קוד קופון','הנחה','סה"כ','סטטוס'],
       rows: snap.docs.map(d => {
         const o = d.data();
         const c = o.customer || {};
         const addr = c.address || {};
         const s = o.summary || {};
         const items = o.items || [];
-        const productNames = items.map(it => it.name + (it.customizationNote ? ' (' + it.customizationNote + ')' : '')).join(' | ');
+        const productNames = items.map(it => it.name || '').join(' | ');
+        const productDetails = items.map(it => {
+          let detail = (it.name||'') + ' x' + (it.qty||1) + ' (' + (it.price||0) + '₪)';
+          if (it.customizationNote) detail += ' — ' + it.customizationNote;
+          return detail;
+        }).join(' | ');
         const totalQty = items.reduce((sum, it) => sum + (it.qty || 1), 0);
+        const couponCode = o.coupon ? o.coupon.code||'' : '';
         return [
           bkDate(o.timestamp), o.orderId||d.id, c.name||'', c.phone||'', c.email||'',
-          addr.city||'', addr.street ? (addr.street + ' ' + (addr.house||'')) : '',
+          addr.city||'', addr.street ? (addr.street + ' ' + (addr.house||'')) : '', addr.apt||'',
           c.shippingMethod === 'pickup' ? 'איסוף עצמי' : 'משלוח',
-          productNames, totalQty, s.subtotal||0, s.shipping||0,
-          s.discount||0, s.total||0, ORD_STATUS_HE[o.status] || o.status || ''
+          productNames, productDetails, totalQty, s.subtotal||0, s.shipping||0,
+          couponCode, s.discount||0, s.total||0, ORD_STATUS_HE[o.status] || o.status || ''
         ];
       })
     };
@@ -9243,14 +9250,17 @@ async function getBackupData() {
     const snap = await getDocs(collection(db, COL_PATH));
     data.products = {
       name: 'מוצרים',
-      headers: ['שם','שם באנגלית','מק"ט','קטגוריה','קולקציה','חומר','צבע','מחיר מלא','מחיר מבצע','עלות','מלאי','תג','סטטוס','מותאם אישית','מוצר מובלט'],
+      headers: ['שם','שם באנגלית','מק"ט','קטגוריה','קולקציה','חומר','צבע','מחיר מלא','מחיר מבצע','עלות','מלאי','תג','סטטוס','מותאם אישית','מוצר מובלט','תיאור בעברית','תיאור באנגלית','תמונה ראשית','כל התמונות','תאריך יצירה','תאריך עדכון'],
       rows: snap.docs.map(d => {
         const p = d.data();
+        const imgs = Array.isArray(p.images) ? p.images.join(' | ') : '';
         return [
           p.name||'', p.nameEn||'', p.sku||'', p.category||'', p.collection||'',
           p.material||'', p.color||'', p.priceOriginal||p.price||0, p.priceSale||p.salePrice||'',
           p.costPrice||'', p.stockCount??p.stock??'', p.badge||'',
-          p.status||'', p.isCustomizable?'כן':'לא', p.isFeatured?'כן':'לא'
+          p.status||'', p.isCustomizable?'כן':'לא', p.isFeatured?'כן':'לא',
+          p.description||'', p.descriptionEn||'', p.imageUrl||'', imgs,
+          bkDate(p.createdAt), bkDate(p.updatedAt)
         ];
       })
     };
