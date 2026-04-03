@@ -302,14 +302,7 @@
             </button>
           </div>
         </div>
-        <a href="index.html" target="_blank"
-          class="hidden sm:inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#d4a373] border border-[#e8ddd5] hover:border-[#d4a373]/40 bg-white/80 px-3.5 py-2 rounded-full transition-all font-semibold shadow-sm">
-          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> האתר
-        </a>
-        <span id="admin-name" class="text-xs text-gray-400 hidden sm:block truncate max-w-[140px]"></span>
-        <button id="logout-btn" class="hidden sm:flex items-center gap-1.5 text-xs border border-[#e8ddd5] text-gray-400 hover:border-[#d4a373]/40 hover:text-[#d4a373] bg-white/80 px-3.5 py-2 rounded-full font-bold transition-all shadow-sm">
-          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> התנתק
-        </button>
+        <span id="admin-name" class="hidden"></span>
       </div>
     </div>
   </header>'
@@ -2463,7 +2456,7 @@ document.getElementById('admin-reset-send').addEventListener('click', async () =
   }
 });
 
-document.getElementById('logout-btn').addEventListener('click', () => {
+document.getElementById('logout-btn')?.addEventListener('click', () => {
   if (unsubProducts)  unsubProducts();
   if (unsubOrders)    unsubOrders();
   if (unsubCoupons)   unsubCoupons();
