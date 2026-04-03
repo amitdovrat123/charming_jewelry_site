@@ -9167,6 +9167,7 @@ function connectGoogleDrive() {
   const tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: BACKUP_CLIENT_ID,
     scope: BACKUP_SCOPES,
+    hint: 'amitdovrat123@gmail.com',
     callback: (resp) => {
       if (resp.error) { console.error('OAuth error:', resp); return; }
       backupAccessToken = resp.access_token;
@@ -9364,6 +9365,7 @@ async function runBackupToSheets() {
         const tc = google.accounts.oauth2.initTokenClient({
           client_id: BACKUP_CLIENT_ID,
           scope: BACKUP_SCOPES,
+          hint: 'amitdovrat123@gmail.com',
           callback: (resp) => {
             if (resp.error) { reject(resp); return; }
             backupAccessToken = resp.access_token;
