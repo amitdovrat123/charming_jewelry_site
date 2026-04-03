@@ -1767,6 +1767,7 @@ Charming by Vik 💛</textarea>
               <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">פניות</div>
               <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">מוצרים</div>
               <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">לקוחות</div>
+              <div class="bg-[#fdf6ee] rounded-xl px-3 py-2 text-gray-600 font-semibold">קופונים</div>
             </div>
             <p class="text-[10px] text-gray-400 mt-3">כל קטגוריה מקבלת גיליון נפרד עם כותרות עמודות בעברית</p>
           </div>
@@ -9136,6 +9137,22 @@ function connectGoogleDrive() {
 }
 window.connectGoogleDrive = connectGoogleDrive;
 
+// Helper: Firestore Timestamp → readable date string
+function bkDate(ts) {
+  if (!ts) return '';
+  const d = ts.seconds ? new Date(ts.seconds * 1000) : (ts.toDate ? ts.toDate() : new Date(ts));
+  return isNaN(d) ? String(ts) : d.toLocaleString('he-IL');
+}
+function bkDateShort(ts) {
+  if (!ts) return '';
+  const d = ts.seconds ? new Date(ts.seconds * 1000) : (ts.toDate ? ts.toDate() : new Date(ts));
+  return isNaN(d) ? String(ts) : d.toLocaleDateString('he-IL');
+}
+const EXP_CAT_HE = { materials:'חומרי גלם', staff:'תשלום לעובדת', fuel:'דלק / נסיעות', marketing:'שיווק ממומן', other:'אחר' };
+const WS_STATUS_HE = { draft:'טיוטה', confirmed:'מאושרת', archived:'בארכיון' };
+const ORD_STATUS_HE = { pending_payment:'ממתין לתשלום', processing:'בטיפול', shipped:'נשלח', delivered:'נמסר', cancelled:'בוטל' };
+const INQ_STATUS_HE = { new:'חדשה', handled:'טופל', archived:'בארכיון' };
+
 async function getBackupData() {
   const data = {};
 
@@ -9144,16 +9161,22 @@ async function getBackupData() {
     const snap = await getDocs(query(collection(db, WORKSHOPS_COL), orderBy('eventDate','desc')));
     data.workshops = {
       name: 'סדנאות',
-      headers: ['תאריך','שם חוגגת','איש קשר','טלפון','עיר','מסלול','משתתפות','מחיר בסיס','הנחה','תוספת הגעה','סה"כ','מקדמה ששולמה','יתרה','סטטוס','הערות'],
+      headers: ['תאריך','שעה','אירוע','שם חוגגת','איש קשר','טלפון','עיר','מסלול','משתתפות','מחיר בסיס','הנחה (%)','תוספת הגעה','סה"כ','מקדמה ששולמה','אמצעי תשלום מקדמה','תאריך מקדמה','יתרה ששולמה','אמצעי תשלום יתרה','תאריך יתרה','יתרה לתשלום','סטטוס','הערות'],
       rows: snap.docs.map(d => {
         const w = d.data();
-        const total = w.totalPrice || 0;
-        const advance = w.advancePayment || w.paidAdvance || 0;
+        const total = w.total || 0;
+        const pay = w.payment || {};
+        const advAmt = pay.advanceAmount || 0;
+        const balAmt = pay.balanceAmount || 0;
+        const remaining = Math.max(0, total - advAmt - balAmt);
         return [
-          w.eventDate||'', w.celebrantName||'', w.contactName||'', w.phone||'',
-          w.city||'', w.route||w.packageName||'', w.participants||'',
-          w.basePrice||0, w.discount||0, w.arrivalFee||0, total, advance,
-          Math.max(0, total - advance), w.status||'', w.notes||''
+          bkDateShort(w.eventDate), w.time||'', w.occasion||'',
+          w.celebrant||'', w.customerName||'', w.phone||'',
+          w.city||'', w.route||'', w.participantCount||'',
+          w.basePrice||0, w.discount||0, w.arrivalFee||0, total,
+          advAmt, pay.advanceMethod||'', bkDateShort(pay.advancePaidDate),
+          balAmt, pay.balanceMethod||'', bkDateShort(pay.balancePaidDate),
+          remaining, WS_STATUS_HE[w.bookingStatus] || w.bookingStatus || '', w.notes||''
         ];
       })
     };
@@ -9164,12 +9187,22 @@ async function getBackupData() {
     const snap = await getDocs(query(collection(db, ORDERS_COL), orderBy('timestamp','desc')));
     data.orders = {
       name: 'הזמנות',
-      headers: ['תאריך','מוצר','שם לקוח','טלפון','אימייל','צבע','תליון','אופן קבלה','סה"כ','סטטוס'],
+      headers: ['תאריך','מס. הזמנה','שם לקוח','טלפון','אימייל','עיר','רחוב','אופן קבלה','מוצרים','כמות פריטים','סכום ביניים','משלוח','הנחה/קופון','סה"כ','סטטוס'],
       rows: snap.docs.map(d => {
         const o = d.data();
-        const ts = o.timestamp?.toDate ? o.timestamp.toDate().toLocaleString('he-IL') : (o.timestamp||'');
-        return [ts, o.product||'', o.customerName||o.name||'', o.phone||'', o.email||'',
-          o.color||'', o.charm||'', o.delivery||'', o.total||o.totalPrice||0, o.status||''];
+        const c = o.customer || {};
+        const addr = c.address || {};
+        const s = o.summary || {};
+        const items = o.items || [];
+        const productNames = items.map(it => it.name + (it.customizationNote ? ' (' + it.customizationNote + ')' : '')).join(' | ');
+        const totalQty = items.reduce((sum, it) => sum + (it.qty || 1), 0);
+        return [
+          bkDate(o.timestamp), o.orderId||d.id, c.name||'', c.phone||'', c.email||'',
+          addr.city||'', addr.street ? (addr.street + ' ' + (addr.house||'')) : '',
+          c.shippingMethod === 'pickup' ? 'איסוף עצמי' : 'משלוח',
+          productNames, totalQty, s.subtotal||0, s.shipping||0,
+          s.discount||0, s.total||0, ORD_STATUS_HE[o.status] || o.status || ''
+        ];
       })
     };
   } catch(e) { console.log('Backup orders err:', e); }
@@ -9179,10 +9212,10 @@ async function getBackupData() {
     const snap = await getDocs(query(collection(db, EXPENSES_COL), orderBy('date','desc')));
     data.expenses = {
       name: 'הוצאות',
-      headers: ['תאריך','קטגוריה','תיאור','סכום','סדנא קשורה'],
+      headers: ['תאריך','קטגוריה','תיאור','סכום','אמצעי תשלום','סדנא קשורה'],
       rows: snap.docs.map(d => {
         const e = d.data();
-        return [e.date||'', e.category||'', e.description||'', e.amount||0, e.workshopName||''];
+        return [e.date||'', EXP_CAT_HE[e.category]||e.category||'', e.notes||'', e.amount||0, e.method||'', e.workshopName||''];
       })
     };
   } catch(e) { console.log('Backup expenses err:', e); }
@@ -9192,11 +9225,14 @@ async function getBackupData() {
     const snap = await getDocs(query(collection(db, INQUIRIES_COL), orderBy('createdAt','desc')));
     data.inquiries = {
       name: 'פניות',
-      headers: ['תאריך','שם','טלפון','אימייל','הודעה','סטטוס'],
+      headers: ['תאריך','סוג פנייה','שם','טלפון','אימייל','הודעה','סוג סדנא','משתתפות','תאריך מבוקש','סטטוס'],
       rows: snap.docs.map(d => {
         const i = d.data();
-        const ts = i.createdAt?.toDate ? i.createdAt.toDate().toLocaleString('he-IL') : '';
-        return [ts, i.name||'', i.phone||'', i.email||'', i.message||'', i.status||''];
+        return [
+          bkDate(i.createdAt), i.inquiryType||'', i.name||'', i.phone||'', i.email||'',
+          i.message||i.notes||'', i.workshopType||'', i.participants||'', i.date||'',
+          INQ_STATUS_HE[i.status] || i.status || ''
+        ];
       })
     };
   } catch(e) { console.log('Backup inquiries err:', e); }
@@ -9206,10 +9242,15 @@ async function getBackupData() {
     const snap = await getDocs(collection(db, COL_PATH));
     data.products = {
       name: 'מוצרים',
-      headers: ['שם','מחיר','קטגוריה','מלאי','פעיל'],
+      headers: ['שם','שם באנגלית','מק"ט','קטגוריה','קולקציה','חומר','צבע','מחיר מלא','מחיר מבצע','עלות','מלאי','תג','סטטוס','מותאם אישית','מוצר מובלט'],
       rows: snap.docs.map(d => {
         const p = d.data();
-        return [p.name||'', p.price||0, p.category||'', p.stock??'', p.active!==false?'כן':'לא'];
+        return [
+          p.name||'', p.nameEn||'', p.sku||'', p.category||'', p.collection||'',
+          p.material||'', p.color||'', p.priceOriginal||p.price||0, p.priceSale||p.salePrice||'',
+          p.costPrice||'', p.stockCount??p.stock??'', p.badge||'',
+          p.status||'', p.isCustomizable?'כן':'לא', p.isFeatured?'כן':'לא'
+        ];
       })
     };
   } catch(e) { console.log('Backup products err:', e); }
@@ -9222,10 +9263,30 @@ async function getBackupData() {
       headers: ['שם','אימייל','טלפון','יום הולדת','עיר','הערות'],
       rows: snap.docs.map(d => {
         const c = d.data();
-        return [c.name||c.displayName||'', c.email||'', c.phone||'', c.birthday||'', c.city||'', c.notes||''];
+        return [
+          c.displayName||c.fullName||c.name||'', c.email||'', c.phone||'',
+          bkDateShort(c.birthDate)||c.birthday||'', c.city||'', c.notes||''
+        ];
       })
     };
   } catch(e) { console.log('Backup customers err:', e); }
+
+  // Coupons
+  try {
+    const snap = await getDocs(query(collection(db, COUPONS_COL), orderBy('createdAt','desc')));
+    data.coupons = {
+      name: 'קופונים',
+      headers: ['קוד','סוג','ערך','מגבלת שימוש','שימושים','תוקף','נוצר'],
+      rows: snap.docs.map(d => {
+        const cp = d.data();
+        return [
+          cp.code||'', cp.type==='percent'?'אחוז':'סכום קבוע', cp.value||0,
+          cp.usageLimit||'ללא הגבלה', cp.usedCount||0,
+          bkDateShort(cp.expiryDate), bkDate(cp.createdAt)
+        ];
+      })
+    };
+  } catch(e) { console.log('Backup coupons err:', e); }
 
   return data;
 }
