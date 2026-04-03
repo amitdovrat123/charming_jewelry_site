@@ -5467,12 +5467,11 @@ function calcTravelEstimate(baseMinutes, wsDate, wsTime) {
 // חינם: עד 60 דק' (עם פקקים) או עד 30 דק' (ללא פקקים)
 // אחרי זה: 100₪ לכל שעה נוספת
 function calcArrivalFeeByTime(estMinutes, baseMinutes) {
-  // Free if base (no traffic) <= 30 min OR estimated (with traffic) <= 60 min
-  if (baseMinutes <= 30 || estMinutes <= 60) return 0;
-  // Extra time beyond free hour, in 30-min steps of 50₪
-  var extraMinutes = estMinutes - 60;
-  var steps = Math.ceil(extraMinutes / 30);
-  return steps * 50;
+  // Free if base (no traffic) <= 30 min
+  if (baseMinutes <= 30) return 0;
+  // (estimated_minutes - 30) × 4₪, rounded to nearest 50₪
+  var raw = (estMinutes - 30) * 4;
+  return Math.round(raw / 50) * 50;
 }
 
 // Sync fallback for non-async contexts (card display etc.)
