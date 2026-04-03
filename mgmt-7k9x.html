@@ -9157,12 +9157,21 @@ const INQ_STATUS_HE = { new:'חדשה', handled:'טופל', archived:'בארכי
 async function getBackupData() {
   const data = {};
 
-  // Workshops
+  // Workshops — סדר זהה לטופס בפאנל הניהול
   try {
     const snap = await getDocs(query(collection(db, WORKSHOPS_COL), orderBy('eventDate','desc')));
+    const PAY_METHOD_HE = { paybox:'PayBox', bit:'Bit', cash:'מזומן', transfer:'העברה בנקאית' };
     data.workshops = {
       name: 'סדנאות',
-      headers: ['תאריך','שעה','אירוע','שם חוגגת','איש קשר','טלפון','עיר','מסלול','משתתפות','מחיר בסיס','הנחה (%)','תוספת הגעה','סה"כ','מקדמה ששולמה','אמצעי תשלום מקדמה','תאריך מקדמה','יתרה ששולמה','אמצעי תשלום יתרה','תאריך יתרה','יתרה לתשלום','סטטוס','בארכיון','הערות','תאריך יצירה'],
+      headers: [
+        'שם מלא איש קשר','טלפון','שם החוגג/ת','לכבוד מה האירוע',
+        'עיר','תאריך אירוע','שעת התחלה','מספר משתתפות','מסלול',
+        'מחיר בסיס (₪)','הנחה (%)','עלות הגעה (₪)','סה"כ לתשלום (₪)',
+        'סטטוס הזמנה',
+        'מקדמה שולמה','סכום מקדמה (₪)','אמצעי תשלום מקדמה','תאריך תשלום מקדמה',
+        'יתרה שולמה','סכום יתרה (₪)','אמצעי תשלום יתרה','תאריך תשלום יתרה',
+        'נותר לתשלום (₪)','בארכיון','הערות','תאריך יצירת הזמנה'
+      ],
       rows: snap.docs.map(d => {
         const w = d.data();
         const total = w.total || 0;
@@ -9171,14 +9180,13 @@ async function getBackupData() {
         const balAmt = pay.balanceAmount || 0;
         const remaining = Math.max(0, total - advAmt - balAmt);
         return [
-          bkDateShort(w.eventDate), w.time||'', w.occasion||'',
-          w.celebrant||'', w.customerName||'', w.phone||'',
-          w.city||'', w.route||'', w.participantCount||'',
+          w.customerName||'', w.phone||'', w.celebrant||'', w.occasion||'',
+          w.city||'', bkDateShort(w.eventDate), w.time||'', w.participantCount||'', w.route||'',
           w.basePrice||0, w.discount||0, w.arrivalFee||0, total,
-          advAmt, pay.advanceMethod||'', bkDateShort(pay.advancePaidDate),
-          balAmt, pay.balanceMethod||'', bkDateShort(pay.balancePaidDate),
-          remaining, WS_STATUS_HE[w.bookingStatus] || w.bookingStatus || '',
-          w.archived?'כן':'לא', w.notes||'', bkDate(w.createdAt)
+          WS_STATUS_HE[w.bookingStatus] || w.bookingStatus || '',
+          pay.advancePaid?'כן':'לא', advAmt, PAY_METHOD_HE[pay.advanceMethod]||pay.advanceMethod||'', bkDateShort(pay.advancePaidDate),
+          pay.balancePaid?'כן':'לא', balAmt, PAY_METHOD_HE[pay.balanceMethod]||pay.balanceMethod||'', bkDateShort(pay.balancePaidDate),
+          remaining, w.archived?'כן':'לא', w.notes||'', bkDate(w.createdAt)
         ];
       })
     };
