@@ -192,9 +192,12 @@ function writeSheet(ss, sheetName, headers, rows) {
 
   // Apply header color groups
   const groups = SHEET_COLORS[sheetName];
-  if (groups) {
+  if (groups && groups.length > 0) {
+    headerRange.setBackground('#FFFFFF'); // reset to white first
     for (const g of groups) {
-      sheet.getRange(1, g.s, 1, g.e - g.s + 1).setBackground(g.c);
+      if (g.s >= 1 && g.e >= g.s && g.e <= headers.length) {
+        sheet.getRange(1, g.s, 1, g.e - g.s + 1).setBackground(g.c);
+      }
     }
   } else {
     headerRange.setBackground('#FDF5ED');
