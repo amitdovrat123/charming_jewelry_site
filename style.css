@@ -4708,12 +4708,34 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
 }
 
 @media (max-width: 375px) {
+  :root { --section-pad: 40px; }
+
   .categories-grid { gap: 10px; grid-template-columns: 1fr; }
   .category-card-label { font-size: 0.85rem; padding: 12px 14px; }
-  .hero-logo-img { width: 150px; height: 150px; }
   .shop-grid { grid-template-columns: 1fr; }
   .testimonial-card { width: 260px; }
-  .collage-grid { gap: 5px; }
+  .collage-grid { gap: 6px; grid-template-columns: repeat(2, 1fr); }
+  .collage-item--wide { grid-column: span 1; }
+
+  /* Hero */
+  .hero { padding: 100px 20px 60px; }
+  .hero-logo-img { width: 120px; height: 120px; }
+  .hero-title { font-size: clamp(2rem, 8vw, 2.8rem); }
+
+  /* Shop cards — readability + touch targets */
+  .shop-card-body { padding: 12px 14px 16px; gap: 8px; }
+  .shop-card-title { font-size: 0.9rem; }
+  .shop-card-desc { font-size: 0.8rem; }
+  .option-label { font-size: 0.78rem; }
+  .radio-pill span { padding: 6px 13px; font-size: 0.82rem; }
+  .shop-shipping-bar { padding: 14px 16px; gap: 12px; }
+
+  /* Journey steps */
+  .journey-step-img { height: 200px; }
+  .step-image { height: 200px; }
+
+  /* Checkout */
+  .co-delivery-selector { grid-template-columns: 1fr; }
 }
 
 
