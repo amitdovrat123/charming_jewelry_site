@@ -1,0 +1,20 @@
+{
+  "name": "Charming by Vik — ניהול",
+  "short_name": "Charming",
+  "start_url": "/mgmt-7k9x.html",
+  "display": "standalone",
+  "background_color": "#fdf8f5",
+  "theme_color": "#fdf8f5",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/dhri2dbek/image/upload/c_thumb,g_center,z_15.0,w_192,h_192,f_png,q_auto/v1773325210/simbole_xzkmjs.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://res.cloudinary.com/dhri2dbek/image/upload/c_thumb,g_center,z_15.0,w_512,h_512,f_png,q_auto/v1773325210/simbole_xzkmjs.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
