@@ -5275,10 +5275,15 @@ async function saveWorkshop() {
     showToast('הסדנה נשמרה בהצלחה');
     // Auto-sync to Google Calendar
     const calWsData = { ...data, id: editWorkshopId, calendarEventId: prevWs?.calendarEventId || null };
+    console.log('[CAL] status:', data.bookingStatus, 'editId:', editWorkshopId, 'eventId:', calWsData.calendarEventId);
     if (data.bookingStatus === 'confirmed' && editWorkshopId) {
+      console.log('[CAL] calling syncCalendarEvent');
       syncCalendarEvent(editWorkshopId, calWsData);
     } else if (data.bookingStatus === 'draft' && editWorkshopId && prevWs?.calendarEventId) {
+      console.log('[CAL] calling deleteCalendarEvent');
       deleteCalendarEvent(editWorkshopId);
+    } else {
+      console.log('[CAL] no calendar action taken');
     }
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
 }
@@ -9292,10 +9297,12 @@ function buildCalendarEvent(w) {
 }
 
 async function syncCalendarEvent(workshopId, wsData) {
+  console.log('[CAL] syncCalendarEvent start, id:', workshopId);
   const w = wsData || allWorkshops.find(x => x.id === workshopId);
-  if (!w) return;
+  if (!w) { console.log('[CAL] no workshop found'); return; }
   const event = buildCalendarEvent(w);
-  if (!event) return;
+  if (!event) { console.log('[CAL] buildCalendarEvent returned null, eventDate:', w.eventDate); return; }
+  console.log('[CAL] event built:', event.summary);
   const token = await ensureCalendarToken();
   if (!token) { console.warn('Calendar: no token'); return; }
   const headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
