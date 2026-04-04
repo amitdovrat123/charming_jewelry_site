@@ -866,7 +866,20 @@
       <!-- ─── TAB: WORKSHOPS ─── -->
       <section id="tab-workshops" data-erp-tab class="p-6 space-y-6">
         <div class="flex flex-wrap justify-between items-center gap-3">
-          <h2 class="font-black text-gray-800 text-lg">ניהול סדנאות</h2>
+          <div class="flex items-center gap-2">
+            <h2 class="font-black text-gray-800 text-lg">ניהול סדנאות</h2>
+            <div class="relative">
+              <button id="ws-filter-btn" onclick="document.getElementById('ws-filter-dropdown').style.display=document.getElementById('ws-filter-dropdown').style.display==='none'?'':'none'" class="w-8 h-8 flex items-center justify-center rounded-full border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] transition-colors" title="סינון סטטוסים"><i data-lucide="filter" class="w-4 h-4"></i></button>
+              <div id="ws-filter-dropdown" style="display:none" class="absolute right-0 top-full mt-1 bg-white border border-[#f0dfc0] rounded-xl shadow-lg z-30 p-3 space-y-2 min-w-[180px]">
+                <p class="text-[10px] font-bold text-gray-400 mb-1">הצג סטטוסים:</p>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked data-ws-filter="leads" onchange="saveWsFilters()"><span class="text-xs text-gray-700">לידים חדשים</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked data-ws-filter="draft" onchange="saveWsFilters()"><span class="text-xs text-gray-700">טיוטה</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked data-ws-filter="confirmed" onchange="saveWsFilters()"><span class="text-xs text-gray-700">סדנה אושרה</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked data-ws-filter="pending" onchange="saveWsFilters()"><span class="text-xs text-gray-700">ממתינה לתשלום</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked data-ws-filter="archive" onchange="saveWsFilters()"><span class="text-xs text-gray-700">ארכיון</span></label>
+              </div>
+            </div>
+          </div>
           <div class="flex items-center gap-2">
             <!-- View toggle -->
             <div class="flex items-center bg-gray-100 rounded-full p-0.5">
@@ -6484,6 +6497,43 @@ async function executeWscPay(type, wsId) {
 }
 window.executeWscPay = executeWscPay;
 
+// ── CRM Filters ─────────────────────────────────────────────────
+function getWsFilters() {
+  try { return JSON.parse(localStorage.getItem('charming_ws_filters')) || {}; } catch { return {}; }
+}
+function saveWsFilters() {
+  const filters = {};
+  document.querySelectorAll('[data-ws-filter]').forEach(cb => { filters[cb.dataset.wsFilter] = cb.checked; });
+  localStorage.setItem('charming_ws_filters', JSON.stringify(filters));
+  applyWsFilters();
+  if (wsCurrentView === 'crm') renderCrmBoard();
+}
+function loadWsFilters() {
+  const f = getWsFilters();
+  document.querySelectorAll('[data-ws-filter]').forEach(cb => {
+    if (f[cb.dataset.wsFilter] !== undefined) cb.checked = f[cb.dataset.wsFilter];
+  });
+}
+function applyWsFilters() {
+  const f = getWsFilters();
+  const show = (id, key) => { const el = document.getElementById(id); if (el) el.closest('.bg-purple-50,.bg-pink-50,.bg-emerald-50,.bg-red-50')?.style && (el.closest('[class*="rounded-2xl"]').style.display = f[key] === false ? 'none' : ''); };
+  // CRM columns
+  ['leads','draft','confirmed','pending'].forEach(key => {
+    const col = document.getElementById('crm-col-' + key);
+    if (col?.parentElement) col.parentElement.style.display = f[key] === false ? 'none' : '';
+  });
+  // Archive section
+  const archSec = document.getElementById('ws-section-archive');
+  if (archSec && f.archive === false) archSec.style.display = 'none';
+}
+window.saveWsFilters = saveWsFilters;
+document.addEventListener('DOMContentLoaded', loadWsFilters);
+document.addEventListener('click', e => {
+  const dd = document.getElementById('ws-filter-dropdown');
+  const btn = document.getElementById('ws-filter-btn');
+  if (dd && dd.style.display !== 'none' && !dd.contains(e.target) && e.target !== btn && !btn.contains(e.target)) dd.style.display = 'none';
+});
+
 // ── CRM Kanban View ─────────────────────────────────────────────
 let wsCurrentView = 'list';
 function switchWsView(view) {
@@ -6491,6 +6541,8 @@ function switchWsView(view) {
   sessionStorage.setItem('charming_ws_view', view);
   document.getElementById('ws-list-view').style.display = view === 'list' ? '' : 'none';
   document.getElementById('ws-crm-view').style.display = view === 'crm' ? '' : 'none';
+  const filterBtn = document.getElementById('ws-filter-btn');
+  if (filterBtn) filterBtn.parentElement.style.display = view === 'crm' ? '' : 'none';
   document.getElementById('ws-view-list').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
     (view === 'list' ? 'bg-white text-[#d4a373] shadow-sm' : 'text-gray-400');
   document.getElementById('ws-view-crm').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
@@ -6617,6 +6669,7 @@ function renderCrmBoard() {
   fillCol('crm-col-draft', drafts, w => crmCard(w));
   fillCol('crm-col-confirmed', confirmed, w => crmCard(w));
   fillCol('crm-col-pending', pending, w => crmCard(w));
+  applyWsFilters();
 }
 window.renderCrmBoard = renderCrmBoard;
 function toggleCrmCol(id, header) {
