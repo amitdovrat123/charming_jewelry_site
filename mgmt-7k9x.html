@@ -3265,9 +3265,6 @@ function initERP(user) {
   // Load AI style settings from Firestore (after auth)
   loadAiStyleFromCloud();
 
-  // One-time cleanup of duplicate auto-expenses
-  cleanupDuplicateExpenses().catch(()=>{});
-
   // Start notifications
   initNotifications();
 
@@ -6920,6 +6917,7 @@ function renderExpensesList() {
     </div>`;
   }).join('');
 
+  if (typeof lucide !== 'undefined') lucide.createIcons();
   updateExpenseKPIs();
 }
 
