@@ -5458,25 +5458,12 @@ async function _saveWorkshop() {
       const wasAdvancePaid = prevWs?.payment?.advancePaid;
       await updateDoc(doc(db, WORKSHOPS_COL, editWorkshopId), data);
       logAction(`סדנה "${name}" עודכנה`);
-      // Auto-create materials expense if advance just got marked as paid
-      if (advancePaid && !wasAdvancePaid) {
-        await addDoc(collection(db, EXPENSES_COL), {
-          date: new Date().toISOString().split('T')[0], category: 'materials', amount: 400, method: 'cash',
-          workshopId: editWorkshopId, workshopName: celebrant || name, notes: 'סחורה לסדנא — אוטומטי', createdAt: serverTimestamp(),
-        });
-        logAction(`הוצאת סחורה 400₪ — "${celebrant || name}" (אוטומטי)`);
-      }
+      // Auto-expenses are created after workshop date passes (not on payment)
     } else {
       const ref = await addDoc(collection(db, WORKSHOPS_COL), data);
       editWorkshopId = ref.id; // Switch to edit mode immediately
       logAction(`סדנה חדשה "${celebrant}" — ${count} משתתפות`);
-      if (advancePaid) {
-        await addDoc(collection(db, EXPENSES_COL), {
-          date: new Date().toISOString().split('T')[0], category: 'materials', amount: 400, method: 'cash',
-          workshopId: ref.id, workshopName: celebrant || name, notes: 'סחורה לסדנא — אוטומטי', createdAt: serverTimestamp(),
-        });
-        logAction(`הוצאת סחורה 400₪ — "${celebrant || name}" (אוטומטי)`);
-      }
+      // Auto-expenses are created after workshop date passes (not on payment)
     }
     showToast('הסדנה נשמרה בהצלחה');
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
@@ -6846,11 +6833,16 @@ function renderExpensesList() {
 
   list.innerHTML = filtered.map(e => {
     const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
+    const method = EXPENSE_METHODS[e.method] || e.method || '';
     const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
     return `<div class="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="if(!event.target.closest('button'))openExpenseCard('${e.id}')">
       <span class="text-xs text-gray-500 w-14 flex-shrink-0">${dateStr}</span>
-      <span class="text-xs text-gray-600 flex-1 truncate">${cat.label}${e.notes ? ' · '+esc(e.notes) : (e.workshopName ? ' · '+esc(e.workshopName) : '')}</span>
-      <span class="text-xs font-semibold text-red-500 flex-shrink-0">${(e.amount||0).toLocaleString('he-IL')} ₪</span>
+      <span class="text-xs ${cat.color} w-5 flex-shrink-0">${cat.icon}</span>
+      <span class="text-xs font-semibold text-gray-700 w-24 flex-shrink-0 truncate">${cat.label}</span>
+      <span class="text-xs text-gray-500 flex-1 truncate">${e.notes ? esc(e.notes) : (e.workshopName ? esc(e.workshopName) : '—')}</span>
+      <span class="text-[10px] text-gray-400 w-14 flex-shrink-0 hidden sm:block text-center">${method}</span>
+      <span class="text-[10px] text-gray-400 w-24 flex-shrink-0 hidden lg:block truncate text-center">${e.workshopName ? esc(e.workshopName) : ''}</span>
+      <span class="text-xs font-bold text-red-500 w-16 flex-shrink-0 text-left">${(e.amount||0).toLocaleString('he-IL')} ₪</span>
       <div class="flex gap-1 flex-shrink-0">
         <button onclick="openExpenseForm('${e.id}')" class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-[#d4a373] hover:bg-[#fdf6ee] transition-all" title="עריכה"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
         <button onclick="confirmDeleteExpense('${e.id}')" class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all" title="מחיקה"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
