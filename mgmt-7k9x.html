@@ -3426,16 +3426,21 @@ function renderWsDashboard() {
   if (el('wsd-weekly-glow')) { el('wsd-weekly-glow').style.opacity = wReached ? '1' : '0'; if (wReached) el('wsd-weekly-glow').style.background = 'radial-gradient(circle,rgba(5,150,105,.25) 0%,transparent 70%)'; }
   if (el('wsd-weekly-sparkles')) el('wsd-weekly-sparkles').style.opacity = wReached ? '1' : '0';
 
-  // ── Monthly Goal (linear meter) ──
+  // ── Monthly Goal — by createdAt (deals closed this month) ──
   const mGoal = parseInt(el('wsd-monthly-goal')?.value) || 10;
-  const mPct = Math.min(100, Math.round((monthConfirmed.length / mGoal) * 100));
-  const mReached = monthConfirmed.length >= mGoal;
+  const monthStart = new Date(curY, curM, 1);
+  const monthClosedCount = confirmed.filter(w => {
+    const created = w.createdAt?.seconds ? new Date(w.createdAt.seconds * 1000) : null;
+    return created && created >= monthStart;
+  }).length;
+  const mPct = Math.min(100, Math.round((monthClosedCount / mGoal) * 100));
+  const mReached = monthClosedCount >= mGoal;
   if (el('wsd-goal-monthly-ring')) {
     el('wsd-goal-monthly-ring').style.strokeDashoffset = circumference - (circumference * mPct / 100);
     el('wsd-goal-monthly-ring').setAttribute('stroke', mReached ? 'url(#mgrad-done)' : 'url(#mgrad)');
   }
   if (el('wsd-goal-monthly-pct')) el('wsd-goal-monthly-pct').textContent = mPct + '%';
-  if (el('wsd-goal-monthly-label')) el('wsd-goal-monthly-label').textContent = monthConfirmed.length + '/' + mGoal;
+  if (el('wsd-goal-monthly-label')) el('wsd-goal-monthly-label').textContent = monthClosedCount + '/' + mGoal;
   if (el('wsd-goal-monthly-status')) {
     if (mReached) el('wsd-goal-monthly-status').innerHTML = '<span class="text-emerald-600 font-bold">עמדת ביעד!</span>';
     else if (mPct >= 50) el('wsd-goal-monthly-status').innerHTML = '<span class="text-[#a8705a] font-semibold">כמעט שם, קדימה!</span>';
@@ -3606,12 +3611,12 @@ function renderWsDashboard() {
   if (funnelEl) {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    // New leads this month: drafts + confirmed created this month
+    // New leads this month: all workshops created this month
     const newLeads = allWorkshops.filter(w => {
-      const created = w.createdAt?.seconds ? new Date(w.createdAt.seconds * 1000) : (w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null);
+      const created = w.createdAt?.seconds ? new Date(w.createdAt.seconds * 1000) : null;
       return created && created >= monthStart;
     });
-    const closed = newLeads.filter(w => w.bookingStatus === 'confirmed' || w.payment?.advancePaid);
+    const closed = newLeads.filter(w => w.bookingStatus === 'confirmed');
     const total = newLeads.length;
     const closedCount = closed.length;
     const rate = total > 0 ? Math.round((closedCount / total) * 100) : 0;
