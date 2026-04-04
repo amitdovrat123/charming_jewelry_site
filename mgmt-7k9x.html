@@ -542,6 +542,12 @@
               <div id="wsd-confetti" class="relative pointer-events-none" style="height:0;overflow:visible;"></div>
             </div>
 
+            <!-- Funnel (mobile only) -->
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm lg:hidden">
+              <h3 class="font-bold text-[10px] text-gray-800 mb-2 flex items-center gap-1.5"><i data-lucide="refresh-cw" class="w-3 h-3 text-[#d4a373]"></i> המרת לידים</h3>
+              <div id="wsd-funnel-mobile"></div>
+            </div>
+
             <!-- Cash Flow Summary (Dashboard) -->
             <div class="bg-white border border-[#f0dfc0] rounded-xl shadow-sm overflow-hidden">
               <div class="px-4 py-2 border-b border-[#f0dfc0] bg-[#fdf6ee]">
@@ -6722,7 +6728,12 @@ function openExpenseForm(id) {
     document.getElementById('exp-category').value = e.category || '';
     document.getElementById('exp-amount').value = e.amount || '';
     document.getElementById('exp-method').value = e.method || 'cash';
-    document.getElementById('exp-workshop').value = e.workshopId || '';
+    const wsSel = document.getElementById('exp-workshop');
+    wsSel.value = e.workshopId || '';
+    if (!wsSel.value && e.workshopName) {
+      const match = allWorkshops.find(w => (w.celebrant || w.customerName) === e.workshopName);
+      if (match) wsSel.value = match.id;
+    }
     document.getElementById('exp-notes').value = e.notes || '';
     if (e.category === 'staff') {
       document.getElementById('exp-staff-amount').style.display = '';
