@@ -1702,7 +1702,10 @@ Charming by Vik 💛</textarea>
               <label class="lbl">הנחיות מותאמות אישית (חופשי)</label>
               <textarea id="ai-custom-prompt" rows="5" class="inp resize-none" placeholder="כתבי כאן הנחיות נוספות, לדוגמה:&#10;- תמיד תסיימי עם משפט על עמידות&#10;- אל תשתמשי במילה 'מושלם'&#10;- תוסיפי אימוג'י בסוף" onchange="saveAiStyle()"></textarea>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+              <button onclick="saveAiStyleToCloud()" class="bg-[#d4a373] text-white hover:bg-[#b8875d] px-5 py-2.5 rounded-full font-bold text-sm transition-colors">
+                💾 שמרי הגדרות לכל המנהלים
+              </button>
               <button onclick="testAiStyle()" class="border border-[#d4a373] text-[#d4a373] hover:bg-[#fdf6ee] px-5 py-2.5 rounded-full font-bold text-sm transition-colors">
                 🧪 בדקי סגנון (מוצר לדוגמה)
               </button>
@@ -4207,27 +4210,56 @@ const AI_STYLE_KEY = 'charming_ai_style';
 function getAiStyle() {
   try { return JSON.parse(localStorage.getItem(AI_STYLE_KEY)) || {}; } catch { return {}; }
 }
-function saveAiStyle() {
-  const style = {
+function collectAiStyleFromForm() {
+  return {
     tone: document.getElementById('ai-tone').value,
     keywords: document.getElementById('ai-keywords').value,
     keywordsEn: document.getElementById('ai-keywords-en').value,
     length: document.getElementById('ai-length').value,
     custom: document.getElementById('ai-custom-prompt').value,
   };
-  localStorage.setItem(AI_STYLE_KEY, JSON.stringify(style));
-  const st = document.getElementById('ai-style-status');
-  st.textContent = '✓ נשמר'; setTimeout(() => st.textContent = '', 2000);
 }
-function loadAiStyle() {
-  const s = getAiStyle();
+function saveAiStyle() {
+  localStorage.setItem(AI_STYLE_KEY, JSON.stringify(collectAiStyleFromForm()));
+}
+async function saveAiStyleToCloud() {
+  const st = document.getElementById('ai-style-status');
+  const style = collectAiStyleFromForm();
+  localStorage.setItem(AI_STYLE_KEY, JSON.stringify(style));
+  st.textContent = '⏳ שומרת...';
+  try {
+    await setDoc(doc(db, SETTINGS_COL, 'aiStyle'), { ...style, updatedAt: serverTimestamp(), updatedBy: auth.currentUser?.email || '' }, { merge: true });
+    st.textContent = '✓ נשמר לכל המנהלים';
+    st.classList.remove('text-red-500'); st.classList.add('text-green-600');
+  } catch (ex) {
+    st.textContent = '✗ שגיאה בשמירה: ' + ex.message;
+    st.classList.remove('text-green-600'); st.classList.add('text-red-500');
+    console.error('AI style cloud save error:', ex);
+  }
+  setTimeout(() => { st.textContent = ''; st.classList.remove('text-red-500','text-green-600'); }, 3000);
+}
+function applyAiStyleToForm(s) {
   if (s.tone) document.getElementById('ai-tone').value = s.tone;
   if (s.keywords) document.getElementById('ai-keywords').value = s.keywords;
   if (s.keywordsEn) document.getElementById('ai-keywords-en').value = s.keywordsEn;
   if (s.length) document.getElementById('ai-length').value = s.length;
   if (s.custom) document.getElementById('ai-custom-prompt').value = s.custom;
 }
+async function loadAiStyle() {
+  // Try Firestore first, fall back to localStorage
+  try {
+    const snap = await getDoc(doc(db, SETTINGS_COL, 'aiStyle'));
+    if (snap.exists()) {
+      const cloud = snap.data();
+      applyAiStyleToForm(cloud);
+      localStorage.setItem(AI_STYLE_KEY, JSON.stringify(cloud));
+      return;
+    }
+  } catch (ex) { console.warn('Could not load AI style from cloud, using local:', ex); }
+  applyAiStyleToForm(getAiStyle());
+}
 document.addEventListener('DOMContentLoaded', loadAiStyle);
+window.saveAiStyleToCloud = saveAiStyleToCloud;
 
 function buildAiSystemPrompt() {
   const s = getAiStyle();
