@@ -6480,26 +6480,39 @@ function renderCrmBoard() {
     let actionBtn = '';
     if (!pay.advancePaid) {
       actionBtn = `<button onclick="event.stopPropagation();quickPayAdvance('${w.id}')" class="text-[9px] bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1 rounded-full font-bold transition-colors">💳 אשר מקדמה</button>`;
-    } else if (!pay.balancePaid) {
-      actionBtn = `<button onclick="event.stopPropagation();quickPayBalance('${w.id}')" class="text-[9px] bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-full font-bold transition-colors">💳 אשר יתרה</button>`;
     }
 
-    return `<div class="bg-white rounded-xl border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isArchive ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
-      <div class="flex items-start justify-between gap-2 mb-2">
-        <p class="font-bold text-sm text-gray-800 leading-tight">${esc(w.celebrant || w.customerName)}</p>
-        <span class="text-[10px] text-gray-400 flex-shrink-0">${dateStr}</span>
+    const contact = w.customerName !== w.celebrant ? `<span class="text-[10px] text-gray-400 hidden lg:inline">👤 ${esc(w.customerName)}</span>` : '';
+    return `<div class="bg-white rounded-xl border border-gray-100 p-2.5 lg:p-2 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isArchive ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
+      <!-- Mobile layout -->
+      <div class="lg:hidden">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <p class="font-bold text-sm text-gray-800">${esc(w.celebrant || w.customerName)}</p>
+          <span class="font-black text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')}₪</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex gap-1.5 text-[10px]">
+            <span class="text-gray-500">${dateStr}</span>
+            <span class="text-gray-400">${w.time || ''}</span>
+            <span class="text-gray-400">📍${esc(w.city || '')}</span>
+            <span class="text-gray-400">👥${w.participantCount}</span>
+          </div>
+          <span class="text-[10px]">${daysLabel}</span>
+        </div>
+        ${actionBtn ? `<div class="mt-1.5">${actionBtn}</div>` : ''}
       </div>
-      <div class="flex flex-wrap gap-1.5 text-[10px] mb-2">
-        <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${w.time || ''}</span>
-        <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">📍 ${esc(w.city || '—')}</span>
-        <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">👥 ${w.participantCount}</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="font-black text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')}₪</span>
+      <!-- Desktop layout — single row -->
+      <div class="hidden lg:flex items-center gap-4">
+        <p class="font-bold text-sm text-gray-800 w-28 truncate">${esc(w.celebrant || w.customerName)}</p>
+        <span class="text-[10px] text-gray-500 w-14">${dateStr}</span>
+        <span class="text-[10px] text-gray-500 w-10">${w.time || ''}</span>
+        <span class="text-[10px] text-gray-500 w-20 truncate">📍${esc(w.city || '—')}</span>
+        <span class="text-[10px] text-gray-500 w-8">👥${w.participantCount}</span>
+        ${contact}
+        <span class="font-black text-sm text-[#d4a373] mr-auto">${(w.total||0).toLocaleString('he-IL')}₪</span>
         <span class="text-[10px]">${daysLabel}</span>
+        ${actionBtn || ''}
       </div>
-      ${w.customerName !== w.celebrant ? `<p class="text-[9px] text-gray-400 mt-1">👤 ${esc(w.customerName)} · ${esc(w.phone||'')}</p>` : ''}
-      ${actionBtn ? `<div class="mt-2">${actionBtn}</div>` : ''}
     </div>`;
   }
 
