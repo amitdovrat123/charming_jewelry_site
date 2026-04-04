@@ -493,7 +493,7 @@
                     <svg class="w-24 h-24 -rotate-90 relative" viewBox="0 0 120 120">
                       <circle cx="60" cy="60" r="52" fill="none" stroke="#f5ece7" stroke-width="8"/>
                       <circle id="wsd-goal-weekly-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#wgrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" class="transition-all duration-1000 ease-out"/>
-                      <defs><linearGradient id="wgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8b894"/><stop offset="100%" stop-color="#c9957a"/></linearGradient></defs>
+                      <defs><linearGradient id="wgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8b894"/><stop offset="100%" stop-color="#c9957a"/></linearGradient><linearGradient id="wgrad-done" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6ee7b7"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                       <span id="wsd-goal-weekly-label" class="text-lg font-black text-[#2c2a29] tracking-tight">0/3</span>
@@ -3399,10 +3399,13 @@ function renderWsDashboard() {
   }).length;
   const wPct = Math.min(100, Math.round((weekConfirmed / wGoal) * 100));
   const circumference = 327;
-  if (el('wsd-goal-weekly-ring')) el('wsd-goal-weekly-ring').style.strokeDashoffset = circumference - (circumference * wPct / 100);
+  const wReached = weekConfirmed >= wGoal;
+  if (el('wsd-goal-weekly-ring')) {
+    el('wsd-goal-weekly-ring').style.strokeDashoffset = circumference - (circumference * wPct / 100);
+    el('wsd-goal-weekly-ring').setAttribute('stroke', wReached ? 'url(#wgrad-done)' : 'url(#wgrad)');
+  }
   if (el('wsd-goal-weekly-pct')) el('wsd-goal-weekly-pct').textContent = wPct + '%';
   if (el('wsd-goal-weekly-label')) el('wsd-goal-weekly-label').textContent = weekConfirmed + '/' + wGoal;
-  const wReached = weekConfirmed >= wGoal;
   if (el('wsd-goal-weekly-status')) {
     if (wReached) el('wsd-goal-weekly-status').innerHTML = '<span class="text-emerald-600 font-bold">עמדת ביעד!</span>';
     else if (wPct >= 50) el('wsd-goal-weekly-status').innerHTML = '<span class="text-[#c9957a] font-semibold">כמעט שם, קדימה!</span>';
@@ -3414,10 +3417,13 @@ function renderWsDashboard() {
   // ── Monthly Goal (linear meter) ──
   const mGoal = parseInt(el('wsd-monthly-goal')?.value) || 10;
   const mPct = Math.min(100, Math.round((monthConfirmed.length / mGoal) * 100));
-  if (el('wsd-goal-monthly-ring')) el('wsd-goal-monthly-ring').style.strokeDashoffset = circumference - (circumference * mPct / 100);
+  const mReached = monthConfirmed.length >= mGoal;
+  if (el('wsd-goal-monthly-ring')) {
+    el('wsd-goal-monthly-ring').style.strokeDashoffset = circumference - (circumference * mPct / 100);
+    el('wsd-goal-monthly-ring').setAttribute('stroke', mReached ? 'url(#mgrad-done)' : 'url(#mgrad)');
+  }
   if (el('wsd-goal-monthly-pct')) el('wsd-goal-monthly-pct').textContent = mPct + '%';
   if (el('wsd-goal-monthly-label')) el('wsd-goal-monthly-label').textContent = monthConfirmed.length + '/' + mGoal;
-  const mReached = monthConfirmed.length >= mGoal;
   if (el('wsd-goal-monthly-status')) {
     if (mReached) el('wsd-goal-monthly-status').innerHTML = '<span class="text-emerald-600 font-bold">עמדת ביעד!</span>';
     else if (mPct >= 50) el('wsd-goal-monthly-status').innerHTML = '<span class="text-[#a8705a] font-semibold">כמעט שם, קדימה!</span>';
@@ -3538,7 +3544,7 @@ function renderWsDashboard() {
     }
     const maxRev = Math.max(...months.map(m => m.rev), 1);
     chartEl.innerHTML = months.map(m => {
-      const h = Math.max(4, Math.round((m.rev / maxRev) * 100));
+      const h = Math.max(4, Math.round((m.rev / maxRev) * 55));
       return `<div class="flex-1 flex flex-col items-center gap-1">
         <span class="text-[9px] font-bold text-gray-500">${m.rev > 0 ? (m.rev/1000).toFixed(1)+'K' : '0'}</span>
         <div class="w-full bg-[#d4a373] rounded-t-lg transition-all" style="height:${h}px;" title="${m.count} סדנאות · ${m.rev.toLocaleString('he-IL')} ₪"></div>
