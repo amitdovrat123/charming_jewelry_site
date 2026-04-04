@@ -467,7 +467,7 @@
             </div>
           </div>
 
-          <!-- Goals + Payment Status -->
+          <!-- Goals + Funnel (mobile) + Cash Flow -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- Goals Card -->
             <div class="bg-white border border-[#f0dfc0] rounded-xl p-4 shadow-sm">
@@ -5140,12 +5140,15 @@ async function deleteAutoExpenses(wsId) {
 
 // One-time cleanup: remove duplicate auto-expenses (keep 1 per category per workshop)
 async function cleanupDuplicateExpenses() {
-  const snap = await getDocs(query(collection(db, EXPENSES_COL), where('notes', '>=', ''), orderBy('notes')));
+  const snap = await getDocs(collection(db, EXPENSES_COL));
   const grouped = {};
   snap.docs.forEach(d => {
     const e = d.data();
-    if (!e.workshopId || !(e.notes || '').includes('אוטומטי')) return;
-    const key = e.workshopId + '|' + e.category;
+    if (!(e.notes || '').includes('אוטומטי')) return;
+    // Group by workshopId+category, or workshopName+category if no workshopId
+    const wsKey = e.workshopId || e.workshopName || '';
+    if (!wsKey) return;
+    const key = wsKey + '|' + (e.category || '');
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(d.id);
   });
