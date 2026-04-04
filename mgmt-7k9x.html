@@ -1117,9 +1117,9 @@
           </div><!-- /px-6 py-5 -->
           <div class="px-6 py-4 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2 sticky bottom-0">
             <button onclick="saveWorkshop()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור סדנה</button>
-            <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp</button>
-            <a id="ws-call-btn" href="tel:" onclick="var p=document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');if(p)this.href='tel:'+p;" class="border border-blue-300 text-blue-500 hover:bg-blue-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="phone" class="w-3.5 h-3.5"></i> חייג</a>
-            <button id="ws-delete-btn" onclick="deleteWorkshopFromForm()" style="display:none" class="border border-red-300 text-red-500 hover:bg-red-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-2.5 py-2.5 rounded-full text-sm transition-colors flex-shrink-0" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></button>
+            <a id="ws-call-btn" href="tel:" onclick="var p=document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');if(p)this.href='tel:'+p;" class="border border-blue-300 text-blue-500 hover:bg-blue-50 px-2.5 py-2.5 rounded-full text-sm transition-colors flex-shrink-0" title="חייג"><i data-lucide="phone" class="w-4 h-4"></i></a>
+            <button id="ws-delete-btn" onclick="deleteWorkshopFromForm()" style="display:none" class="border border-red-300 text-red-500 hover:bg-red-50 px-2.5 py-2.5 rounded-full text-sm transition-colors flex-shrink-0" title="מחק"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           </div>
           </div><!-- /modal inner -->
         </div><!-- /ws-form-section -->
