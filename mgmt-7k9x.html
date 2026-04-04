@@ -2967,7 +2967,7 @@ function initNotifications() {
       return ed && ed < oneDayAgo;
     });
     // Auto-create expenses for past confirmed workshops
-    pastDocs.forEach(d => ensureAutoExpenses(d.id, d.data()).catch(()=>{}));
+    pastDocs.forEach(d => ensureFuelExpense(d.id, d.data()).catch(()=>{}));
     const pastNotifs = pastDocs.map(d => {
       const w = d.data();
       const ed = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
