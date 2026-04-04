@@ -5219,9 +5219,11 @@ async function saveWorkshop() {
       editWorkshopId = ref.id;
     }
     showToast('הסדנה נשמרה בהצלחה');
-    // Auto-sync to Google Calendar if confirmed
+    // Auto-sync to Google Calendar
     if (data.bookingStatus === 'confirmed' && editWorkshopId) {
       syncCalendarEvent(editWorkshopId);
+    } else if (data.bookingStatus === 'draft' && editWorkshopId && prevWs?.bookingStatus === 'confirmed') {
+      deleteCalendarEvent(editWorkshopId);
     }
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
 }
