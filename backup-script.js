@@ -166,8 +166,8 @@ const STATUS_CLR = {
 // Column color groups per sheet
 const SHEET_COLORS = {
   'סדנאות': [
-    {s:1,e:3,c:CLR.customer}, {s:4,e:9,c:CLR.event}, {s:10,e:13,c:CLR.pricing},
-    {s:14,e:14,c:CLR.status}, {s:15,e:23,c:CLR.payment}, {s:24,e:26,c:CLR.meta}
+    {s:1,e:4,c:CLR.customer}, {s:5,e:10,c:CLR.event}, {s:11,e:14,c:CLR.pricing},
+    {s:15,e:15,c:CLR.status}, {s:16,e:24,c:CLR.payment}, {s:25,e:27,c:CLR.meta}
   ],
   'הזמנות': [
     {s:1,e:2,c:CLR.meta}, {s:3,e:8,c:CLR.customer}, {s:9,e:9,c:CLR.event},
@@ -255,7 +255,7 @@ const INQ_STATUS = { new:'חדשה', handled:'טופל', archived:'בארכיו�
 // ── Workshops ──
 const workshopHeaders = [
   'שם מלא איש קשר','טלפון','שם החוגג/ת','לכבוד מה האירוע',
-  'עיר','תאריך אירוע','שעת התחלה','מספר משתתפות','מסלול',
+  'עיר','רחוב ומספר','תאריך אירוע','שעת התחלה','מספר משתתפות','מסלול',
   'מחיר בסיס (₪)','הנחה (%)','עלות הגעה (₪)','סה"כ לתשלום (₪)',
   'סטטוס הזמנה',
   'מקדמה שולמה','סכום מקדמה (₪)','אמצעי תשלום מקדמה','תאריך תשלום מקדמה',
@@ -275,7 +275,7 @@ function workshopRow(doc) {
 
   return [
     gf(doc, 'customerName'), gf(doc, 'phone'), gf(doc, 'celebrant'), gf(doc, 'occasion'),
-    gf(doc, 'city'), fd(gf(doc, 'eventDate')), gf(doc, 'time'), gf(doc, 'participantCount'), gf(doc, 'route'),
+    gf(doc, 'city'), gf(doc, 'street') || '', fd(gf(doc, 'eventDate')), gf(doc, 'time'), gf(doc, 'participantCount'), gf(doc, 'route'),
     gf(doc, 'basePrice') || 0, gf(doc, 'discount') || 0, gf(doc, 'arrivalFee') || 0, total,
     WS_STATUS[status] || status,
     advPaid ? 'כן' : 'לא', advPaid ? advAmt : '', advPaid ? (PAY_METHOD[gmf(pay,'advanceMethod')] || gmf(pay,'advanceMethod') || '') : '', advPaid ? fd(gmf(pay,'advancePaidDate')) : '',
