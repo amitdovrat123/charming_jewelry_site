@@ -24,7 +24,7 @@
     }
   </script>
   <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@400;500;600;700;800&family=Karantina:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@400;500;600;700;800&family=Karantina:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -9973,6 +9973,7 @@ async function preloadInviteFonts() {
   try {
     await document.fonts.load('700 48px Heebo');
     await document.fonts.load('700 48px Karantina');
+    await document.fonts.load('700 48px Fredoka');
   } catch(e) { console.log('Font preload:', e); }
 }
 preloadInviteFonts();
@@ -10028,49 +10029,49 @@ async function generateInvitation(w) {
   // ── "הינך מוזמנת לחגוג איתנו את" ──
   ctx.fillStyle = GRAY;
   ctx.font = '600 58px Heebo, sans-serif';
-  ctx.fillText('הינך מוזמנת לחגוג איתנו את', cx, 350);
+  ctx.fillText('הינך מוזמנת לחגוג איתנו את', cx, 400);
 
   // ── Occasion ──
   ctx.font = '600 58px Heebo, sans-serif';
-  ctx.fillText(occasion + ' של', cx, 425);
+  ctx.fillText(occasion + ' של', cx, 475);
 
-  // ── Celebrant name (large, pink, script) ──
+  // ── Celebrant name (large, pink, rounded) ──
   ctx.fillStyle = PINK;
-  ctx.font = '700 170px Karantina, cursive';
-  ctx.fillText(celebrant, cx, 600);
+  ctx.font = '700 160px Fredoka, sans-serif';
+  ctx.fillText(celebrant, cx, 650);
 
   // ── Fixed block ──
   ctx.fillStyle = GRAY;
   ctx.font = '700 48px Heebo, sans-serif';
-  ctx.fillText('בתוכנית- סדנת הצ׳ארמים', cx, 710);
-  ctx.fillText('של', cx, 768);
+  ctx.fillText('בתוכנית- סדנת הצ׳ארמים', cx, 755);
+  ctx.fillText('של', cx, 813);
 
   ctx.fillStyle = PINK;
   ctx.font = '700 62px Heebo, sans-serif';
   ctx.letterSpacing = '8px';
-  ctx.fillText('C H A R M I N G', cx, 850);
+  ctx.fillText('C H A R M I N G', cx, 895);
   ctx.letterSpacing = '0px';
 
   ctx.fillStyle = GRAY;
   ctx.font = '700 48px Heebo, sans-serif';
-  ctx.fillText('נייצר ביחד תכשיטי', cx, 930);
-  ctx.fillText('צ׳ארמים בהתאמה אישית!', cx, 988);
+  ctx.fillText('נייצר ביחד תכשיטי', cx, 975);
+  ctx.fillText('צ׳ארמים בהתאמה אישית!', cx, 1033);
 
   // ── Address ──
   ctx.fillStyle = PINK;
   ctx.font = '600 52px Heebo, sans-serif';
-  ctx.fillText('כתובת: ' + city, cx, 1110);
+  ctx.fillText('כתובת: ' + city, cx, 1150);
 
   // ── Date ──
   ctx.font = '700 56px Heebo, sans-serif';
-  ctx.fillText('תאריך : ' + dateStr, cx, 1230);
+  ctx.fillText('תאריך : ' + dateStr, cx, 1260);
 
   // ── Time ──
-  ctx.fillText('שעה: ' + timeStr, cx, 1310);
+  ctx.fillText('שעה: ' + timeStr, cx, 1340);
 
   // ── "מצפה לראותך :)" ──
-  ctx.font = '700 68px Karantina, cursive';
-  ctx.fillText('מצפה לראותך :)', cx, 1450);
+  ctx.font = '700 68px Fredoka, sans-serif';
+  ctx.fillText('מצפה לראותך :)', cx, 1470);
 
   // Show modal
   const modal = document.getElementById('invite-modal');
