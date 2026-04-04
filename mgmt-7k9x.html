@@ -29,6 +29,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
   <style>
     * { font-family: 'Assistant', sans-serif; }
     [data-v] { display: none !important; }
@@ -379,8 +380,14 @@
           </button>
         </nav>
       </div>
-      <!-- Sidebar user area (desktop) -->
-      <div class="hidden sm:block mt-auto p-5 border-t border-[#f0dfc0]/40">
+      <!-- Sidebar user area -->
+      <div class="mt-auto p-5 border-t border-[#f0dfc0]/40">
+        <div class="flex items-center gap-2 mb-3 px-2">
+          <div class="w-7 h-7 rounded-full bg-[#f5ece7] flex items-center justify-center flex-shrink-0">
+            <i data-lucide="user" class="w-3.5 h-3.5 text-[#d4a373]"></i>
+          </div>
+          <span id="sidebar-user-email" class="text-[11px] text-gray-500 truncate leading-tight"></span>
+        </div>
         <a href="index.html" target="_blank"
           class="flex items-center justify-center gap-2 text-xs text-gray-400 hover:text-[#d4a373] py-2.5 rounded-full border border-[#f0dfc0]/40 hover:border-[#d4a373]/40 transition-all font-semibold">
           <i data-lucide="external-link" class="w-3.5 h-3.5"></i> צפה באתר
@@ -3087,6 +3094,8 @@ window.renderFullNotifications = renderFullNotifications;
 function initERP(user) {
   show('v-dash');
   document.getElementById('admin-name').textContent = user.displayName || user.email;
+  const sidebarEmail = document.getElementById('sidebar-user-email');
+  if (sidebarEmail) sidebarEmail.textContent = user.email;
 
   // Load AI style settings from Firestore (after auth)
   loadAiStyleFromCloud();
@@ -9534,6 +9543,43 @@ async function runBackupToSheets() {
 window.runBackupToSheets = runBackupToSheets;
 
 
+// Color definitions matching Google Sheets (from backup-script.js)
+const EXCEL_CLR = {
+  customer: 'D6EAF8', event: 'D5F5E3', pricing: 'FEF5E7',
+  payment: 'F5EEF8', status: 'F2F3F4', meta: 'F2F3F4',
+  desc: 'E6F0FA', tag: 'FFF3CD'
+};
+const EXCEL_STATUS_CLR = {
+  'טיוטה':'FFF3CD','מאושרת':'D4EDDA','בארכיון':'E2E3E5',
+  'ממתין לתשלום':'FFF3CD','בטיפול':'D6EAF8','נשלח':'FFE8CC','נמסר':'D4EDDA','בוטל':'F5D5D5',
+  'חדשה':'FFF3CD','טופל':'D4EDDA','published':'D4EDDA','draft':'FFF3CD'
+};
+const EXCEL_SHEET_COLORS = {
+  'סדנאות': [
+    {s:1,e:3,c:EXCEL_CLR.customer},{s:4,e:9,c:EXCEL_CLR.event},{s:10,e:13,c:EXCEL_CLR.pricing},
+    {s:14,e:14,c:EXCEL_CLR.status},{s:15,e:23,c:EXCEL_CLR.payment},{s:24,e:26,c:EXCEL_CLR.meta}
+  ],
+  'הזמנות': [
+    {s:1,e:2,c:EXCEL_CLR.meta},{s:3,e:8,c:EXCEL_CLR.customer},{s:9,e:9,c:EXCEL_CLR.event},
+    {s:10,e:12,c:EXCEL_CLR.pricing},{s:13,e:17,c:EXCEL_CLR.payment},{s:18,e:18,c:EXCEL_CLR.status}
+  ],
+  'הוצאות': [
+    {s:1,e:1,c:EXCEL_CLR.meta},{s:2,e:2,c:EXCEL_CLR.event},{s:3,e:4,c:EXCEL_CLR.pricing},{s:5,e:6,c:EXCEL_CLR.payment}
+  ],
+  'פניות': [
+    {s:1,e:1,c:EXCEL_CLR.meta},{s:2,e:2,c:EXCEL_CLR.event},{s:3,e:5,c:EXCEL_CLR.customer},
+    {s:6,e:9,c:EXCEL_CLR.pricing},{s:10,e:10,c:EXCEL_CLR.status}
+  ],
+  'מוצרים': [
+    {s:1,e:3,c:EXCEL_CLR.customer},{s:4,e:7,c:EXCEL_CLR.event},{s:8,e:11,c:EXCEL_CLR.pricing},
+    {s:12,e:12,c:EXCEL_CLR.tag},{s:13,e:13,c:EXCEL_CLR.status},{s:14,e:15,c:EXCEL_CLR.payment},
+    {s:16,e:17,c:EXCEL_CLR.desc},{s:18,e:19,c:EXCEL_CLR.meta},{s:20,e:21,c:EXCEL_CLR.meta}
+  ],
+  'קופונים': [
+    {s:1,e:1,c:EXCEL_CLR.customer},{s:2,e:3,c:EXCEL_CLR.pricing},{s:4,e:5,c:EXCEL_CLR.event},{s:6,e:7,c:EXCEL_CLR.meta}
+  ]
+};
+
 async function exportToExcel() {
   const progress = document.getElementById('excel-progress');
   progress.style.display = '';
@@ -9544,20 +9590,70 @@ async function exportToExcel() {
     const data = await getBackupData();
     progress.textContent = 'בונה קובץ אקסל...';
 
-    const wb = XLSX.utils.book_new();
+    const wb = new ExcelJS.Workbook();
+    wb.views = [{ rightToLeft: true }];
+
     for (const key of Object.keys(data)) {
       const sd = data[key];
-      const ws = XLSX.utils.aoa_to_sheet([sd.headers, ...sd.rows]);
-      ws['!RTL'] = true;
-      ws['!cols'] = sd.headers.map((h, i) => {
-        const max = Math.max(h.length, ...sd.rows.map(r => String(r[i]||'').length));
-        return { wch: Math.min(max + 3, 40) };
+      const ws = wb.addWorksheet(sd.name, { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
+
+      // Header row
+      const headerRow = ws.addRow(sd.headers);
+      headerRow.font = { bold: true, size: 11 };
+      headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+      headerRow.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFDF5ED' } };
+        cell.border = { bottom: { style: 'thin', color: { argb: 'FFD5D5D5' } } };
       });
-      XLSX.utils.book_append_sheet(wb, ws, sd.name);
+
+      // Apply color groups to header
+      const groups = EXCEL_SHEET_COLORS[sd.name];
+      if (groups) {
+        for (const g of groups) {
+          for (let col = g.s; col <= g.e && col <= sd.headers.length; col++) {
+            headerRow.getCell(col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + g.c } };
+          }
+        }
+      }
+
+      // Find status column
+      const statusIdx = sd.headers.indexOf('סטטוס הזמנה') !== -1
+        ? sd.headers.indexOf('סטטוס הזמנה') + 1
+        : sd.headers.indexOf('סטטוס') !== -1
+          ? sd.headers.indexOf('סטטוס') + 1 : -1;
+
+      // Data rows
+      for (const row of sd.rows) {
+        const dataRow = ws.addRow(row);
+        dataRow.alignment = { vertical: 'middle' };
+        if (statusIdx > 0) {
+          const val = row[statusIdx - 1];
+          const bg = EXCEL_STATUS_CLR[val];
+          if (bg) {
+            const cell = dataRow.getCell(statusIdx);
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + bg } };
+            cell.font = { bold: true };
+          }
+        }
+      }
+
+      // Auto-fit column widths
+      ws.columns.forEach((col, i) => {
+        let maxLen = String(sd.headers[i] || '').length;
+        for (const row of sd.rows) { maxLen = Math.max(maxLen, String(row[i] || '').length); }
+        col.width = Math.min(maxLen + 3, 40);
+      });
     }
 
+    // Download
     const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, 'Charming_Backup_' + dateStr + '.xlsx');
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'Charming_Backup_' + dateStr + '.xlsx';
+    a.click();
+    URL.revokeObjectURL(url);
 
     progress.textContent = 'הקובץ הורד בהצלחה';
     setTimeout(() => { progress.style.display = 'none'; }, 4000);
