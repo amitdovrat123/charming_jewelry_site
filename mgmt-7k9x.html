@@ -3259,6 +3259,9 @@ function initERP(user) {
   // Load AI style settings from Firestore (after auth)
   loadAiStyleFromCloud();
 
+  // One-time cleanup of duplicate auto-expenses
+  cleanupDuplicateExpenses().catch(()=>{});
+
   // Start notifications
   initNotifications();
 
@@ -5135,6 +5138,36 @@ async function deleteAutoExpenses(wsId) {
   }
 }
 
+// One-time cleanup: remove duplicate auto-expenses (keep 1 per category per workshop)
+async function cleanupDuplicateExpenses() {
+  const snap = await getDocs(query(collection(db, EXPENSES_COL), where('notes', '>=', ''), orderBy('notes')));
+  const grouped = {};
+  snap.docs.forEach(d => {
+    const e = d.data();
+    if (!e.workshopId || !(e.notes || '').includes('אוטומטי')) return;
+    const key = e.workshopId + '|' + e.category;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(d.id);
+  });
+  let deleted = 0;
+  for (const key of Object.keys(grouped)) {
+    const ids = grouped[key];
+    if (ids.length <= 1) continue;
+    // Keep first, delete rest
+    for (let i = 1; i < ids.length; i++) {
+      await deleteDoc(doc(db, EXPENSES_COL, ids[i]));
+      deleted++;
+    }
+  }
+  if (deleted > 0) {
+    showToast(`נוקו ${deleted} הוצאות כפולות`);
+    logAction(`ניקוי הוצאות כפולות — ${deleted} נמחקו`);
+  } else {
+    showToast('אין כפילויות — הכל נקי');
+  }
+}
+window.cleanupDuplicateExpenses = cleanupDuplicateExpenses;
+
 function getWsBasePrice() {
   const count = parseInt(document.getElementById('ws-count')?.value) || 0;
   const route = document.getElementById('ws-route')?.value || '';
@@ -6660,14 +6693,13 @@ function populateExpenseWorkshops() {
   const sel = document.getElementById('exp-workshop');
   if (!sel) return;
   sel.innerHTML = '<option value="">ללא שיוך</option>';
-  const upcoming = [...allWorkshops]
-    .filter(w => (w.bookingStatus || 'confirmed') === 'confirmed')
+  const sorted = [...allWorkshops]
     .sort((a, b) => {
       const da = a.eventDate?.seconds || 0, db = b.eventDate?.seconds || 0;
       return db - da;
     })
-    .slice(0, 30);
-  upcoming.forEach(w => {
+    .slice(0, 50);
+  sorted.forEach(w => {
     const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000).toLocaleDateString('he-IL') : '';
     sel.innerHTML += `<option value="${w.id}">${esc(w.celebrant||w.customerName)} · ${d}</option>`;
   });
