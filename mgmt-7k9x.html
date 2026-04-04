@@ -4925,10 +4925,37 @@ function getWsBasePrice() {
   return WS_PRICES[count][route] || 0;
 }
 
+let prevWorkshopsMap = {};
 function initWorkshopsTab() {
   const q = query(collection(db, WORKSHOPS_COL), orderBy('eventDate','desc'));
   unsubWorkshops = onSnapshot(q, snap => {
-    allWorkshops = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const newList = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Detect status changes for calendar sync
+    for (const w of newList) {
+      const prev = prevWorkshopsMap[w.id];
+      if (!prev) continue; // first load — skip
+      const wasConfirmed = prev.bookingStatus === 'confirmed';
+      const isConfirmed = w.bookingStatus === 'confirmed';
+      if (!wasConfirmed && isConfirmed) {
+        // Draft → Confirmed: create/update calendar event
+        syncCalendarEvent(w.id, w);
+      } else if (wasConfirmed && !isConfirmed) {
+        // Confirmed → Draft: delete calendar event
+        deleteCalendarEvent(w.id);
+      } else if (isConfirmed && prev.calendarEventId && (
+        prev.eventDate?.seconds !== w.eventDate?.seconds ||
+        prev.city !== w.city || prev.celebrant !== w.celebrant ||
+        prev.customerName !== w.customerName || prev.route !== w.route ||
+        prev.participantCount !== w.participantCount || prev.arrivalFee !== w.arrivalFee ||
+        prev.occasion !== w.occasion || prev.total !== w.total || prev.notes !== w.notes
+      )) {
+        // Details changed on confirmed workshop: update calendar
+        syncCalendarEvent(w.id, w);
+      }
+    }
+    prevWorkshopsMap = {};
+    for (const w of newList) prevWorkshopsMap[w.id] = w;
+    allWorkshops = newList;
     renderCalendar();
     renderWorkshopsList();
     if (wsCurrentView === 'crm') renderCrmBoard();
@@ -5273,18 +5300,6 @@ async function saveWorkshop() {
       editWorkshopId = ref.id;
     }
     showToast('הסדנה נשמרה בהצלחה');
-    // Auto-sync to Google Calendar
-    const calWsData = { ...data, id: editWorkshopId, calendarEventId: prevWs?.calendarEventId || null };
-    console.log('[CAL] status:', data.bookingStatus, 'editId:', editWorkshopId, 'eventId:', calWsData.calendarEventId);
-    if (data.bookingStatus === 'confirmed' && editWorkshopId) {
-      console.log('[CAL] calling syncCalendarEvent');
-      syncCalendarEvent(editWorkshopId, calWsData);
-    } else if (data.bookingStatus === 'draft' && editWorkshopId && prevWs?.calendarEventId) {
-      console.log('[CAL] calling deleteCalendarEvent');
-      deleteCalendarEvent(editWorkshopId);
-    } else {
-      console.log('[CAL] no calendar action taken');
-    }
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
 }
 window.saveWorkshop = saveWorkshop;
@@ -5662,7 +5677,6 @@ async function confirmWorkshop(id) {
     await updateDoc(doc(db, WORKSHOPS_COL, id), { bookingStatus: 'confirmed' });
     const w = allWorkshops.find(x => x.id === id);
     logAction(`סדנה "${w?.celebrant || w?.customerName}" — הזמנה נסגרה`);
-    syncCalendarEvent(id);
   } catch(e) { console.error(e); }
 }
 window.confirmWorkshop = confirmWorkshop;
@@ -5705,7 +5719,6 @@ async function quickPayAdvance(id) {
       bookingStatus: 'confirmed',
     });
     logAction(`מקדמה אושרה + סדנא נסגרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
-    syncCalendarEvent(id);
     // Auto-create 400₪ materials expense
     await addDoc(collection(db, EXPENSES_COL), {
       date: new Date().toISOString().split('T')[0],
@@ -9297,12 +9310,10 @@ function buildCalendarEvent(w) {
 }
 
 async function syncCalendarEvent(workshopId, wsData) {
-  console.log('[CAL] syncCalendarEvent start, id:', workshopId);
   const w = wsData || allWorkshops.find(x => x.id === workshopId);
-  if (!w) { console.log('[CAL] no workshop found'); return; }
+  if (!w) return;
   const event = buildCalendarEvent(w);
-  if (!event) { console.log('[CAL] buildCalendarEvent returned null, eventDate:', w.eventDate); return; }
-  console.log('[CAL] event built:', event.summary);
+  if (!event) return;
   const token = await ensureCalendarToken();
   if (!token) { console.warn('Calendar: no token'); return; }
   const headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
