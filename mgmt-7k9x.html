@@ -945,9 +945,9 @@
           </div>
         </div>
 
-        <!-- Workshop booking form -->'
+        <!-- Workshop booking form -->
 
-        <div id="ws-form-section" data-v class="fixed inset-0 z-[9000] flex items-center justify-center p-3 sm:p-6" style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)" onclick="if(event.target===this)closeWsForm()">
+        <div id="ws-form-section" data-v class="fixed inset-0 z-[9500] flex items-center justify-center p-3 sm:p-6" style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)" onclick="if(event.target===this)closeWsForm()">
           <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl fadein overflow-hidden max-h-[90vh] overflow-y-auto">
           <div class="flex items-center justify-between px-6 py-4 border-b border-[#f0dfc0] sticky top-0 bg-white rounded-t-2xl z-10">
             <h2 id="ws-modal-title" class="font-black text-gray-800 text-base">סדנה חדשה</h2>
@@ -6250,19 +6250,22 @@ function renderCrmBoard() {
     </div>`;
   }
 
-  const emptyMsg = '<p class="text-gray-300 text-[10px] text-center py-1.5">—</p>';
   function fillCol(id, items, renderFn) {
     const col = el(id);
     if (!col) return;
-    col.innerHTML = items.length ? items.map(renderFn).join('') : emptyMsg;
+    col.innerHTML = items.length ? items.map(renderFn).join('') : '';
+    if (id !== 'crm-col-archive') {
+      col.style.display = items.length ? '' : 'none';
+      const arrow = col.parentElement.querySelector('.crm-arrow');
+      if (arrow) arrow.classList.toggle('rotate-180', items.length > 0);
+    }
   }
   fillCol('crm-col-leads', leads, i => leadCard(i));
   fillCol('crm-col-draft', drafts, w => crmCard(w));
   fillCol('crm-col-confirmed', confirmed, w => crmCard(w));
   fillCol('crm-col-pending', pending, w => crmCard(w));
-  // Archive stays collapsed — just fill content
   const archCol = el('crm-col-archive');
-  if (archCol) archCol.innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || '<p class="text-gray-300 text-[10px] text-center py-1.5">—</p>';
+  if (archCol) archCol.innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || '';
 }
 window.renderCrmBoard = renderCrmBoard;
 function toggleCrmCol(id, header) {
