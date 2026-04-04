@@ -6700,7 +6700,14 @@ function initExpensesTab() {
   populateExpenseWorkshops();
 }
 
-function populateExpenseWorkshops() {
+async function populateExpenseWorkshops() {
+  // Ensure workshops are loaded
+  if (!allWorkshops.length) {
+    try {
+      const snap = await getDocs(query(collection(db, WORKSHOPS_COL), orderBy('eventDate','desc')));
+      allWorkshops = snap.docs.map(d=>({id:d.id,...d.data()}));
+    } catch(e) {}
+  }
   const sel = document.getElementById('exp-workshop');
   if (!sel) return;
   sel.innerHTML = '<option value="">ללא שיוך</option>';
@@ -6716,10 +6723,10 @@ function populateExpenseWorkshops() {
   });
 }
 
-function openExpenseForm(id) {
+async function openExpenseForm(id) {
   const form = document.getElementById('exp-form-section');
   form.removeAttribute('data-v');
-  populateExpenseWorkshops();
+  await populateExpenseWorkshops();
   const titleEl = document.getElementById('exp-modal-title');
   if (id) {
     const e = allExpenses.find(x=>x.id===id);
@@ -6737,10 +6744,9 @@ function openExpenseForm(id) {
       if (match) {
         wsSel.value = match.id;
       } else {
-        // Workshop not in list — add it as an option so the link is visible
         const opt = document.createElement('option');
         opt.value = e.workshopId || '__name__' + e.workshopName;
-        opt.textContent = e.workshopName;
+        opt.textContent = e.workshopName + (e.date ? ' · ' + new Date(e.date).toLocaleDateString('he-IL') : '');
         wsSel.appendChild(opt);
         wsSel.value = opt.value;
       }
