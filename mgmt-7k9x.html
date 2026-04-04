@@ -4774,11 +4774,20 @@ function esc(str) {
 }
 
 // ── Audit Log ────────────────────────────────────────────────────
-function showToast(msg, duration = 2500) {
+let toastQueue = [];
+let toastBusy = false;
+function showToast(msg, duration = 2000) {
+  toastQueue.push({ msg, duration });
+  if (!toastBusy) drainToast();
+}
+function drainToast() {
+  if (!toastQueue.length) { toastBusy = false; return; }
+  toastBusy = true;
+  const { msg, duration } = toastQueue.shift();
   const el = document.getElementById('toast-banner');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), duration);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(drainToast, 350); }, duration);
 }
 
 async function logAction(description) {
@@ -5220,9 +5229,10 @@ async function saveWorkshop() {
     }
     showToast('הסדנה נשמרה בהצלחה');
     // Auto-sync to Google Calendar
+    const calWsData = { ...data, id: editWorkshopId, calendarEventId: prevWs?.calendarEventId || null };
     if (data.bookingStatus === 'confirmed' && editWorkshopId) {
-      syncCalendarEvent(editWorkshopId);
-    } else if (data.bookingStatus === 'draft' && editWorkshopId && prevWs?.bookingStatus === 'confirmed') {
+      syncCalendarEvent(editWorkshopId, calWsData);
+    } else if (data.bookingStatus === 'draft' && editWorkshopId && prevWs?.calendarEventId) {
       deleteCalendarEvent(editWorkshopId);
     }
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
@@ -9215,19 +9225,19 @@ async function ensureCalendarToken() {
 function buildCalendarEvent(w) {
   const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
   if (!d) return null;
-  const end = new Date(d.getTime() + 2 * 60 * 60 * 1000); // 2 hours
-  const routeNames = { route1: 'מסלול 1 — שרשרת / צמיד', route2: 'מסלול 2 — שרשרת ועגילים', route3: 'מסלול 3 — שרשרת, צמיד ועגילים' };
+  const end = new Date(d.getTime() + 2 * 60 * 60 * 1000);
   const desc = [
-    `איש קשר: ${w.customerName || ''}`,
-    `טלפון: ${w.phone || ''}`,
-    `מסלול: ${routeNames[w.route] || w.route || ''}`,
-    `משתתפות: ${w.participantCount || ''}`,
+    `שם מלא איש קשר: ${w.customerName || ''}`,
+    `שם החוגג/חוגגת: ${w.celebrant || ''}`,
+    `לכבוד מה האירוע: ${w.occasion || ''}`,
+    `מסלול: ${w.route || ''}`,
+    `עד כמה משתתפים: ${w.participantCount || ''}`,
+    `עיר: ${w.city || ''}`,
     `עלות הגעה: ${w.arrivalFee || 0} ₪`,
-    `סה"כ: ${(w.total || 0).toLocaleString('he-IL')} ₪`,
-    w.notes ? `הערות: ${w.notes}` : '',
-  ].filter(Boolean).join('\n');
+    `שולמה מקדמה`,
+  ].join('\n');
   return {
-    summary: `סדנת Charming — ${w.celebrant || w.customerName}`,
+    summary: `${w.celebrant || w.customerName}, אירוע charming`,
     location: w.city || '',
     description: desc,
     start: { dateTime: d.toISOString(), timeZone: 'Asia/Jerusalem' },
@@ -9236,8 +9246,8 @@ function buildCalendarEvent(w) {
   };
 }
 
-async function syncCalendarEvent(workshopId) {
-  const w = allWorkshops.find(x => x.id === workshopId);
+async function syncCalendarEvent(workshopId, wsData) {
+  const w = wsData || allWorkshops.find(x => x.id === workshopId);
   if (!w) return;
   const event = buildCalendarEvent(w);
   if (!event) return;
@@ -9282,9 +9292,14 @@ async function deleteCalendarEvent(workshopId) {
   const token = await ensureCalendarToken();
   if (!token) return;
   try {
-    await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${w.calendarEventId}`, {
+    const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${w.calendarEventId}`, {
       method: 'DELETE', headers: { Authorization: 'Bearer ' + token }
     });
+    if (r.ok || r.status === 204) {
+      await updateDoc(doc(db, WORKSHOPS_COL, workshopId), { calendarEventId: null });
+      showToast('האירוע הוסר מהיומן');
+      logAction(`אירוע Google Calendar נמחק — "${w.celebrant || w.customerName}"`);
+    }
   } catch(e) { console.error('Calendar delete error:', e); }
 }
 let backupAccessToken = localStorage.getItem('backup_token') || null;
