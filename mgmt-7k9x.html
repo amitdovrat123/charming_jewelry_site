@@ -5933,7 +5933,8 @@ function renderWorkshopsList() {
       const s = w.bookingStatus || 'confirmed';
       if (s !== 'confirmed') return false;
       const d = getWsDate(w);
-      return d && d < now;
+      const pay = w.payment || {};
+      return d && d < now && pay.advancePaid && pay.balancePaid;
     })
     .sort((a, b) => {
       const da = getWsDate(a), db = getWsDate(b);
