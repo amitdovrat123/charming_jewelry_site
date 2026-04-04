@@ -1119,6 +1119,7 @@
             <button onclick="saveWorkshop()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור סדנה</button>
             <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp</button>
             <a id="ws-call-btn" href="tel:" onclick="var p=document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');if(p)this.href='tel:'+p;" class="border border-blue-300 text-blue-500 hover:bg-blue-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="phone" class="w-3.5 h-3.5"></i> חייג</a>
+            <button id="ws-delete-btn" onclick="deleteWorkshopFromForm()" style="display:none" class="border border-red-300 text-red-500 hover:bg-red-50 px-4 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-1.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
           </div>
           </div><!-- /modal inner -->
         </div><!-- /ws-form-section -->
@@ -5392,6 +5393,8 @@ function openWorkshopModal(id) {
     const titleEl = document.getElementById('ws-modal-title');
     if (titleEl) titleEl.textContent = 'סדנה חדשה';
   }
+  const delBtn = document.getElementById('ws-delete-btn');
+  if (delBtn) delBtn.style.display = id ? '' : 'none';
   document.getElementById('ws-form-section')?.removeAttribute('data-v');
   if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 }
@@ -5401,6 +5404,21 @@ function closeWsForm() {
   document.getElementById('ws-form-section')?.setAttribute('data-v','');
 }
 window.closeWsForm = closeWsForm;
+
+async function deleteWorkshopFromForm() {
+  if (!editWorkshopId) return;
+  const w = allWorkshops.find(x => x.id === editWorkshopId);
+  const name = w?.celebrant || w?.customerName || '';
+  if (!confirm(`למחוק את הסדנה של "${name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
+  try {
+    if (w?.calendarEventId) deleteCalendarEvent(editWorkshopId);
+    await deleteDoc(doc(db, WORKSHOPS_COL, editWorkshopId));
+    logAction(`סדנה "${name}" נמחקה`);
+    showToast('הסדנה נמחקה');
+    closeWsForm();
+  } catch(e) { console.error(e); }
+}
+window.deleteWorkshopFromForm = deleteWorkshopFromForm;
 
 function sendWorkshopWhatsApp() {
   const name      = document.getElementById('ws-name').value.trim();
