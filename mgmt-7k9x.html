@@ -6734,7 +6734,16 @@ function openExpenseForm(id) {
     wsSel.value = e.workshopId || '';
     if (!wsSel.value && e.workshopName) {
       const match = allWorkshops.find(w => (w.celebrant || w.customerName) === e.workshopName);
-      if (match) wsSel.value = match.id;
+      if (match) {
+        wsSel.value = match.id;
+      } else {
+        // Workshop not in list — add it as an option so the link is visible
+        const opt = document.createElement('option');
+        opt.value = e.workshopId || '__name__' + e.workshopName;
+        opt.textContent = e.workshopName;
+        wsSel.appendChild(opt);
+        wsSel.value = opt.value;
+      }
     }
     document.getElementById('exp-notes').value = e.notes || '';
     if (e.category === 'staff') {
