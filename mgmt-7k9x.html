@@ -884,14 +884,15 @@
               </div>
               <div id="crm-col-pending" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
-            <!-- Column 5: Archive -->
+            <!-- Column 5: Archive (collapsed by default) -->
             <div class="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
+              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="const c=document.getElementById('crm-col-archive');c.style.display=c.style.display==='none'?'':'none';this.querySelector('.crm-arrow').classList.toggle('rotate-180')">
                 <div class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
                 <h4 class="font-bold text-sm text-gray-500">ארכיון</h4>
                 <span id="crm-count-archive" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
+                <svg class="crm-arrow w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <div id="crm-col-archive" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-archive" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-gray-200" style="display:none"></div>
             </div>
           </div>
         </div>
@@ -6242,12 +6243,19 @@ function renderCrmBoard() {
     </div>`;
   }
 
-  const emptyMsg = '<p class="text-gray-300 text-[10px] text-center py-1.5">—</p>';
-  if (el('crm-col-leads')) el('crm-col-leads').innerHTML = leads.length ? leads.map(i=>leadCard(i)).join('') : emptyMsg;
-  if (el('crm-col-draft')) el('crm-col-draft').innerHTML = drafts.length ? drafts.map(w=>crmCard(w)).join('') : emptyMsg;
-  if (el('crm-col-confirmed')) el('crm-col-confirmed').innerHTML = confirmed.length ? confirmed.map(w=>crmCard(w)).join('') : emptyMsg;
-  if (el('crm-col-pending')) el('crm-col-pending').innerHTML = pending.length ? pending.map(w=>crmCard(w)).join('') : emptyMsg;
-  if (el('crm-col-archive')) el('crm-col-archive').innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || emptyMsg;
+  function fillCol(id, items, renderFn) {
+    const col = el(id);
+    if (!col) return;
+    if (items.length) { col.innerHTML = items.map(renderFn).join(''); col.style.display = ''; col.style.borderTop = ''; }
+    else { col.innerHTML = ''; col.style.display = 'none'; }
+  }
+  fillCol('crm-col-leads', leads, i => leadCard(i));
+  fillCol('crm-col-draft', drafts, w => crmCard(w));
+  fillCol('crm-col-confirmed', confirmed, w => crmCard(w));
+  fillCol('crm-col-pending', pending, w => crmCard(w));
+  // Archive stays collapsed — just fill content
+  const archCol = el('crm-col-archive');
+  if (archCol) archCol.innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || '<p class="text-gray-300 text-[10px] text-center py-1.5">—</p>';
 }
 window.renderCrmBoard = renderCrmBoard;
 
