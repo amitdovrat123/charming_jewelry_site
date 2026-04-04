@@ -3357,12 +3357,13 @@ function renderWsDashboard() {
   // ── Monthly Goal (linear meter) ──
   const mGoal = parseInt(el('wsd-monthly-goal')?.value) || 10;
   const mPct = Math.min(100, Math.round((monthConfirmed.length / mGoal) * 100));
-  if (el('wsd-goal-monthly-bar')) el('wsd-goal-monthly-bar').style.width = mPct + '%';
-  if (el('wsd-goal-monthly-pct')) el('wsd-goal-monthly-pct').textContent = mPct > 10 ? mPct + '%' : '';
+  if (el('wsd-goal-monthly-ring')) el('wsd-goal-monthly-ring').style.strokeDashoffset = circumference - (circumference * mPct / 100);
+  if (el('wsd-goal-monthly-pct')) el('wsd-goal-monthly-pct').textContent = mPct + '%';
   if (el('wsd-goal-monthly-label')) el('wsd-goal-monthly-label').textContent = monthConfirmed.length + '/' + mGoal;
   if (el('wsd-goal-monthly-status')) {
-    if (monthConfirmed.length >= mGoal) el('wsd-goal-monthly-status').textContent = 'עמדת ביעד החודשי!';
-    else el('wsd-goal-monthly-status').textContent = 'עוד ' + (mGoal - monthConfirmed.length) + ' סגירות ליעד';
+    if (monthConfirmed.length >= mGoal) el('wsd-goal-monthly-status').innerHTML = '<span class="text-emerald-500 font-bold">עמדת ביעד!</span>';
+    else if (mPct >= 50) el('wsd-goal-monthly-status').innerHTML = '<span class="text-blue-500 font-semibold">כמעט שם, קדימה!</span>';
+    else el('wsd-goal-monthly-status').textContent = 'עוד ' + (mGoal - monthConfirmed.length) + ' סגירות';
   }
 
   // Confetti on goal reached
