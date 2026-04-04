@@ -366,21 +366,13 @@
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
             <i data-lucide="users" class="w-[20px] h-[20px] flex-shrink-0"></i> לקוחות
           </button>
-          <button data-tab="analytics" onclick="showTab('analytics');closeSidebar()"
-            class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
-            <i data-lucide="bar-chart-3" class="w-[20px] h-[20px] flex-shrink-0"></i> אנליטיקה (BI)
-          </button>
-          <button data-tab="logs" onclick="showTab('logs');closeSidebar()"
-            class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
-            <i data-lucide="clipboard-list" class="w-[20px] h-[20px] flex-shrink-0"></i> יומן שינויים
-          </button>
           <button data-tab="settings" onclick="showTab('settings');closeSidebar()"
             class="erp-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-500 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right">
             <i data-lucide="settings" class="w-[20px] h-[20px] flex-shrink-0"></i> הגדרות
           </button>
           <button onclick="location.reload()"
             class="w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-semibold text-gray-400 hover:bg-[#fdf6ee] hover:text-[#d4a373] transition-all text-right mt-2 border-t border-[#f0dfc0]/30 pt-4">
-            <i data-lucide="refresh-cw" class="w-[20px] h-[20px] flex-shrink-0"></i> רענן דף
+            <i data-lucide="refresh-cw" class="w-[20px] h-[20px] flex-shrink-0 text-emerald-500"></i> רענן דף
           </button>
         </nav>
       </div>
@@ -1509,6 +1501,12 @@
             </button>
             <button class="settings-card-btn" data-settings-page="backup" onclick="showSettingsPage('backup')">
               <i data-lucide="hard-drive-download" class="w-5 h-5"></i><span>גיבוי נתונים</span>
+            </button>
+            <button class="settings-card-btn" onclick="showTab('analytics')">
+              <i data-lucide="bar-chart-3" class="w-5 h-5"></i><span>אנליטיקה (BI)</span>
+            </button>
+            <button class="settings-card-btn" onclick="showTab('logs')">
+              <i data-lucide="clipboard-list" class="w-5 h-5"></i><span>יומן שינויים</span>
             </button>
           </div>
         </div>
