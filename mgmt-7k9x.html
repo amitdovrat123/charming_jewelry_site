@@ -847,42 +847,51 @@
 
         <!-- CRM Kanban View -->
         <div id="ws-crm-view" style="display:none;" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start" id="crm-board">
-            <!-- Column: Leads (Drafts) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start" id="crm-board">
+            <!-- Column 1: Leads (Inquiries) -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-2xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-yellow-200 flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                <h4 class="font-bold text-sm text-yellow-700">לידים חדשים</h4>
+                <span id="crm-count-leads" class="text-[10px] font-bold bg-yellow-200 text-yellow-700 rounded-full px-2 py-0.5 mr-auto"></span>
+              </div>
+              <div id="crm-col-leads" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+            </div>
+            <!-- Column 2: Draft (Advance not paid) -->
             <div class="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
               <div class="px-4 py-3 border-b border-amber-200 flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                <h4 class="font-bold text-sm text-amber-700">לידים חדשים</h4>
+                <h4 class="font-bold text-sm text-amber-700">טרם הועברה מקדמה</h4>
                 <span id="crm-count-draft" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
               <div id="crm-col-draft" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
             </div>
-            <!-- Column: Advance Paid (Confirmed) -->
+            <!-- Column 3: Confirmed (Advance paid, future) -->
             <div class="bg-[#fdf6ee] border border-[#f0dfc0] rounded-2xl overflow-hidden">
               <div class="px-4 py-3 border-b border-[#f0dfc0] flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-[#d4a373]"></div>
-                <h4 class="font-bold text-sm text-[#a8705a]">מקדמה שולמה</h4>
-                <span id="crm-count-advance" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5 mr-auto"></span>
+                <h4 class="font-bold text-sm text-[#a8705a]">סדנה אושרה</h4>
+                <span id="crm-count-confirmed" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-advance" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-confirmed" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
             </div>
-            <!-- Column: Fully Paid -->
-            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 border-b border-emerald-200 flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
-                <h4 class="font-bold text-sm text-emerald-700">שולם במלואו</h4>
-                <span id="crm-count-paid" class="text-[10px] font-bold bg-emerald-200 text-emerald-700 rounded-full px-2 py-0.5 mr-auto"></span>
+            <!-- Column 4: Done, waiting for balance -->
+            <div class="bg-orange-50 border border-orange-200 rounded-2xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-orange-200 flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-orange-400"></div>
+                <h4 class="font-bold text-sm text-orange-700">בוצעה וממתינה לתשלום</h4>
+                <span id="crm-count-pending" class="text-[10px] font-bold bg-orange-200 text-orange-700 rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-paid" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-pending" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
             </div>
-            <!-- Column: Completed (Past) -->
+            <!-- Column 5: Archive -->
             <div class="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
               <div class="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
-                <h4 class="font-bold text-sm text-gray-500">הושלמו</h4>
-                <span id="crm-count-done" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
+                <h4 class="font-bold text-sm text-gray-500">ארכיון</h4>
+                <span id="crm-count-archive" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-done" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-archive" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
             </div>
           </div>
         </div>
@@ -6134,13 +6143,12 @@ window.switchWsView = switchWsView;
 function renderCrmBoard() {
   const now = new Date(); now.setHours(0,0,0,0);
   function wsDate(w) { return w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null; }
-  const mn = { paybox:'PayBox', bit:'Bit', cash:'מזומן', transfer:'העברה' };
 
-  // Categorize
-  const drafts = [];
-  const advancePaid = [];
-  const fullyPaid = [];
-  const done = [];
+  // Categorize workshops
+  const drafts = [];      // טרם הועברה מקדמה
+  const confirmed = [];   // סדנה אושרה (confirmed + future)
+  const pending = [];     // בוצעה וממתינה לתשלום (past + balance not paid)
+  const archive = [];     // ארכיון (past + fully paid)
 
   allWorkshops.forEach(w => {
     const status = w.bookingStatus || 'confirmed';
@@ -6148,24 +6156,50 @@ function renderCrmBoard() {
     const d = wsDate(w);
     const isPast = d && d < now;
 
-    if (status === 'draft') drafts.push(w);
-    else if (isPast) done.push(w);
-    else if (pay.advancePaid && pay.balancePaid) fullyPaid.push(w);
-    else advancePaid.push(w);
+    if (status === 'draft') {
+      drafts.push(w);
+    } else if (!isPast) {
+      confirmed.push(w);
+    } else if (!pay.balancePaid) {
+      pending.push(w);
+    } else {
+      archive.push(w);
+    }
   });
 
-  // Sort each by date
+  // Leads from inquiries (new, not handled)
+  const leads = allInquiries.filter(i => !i.status || i.status === 'new');
+
+  // Sort
   const sortByDate = arr => arr.sort((a,b) => ((wsDate(a)?.getTime()||0) - (wsDate(b)?.getTime()||0)));
-  sortByDate(drafts); sortByDate(advancePaid); sortByDate(fullyPaid);
-  done.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
+  sortByDate(drafts); sortByDate(confirmed);
+  pending.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
+  archive.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
 
   // Counts
   const el = i => document.getElementById(i);
+  if (el('crm-count-leads')) el('crm-count-leads').textContent = leads.length;
   if (el('crm-count-draft')) el('crm-count-draft').textContent = drafts.length;
-  if (el('crm-count-advance')) el('crm-count-advance').textContent = advancePaid.length;
-  if (el('crm-count-paid')) el('crm-count-paid').textContent = fullyPaid.length;
-  if (el('crm-count-done')) el('crm-count-done').textContent = done.length;
+  if (el('crm-count-confirmed')) el('crm-count-confirmed').textContent = confirmed.length;
+  if (el('crm-count-pending')) el('crm-count-pending').textContent = pending.length;
+  if (el('crm-count-archive')) el('crm-count-archive').textContent = archive.length;
 
+  // Lead card (from inquiries)
+  function leadCard(inq) {
+    const dateStr = inq.createdAt?.seconds ? new Date(inq.createdAt.seconds*1000).toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
+    return `<div class="bg-white rounded-xl border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer" onclick="showInquiryDetail('${inq.id}')">
+      <div class="flex items-start justify-between gap-2 mb-1">
+        <p class="font-bold text-sm text-gray-800 leading-tight">${esc(inq.name || '—')}</p>
+        <span class="text-[10px] text-gray-400 flex-shrink-0">${dateStr}</span>
+      </div>
+      <p class="text-[10px] text-gray-500 mb-1">${esc(inq.phone || '')}${inq.email ? ' · ' + esc(inq.email) : ''}</p>
+      ${inq.workshopType ? `<span class="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${esc(inq.workshopType)}</span>` : ''}
+      ${inq.date ? `<span class="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${esc(inq.date)}</span>` : ''}
+      ${inq.message ? `<p class="text-[9px] text-gray-400 mt-1 line-clamp-2">${esc(inq.message)}</p>` : ''}
+    </div>`;
+  }
+
+  // Workshop card
   function crmCard(w, opts = {}) {
     const d = wsDate(w);
     const dateStr = d ? d.toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
@@ -6173,15 +6207,14 @@ function renderCrmBoard() {
     const diff = d ? Math.ceil((d - now) / 86400000) : null;
     const daysLabel = diff === null ? '' : diff < 0 ? '<span class="text-gray-400">עבר</span>' : diff === 0 ? '<span class="text-emerald-500 font-bold">היום</span>' : `<span class="text-blue-500">בעוד ${diff} ימים</span>`;
 
-    // Action button based on state
     let actionBtn = '';
     if (!pay.advancePaid) {
       actionBtn = `<button onclick="event.stopPropagation();quickPayAdvance('${w.id}')" class="text-[9px] bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1 rounded-full font-bold transition-colors">💳 אשר מקדמה</button>`;
-    } else if (!pay.balancePaid && !opts.isPast) {
+    } else if (!pay.balancePaid) {
       actionBtn = `<button onclick="event.stopPropagation();quickPayBalance('${w.id}')" class="text-[9px] bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-full font-bold transition-colors">💳 אשר יתרה</button>`;
     }
 
-    return `<div class="bg-white rounded-xl border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isPast ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
+    return `<div class="bg-white rounded-xl border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isArchive ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
       <div class="flex items-start justify-between gap-2 mb-2">
         <p class="font-bold text-sm text-gray-800 leading-tight">${esc(w.celebrant || w.customerName)}</p>
         <span class="text-[10px] text-gray-400 flex-shrink-0">${dateStr}</span>
@@ -6200,10 +6233,11 @@ function renderCrmBoard() {
     </div>`;
   }
 
-  if (el('crm-col-draft')) el('crm-col-draft').innerHTML = drafts.length ? drafts.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">אין לידים</p>';
-  if (el('crm-col-advance')) el('crm-col-advance').innerHTML = advancePaid.length ? advancePaid.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
-  if (el('crm-col-paid')) el('crm-col-paid').innerHTML = fullyPaid.length ? fullyPaid.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
-  if (el('crm-col-done')) el('crm-col-done').innerHTML = done.slice(0,15).map(w=>crmCard(w,{isPast:true})).join('') || '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+  if (el('crm-col-leads')) el('crm-col-leads').innerHTML = leads.length ? leads.map(i=>leadCard(i)).join('') : '<p class="text-gray-300 text-xs text-center py-6">אין לידים</p>';
+  if (el('crm-col-draft')) el('crm-col-draft').innerHTML = drafts.length ? drafts.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+  if (el('crm-col-confirmed')) el('crm-col-confirmed').innerHTML = confirmed.length ? confirmed.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+  if (el('crm-col-pending')) el('crm-col-pending').innerHTML = pending.length ? pending.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+  if (el('crm-col-archive')) el('crm-col-archive').innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || '<p class="text-gray-300 text-xs text-center py-6">—</p>';
 }
 window.renderCrmBoard = renderCrmBoard;
 
