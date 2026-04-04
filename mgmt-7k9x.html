@@ -5215,7 +5215,13 @@ function closeWsFullView() {
 }
 window.closeWsFullView = closeWsFullView;
 
+let wsSaving = false;
 async function saveWorkshop() {
+  if (wsSaving) return;
+  wsSaving = true;
+  try { await _saveWorkshop(); } finally { wsSaving = false; }
+}
+async function _saveWorkshop() {
   const name      = document.getElementById('ws-name').value.trim();
   const phone     = document.getElementById('ws-phone').value.trim();
   const celebrant = document.getElementById('ws-celebrant').value.trim();
@@ -5295,6 +5301,7 @@ async function saveWorkshop() {
       }
     } else {
       const ref = await addDoc(collection(db, WORKSHOPS_COL), data);
+      editWorkshopId = ref.id; // Switch to edit mode immediately
       logAction(`סדנה חדשה "${celebrant}" — ${count} משתתפות`);
       if (advancePaid) {
         await addDoc(collection(db, EXPENSES_COL), {
@@ -5303,11 +5310,6 @@ async function saveWorkshop() {
         });
         logAction(`הוצאת סחורה 400₪ — "${celebrant || name}" (אוטומטי)`);
       }
-    }
-    // Keep form open with data after save — don't clear
-    // If it was a new workshop, switch to edit mode for the saved doc
-    if (!editWorkshopId && typeof ref !== 'undefined') {
-      editWorkshopId = ref.id;
     }
     showToast('הסדנה נשמרה בהצלחה');
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
