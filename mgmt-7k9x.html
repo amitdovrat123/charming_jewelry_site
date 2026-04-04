@@ -2808,14 +2808,18 @@ function handleNotifClick(nid, type, docId) {
       () => allProducts.length > 0,
       () => { const p = allProducts.find(x => x.id === docId); if (p) openModal('edit', p); }
     );
+  } else if (type === 'workshop-past') {
+    showTab('workshops');
   }
 }
 window.handleNotifClick = handleNotifClick;
 
 let _unsubNotifInq = null;
 let _unsubNotifOrd = null;
-let _inquiryNotifs = [];
-let _orderNotifs   = [];
+let _unsubNotifWs  = null;
+let _inquiryNotifs  = [];
+let _orderNotifs    = [];
+let _workshopNotifs = [];
 
 function rebuildNotifications() {
   const oosProducts = allProducts
@@ -2825,7 +2829,7 @@ function rebuildNotifications() {
     })
     .map(p => ({ id: 'oos-' + p.id, type: 'stock', docId: p.id, name: p.name }));
 
-  notifications = [..._inquiryNotifs, ..._orderNotifs, ...oosProducts];
+  notifications = [..._inquiryNotifs, ..._orderNotifs, ...oosProducts, ..._workshopNotifs];
   renderNotifications();
 }
 
@@ -2854,6 +2858,24 @@ function initNotifications() {
     _orderNotifs = snap.docs
       .filter(d => d.data().status === 'pending_payment')
       .map(d => ({ id: 'ord-' + d.id, type: 'order', docId: d.id, ...d.data() }));
+    rebuildNotifications();
+  });
+
+  // Workshop listener — past workshops (1+ day ago) still in confirmed status
+  const wq = query(collection(db, WORKSHOPS_COL), orderBy('eventDate', 'desc'));
+  _unsubNotifWs = onSnapshot(wq, snap => {
+    const now = new Date();
+    const oneDayAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    _workshopNotifs = snap.docs.filter(d => {
+      const w = d.data();
+      if ((w.bookingStatus || 'confirmed') !== 'confirmed') return false;
+      const ed = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
+      return ed && ed < oneDayAgo;
+    }).map(d => {
+      const w = d.data();
+      const ed = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
+      return { id: 'ws-past-' + d.id, type: 'workshop-past', docId: d.id, eventDate: ed, city: w.city || '', route: w.route || '' };
+    });
     rebuildNotifications();
   });
 
@@ -2942,6 +2964,17 @@ function renderNotifications() {
         </div>
       </button>`;
     }
+
+    if (n.type === 'workshop-past') {
+      const dateStr = n.eventDate ? n.eventDate.toLocaleDateString('he-IL') : '';
+      return `<button onclick="${onclick}" class="notif-item w-full text-right px-4 py-3.5 flex items-start gap-3 hover:bg-[#fdf6ee] transition-all duration-200 border-b border-gray-50 ${bg}">
+        ${dot}
+        <div class="flex-1 min-w-0">
+          <p class="text-xs ${titleWeight} truncate"><i data-lucide='palette' class='w-3 h-3 inline-block'></i> סדנה לא עודכנה — ${n.route || n.city || ''}</p>
+          <p class="text-[11px] text-gray-400 truncate mt-0.5">התקיימה ב-${dateStr} ועדיין בסטטוס מאושרת</p>
+        </div>
+      </button>`;
+    }
     return '';
   }).join('');
 }
@@ -3003,6 +3036,18 @@ function buildAllNotifItems() {
       ts: p.createdAt?.seconds ? p.createdAt.seconds * 1000 : 0,
       label: `נגמר המלאי — ${p.name || ''}`,
       sub: 'יש לעדכן מלאי או לשנות סטטוס',
+    });
+  });
+
+  // Past workshops not updated
+  _workshopNotifs.forEach(w => {
+    items.push({
+      id: w.id,
+      type: 'workshop-past',
+      docId: w.docId,
+      ts: w.eventDate ? w.eventDate.getTime() : 0,
+      label: `סדנה לא עודכנה — ${w.route || w.city || ''}`,
+      sub: `התקיימה ב-${w.eventDate ? w.eventDate.toLocaleDateString('he-IL') : ''} ועדיין בסטטוס מאושרת`,
     });
   });
 
