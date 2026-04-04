@@ -6079,9 +6079,9 @@ function openWsCard(id) {
   if (pay.advancePaid && pay.balancePaid) {
     pe.className='p-4 rounded-xl border space-y-2 border-emerald-200 bg-emerald-50';
   } else if (pay.advancePaid) {
-    pe.className='p-4 rounded-xl border space-y-2 border-amber-200 bg-amber-50';
+    pe.className='p-4 rounded-xl border space-y-2 border-[#f0dfc0] bg-[#fdf8f5]';
   } else {
-    pe.className='p-4 rounded-xl border space-y-2 border-red-200 bg-red-50';
+    pe.className='p-4 rounded-xl border space-y-2 border-[#f0dfc0] bg-[#fdf8f5]';
   }
   pe.innerHTML=ph;
   if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
