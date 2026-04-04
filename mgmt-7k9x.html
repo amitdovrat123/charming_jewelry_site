@@ -9481,17 +9481,25 @@ async function runBackupToSheets() {
       const range = encodeURIComponent(sd.name) + '!A:Z';
 
       // Clear old data
-      await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '/values/' + range + ':clear', {
+      const clearRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '/values/' + range + ':clear', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + backupAccessToken }
       });
+      if (!clearRes.ok) {
+        const err = await clearRes.text();
+        throw new Error('Clear failed (' + clearRes.status + '): ' + err);
+      }
 
       // Write new data
-      await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '/values/' + encodeURIComponent(sd.name) + '!A1?valueInputOption=RAW', {
+      const writeRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + backupSpreadsheetId + '/values/' + encodeURIComponent(sd.name) + '!A1?valueInputOption=RAW', {
         method: 'PUT',
         headers: { 'Authorization': 'Bearer ' + backupAccessToken, 'Content-Type': 'application/json' },
         body: JSON.stringify({ values: [sd.headers, ...sd.rows] })
       });
+      if (!writeRes.ok) {
+        const err = await writeRes.text();
+        throw new Error('Write failed (' + writeRes.status + '): ' + err);
+      }
     }
 
     // Formatting handled by Apps Script auto-backup
