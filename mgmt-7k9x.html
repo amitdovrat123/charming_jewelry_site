@@ -6506,7 +6506,7 @@ function renderCrmBoard() {
   const drafts = [];      // טרם הועברה מקדמה
   const confirmed = [];   // סדנה אושרה (confirmed + future)
   const pending = [];     // בוצעה וממתינה לתשלום (past + balance not paid)
-  const archive = [];     // ארכיון (all past workshops)
+  const archive = [];     // ארכיון (past + fully paid)
 
   allWorkshops.forEach(w => {
     const status = w.bookingStatus || 'confirmed';
@@ -6518,9 +6518,10 @@ function renderCrmBoard() {
       drafts.push(w);
     } else if (status === 'confirmed' && !isPast) {
       confirmed.push(w);
-    } else if (isPast) {
+    } else if (isPast && !pay.balancePaid) {
+      pending.push(w);
+    } else if (isPast && pay.balancePaid) {
       archive.push(w);
-      if (!pay.balancePaid) pending.push(w);
     }
   });
 
