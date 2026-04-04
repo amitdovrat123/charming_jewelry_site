@@ -5984,7 +5984,7 @@ function renderWorkshopsList() {
   const secArchive = document.getElementById('ws-section-archive');
   const listArchive = document.getElementById('ws-list-archive');
   document.getElementById('ws-archive-count').textContent = archive.length;
-  if (archive.length) {
+  if (archive.length && wsCurrentView === 'list') {
     secArchive.style.display = '';
     renderLimitedList(archive, listArchive, w => renderWorkshopCard(w, { isPast: true }), 'border-gray-100', 'text-gray-400');
   } else {
