@@ -6581,6 +6581,7 @@ function renderCrmBoard() {
             <span class="text-gray-400">${w.time || ''}</span>
             <span class="text-gray-400">📍${esc(w.city || '')}</span>
             <span class="text-gray-400">👥${w.participantCount}</span>
+            <span class="text-gray-400 truncate">${esc(w.route || '')}</span>
           </div>
           <span class="text-[10px]">${daysLabel}</span>
         </div>
@@ -6593,8 +6594,9 @@ function renderCrmBoard() {
         <span class="text-[10px] text-gray-500 w-10">${w.time || ''}</span>
         <span class="text-[10px] text-gray-500 w-20 truncate">📍${esc(w.city || '—')}</span>
         <span class="text-[10px] text-gray-500 w-8">👥${w.participantCount}</span>
+        <span class="text-[10px] text-gray-500 flex-1 truncate">${esc(w.route || '')}</span>
         ${contact}
-        <span class="font-black text-sm text-[#d4a373] mr-auto">${(w.total||0).toLocaleString('he-IL')}₪</span>
+        <span class="font-black text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')}₪</span>
         <span class="text-[10px]">${daysLabel}</span>
         ${actionBtn || ''}
       </div>
