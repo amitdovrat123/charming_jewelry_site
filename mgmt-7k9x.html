@@ -2952,12 +2952,15 @@ function initNotifications() {
   _unsubNotifWs = onSnapshot(wq, snap => {
     const now = new Date();
     const oneDayAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-    const pastNotifs = snap.docs.filter(d => {
+    const pastDocs = snap.docs.filter(d => {
       const w = d.data();
       if ((w.bookingStatus || 'confirmed') !== 'confirmed') return false;
       const ed = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
       return ed && ed < oneDayAgo;
-    }).map(d => {
+    });
+    // Auto-create expenses for past confirmed workshops
+    pastDocs.forEach(d => ensureAutoExpenses(d.id, d.data()).catch(()=>{}));
+    const pastNotifs = pastDocs.map(d => {
       const w = d.data();
       const ed = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
       return { id: 'ws-past-' + d.id, type: 'workshop-past', docId: d.id, eventDate: ed, city: w.city || '', route: w.route || '' };
@@ -5094,6 +5097,44 @@ function calcWsMaterialCost(w) {
   return costPerP * (w.participantCount || 0);
 }
 
+// Auto-create expenses for past confirmed workshops (idempotent — checks for existing)
+async function ensureAutoExpenses(wsId, w) {
+  const ed = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
+  if (!ed) return;
+  const dateStr = ed.toISOString().split('T')[0];
+  const wsName = w.celebrant || w.customerName || '';
+  // Check if materials expense already exists for this workshop
+  const snap = await getDocs(query(collection(db, EXPENSES_COL), where('workshopId', '==', wsId)));
+  const existing = snap.docs.map(d => d.data().category);
+  if (!existing.includes('materials')) {
+    await addDoc(collection(db, EXPENSES_COL), {
+      date: dateStr, category: 'materials', amount: 400, method: 'cash',
+      workshopId: wsId, workshopName: wsName, notes: 'סחורה לסדנא — אוטומטי', createdAt: serverTimestamp(),
+    });
+    logAction(`הוצאת סחורה 400₪ — "${wsName}" (אוטומטי)`);
+  }
+  if (!existing.includes('fuel')) {
+    const dist = getCityDistance(w.city);
+    if (dist && dist > 0) {
+      const fuelCost = calcFuelCost(dist);
+      await addDoc(collection(db, EXPENSES_COL), {
+        date: dateStr, category: 'fuel', amount: fuelCost, method: 'cash',
+        workshopId: wsId, workshopName: wsName,
+        notes: `דלק ${dist} ק"מ × ${FUEL_RATE}₪ — ${w.city} — אוטומטי`, createdAt: serverTimestamp(),
+      });
+      logAction(`הוצאת דלק ${fuelCost}₪ — ${w.city} (אוטומטי)`);
+    }
+  }
+}
+
+// Delete all auto-expenses linked to a workshop
+async function deleteAutoExpenses(wsId) {
+  const snap = await getDocs(query(collection(db, EXPENSES_COL), where('workshopId', '==', wsId)));
+  for (const d of snap.docs) {
+    await deleteDoc(doc(db, EXPENSES_COL, d.id));
+  }
+}
+
 function getWsBasePrice() {
   const count = parseInt(document.getElementById('ws-count')?.value) || 0;
   const route = document.getElementById('ws-route')?.value || '';
@@ -5573,6 +5614,7 @@ async function deleteWorkshopFromForm() {
   if (!ok) return;
   try {
     if (w?.calendarEventId) deleteCalendarEvent(editWorkshopId);
+    await deleteAutoExpenses(editWorkshopId);
     await deleteDoc(doc(db, WORKSHOPS_COL, editWorkshopId));
     logAction(`סדנה "${name}" נמחקה`);
     showToast('הסדנה נמחקה');
@@ -5904,7 +5946,7 @@ window.toggleWsArchive = function() {};
 async function deleteWorkshop(id) {
   const w = allWorkshops.find(x=>x.id===id);
   if (w && confirm(`למחוק את הסדנה של "${w.celebrant||w.customerName}"?`)) {
-    try { await deleteDoc(doc(db, WORKSHOPS_COL, id)); logAction(`סדנה "${w.celebrant||w.customerName}" נמחקה`); }
+    try { await deleteAutoExpenses(id); await deleteDoc(doc(db, WORKSHOPS_COL, id)); logAction(`סדנה "${w.celebrant||w.customerName}" נמחקה`); }
     catch(ex) { console.error(ex); }
   }
 }
@@ -5947,22 +5989,6 @@ async function quickPayBalance(id) {
     });
     const methodNames = { cash:'מזומן', bit:'Bit', paybox:'PayBox', transfer:'העברה' };
     logAction(`יתרה אושרה — "${w.celebrant || w.customerName}" · ${Math.max(0,balanceAmount).toLocaleString('he-IL')}₪ · ${methodNames[chosen]}`);
-    // Auto-create fuel expense based on city distance
-    const dist = getCityDistance(w.city);
-    if (dist && dist > 0) {
-      const fuelCost = calcFuelCost(dist);
-      await addDoc(collection(db, EXPENSES_COL), {
-        date: new Date().toISOString().split('T')[0],
-        category: 'fuel',
-        amount: fuelCost,
-        method: 'cash',
-        workshopId: id,
-        workshopName: w.celebrant || w.customerName,
-        notes: `דלק ${dist} ק"מ × ${FUEL_RATE}₪ — ${w.city} — אוטומטי`,
-        createdAt: serverTimestamp(),
-      });
-      logAction(`הוצאת דלק ${fuelCost}₪ — ${w.city} (${dist} ק"מ) — אוטומטי`);
-    }
   } catch(e) { console.error(e); }
 }
 window.quickPayBalance = quickPayBalance;
@@ -6300,10 +6326,6 @@ async function executeWscPay(type, wsId) {
         bookingStatus: 'confirmed',
       });
       logAction(`מקדמה אושרה — "${w.celebrant||w.customerName}" · ${amount}₪`);
-      await addDoc(collection(db, EXPENSES_COL), {
-        date: new Date().toISOString().split('T')[0], category:'materials', amount:400, method:'cash',
-        workshopId:wsId, workshopName:w.celebrant||w.customerName, notes:'סחורה לסדנא — אוטומטי', createdAt:serverTimestamp(),
-      });
     } catch(e) { console.error(e); }
   } else {
     const method = document.getElementById('wsc-bal-method')?.value || 'cash';
@@ -6317,14 +6339,6 @@ async function executeWscPay(type, wsId) {
       });
       const methodNames = {cash:'מזומן',bit:'Bit',paybox:'PayBox',transfer:'העברה'};
       logAction(`יתרה אושרה — "${w.celebrant||w.customerName}" · ${balAmt}₪ · ${methodNames[method]}`);
-      const dist = getCityDistance(w.city);
-      if (dist && dist > 0) {
-        await addDoc(collection(db, EXPENSES_COL), {
-          date: new Date().toISOString().split('T')[0], category:'fuel', amount:calcFuelCost(dist), method:'cash',
-          workshopId:wsId, workshopName:w.celebrant||w.customerName,
-          notes:`דלק ${dist} ק"מ × ${FUEL_RATE}₪ — ${w.city} — אוטומטי`, createdAt:serverTimestamp(),
-        });
-      }
     } catch(e) { console.error(e); }
   }
   // Refresh card after payment
