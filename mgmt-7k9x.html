@@ -2196,7 +2196,9 @@ Charming by Vik 💛</textarea>
 
 <style>
   .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
-  .inp { width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s, box-shadow .2s; font-family:inherit; }
+  .inp { width:100%; max-width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s, box-shadow .2s; font-family:inherit; box-sizing:border-box; }
+  input[type="date"].inp,
+  input[type="time"].inp { -webkit-appearance:none; appearance:none; min-height:42px; }
   .inp:hover { border-color:#f0dfc0; }
   .inp:focus { border-color:#d4a373; box-shadow:0 0 0 3px rgba(212,163,115,.12); }
   textarea.inp { display:block; }
