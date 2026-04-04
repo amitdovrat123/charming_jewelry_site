@@ -5219,6 +5219,10 @@ async function saveWorkshop() {
       editWorkshopId = ref.id;
     }
     showToast('הסדנה נשמרה בהצלחה');
+    // Auto-sync to Google Calendar if confirmed
+    if (data.bookingStatus === 'confirmed' && editWorkshopId) {
+      syncCalendarEvent(editWorkshopId);
+    }
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
 }
 window.saveWorkshop = saveWorkshop;
@@ -5596,6 +5600,7 @@ async function confirmWorkshop(id) {
     await updateDoc(doc(db, WORKSHOPS_COL, id), { bookingStatus: 'confirmed' });
     const w = allWorkshops.find(x => x.id === id);
     logAction(`סדנה "${w?.celebrant || w?.customerName}" — הזמנה נסגרה`);
+    syncCalendarEvent(id);
   } catch(e) { console.error(e); }
 }
 window.confirmWorkshop = confirmWorkshop;
@@ -5638,6 +5643,7 @@ async function quickPayAdvance(id) {
       bookingStatus: 'confirmed',
     });
     logAction(`מקדמה אושרה + סדנא נסגרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
+    syncCalendarEvent(id);
     // Auto-create 400₪ materials expense
     await addDoc(collection(db, EXPENSES_COL), {
       date: new Date().toISOString().split('T')[0],
@@ -9169,6 +9175,116 @@ window.renderAnalytics = renderAnalytics;
 // ══════════════════════════════════════════════════════════════
 const BACKUP_CLIENT_ID = '130259110676-k2ef85o71ig2j1pgnpucc3lvljh45tlg.apps.googleusercontent.com';
 const BACKUP_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
+const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar';
+let calendarAccessToken = localStorage.getItem('calendar_token') || null;
+
+// ── Google Calendar Auto-Sync ──
+async function ensureCalendarToken() {
+  if (calendarAccessToken) {
+    // Verify token is still valid
+    try {
+      const r = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1', {
+        headers: { Authorization: 'Bearer ' + calendarAccessToken }
+      });
+      if (r.ok) return calendarAccessToken;
+    } catch(e) {}
+    // Token expired — clear it
+    calendarAccessToken = null;
+    localStorage.removeItem('calendar_token');
+  }
+  // Request new token
+  return new Promise((resolve) => {
+    if (typeof google === 'undefined' || !google.accounts?.oauth2) { resolve(null); return; }
+    const tc = google.accounts.oauth2.initTokenClient({
+      client_id: BACKUP_CLIENT_ID,
+      scope: CALENDAR_SCOPE,
+      hint: 'charming.by.vik@gmail.com',
+      callback: (resp) => {
+        if (resp.error) { console.error('Calendar OAuth error:', resp); resolve(null); return; }
+        calendarAccessToken = resp.access_token;
+        localStorage.setItem('calendar_token', calendarAccessToken);
+        resolve(calendarAccessToken);
+      }
+    });
+    tc.requestAccessToken();
+  });
+}
+
+function buildCalendarEvent(w) {
+  const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
+  if (!d) return null;
+  const end = new Date(d.getTime() + 2 * 60 * 60 * 1000); // 2 hours
+  const routeNames = { route1: 'מסלול 1 — שרשרת / צמיד', route2: 'מסלול 2 — שרשרת ועגילים', route3: 'מסלול 3 — שרשרת, צמיד ועגילים' };
+  const desc = [
+    `איש קשר: ${w.customerName || ''}`,
+    `טלפון: ${w.phone || ''}`,
+    `מסלול: ${routeNames[w.route] || w.route || ''}`,
+    `משתתפות: ${w.participantCount || ''}`,
+    `עלות הגעה: ${w.arrivalFee || 0} ₪`,
+    `סה"כ: ${(w.total || 0).toLocaleString('he-IL')} ₪`,
+    w.notes ? `הערות: ${w.notes}` : '',
+  ].filter(Boolean).join('\n');
+  return {
+    summary: `סדנת Charming — ${w.celebrant || w.customerName}`,
+    location: w.city || '',
+    description: desc,
+    start: { dateTime: d.toISOString(), timeZone: 'Asia/Jerusalem' },
+    end: { dateTime: end.toISOString(), timeZone: 'Asia/Jerusalem' },
+    reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 1440 }, { method: 'popup', minutes: 120 }] },
+  };
+}
+
+async function syncCalendarEvent(workshopId) {
+  const w = allWorkshops.find(x => x.id === workshopId);
+  if (!w) return;
+  const event = buildCalendarEvent(w);
+  if (!event) return;
+  const token = await ensureCalendarToken();
+  if (!token) { console.warn('Calendar: no token'); return; }
+  const headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+  const calId = 'primary';
+  try {
+    if (w.calendarEventId) {
+      // Update existing event
+      const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events/${w.calendarEventId}`, {
+        method: 'PUT', headers, body: JSON.stringify(event)
+      });
+      if (r.ok) {
+        showToast('היומן עודכן');
+        logAction(`יומן Google עודכן — "${w.celebrant || w.customerName}"`);
+      } else if (r.status === 404) {
+        // Event was deleted — create new
+        await createCalendarEvent(workshopId, event, headers, calId);
+      } else { console.error('Calendar update failed:', await r.text()); }
+    } else {
+      await createCalendarEvent(workshopId, event, headers, calId);
+    }
+  } catch(e) { console.error('Calendar sync error:', e); }
+}
+
+async function createCalendarEvent(workshopId, event, headers, calId) {
+  const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events`, {
+    method: 'POST', headers, body: JSON.stringify(event)
+  });
+  if (r.ok) {
+    const data = await r.json();
+    await updateDoc(doc(db, WORKSHOPS_COL, workshopId), { calendarEventId: data.id });
+    showToast('אירוע נוסף ליומן Google');
+    logAction(`אירוע Google Calendar נוצר — "${event.summary}"`);
+  } else { console.error('Calendar create failed:', await r.text()); }
+}
+
+async function deleteCalendarEvent(workshopId) {
+  const w = allWorkshops.find(x => x.id === workshopId);
+  if (!w?.calendarEventId) return;
+  const token = await ensureCalendarToken();
+  if (!token) return;
+  try {
+    await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${w.calendarEventId}`, {
+      method: 'DELETE', headers: { Authorization: 'Bearer ' + token }
+    });
+  } catch(e) { console.error('Calendar delete error:', e); }
+}
 let backupAccessToken = localStorage.getItem('backup_token') || null;
 let backupSpreadsheetId = null;
 
