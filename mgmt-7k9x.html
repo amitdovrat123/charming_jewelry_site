@@ -1011,7 +1011,7 @@
               <input id="ws-status" type="hidden" value="draft" />
               <div id="ws-status-display" class="flex items-center gap-2 mt-1 px-3 py-2 bg-gray-50 rounded-lg">
                 <span id="ws-status-icon"><i data-lucide="file-edit" class="w-4 h-4 inline-block"></i></span>
-                <span id="ws-status-text" class="text-sm font-semibold text-amber-600">טיוטה — ממתין למקדמה</span>
+                <span id="ws-status-text" class="text-sm font-semibold text-amber-600">טרם הועברה מקדמה</span>
               </div>
               <p class="text-[10px] text-gray-400 mt-1">הסדנא תיסגר אוטומטית עם אישור מקדמה</p>
             </div>
@@ -1135,7 +1135,7 @@
           <div id="wsf-drafts" class="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
             <div class="px-5 py-3 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
               <i data-lucide="file-edit" class="w-4 h-4 text-amber-600"></i>
-              <h3 class="font-bold text-sm text-amber-700">סדנאות בטיוטה</h3>
+              <h3 class="font-bold text-sm text-amber-700">טרם הועברה מקדמה</h3>
               <span id="wsf-drafts-count" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5"></span>
             </div>
             <div id="wsf-drafts-list" class="divide-y divide-amber-50"></div>
@@ -1145,7 +1145,7 @@
           <div id="wsf-confirmed" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden" style="display:none;">
             <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2">
               <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
-              <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — עתידיות</h3>
+              <h3 class="font-bold text-sm text-gray-800">מקדמה שולמה — עתידיות</h3>
               <span id="wsf-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
             </div>
             <div id="wsf-confirmed-list" class="divide-y divide-[#fdf6ee]"></div>
@@ -1155,7 +1155,7 @@
           <div id="wsf-unsettled" class="bg-white border border-red-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
             <div class="px-5 py-3 border-b border-red-100 bg-red-50 flex items-center gap-2">
               <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
-              <h3 class="font-bold text-sm text-red-600">סדנאות שלא נסגרו</h3>
+              <h3 class="font-bold text-sm text-red-600">טרם הועברה מקדמה — עברו</h3>
               <span id="wsf-unsettled-count" class="text-[10px] font-bold bg-red-200 text-red-600 rounded-full px-2 py-0.5"></span>
             </div>
             <div id="wsf-unsettled-list" class="divide-y divide-red-50"></div>
@@ -1165,7 +1165,7 @@
           <div id="wsf-past" class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden" style="display:none;">
             <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
               <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
-              <h3 class="font-bold text-sm text-gray-400">סדנאות שעברו</h3>
+              <h3 class="font-bold text-sm text-gray-400">ארכיון</h3>
               <span id="wsf-past-count" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5"></span>
             </div>
             <div id="wsf-past-list" class="divide-y divide-gray-50"></div>
@@ -2971,7 +2971,7 @@ function renderNotifications() {
         ${dot}
         <div class="flex-1 min-w-0">
           <p class="text-xs ${titleWeight} truncate"><i data-lucide='palette' class='w-3 h-3 inline-block'></i> סדנה לא עודכנה — ${n.route || n.city || ''}</p>
-          <p class="text-[11px] text-gray-400 truncate mt-0.5">התקיימה ב-${dateStr} ועדיין בסטטוס מאושרת</p>
+          <p class="text-[11px] text-gray-400 truncate mt-0.5">התקיימה ב-${dateStr} וממתינה לתשלום יתרה</p>
         </div>
       </button>`;
     }
@@ -3047,7 +3047,7 @@ function buildAllNotifItems() {
       docId: w.docId,
       ts: w.eventDate ? w.eventDate.getTime() : 0,
       label: `סדנה לא עודכנה — ${w.route || w.city || ''}`,
-      sub: `התקיימה ב-${w.eventDate ? w.eventDate.toLocaleDateString('he-IL') : ''} ועדיין בסטטוס מאושרת`,
+      sub: `התקיימה ב-${w.eventDate ? w.eventDate.toLocaleDateString('he-IL') : ''} וממתינה לתשלום יתרה`,
     });
   });
 
@@ -5017,12 +5017,12 @@ function updatePaymentBadge() {
   if (statusIcon && statusText && statusInput) {
     if (adv) {
       statusIcon.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 inline-block text-emerald-500"></i>'; if(typeof lucide!=='undefined')lucide.createIcons();
-      statusText.textContent = 'הזמנה סגורה';
+      statusText.textContent = 'מקדמה שולמה';
       statusText.className = 'text-sm font-semibold text-emerald-600';
       statusInput.value = 'confirmed';
     } else {
       statusIcon.innerHTML = '<i data-lucide="file-edit" class="w-4 h-4 inline-block"></i>'; if(typeof lucide!=='undefined')lucide.createIcons();
-      statusText.textContent = 'טיוטה — ממתין למקדמה';
+      statusText.textContent = 'טרם הועברה מקדמה';
       statusText.className = 'text-sm font-semibold text-amber-600';
       statusInput.value = 'draft';
     }
@@ -5104,8 +5104,8 @@ function openDayPopup(day) {
     listEl.innerHTML = dayWs.map(w => {
       const isConfirmed = w.bookingStatus === 'confirmed';
       const statusBadge = isConfirmed
-        ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700">מאושרת</span>`
-        : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500">טיוטה</span>`;
+        ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700">מקדמה שולמה</span>`
+        : `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500">טרם הועברה מקדמה</span>`;
       const timeStr = w.time || '';
       return `<div class="px-4 py-3 flex items-center justify-between hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="drillToWorkshop('${w.id}')">
         <div class="flex items-center gap-2.5">
@@ -5531,7 +5531,7 @@ function renderWorkshopCard(w, opts = {}) {
   const pay = w.payment || {};
 
   const statusBadge = status === 'draft'
-    ? '<span class="text-[10px] font-bold bg-red-100 text-red-500 border border-red-200 px-2 py-0.5 rounded-full">טיוטה</span>'
+    ? '<span class="text-[10px] font-bold bg-red-100 text-red-500 border border-red-200 px-2 py-0.5 rounded-full">טרם הועברה מקדמה</span>'
     : '';
   const pastBadge = isPast
     ? '<span class="text-[10px] font-bold bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">סדנה עברה</span>'
@@ -5676,7 +5676,7 @@ async function confirmWorkshop(id) {
   try {
     await updateDoc(doc(db, WORKSHOPS_COL, id), { bookingStatus: 'confirmed' });
     const w = allWorkshops.find(x => x.id === id);
-    logAction(`סדנה "${w?.celebrant || w?.customerName}" — הזמנה נסגרה`);
+    logAction(`סדנה "${w?.celebrant || w?.customerName}" — מקדמה שולמה`);
   } catch(e) { console.error(e); }
 }
 window.confirmWorkshop = confirmWorkshop;
@@ -5718,7 +5718,7 @@ async function quickPayAdvance(id) {
       'payment.advancePaidDate': Timestamp.now(),
       bookingStatus: 'confirmed',
     });
-    logAction(`מקדמה אושרה + סדנא נסגרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
+    logAction(`מקדמה אושרה — "${w.celebrant || w.customerName}" · ${(pay.advanceAmount||500).toLocaleString('he-IL')}₪`);
     // Auto-create 400₪ materials expense
     await addDoc(collection(db, EXPENSES_COL), {
       date: new Date().toISOString().split('T')[0],
@@ -5955,13 +5955,13 @@ function openWsCard(id) {
   // Status badge
   const isPast = d && d < now;
   if (status === 'draft') {
-    el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded-full">טיוטה</span>';
+    el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded-full">טרם הועברה מקדמה</span>';
   } else {
-    el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-600 border border-emerald-200 px-2.5 py-1 rounded-full">סגורה — מקדמה שולמה</span>';
+    el('wsc-status-badge').innerHTML = '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-600 border border-emerald-200 px-2.5 py-1 rounded-full">מקדמה שולמה</span>';
   }
   // Reminder for past workshops where balance not marked as paid
   if (status === 'confirmed' && isPast && !pay.balancePaid) {
-    el('wsc-status-badge').innerHTML += '<span class="text-[10px] font-semibold bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full mr-2">טרם הושלם התשלום</span>';
+    el('wsc-status-badge').innerHTML += '<span class="text-[10px] font-semibold bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full mr-2">בוצעה וממתינה לתשלום</span>';
   }
 
   if (d) {
@@ -6082,7 +6082,7 @@ async function executeWscPay(type, wsId) {
         'payment.advanceMethod': method, 'payment.advancePaidDate': Timestamp.now(),
         bookingStatus: 'confirmed',
       });
-      logAction(`מקדמה אושרה + סדנא נסגרה — "${w.celebrant||w.customerName}" · ${amount}₪`);
+      logAction(`מקדמה אושרה — "${w.celebrant||w.customerName}" · ${amount}₪`);
       await addDoc(collection(db, EXPENSES_COL), {
         date: new Date().toISOString().split('T')[0], category:'materials', amount:400, method:'cash',
         workshopId:wsId, workshopName:w.celebrant||w.customerName, notes:'סחורה לסדנא — אוטומטי', createdAt:serverTimestamp(),
@@ -9449,7 +9449,7 @@ function bkDateShort(ts) {
   return isNaN(d) ? String(ts) : d.toLocaleDateString('he-IL');
 }
 const EXP_CAT_HE = { materials:'חומרי גלם', staff:'תשלום לעובדת', fuel:'דלק / נסיעות', marketing:'שיווק ממומן', other:'אחר' };
-const WS_STATUS_HE = { draft:'טיוטה', confirmed:'מאושרת', archived:'בארכיון' };
+const WS_STATUS_HE = { draft:'טרם הועברה מקדמה', confirmed:'מקדמה שולמה', archived:'ארכיון' };
 const ORD_STATUS_HE = { pending_payment:'ממתין לתשלום', processing:'בטיפול', shipped:'נשלח', delivered:'נמסר', cancelled:'בוטל' };
 const INQ_STATUS_HE = { new:'חדשה', handled:'טופל', archived:'בארכיון' };
 
@@ -9746,7 +9746,7 @@ const EXCEL_CLR = {
   desc: 'E6F0FA', tag: 'FFF3CD'
 };
 const EXCEL_STATUS_CLR = {
-  'טיוטה':'FFF3CD','מאושרת':'D4EDDA','בארכיון':'E2E3E5',
+  'טרם הועברה מקדמה':'FFF3CD','מקדמה שולמה':'D4EDDA','ארכיון':'E2E3E5',
   'ממתין לתשלום':'FFF3CD','בטיפול':'D6EAF8','נשלח':'FFE8CC','נמסר':'D4EDDA','בוטל':'F5D5D5',
   'חדשה':'FFF3CD','טופל':'D4EDDA','published':'D4EDDA','draft':'FFF3CD'
 };
