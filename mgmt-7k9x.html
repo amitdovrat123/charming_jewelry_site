@@ -5532,7 +5532,7 @@ function generateCalendarLinks(ws) {
     `סה"כ עלות: ${total} ₪`,
     payLine,
   ].join('\n');
-  const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(d)}/${fmt(end)}&details=${encodeURIComponent(calNotes)}`;
+  const gcal = `https://calendar.google.com/calendar/render?authuser=charming.by.vik@gmail.com&action=TEMPLATE&text=${title}&dates=${fmt(d)}/${fmt(end)}&details=${encodeURIComponent(calNotes)}`;
   return `<a href="${gcal}" target="_blank" class="text-[10px] text-[#d4a373] hover:underline"><i data-lucide='calendar' class='w-3 h-3 inline-block'></i> Google Calendar</a>`;
 }
 
