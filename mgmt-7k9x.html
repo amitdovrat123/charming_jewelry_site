@@ -3408,36 +3408,17 @@ function renderWsDashboard() {
 
   // ── Payment Status ──
   const upcoming = confirmed.filter(w => { const d = wsDate(w); return d && d >= now; });
-  let totalExpected = 0, totalCollected = 0, openDebt = 0;
+  let payFull = 0, payAdvance = 0, payNone = 0, openDebt = 0;
   upcoming.forEach(w => {
     const pay = w.payment || {};
-    const total = w.total || 0;
-    totalExpected += total;
-    if (pay.advancePaid) totalCollected += (pay.advanceAmount || 500);
-    if (pay.balancePaid) totalCollected += (pay.balanceAmount || 0);
+    if (pay.advancePaid && pay.balancePaid) payFull++;
+    else if (pay.advancePaid) { payAdvance++; openDebt += (w.total || 0) - (pay.advanceAmount || 500); }
+    else { payNone++; openDebt += (w.total || 0); }
   });
-  openDebt = Math.max(0, totalExpected - totalCollected);
-  const payEl = el('wsd-payment-summary');
-  if (payEl) {
-    const fmt = v => v.toLocaleString('he-IL');
-    payEl.innerHTML = `
-      <div class="flex items-center justify-between p-2.5 rounded-lg bg-gray-50">
-        <span class="text-xs font-semibold text-gray-600">סה"כ צפוי</span>
-        <span class="text-sm font-black text-gray-700">${fmt(totalExpected)} ₪</span>
-      </div>
-      <div class="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50 border border-emerald-100">
-        <span class="text-xs font-bold text-gray-600">התקבל</span>
-        <span class="text-sm font-black text-emerald-600">${fmt(totalCollected)} ₪</span>
-      </div>
-      <div class="flex items-center justify-between p-2.5 rounded-lg ${openDebt > 0 ? 'bg-red-50 border border-red-100' : 'bg-gray-50'}">
-        <span class="text-xs font-bold text-gray-600">חוב פתוח</span>
-        <span class="text-sm font-black ${openDebt > 0 ? 'text-red-500' : 'text-gray-400'}">${fmt(openDebt)} ₪</span>
-      </div>
-      ${totalExpected > 0 ? `<div class="mt-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-        <div class="h-full bg-emerald-400 rounded-full transition-all" style="width:${Math.round((totalCollected/totalExpected)*100)}%"></div>
-      </div>
-      <p class="text-[10px] text-gray-400 text-left mt-0.5">${Math.round((totalCollected/totalExpected)*100)}% נגבה</p>` : ''}`;
-  }
+  if (el('wsd-pay-full')) el('wsd-pay-full').textContent = payFull;
+  if (el('wsd-pay-advance')) el('wsd-pay-advance').textContent = payAdvance;
+  if (el('wsd-pay-none')) el('wsd-pay-none').textContent = payNone;
+  if (el('wsd-open-debt')) el('wsd-open-debt').textContent = openDebt > 0 ? openDebt.toLocaleString('he-IL') + ' ₪' : '0 ₪';
 
   // ── Next Workshop ──
   const futureConfirmed = confirmed
