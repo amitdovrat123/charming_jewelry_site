@@ -9177,9 +9177,11 @@ async function initBackupTab() {
     if (settingsDoc.exists()) {
       const data = settingsDoc.data();
       backupSpreadsheetId = data.spreadsheetId || null;
-      if (data.lastBackup) {
-        const d = data.lastBackup.toDate ? data.lastBackup.toDate() : new Date(data.lastBackup);
-        document.getElementById('backup-last-run').textContent = 'גיבוי אחרון: ' + d.toLocaleString('he-IL');
+      const manualDate = data.lastBackup ? (data.lastBackup.toDate ? data.lastBackup.toDate() : new Date(data.lastBackup)) : null;
+      const autoDate = data.lastAutoBackup ? (data.lastAutoBackup.toDate ? data.lastAutoBackup.toDate() : new Date(data.lastAutoBackup)) : null;
+      const latestDate = manualDate && autoDate ? (manualDate > autoDate ? manualDate : autoDate) : (manualDate || autoDate);
+      if (latestDate) {
+        document.getElementById('backup-last-run').textContent = 'גיבוי אחרון: ' + latestDate.toLocaleString('he-IL');
       }
       if (backupSpreadsheetId) {
         const link = document.getElementById('backup-sheet-link');
