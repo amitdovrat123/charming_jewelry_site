@@ -35,7 +35,7 @@ function doBackup() {
   logSheet.appendRow([new Date(), 'גיבוי הושלם בהצלחה']);
 
   // Save spreadsheet ID to Firestore so dashboard can use the same sheet
-  saveSheetIdToFirestore(ssId);
+  saveSheetIdToFirestore(ss.getId());
 
   Logger.log('Backup completed at ' + new Date().toISOString());
 }
