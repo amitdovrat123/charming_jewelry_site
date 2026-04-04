@@ -9997,47 +9997,48 @@ async function generateInvitation(w) {
 
   // ── "הינך מוזמנת לחגוג איתנו את" ──
   ctx.fillStyle = GRAY;
-  ctx.font = '600 46px Assistant, sans-serif';
-  ctx.fillText('הינך מוזמנת לחגוג איתנו את', cx, 390);
+  ctx.font = '700 58px Assistant, sans-serif';
+  ctx.fillText('הינך מוזמנת לחגוג איתנו את', cx, 350);
 
   // ── Occasion ──
-  ctx.font = '600 46px Assistant, sans-serif';
-  ctx.fillText(occasion + ' של', cx, 455);
+  ctx.font = '700 58px Assistant, sans-serif';
+  ctx.fillText(occasion + ' של', cx, 425);
 
   // ── Celebrant name (large, pink, bold) ──
   ctx.fillStyle = PINK;
-  ctx.font = '800 120px Assistant, sans-serif';
-  ctx.fillText(celebrant, cx, 600);
+  ctx.font = '800 160px Assistant, sans-serif';
+  ctx.fillText(celebrant, cx, 590);
 
   // ── Fixed block ──
   ctx.fillStyle = GRAY;
-  ctx.font = '600 40px Assistant, sans-serif';
-  ctx.fillText('בתוכנית- סדנת הצ׳ארמים', cx, 710);
-  ctx.fillText('של', cx, 760);
+  ctx.font = '700 48px Assistant, sans-serif';
+  ctx.fillText('בתוכנית- סדנת הצ׳ארמים', cx, 700);
+  ctx.fillText('של', cx, 758);
 
   ctx.fillStyle = PINK;
-  ctx.font = '700 54px Assistant, sans-serif';
-  ctx.fillText('C H A R M I N G', cx, 835);
+  ctx.font = '700 62px Assistant, sans-serif';
+  ctx.fillText('C H A R M I N G', cx, 840);
 
   ctx.fillStyle = GRAY;
-  ctx.font = '600 40px Assistant, sans-serif';
-  ctx.fillText('נייצר ביחד תכשיטי', cx, 910);
-  ctx.fillText('צ׳ארמים בהתאמה אישית!', cx, 960);
+  ctx.font = '700 48px Assistant, sans-serif';
+  ctx.fillText('נייצר ביחד תכשיטי', cx, 920);
+  ctx.fillText('צ׳ארמים בהתאמה אישית!', cx, 978);
 
   // ── Address ──
   ctx.fillStyle = PINK;
-  ctx.font = '600 46px Assistant, sans-serif';
-  ctx.fillText('כתובת: ' + city, cx, 1100);
+  ctx.font = '700 52px Assistant, sans-serif';
+  ctx.fillText('כתובת: ' + city, cx, 1110);
 
   // ── Date ──
-  ctx.fillText('תאריך : ' + dateStr, cx, 1210);
+  ctx.font = '700 56px Assistant, sans-serif';
+  ctx.fillText('תאריך : ' + dateStr, cx, 1230);
 
   // ── Time ──
-  ctx.fillText('שעה: ' + timeStr, cx, 1290);
+  ctx.fillText('שעה: ' + timeStr, cx, 1310);
 
   // ── "מצפה לראותך :)" ──
-  ctx.font = 'italic 600 52px Assistant, sans-serif';
-  ctx.fillText('מצפה לראותך :)', cx, 1430);
+  ctx.font = 'italic 700 62px Assistant, sans-serif';
+  ctx.fillText('מצפה לראותך :)', cx, 1450);
 
   // Show modal
   const modal = document.getElementById('invite-modal');
