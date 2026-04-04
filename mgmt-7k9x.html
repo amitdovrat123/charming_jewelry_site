@@ -1306,7 +1306,18 @@
 
       <!-- ─── TAB: FINANCES ─── -->
       <section id="tab-finances" data-erp-tab class="p-6 space-y-6">
-        <h2 class="font-black text-gray-800 text-lg flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-[#d4a373] inline-block"></i> כספים ודוחות</h2>
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <h2 class="font-black text-gray-800 text-lg flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-[#d4a373] inline-block"></i> כספים ודוחות</h2>
+          <div class="flex items-center gap-1 bg-gray-100 rounded-full p-0.5">
+            <button id="fin-view-workshops" onclick="switchFinView('workshops')"
+              class="fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#d4a373] text-white shadow-sm">סדנאות</button>
+            <button id="fin-view-shop" onclick="switchFinView('shop')"
+              class="fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all text-gray-400 hover:text-[#d4a373]">חנות</button>
+          </div>
+        </div>
+
+        <!-- ═══ Workshops Finance View ═══ -->
+        <div id="fin-workshops-view">
 
         <!-- Report period selector -->
         <div class="flex items-center gap-3">
@@ -1410,6 +1421,17 @@
             </div>
           </div>
         </div>
+        </div><!-- /fin-workshops-view -->
+
+        <!-- ═══ Shop Finance View ═══ -->
+        <div id="fin-shop-view" style="display:none">
+          <div class="flex flex-col items-center justify-center py-20 text-center">
+            <i data-lucide="shopping-bag" class="w-16 h-16 text-gray-200 mb-4"></i>
+            <h3 class="text-lg font-bold text-gray-400 mb-2">דוחות חנות</h3>
+            <p class="text-sm text-gray-300">בקרוב — דוחות מכירות, הזמנות ורווחיות מוצרים</p>
+          </div>
+        </div>
+
       </section>
 
       <!-- ─── TAB: LOGS ─── -->
@@ -3245,6 +3267,17 @@ function initDashboardTab() {
 
 // ── Workshop Dashboard ──────────────────────────────────────────
 let currentDashView = 'workshops';
+function switchFinView(view) {
+  document.getElementById('fin-workshops-view').style.display = view === 'workshops' ? '' : 'none';
+  document.getElementById('fin-shop-view').style.display = view === 'shop' ? '' : 'none';
+  document.getElementById('fin-view-workshops').className = 'fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all ' +
+    (view === 'workshops' ? 'bg-[#d4a373] text-white shadow-sm' : 'text-gray-400 hover:text-[#d4a373]');
+  document.getElementById('fin-view-shop').className = 'fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all ' +
+    (view === 'shop' ? 'bg-[#d4a373] text-white shadow-sm' : 'text-gray-400 hover:text-[#d4a373]');
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+}
+window.switchFinView = switchFinView;
+
 function switchDashView(view) {
   currentDashView = view;
   sessionStorage.setItem('charming_dash_view', view);
@@ -10046,7 +10079,7 @@ async function generateInvitation(w) {
   // Parse data
   const celebrant = w.celebrant || w.customerName || '';
   const occasion = w.occasion || '';
-  const city = w.city || '';
+  const city = [w.street, w.city].filter(Boolean).join(', ') || '';
   const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
   const dateStr = d ? d.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' }) : '';
   const timeStr = w.time || '';
