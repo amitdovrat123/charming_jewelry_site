@@ -6284,7 +6284,14 @@ function openWsCard(id) {
   }
   if (pay.balancePaid) {
     const bd=pay.balancePaidDate?.seconds?new Date(pay.balancePaidDate.seconds*1000).toLocaleDateString('he-IL'):'';
-    ph+=`<div class="flex justify-between items-center"><span class="text-xs text-gray-600">יתרה</span><span class="text-sm font-bold text-emerald-600">${(pay.balanceAmount||0).toLocaleString('he-IL')}₪ · ${mn[pay.balanceMethod]||''} · ${bd}</span></div>`;
+    if (Array.isArray(pay.balancePayments) && pay.balancePayments.length > 1) {
+      ph+=`<div class="flex justify-between items-center"><span class="text-xs text-gray-600">יתרה</span><span class="text-sm font-bold text-emerald-600">${(pay.balanceAmount||0).toLocaleString('he-IL')}₪ · ${bd}</span></div>`;
+      pay.balancePayments.forEach(bp => {
+        ph+=`<div class="flex justify-between items-center pr-4"><span class="text-[10px] text-gray-400">↵</span><span class="text-xs text-emerald-500">${(bp.amount||0).toLocaleString('he-IL')}₪ · ${mn[bp.method]||bp.method||''}</span></div>`;
+      });
+    } else {
+      ph+=`<div class="flex justify-between items-center"><span class="text-xs text-gray-600">יתרה</span><span class="text-sm font-bold text-emerald-600">${(pay.balanceAmount||0).toLocaleString('he-IL')}₪ · ${mn[pay.balanceMethod]||''} · ${bd}</span></div>`;
+    }
   } else if (pay.advancePaid) {
     ph+=`<div class="flex justify-between items-center"><span class="text-xs text-gray-600">יתרה לתשלום</span><span class="text-sm font-bold text-red-500">${balAmt.toLocaleString('he-IL')}₪</span></div>`;
   }
@@ -6335,36 +6342,61 @@ function toggleWscPayPanel(type, wsId) {
   const advAmt = pay.advanceAmount || 500;
   const balAmt = Math.max(0, (w?.total||0) - advAmt);
 
+  const methodOpts = `<option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option>`;
   if (type === 'advance') {
     panel.innerHTML = `
       <p class="text-xs font-bold text-gray-700 mb-2">אישור תשלום מקדמה</p>
       <div class="flex gap-3">
         <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label><input id="wsc-adv-amount" type="number" value="${advAmt}" class="inp text-sm mt-0.5" /></div>
         <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
-          <select id="wsc-adv-method" class="inp text-sm mt-0.5"><option value="paybox" selected>PayBox</option><option value="bit">Bit</option></select>
+          <select id="wsc-adv-method" class="inp text-sm mt-0.5">${methodOpts}</select>
         </div>
       </div>
       <button onclick="executeWscPay('advance','${wsId}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#d4a373] hover:bg-[#b8893e] transition-colors flex items-center justify-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i> אשר מקדמה ${advAmt.toLocaleString('he-IL')}₪</button>`;
   } else {
     panel.innerHTML = `
-      <p class="text-xs font-bold text-gray-700 mb-2">אישור תשלום יתרה</p>
-      <div class="flex gap-3">
-        <div class="flex-1"><label class="text-[9px] text-gray-400">סכום יתרה</label><p class="text-sm font-bold text-gray-700 mt-1">${balAmt.toLocaleString('he-IL')} ₪</p></div>
-        <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
-          <select id="wsc-bal-method" class="inp text-sm mt-0.5"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option></select>
+      <p class="text-xs font-bold text-gray-700 mb-2">אישור תשלום יתרה — ${balAmt.toLocaleString('he-IL')} ₪</p>
+      <div id="wsc-bal-rows" class="space-y-2">
+        <div class="flex gap-2 items-end wsc-bal-row">
+          <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label><input type="number" class="inp text-sm mt-0.5 wsc-bal-amt" value="${balAmt}" /></div>
+          <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label><select class="inp text-sm mt-0.5 wsc-bal-mth">${methodOpts}</select></div>
         </div>
       </div>
-      <button onclick="executeWscPay('balance','${wsId}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i> אשר יתרה ${balAmt.toLocaleString('he-IL')}₪</button>`;
+      <button onclick="addBalanceRow(${balAmt})" class="text-[10px] text-[#d4a373] hover:underline font-bold mt-1">+ הוסף אמצעי תשלום נוסף</button>
+      <p id="wsc-bal-err" class="text-[10px] text-red-500 mt-1" style="display:none"></p>
+      <button onclick="executeWscPay('balance','${wsId}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i> אשר יתרה ${balAmt.toLocaleString('he-IL')}₪</button>`;
   }
   if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 }
 window.toggleWscPayPanel = toggleWscPayPanel;
 
+function addBalanceRow(totalBal) {
+  const container = document.getElementById('wsc-bal-rows');
+  if (!container) return;
+  const methodOpts = `<option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option>`;
+  // Calculate remaining
+  let used = 0;
+  container.querySelectorAll('.wsc-bal-amt').forEach(inp => { used += parseFloat(inp.value) || 0; });
+  const remaining = Math.max(0, totalBal - used);
+  const row = document.createElement('div');
+  row.className = 'flex gap-2 items-end wsc-bal-row';
+  row.innerHTML = `
+    <div class="flex-1"><input type="number" class="inp text-sm wsc-bal-amt" value="${remaining}" /></div>
+    <div class="flex-1"><select class="inp text-sm wsc-bal-mth">${methodOpts}</select></div>
+    <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 mb-1"><i data-lucide="x" class="w-4 h-4"></i></button>`;
+  container.appendChild(row);
+  // Update first row amount to fill remaining
+  const firstAmt = container.querySelector('.wsc-bal-amt');
+  if (firstAmt) firstAmt.value = totalBal - remaining;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.addBalanceRow = addBalanceRow;
+
 async function executeWscPay(type, wsId) {
+  const methodNames = {cash:'מזומן',bit:'Bit',paybox:'PayBox',transfer:'העברה בנקאית'};
   if (type === 'advance') {
     const amount = parseFloat(document.getElementById('wsc-adv-amount')?.value) || 500;
     const method = document.getElementById('wsc-adv-method')?.value || 'paybox';
-    // Update workshop + create expense via existing function logic
     const w = allWorkshops.find(x=>x.id===wsId);
     if (!w) return;
     try {
@@ -6373,23 +6405,38 @@ async function executeWscPay(type, wsId) {
         'payment.advanceMethod': method, 'payment.advancePaidDate': Timestamp.now(),
         bookingStatus: 'confirmed',
       });
-      logAction(`מקדמה אושרה — "${w.celebrant||w.customerName}" · ${amount}₪`);
+      logAction(`מקדמה אושרה — "${w.celebrant||w.customerName}" · ${amount}₪ · ${methodNames[method]}`);
     } catch(e) { console.error(e); }
   } else {
-    const method = document.getElementById('wsc-bal-method')?.value || 'cash';
     const w = allWorkshops.find(x=>x.id===wsId);
     if (!w) return;
     const balAmt = Math.max(0, (w.total||0) - (w.payment?.advanceAmount||500));
+    // Collect all payment rows
+    const rows = document.querySelectorAll('.wsc-bal-row');
+    const payments = [];
+    let totalPaid = 0;
+    rows.forEach(row => {
+      const amt = parseFloat(row.querySelector('.wsc-bal-amt')?.value) || 0;
+      const mth = row.querySelector('.wsc-bal-mth')?.value || 'cash';
+      if (amt > 0) { payments.push({ amount: amt, method: mth }); totalPaid += amt; }
+    });
+    // Validate total matches
+    const errEl = document.getElementById('wsc-bal-err');
+    if (Math.abs(totalPaid - balAmt) > 1) {
+      if (errEl) { errEl.textContent = `סכום התשלומים (${totalPaid.toLocaleString('he-IL')}₪) לא תואם ליתרה (${balAmt.toLocaleString('he-IL')}₪)`; errEl.style.display = ''; }
+      return;
+    }
     try {
+      const mainMethod = payments[0]?.method || 'cash';
+      const summary = payments.map(p => `${p.amount}₪ ${methodNames[p.method]}`).join(' + ');
       await updateDoc(doc(db, WORKSHOPS_COL, wsId), {
         'payment.balancePaid': true, 'payment.balanceAmount': balAmt,
-        'payment.balanceMethod': method, 'payment.balancePaidDate': Timestamp.now(),
+        'payment.balanceMethod': mainMethod, 'payment.balancePaidDate': Timestamp.now(),
+        'payment.balancePayments': payments,
       });
-      const methodNames = {cash:'מזומן',bit:'Bit',paybox:'PayBox',transfer:'העברה'};
-      logAction(`יתרה אושרה — "${w.celebrant||w.customerName}" · ${balAmt}₪ · ${methodNames[method]}`);
+      logAction(`יתרה אושרה — "${w.celebrant||w.customerName}" · ${summary}`);
     } catch(e) { console.error(e); }
   }
-  // Refresh card after payment
   closeWsCard();
   setTimeout(()=>openWsCard(wsId), 500);
 }
