@@ -3527,16 +3527,22 @@ function renderWsDashboard() {
   // ── Popular Routes ──
   const routesEl = el('wsd-popular-routes');
   if (routesEl) {
+    const routeShortNames = {
+      'מסלול 1 - שרשרת / צמיד': 'מסלול 1',
+      'מסלול 2 - שרשרת ועגילים': 'מסלול 2',
+      'מסלול 2 משודרג - שרשרת וצמיד': 'מסלול 2 משודרג',
+      'מסלול 3 - שרשרת צמיד ועגילים': 'מסלול 3',
+    };
     const routeMap = {};
     confirmed.forEach(w => { routeMap[w.route] = (routeMap[w.route] || 0) + 1; });
     const sorted = Object.entries(routeMap).sort((a, b) => b[1] - a[1]);
     const maxR = sorted[0]?.[1] || 1;
     routesEl.innerHTML = sorted.length ? sorted.map(([route, count]) => `
-      <div class="flex items-center gap-3">
-        <span class="text-xs font-semibold text-gray-700 w-48 truncate">${esc(route)}</span>
-        <div class="flex-1 h-2 bg-[#f0dfc0] rounded-full overflow-hidden"><div class="h-full bg-[#d4a373] rounded-full" style="width:${Math.round((count/maxR)*100)}%"></div></div>
-        <span class="text-xs font-bold text-[#d4a373] w-8 text-left">${count}</span>
-      </div>`).join('') : '<p class="text-gray-300 text-sm">אין נתונים</p>';
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] font-semibold text-gray-700 w-28 truncate text-right">${esc(routeShortNames[route] || route)}</span>
+        <div class="flex-1 h-2 bg-blue-100 rounded-full overflow-hidden"><div class="h-full bg-blue-400 rounded-full" style="width:${Math.round((count/maxR)*100)}%"></div></div>
+        <span class="text-[11px] font-bold text-blue-500 w-5 text-left">${count}</span>
+      </div>`).join('') : '<p class="text-gray-300 text-xs">אין נתונים</p>';
   }
 
   // ── Popular Cities ──
