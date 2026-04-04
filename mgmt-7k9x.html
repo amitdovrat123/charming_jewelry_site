@@ -912,26 +912,8 @@
               </div>
               <div id="crm-col-confirmed" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-emerald-200"></div>
             </div>
-            <!-- Column 4: Pending balance — Red (open) -->
-            <div class="bg-red-50 border border-red-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-pending',this)">
-                <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                <h4 class="font-bold text-sm text-red-700">בוצעה וממתינה לתשלום</h4>
-                <span id="crm-count-pending" class="text-[10px] font-bold bg-red-200 text-red-700 rounded-full px-2 py-0.5 mr-auto"></span>
-                <svg class="crm-arrow w-4 h-4 text-red-400 transition-transform rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-              <div id="crm-col-pending" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-red-200"></div>
-            </div>
-            <!-- Column 5: Archive — Gray (closed) -->
-            <div class="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-archive',this)">
-                <div class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
-                <h4 class="font-bold text-sm text-gray-500">ארכיון</h4>
-                <span id="crm-count-archive" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
-                <svg class="crm-arrow w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-              <div id="crm-col-archive" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-gray-200" style="display:none"></div>
-            </div>
+            <!-- Pending removed — all past workshops go to archive -->
+            <!-- Archive is shown via ws-section-archive below -->
           </div>
         </div>
 
@@ -5984,7 +5966,7 @@ function renderWorkshopsList() {
   const secArchive = document.getElementById('ws-section-archive');
   const listArchive = document.getElementById('ws-list-archive');
   document.getElementById('ws-archive-count').textContent = archive.length;
-  if (archive.length && wsCurrentView === 'list') {
+  if (archive.length) {
     secArchive.style.display = '';
     renderLimitedList(archive, listArchive, w => renderWorkshopCard(w, { isPast: true }), 'border-gray-100', 'text-gray-400');
   } else {
@@ -6474,8 +6456,6 @@ function switchWsView(view) {
   sessionStorage.setItem('charming_ws_view', view);
   document.getElementById('ws-list-view').style.display = view === 'list' ? '' : 'none';
   document.getElementById('ws-crm-view').style.display = view === 'crm' ? '' : 'none';
-  const archSec = document.getElementById('ws-section-archive');
-  if (archSec && view === 'crm') archSec.style.display = 'none';
   document.getElementById('ws-view-list').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
     (view === 'list' ? 'bg-white text-[#d4a373] shadow-sm' : 'text-gray-400');
   document.getElementById('ws-view-crm').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
@@ -6491,22 +6471,18 @@ function renderCrmBoard() {
   // Categorize workshops
   const drafts = [];      // טרם הועברה מקדמה
   const confirmed = [];   // סדנה אושרה (confirmed + future)
-  const pending = [];     // בוצעה וממתינה לתשלום (past + balance not paid)
-  const archive = [];     // ארכיון (past + fully paid)
+  const archive = [];     // ארכיון (all past workshops)
 
   allWorkshops.forEach(w => {
     const status = w.bookingStatus || 'confirmed';
-    const pay = w.payment || {};
     const d = wsDate(w);
     const isPast = d && d < now;
 
-    if (status === 'draft') {
+    if (status === 'draft' && !isPast) {
       drafts.push(w);
-    } else if (!isPast) {
+    } else if (status === 'confirmed' && !isPast) {
       confirmed.push(w);
-    } else if (!pay.balancePaid) {
-      pending.push(w);
-    } else {
+    } else if (isPast) {
       archive.push(w);
     }
   });
@@ -6517,7 +6493,6 @@ function renderCrmBoard() {
   // Sort
   const sortByDate = arr => arr.sort((a,b) => ((wsDate(a)?.getTime()||0) - (wsDate(b)?.getTime()||0)));
   sortByDate(drafts); sortByDate(confirmed);
-  pending.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
   archive.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
 
   // Counts
@@ -6525,8 +6500,6 @@ function renderCrmBoard() {
   if (el('crm-count-leads')) el('crm-count-leads').textContent = leads.length;
   if (el('crm-count-draft')) el('crm-count-draft').textContent = drafts.length;
   if (el('crm-count-confirmed')) el('crm-count-confirmed').textContent = confirmed.length;
-  if (el('crm-count-pending')) el('crm-count-pending').textContent = pending.length;
-  if (el('crm-count-archive')) el('crm-count-archive').textContent = archive.length;
 
   // Lead card (from inquiries)
   function leadCard(inq) {
@@ -6600,9 +6573,6 @@ function renderCrmBoard() {
   fillCol('crm-col-leads', leads, i => leadCard(i));
   fillCol('crm-col-draft', drafts, w => crmCard(w));
   fillCol('crm-col-confirmed', confirmed, w => crmCard(w));
-  fillCol('crm-col-pending', pending, w => crmCard(w));
-  const archCol = el('crm-col-archive');
-  if (archCol) archCol.innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || '';
 }
 window.renderCrmBoard = renderCrmBoard;
 function toggleCrmCol(id, header) {
