@@ -848,45 +848,49 @@
         <!-- CRM Kanban View -->
         <div id="ws-crm-view" style="display:none;" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start" id="crm-board">
-            <!-- Column 1: Leads (Inquiries) — Purple -->
+            <!-- Column 1: Leads — Purple (open) -->
             <div class="bg-purple-50 border border-purple-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 border-b border-purple-200 flex items-center gap-2">
+              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-leads',this)">
                 <div class="w-2.5 h-2.5 rounded-full bg-purple-400"></div>
                 <h4 class="font-bold text-sm text-purple-700">לידים חדשים</h4>
                 <span id="crm-count-leads" class="text-[10px] font-bold bg-purple-200 text-purple-700 rounded-full px-2 py-0.5 mr-auto"></span>
+                <svg class="crm-arrow w-4 h-4 text-purple-400 transition-transform rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <div id="crm-col-leads" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-leads" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-purple-200"></div>
             </div>
-            <!-- Column 2: Draft (Advance not paid) — Pink -->
+            <!-- Column 2: Draft — Pink (open) -->
             <div class="bg-pink-50 border border-pink-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 border-b border-pink-200 flex items-center gap-2">
+              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-draft',this)">
                 <div class="w-2.5 h-2.5 rounded-full bg-pink-400"></div>
                 <h4 class="font-bold text-sm text-pink-700">טיוטה — טרם הועברה מקדמה</h4>
                 <span id="crm-count-draft" class="text-[10px] font-bold bg-pink-200 text-pink-700 rounded-full px-2 py-0.5 mr-auto"></span>
+                <svg class="crm-arrow w-4 h-4 text-pink-400 transition-transform rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <div id="crm-col-draft" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-draft" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-pink-200"></div>
             </div>
-            <!-- Column 3: Confirmed (Advance paid, future) — Green -->
+            <!-- Column 3: Confirmed — Green (open) -->
             <div class="bg-emerald-50 border border-emerald-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 border-b border-emerald-200 flex items-center gap-2">
+              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-confirmed',this)">
                 <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                 <h4 class="font-bold text-sm text-emerald-700">סדנה אושרה</h4>
                 <span id="crm-count-confirmed" class="text-[10px] font-bold bg-emerald-200 text-emerald-700 rounded-full px-2 py-0.5 mr-auto"></span>
+                <svg class="crm-arrow w-4 h-4 text-emerald-400 transition-transform rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <div id="crm-col-confirmed" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-confirmed" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-emerald-200"></div>
             </div>
-            <!-- Column 4: Done, waiting for balance — Red -->
+            <!-- Column 4: Pending balance — Red (open) -->
             <div class="bg-red-50 border border-red-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 border-b border-red-200 flex items-center gap-2">
+              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-pending',this)">
                 <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
                 <h4 class="font-bold text-sm text-red-700">בוצעה וממתינה לתשלום</h4>
                 <span id="crm-count-pending" class="text-[10px] font-bold bg-red-200 text-red-700 rounded-full px-2 py-0.5 mr-auto"></span>
+                <svg class="crm-arrow w-4 h-4 text-red-400 transition-transform rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <div id="crm-col-pending" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-pending" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-red-200"></div>
             </div>
-            <!-- Column 5: Archive (collapsed by default) -->
+            <!-- Column 5: Archive — Gray (closed) -->
             <div class="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
-              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="const c=document.getElementById('crm-col-archive');c.style.display=c.style.display==='none'?'':'none';this.querySelector('.crm-arrow').classList.toggle('rotate-180')">
+              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-archive',this)">
                 <div class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
                 <h4 class="font-bold text-sm text-gray-500">ארכיון</h4>
                 <span id="crm-count-archive" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
@@ -6245,11 +6249,11 @@ function renderCrmBoard() {
     </div>`;
   }
 
+  const emptyMsg = '<p class="text-gray-300 text-[10px] text-center py-1.5">—</p>';
   function fillCol(id, items, renderFn) {
     const col = el(id);
     if (!col) return;
-    if (items.length) { col.innerHTML = items.map(renderFn).join(''); col.style.display = ''; col.style.borderTop = ''; }
-    else { col.innerHTML = ''; col.style.display = 'none'; }
+    col.innerHTML = items.length ? items.map(renderFn).join('') : emptyMsg;
   }
   fillCol('crm-col-leads', leads, i => leadCard(i));
   fillCol('crm-col-draft', drafts, w => crmCard(w));
@@ -6260,6 +6264,14 @@ function renderCrmBoard() {
   if (archCol) archCol.innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || '<p class="text-gray-300 text-[10px] text-center py-1.5">—</p>';
 }
 window.renderCrmBoard = renderCrmBoard;
+function toggleCrmCol(id, header) {
+  const col = document.getElementById(id);
+  if (!col) return;
+  const isHidden = col.style.display === 'none';
+  col.style.display = isHidden ? '' : 'none';
+  header.querySelector('.crm-arrow').classList.toggle('rotate-180', isHidden);
+}
+window.toggleCrmCol = toggleCrmCol;
 
 // ── WhatsApp Templates CRUD ─────────────────────────────────────
 const WA_TPL_COL = 'artifacts/charming-3dd6f/public/data/waTemplates';
