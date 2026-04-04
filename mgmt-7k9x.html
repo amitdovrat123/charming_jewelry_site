@@ -519,7 +519,7 @@
                     <svg class="w-24 h-24 -rotate-90 relative" viewBox="0 0 120 120">
                       <circle cx="60" cy="60" r="52" fill="none" stroke="#f5ece7" stroke-width="8"/>
                       <circle id="wsd-goal-monthly-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#mgrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" class="transition-all duration-1000 ease-out"/>
-                      <defs><linearGradient id="mgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8cfc4"/><stop offset="100%" stop-color="#a8705a"/></linearGradient></defs>
+                      <defs><linearGradient id="mgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8cfc4"/><stop offset="100%" stop-color="#a8705a"/></linearGradient><linearGradient id="mgrad-done" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6ee7b7"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                       <span id="wsd-goal-monthly-label" class="text-lg font-black text-[#2c2a29] tracking-tight">0/10</span>
@@ -3411,7 +3411,7 @@ function renderWsDashboard() {
     else if (wPct >= 50) el('wsd-goal-weekly-status').innerHTML = '<span class="text-[#c9957a] font-semibold">כמעט שם, קדימה!</span>';
     else el('wsd-goal-weekly-status').textContent = 'עוד ' + (wGoal - weekConfirmed) + ' סגירות';
   }
-  if (el('wsd-weekly-glow')) el('wsd-weekly-glow').style.opacity = wReached ? '1' : '0';
+  if (el('wsd-weekly-glow')) { el('wsd-weekly-glow').style.opacity = wReached ? '1' : '0'; if (wReached) el('wsd-weekly-glow').style.background = 'radial-gradient(circle,rgba(5,150,105,.25) 0%,transparent 70%)'; }
   if (el('wsd-weekly-sparkles')) el('wsd-weekly-sparkles').style.opacity = wReached ? '1' : '0';
 
   // ── Monthly Goal (linear meter) ──
@@ -3429,7 +3429,7 @@ function renderWsDashboard() {
     else if (mPct >= 50) el('wsd-goal-monthly-status').innerHTML = '<span class="text-[#a8705a] font-semibold">כמעט שם, קדימה!</span>';
     else el('wsd-goal-monthly-status').textContent = 'עוד ' + (mGoal - monthConfirmed.length) + ' סגירות';
   }
-  if (el('wsd-monthly-glow')) el('wsd-monthly-glow').style.opacity = mReached ? '1' : '0';
+  if (el('wsd-monthly-glow')) { el('wsd-monthly-glow').style.opacity = mReached ? '1' : '0'; if (mReached) el('wsd-monthly-glow').style.background = 'radial-gradient(circle,rgba(5,150,105,.25) 0%,transparent 70%)'; }
   if (el('wsd-monthly-sparkles')) el('wsd-monthly-sparkles').style.opacity = mReached ? '1' : '0';
 
   // Confetti on goal reached
