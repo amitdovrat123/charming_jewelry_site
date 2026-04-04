@@ -5241,10 +5241,10 @@ async function saveWorkshop() {
     createdAt: serverTimestamp(),
   };
 
+  const prevWs = editWorkshopId ? allWorkshops.find(x => x.id === editWorkshopId) : null;
   try {
     if (editWorkshopId) {
       // Check if advance was just toggled on (wasn't paid before)
-      const prevWs = allWorkshops.find(x => x.id === editWorkshopId);
       const wasAdvancePaid = prevWs?.payment?.advancePaid;
       await updateDoc(doc(db, WORKSHOPS_COL, editWorkshopId), data);
       logAction(`סדנה "${name}" עודכנה`);
