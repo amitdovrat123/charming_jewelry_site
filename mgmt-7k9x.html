@@ -5419,11 +5419,22 @@ function closeWsForm() {
 }
 window.closeWsForm = closeWsForm;
 
+function showConfirm(title, msg) {
+  return new Promise(resolve => {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent = msg;
+    document.getElementById('confirm-dialog').removeAttribute('data-v');
+    document.getElementById('confirm-ok').onclick = () => { document.getElementById('confirm-dialog').setAttribute('data-v',''); resolve(true); };
+    document.getElementById('confirm-cancel').onclick = () => { document.getElementById('confirm-dialog').setAttribute('data-v',''); resolve(false); };
+  });
+}
+
 async function deleteWorkshopFromForm() {
   if (!editWorkshopId) return;
   const w = allWorkshops.find(x => x.id === editWorkshopId);
   const name = w?.celebrant || w?.customerName || '';
-  if (!confirm(`למחוק את הסדנה של "${name}"?\n\nפעולה זו לא ניתנת לביטול.`)) return;
+  const ok = await showConfirm(`למחוק את הסדנה של "${name}"?`, 'פעולה זו לא ניתנת לביטול.');
+  if (!ok) return;
   try {
     if (w?.calendarEventId) deleteCalendarEvent(editWorkshopId);
     await deleteDoc(doc(db, WORKSHOPS_COL, editWorkshopId));
