@@ -431,11 +431,11 @@
           <div>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-[#d4a373]">
-                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">סדנאות סגורות</p>
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">סדנאות החודש</p>
                 <p id="wsd-confirmed-month" class="text-xl font-black text-[#d4a373]">—</p>
               </div>
               <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-amber-400">
-                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">לידים בטיוטה</p>
+                <p class="text-[10px] font-bold text-gray-400 tracking-widest mb-0.5">לידים שטרם נסגרו</p>
                 <p id="wsd-drafts" class="text-xl font-black text-amber-500">—</p>
               </div>
               <div class="bg-white border border-[#f0dfc0] rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow border-r-4 border-r-emerald-400">
@@ -3322,7 +3322,8 @@ function renderWsDashboard() {
 
   // ── KPI Cards ──
   if (el('wsd-confirmed-month')) el('wsd-confirmed-month').textContent = monthConfirmed.length;
-  if (el('wsd-drafts')) el('wsd-drafts').textContent = drafts.length;
+  const newLeads = allInquiries.filter(i => !i.status || i.status === 'new').length;
+  if (el('wsd-drafts')) el('wsd-drafts').textContent = drafts.length + newLeads;
 
   const monthRevenue = monthConfirmed.reduce((s, w) => s + (w.total || 0), 0);
   if (el('wsd-revenue-month')) el('wsd-revenue-month').textContent = monthRevenue.toLocaleString('he-IL') + ' ₪';
@@ -6468,6 +6469,8 @@ function sendWaTplToWorkshop(tplId) {
   const count     = document.getElementById('ws-count')?.value;
   const route     = document.getElementById('ws-route')?.value;
   const city      = document.getElementById('ws-city')?.value.trim();
+  const street    = document.getElementById('ws-street')?.value.trim();
+  const fullAddress = [street, city].filter(Boolean).join(', ');
   const total     = document.getElementById('ws-total-display')?.textContent.replace(/[^\d]/g,'') || '0';
   const advance   = document.getElementById('ws-advance-amount')?.value || '500';
   const balance   = document.getElementById('ws-balance-amount')?.textContent.replace(/[^\d]/g,'') || '0';
@@ -6484,6 +6487,7 @@ function sendWaTplToWorkshop(tplId) {
     .replace(/\{מסלול\}/g, route || '')
     .replace(/\{משתתפות\}/g, count || '')
     .replace(/\{עיר\}/g, city || '')
+    .replace(/\{כתובת\}/g, fullAddress || city || '')
     .replace(/\{סכום\}/g, total)
     .replace(/\{מקדמה\}/g, advance)
     .replace(/\{יתרה\}/g, balance)
@@ -9625,7 +9629,7 @@ async function getBackupData() {
       name: 'סדנאות',
       headers: [
         'שם מלא איש קשר','טלפון','שם החוגג/ת','לכבוד מה האירוע',
-        'עיר','תאריך אירוע','שעת התחלה','מספר משתתפות','מסלול',
+        'עיר','רחוב ומספר','תאריך אירוע','שעת התחלה','מספר משתתפות','מסלול',
         'מחיר בסיס (₪)','הנחה (%)','עלות הגעה (₪)','סה"כ לתשלום (₪)',
         'סטטוס הזמנה',
         'מקדמה שולמה','סכום מקדמה (₪)','אמצעי תשלום מקדמה','תאריך תשלום מקדמה',
