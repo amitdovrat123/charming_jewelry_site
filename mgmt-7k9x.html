@@ -2221,6 +2221,20 @@ Charming by Vik 💛</textarea>
 
 <div id="toast-banner" class="toast"></div>
 
+<div id="confirm-dialog" data-v class="fixed inset-0 z-[9999] flex items-center justify-center p-4" style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center fadein">
+    <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+      <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <h3 id="confirm-title" class="font-bold text-gray-800 text-base mb-2"></h3>
+    <p id="confirm-msg" class="text-sm text-gray-500 mb-6"></p>
+    <div class="flex gap-3 justify-center">
+      <button id="confirm-cancel" class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 px-5 py-2.5 rounded-full font-bold text-sm transition-colors">ביטול</button>
+      <button id="confirm-ok" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-colors">מחיקה</button>
+    </div>
+  </div>
+</div>
+
 <style>
   .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
   .inp { width:100%; max-width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s, box-shadow .2s; font-family:inherit; box-sizing:border-box; }
@@ -10157,8 +10171,8 @@ window.sendInviteWhatsApp = sendInviteWhatsApp;
     <div class="px-5 py-3 border-t border-[#f0dfc0] bg-[#fdf8f5] flex items-center gap-2">
       <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2 rounded-full font-bold text-sm transition-all"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</button>
       <button id="wsc-invite-btn" class="border border-pink-300 text-pink-600 hover:bg-pink-50 px-3 py-2 rounded-full font-bold text-xs transition-colors flex-shrink-0 flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5"></i> הזמנה</button>
-      <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-3 py-2 rounded-full font-bold text-xs transition-colors flex-shrink-0"><i data-lucide="message-circle" class="w-3.5 h-3.5 inline-block"></i> WhatsApp</button>
-      <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0"><i data-lucide="calendar" class="w-4 h-4"></i></button>
+      <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></button>
+      <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0" title="יומן"><i data-lucide="calendar" class="w-4 h-4"></i></button>
     </div>
   </div>
 </div>
