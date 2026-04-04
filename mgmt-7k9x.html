@@ -6474,6 +6474,8 @@ function switchWsView(view) {
   sessionStorage.setItem('charming_ws_view', view);
   document.getElementById('ws-list-view').style.display = view === 'list' ? '' : 'none';
   document.getElementById('ws-crm-view').style.display = view === 'crm' ? '' : 'none';
+  const archSec = document.getElementById('ws-section-archive');
+  if (archSec && view === 'crm') archSec.style.display = 'none';
   document.getElementById('ws-view-list').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
     (view === 'list' ? 'bg-white text-[#d4a373] shadow-sm' : 'text-gray-400');
   document.getElementById('ws-view-crm').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
