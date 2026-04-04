@@ -3082,6 +3082,9 @@ function initERP(user) {
   show('v-dash');
   document.getElementById('admin-name').textContent = user.displayName || user.email;
 
+  // Load AI style settings from Firestore (after auth)
+  loadAiStyleFromCloud();
+
   // Start notifications
   initNotifications();
 
@@ -4245,8 +4248,10 @@ function applyAiStyleToForm(s) {
   if (s.length) document.getElementById('ai-length').value = s.length;
   if (s.custom) document.getElementById('ai-custom-prompt').value = s.custom;
 }
-async function loadAiStyle() {
-  // Try Firestore first, fall back to localStorage
+function loadAiStyleLocal() {
+  applyAiStyleToForm(getAiStyle());
+}
+async function loadAiStyleFromCloud() {
   try {
     const snap = await getDoc(doc(db, SETTINGS_COL, 'aiStyle'));
     if (snap.exists()) {
@@ -4258,7 +4263,7 @@ async function loadAiStyle() {
   } catch (ex) { console.warn('Could not load AI style from cloud, using local:', ex); }
   applyAiStyleToForm(getAiStyle());
 }
-document.addEventListener('DOMContentLoaded', loadAiStyle);
+document.addEventListener('DOMContentLoaded', loadAiStyleLocal);
 window.saveAiStyleToCloud = saveAiStyleToCloud;
 
 function buildAiSystemPrompt() {
