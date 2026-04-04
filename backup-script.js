@@ -408,10 +408,13 @@ function couponRow(doc) {
 function setupAutoBackup() {
   // Remove old triggers
   ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
-  // Every 6 hours
-  ScriptApp.newTrigger('doBackup')
-    .timeBased()
-    .everyHours(6)
-    .create();
-  Logger.log('Auto-backup trigger set: every 6 hours');
+  // Run at 00:00, 06:00, 12:00, 18:00
+  [0, 6, 12, 18].forEach(hour => {
+    ScriptApp.newTrigger('doBackup')
+      .timeBased()
+      .atHour(hour)
+      .everyDays(1)
+      .create();
+  });
+  Logger.log('Auto-backup triggers set: 00:00, 06:00, 12:00, 18:00');
 }
