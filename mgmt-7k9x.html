@@ -855,7 +855,7 @@
                 <h4 class="font-bold text-sm text-yellow-700">לידים חדשים</h4>
                 <span id="crm-count-leads" class="text-[10px] font-bold bg-yellow-200 text-yellow-700 rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-leads" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-leads" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
             <!-- Column 2: Draft (Advance not paid) -->
             <div class="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
@@ -864,7 +864,7 @@
                 <h4 class="font-bold text-sm text-amber-700">טרם הועברה מקדמה</h4>
                 <span id="crm-count-draft" class="text-[10px] font-bold bg-amber-200 text-amber-700 rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-draft" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-draft" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
             <!-- Column 3: Confirmed (Advance paid, future) -->
             <div class="bg-[#fdf6ee] border border-[#f0dfc0] rounded-2xl overflow-hidden">
@@ -873,7 +873,7 @@
                 <h4 class="font-bold text-sm text-[#a8705a]">סדנה אושרה</h4>
                 <span id="crm-count-confirmed" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-confirmed" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-confirmed" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
             <!-- Column 4: Done, waiting for balance -->
             <div class="bg-orange-50 border border-orange-200 rounded-2xl overflow-hidden">
@@ -882,7 +882,7 @@
                 <h4 class="font-bold text-sm text-orange-700">בוצעה וממתינה לתשלום</h4>
                 <span id="crm-count-pending" class="text-[10px] font-bold bg-orange-200 text-orange-700 rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-pending" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-pending" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
             <!-- Column 5: Archive -->
             <div class="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
@@ -891,7 +891,7 @@
                 <h4 class="font-bold text-sm text-gray-500">ארכיון</h4>
                 <span id="crm-count-archive" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
               </div>
-              <div id="crm-col-archive" class="p-2 space-y-2 min-h-[100px] max-h-[60vh] overflow-y-auto"></div>
+              <div id="crm-col-archive" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
           </div>
         </div>
@@ -6242,11 +6242,12 @@ function renderCrmBoard() {
     </div>`;
   }
 
-  if (el('crm-col-leads')) el('crm-col-leads').innerHTML = leads.length ? leads.map(i=>leadCard(i)).join('') : '<p class="text-gray-300 text-xs text-center py-6">אין לידים</p>';
-  if (el('crm-col-draft')) el('crm-col-draft').innerHTML = drafts.length ? drafts.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
-  if (el('crm-col-confirmed')) el('crm-col-confirmed').innerHTML = confirmed.length ? confirmed.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
-  if (el('crm-col-pending')) el('crm-col-pending').innerHTML = pending.length ? pending.map(w=>crmCard(w)).join('') : '<p class="text-gray-300 text-xs text-center py-6">—</p>';
-  if (el('crm-col-archive')) el('crm-col-archive').innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || '<p class="text-gray-300 text-xs text-center py-6">—</p>';
+  const emptyMsg = '<p class="text-gray-300 text-[10px] text-center py-1.5">—</p>';
+  if (el('crm-col-leads')) el('crm-col-leads').innerHTML = leads.length ? leads.map(i=>leadCard(i)).join('') : emptyMsg;
+  if (el('crm-col-draft')) el('crm-col-draft').innerHTML = drafts.length ? drafts.map(w=>crmCard(w)).join('') : emptyMsg;
+  if (el('crm-col-confirmed')) el('crm-col-confirmed').innerHTML = confirmed.length ? confirmed.map(w=>crmCard(w)).join('') : emptyMsg;
+  if (el('crm-col-pending')) el('crm-col-pending').innerHTML = pending.length ? pending.map(w=>crmCard(w)).join('') : emptyMsg;
+  if (el('crm-col-archive')) el('crm-col-archive').innerHTML = archive.slice(0,15).map(w=>crmCard(w,{isArchive:true})).join('') || emptyMsg;
 }
 window.renderCrmBoard = renderCrmBoard;
 
