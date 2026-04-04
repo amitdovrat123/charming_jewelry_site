@@ -2197,6 +2197,8 @@ Charming by Vik 💛</textarea>
   </div>
 </div>
 
+<div id="toast-banner" class="toast"></div>
+
 <style>
   .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
   .inp { width:100%; max-width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s, box-shadow .2s; font-family:inherit; box-sizing:border-box; }
@@ -2228,6 +2230,10 @@ Charming by Vik 💛</textarea>
     select.inp option:checked { background:#fdf6ee; color:#d4a373; }
   }
   @media (max-width:639px) { select.inp { cursor:pointer; } }
+
+  /* Toast banner */
+  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-120%);background:#065f46;color:#fff;padding:10px 24px;border-radius:12px;font-size:.875rem;font-weight:700;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:transform .35s ease,opacity .35s ease;opacity:0;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 </style>
 
 <script type="module">
@@ -4759,6 +4765,13 @@ function esc(str) {
 }
 
 // ── Audit Log ────────────────────────────────────────────────────
+function showToast(msg, duration = 2500) {
+  const el = document.getElementById('toast-banner');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
 async function logAction(description) {
   try {
     await addDoc(collection(db, LOGS_COL), {
@@ -5196,8 +5209,7 @@ async function saveWorkshop() {
     if (!editWorkshopId && typeof ref !== 'undefined') {
       editWorkshopId = ref.id;
     }
-    errEl.innerHTML = '<span class="text-emerald-600 font-bold">נשמר בהצלחה!</span>';
-    setTimeout(() => { errEl.textContent = ''; }, 3000);
+    showToast('הסדנה נשמרה בהצלחה');
   } catch(ex) { errEl.textContent='שגיאה בשמירה.'; console.error(ex); }
 }
 window.saveWorkshop = saveWorkshop;
