@@ -470,57 +470,53 @@
           <!-- Goals + Payment Status -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- Goals Card -->
-            <div class="relative overflow-hidden bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] border border-[#f0dfc0]/20 rounded-2xl p-6 shadow-lg">
-              <!-- Subtle glow effects -->
-              <div class="absolute top-0 right-0 w-40 h-40 bg-[#d4a373]/10 rounded-full blur-3xl"></div>
-              <div class="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
-
-              <div class="relative flex items-center justify-between mb-5">
-                <h3 class="font-bold text-base text-white flex items-center gap-2"><i data-lucide="target" class="w-5 h-5 text-[#e8b894]"></i> יעדים</h3>
-                <button onclick="document.getElementById('wsd-goals-editor').classList.toggle('hidden')" class="text-[10px] border border-white/20 text-white/50 hover:text-[#e8b894] hover:border-[#e8b894]/50 px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide="settings" class="w-3 h-3 inline-block"></i> ערוך</button>
+            <div class="bg-white border border-[#f0dfc0] rounded-xl p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="target" class="w-4 h-4 text-[#d4a373]"></i> יעדים</h3>
+                <button onclick="document.getElementById('wsd-goals-editor').classList.toggle('hidden')" class="text-[10px] border border-gray-200 text-gray-400 hover:text-[#d4a373] hover:border-[#f0dfc0] px-2.5 py-1 rounded-full font-bold transition-colors"><i data-lucide="settings" class="w-3 h-3 inline-block"></i> ערוך</button>
               </div>
-              <div id="wsd-goals-editor" class="hidden relative mb-5 p-3 bg-white/10 backdrop-blur rounded-xl border border-white/10 space-y-2">
+              <div id="wsd-goals-editor" class="hidden mb-5 p-3 bg-[#fdf8f5] rounded-xl border border-[#f0dfc0] space-y-2">
                 <div class="flex items-center gap-3">
-                  <label class="text-xs text-white/60 w-24">יעד שבועי:</label>
-                  <input id="wsd-weekly-goal" type="number" min="1" max="20" value="3" class="w-16 text-center text-sm border border-white/20 rounded-lg px-2 py-1 font-bold text-[#e8b894] bg-white/10" onchange="renderWsDashboard()" />
+                  <label class="text-xs text-gray-500 w-24">יעד שבועי:</label>
+                  <input id="wsd-weekly-goal" type="number" min="1" max="20" value="3" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
                 </div>
                 <div class="flex items-center gap-3">
-                  <label class="text-xs text-white/60 w-24">יעד חודשי:</label>
-                  <input id="wsd-monthly-goal" type="number" min="1" max="50" value="10" class="w-16 text-center text-sm border border-white/20 rounded-lg px-2 py-1 font-bold text-[#e8b894] bg-white/10" onchange="renderWsDashboard()" />
+                  <label class="text-xs text-gray-500 w-24">יעד חודשי:</label>
+                  <input id="wsd-monthly-goal" type="number" min="1" max="50" value="10" class="w-16 text-center text-sm border border-gray-200 rounded-lg px-2 py-1 font-bold text-[#d4a373]" onchange="renderWsDashboard()" />
                 </div>
               </div>
-              <div class="relative flex gap-8 justify-center items-start">
+              <div class="flex gap-8 justify-center items-start">
                 <!-- Weekly ring -->
                 <div class="flex flex-col items-center">
                   <div class="relative w-32 h-32">
-                    <svg class="w-32 h-32 -rotate-90 drop-shadow-lg" viewBox="0 0 120 120">
-                      <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-                      <circle id="wsd-goal-weekly-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#wgrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" class="transition-all duration-1000 ease-out" style="filter:drop-shadow(0 0 6px rgba(212,163,115,.4))"/>
-                      <defs><linearGradient id="wgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f5d0a9"/><stop offset="100%" stop-color="#d4a373"/></linearGradient></defs>
+                    <svg class="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="#f5ece7" stroke-width="8"/>
+                      <circle id="wsd-goal-weekly-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#wgrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" class="transition-all duration-1000 ease-out"/>
+                      <defs><linearGradient id="wgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8b894"/><stop offset="100%" stop-color="#c9957a"/></linearGradient></defs>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                      <span id="wsd-goal-weekly-label" class="text-2xl font-black text-white tracking-tight">0/3</span>
-                      <span id="wsd-goal-weekly-pct" class="text-[10px] font-bold text-[#e8b894]"></span>
+                      <span id="wsd-goal-weekly-label" class="text-2xl font-black text-[#2c2a29] tracking-tight">0/3</span>
+                      <span id="wsd-goal-weekly-pct" class="text-[10px] font-bold text-[#c9957a]"></span>
                     </div>
                   </div>
-                  <span class="text-xs font-bold text-white/70 mt-3 tracking-wide">שבועי</span>
-                  <p id="wsd-goal-weekly-status" class="text-[11px] mt-1 text-center font-semibold text-white/40"></p>
+                  <span class="text-xs font-bold text-[#4a3f3c] mt-3">שבועי</span>
+                  <p id="wsd-goal-weekly-status" class="text-[11px] mt-1 text-center font-semibold text-[#9a8e8a]"></p>
                 </div>
                 <!-- Monthly ring -->
                 <div class="flex flex-col items-center">
                   <div class="relative w-32 h-32">
-                    <svg class="w-32 h-32 -rotate-90 drop-shadow-lg" viewBox="0 0 120 120">
-                      <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-                      <circle id="wsd-goal-monthly-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#mgrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" class="transition-all duration-1000 ease-out" style="filter:drop-shadow(0 0 6px rgba(59,130,246,.4))"/>
-                      <defs><linearGradient id="mgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#93c5fd"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs>
+                    <svg class="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="#f5ece7" stroke-width="8"/>
+                      <circle id="wsd-goal-monthly-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#mgrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" class="transition-all duration-1000 ease-out"/>
+                      <defs><linearGradient id="mgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8cfc4"/><stop offset="100%" stop-color="#a8705a"/></linearGradient></defs>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                      <span id="wsd-goal-monthly-label" class="text-2xl font-black text-white tracking-tight">0/10</span>
-                      <span id="wsd-goal-monthly-pct" class="text-[10px] font-bold text-blue-300"></span>
+                      <span id="wsd-goal-monthly-label" class="text-2xl font-black text-[#2c2a29] tracking-tight">0/10</span>
+                      <span id="wsd-goal-monthly-pct" class="text-[10px] font-bold text-[#a8705a]"></span>
                     </div>
                   </div>
-                  <span class="text-xs font-bold text-white/70 mt-3 tracking-wide">חודשי</span>
-                  <p id="wsd-goal-monthly-status" class="text-[11px] mt-1 text-center font-semibold text-white/40"></p>
+                  <span class="text-xs font-bold text-[#4a3f3c] mt-3">חודשי</span>
+                  <p id="wsd-goal-monthly-status" class="text-[11px] mt-1 text-center font-semibold text-[#9a8e8a]"></p>
                 </div>
               </div>
               <div id="wsd-confetti" class="relative pointer-events-none" style="height:0;overflow:visible;"></div>
@@ -3353,8 +3349,8 @@ function renderWsDashboard() {
   if (el('wsd-goal-weekly-pct')) el('wsd-goal-weekly-pct').textContent = wPct + '%';
   if (el('wsd-goal-weekly-label')) el('wsd-goal-weekly-label').textContent = weekConfirmed + '/' + wGoal;
   if (el('wsd-goal-weekly-status')) {
-    if (weekConfirmed >= wGoal) el('wsd-goal-weekly-status').innerHTML = '<span class="text-emerald-400">עמדת ביעד!</span>';
-    else if (wPct >= 50) el('wsd-goal-weekly-status').innerHTML = '<span class="text-[#e8b894]">כמעט שם, קדימה!</span>';
+    if (weekConfirmed >= wGoal) el('wsd-goal-weekly-status').innerHTML = '<span class="text-emerald-600 font-bold">עמדת ביעד!</span>';
+    else if (wPct >= 50) el('wsd-goal-weekly-status').innerHTML = '<span class="text-[#c9957a] font-semibold">כמעט שם, קדימה!</span>';
     else el('wsd-goal-weekly-status').textContent = 'עוד ' + (wGoal - weekConfirmed) + ' סגירות';
   }
 
@@ -3365,8 +3361,8 @@ function renderWsDashboard() {
   if (el('wsd-goal-monthly-pct')) el('wsd-goal-monthly-pct').textContent = mPct + '%';
   if (el('wsd-goal-monthly-label')) el('wsd-goal-monthly-label').textContent = monthConfirmed.length + '/' + mGoal;
   if (el('wsd-goal-monthly-status')) {
-    if (monthConfirmed.length >= mGoal) el('wsd-goal-monthly-status').innerHTML = '<span class="text-emerald-400">עמדת ביעד!</span>';
-    else if (mPct >= 50) el('wsd-goal-monthly-status').innerHTML = '<span class="text-blue-300">כמעט שם, קדימה!</span>';
+    if (monthConfirmed.length >= mGoal) el('wsd-goal-monthly-status').innerHTML = '<span class="text-emerald-600 font-bold">עמדת ביעד!</span>';
+    else if (mPct >= 50) el('wsd-goal-monthly-status').innerHTML = '<span class="text-[#a8705a] font-semibold">כמעט שם, קדימה!</span>';
     else el('wsd-goal-monthly-status').textContent = 'עוד ' + (mGoal - monthConfirmed.length) + ' סגירות';
   }
 
