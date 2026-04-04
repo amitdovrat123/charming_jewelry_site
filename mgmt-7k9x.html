@@ -6050,6 +6050,7 @@ function openWsCard(id) {
   const cl=d?generateCalendarLinks(w):'';
   const m=cl.match(/href="([^"]+)"/);
   el('wsc-cal-btn').onclick=()=>{if(m)window.open(m[1],'_blank');};
+  el('wsc-invite-btn').onclick=()=>{generateInvitation(w);};
 
   el('ws-card-modal').removeAttribute('data-v');
 }
@@ -9936,6 +9937,142 @@ async function exportToExcel() {
 }
 window.exportToExcel = exportToExcel;
 
+// ══════════════════════════════════════════════════════════════
+//  INVITATION GENERATOR
+// ══════════════════════════════════════════════════════════════
+
+let inviteCurrentPhone = '';
+const INVITE_BG_URL = 'invitation-bg.png';
+const INVITE_W = 1240, INVITE_H = 1748;
+const PINK = '#c4366e';
+const GRAY = '#5a5a5a';
+
+// Pre-load background image
+let inviteBgImg = null;
+(function preloadInviteBg() {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = INVITE_BG_URL;
+  img.onload = () => { inviteBgImg = img; };
+})();
+
+async function generateInvitation(w) {
+  const canvas = document.getElementById('invite-canvas');
+  canvas.width = INVITE_W;
+  canvas.height = INVITE_H;
+  const ctx = canvas.getContext('2d');
+
+  // Wait for background if not loaded yet
+  if (!inviteBgImg) {
+    inviteBgImg = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = INVITE_BG_URL;
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+    });
+  }
+
+  // Draw background
+  ctx.drawImage(inviteBgImg, 0, 0, INVITE_W, INVITE_H);
+
+  // Setup text rendering
+  ctx.textAlign = 'center';
+  ctx.direction = 'rtl';
+  const cx = INVITE_W / 2;
+
+  // Parse data
+  const celebrant = w.celebrant || w.customerName || '';
+  const occasion = w.occasion || '';
+  const city = w.city || '';
+  const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : null;
+  const dateStr = d ? d.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' }) : '';
+  const timeStr = w.time || '';
+  const phone = w.phone || '';
+
+  inviteCurrentPhone = phone;
+
+  // ── Fixed text: "הינך מוזמנת לחגוג איתנו את" ──
+  ctx.fillStyle = GRAY;
+  ctx.font = '600 42px Assistant, sans-serif';
+  ctx.fillText('הינך מוזמנת לחגוג איתנו את', cx, 370);
+
+  // ── Occasion: e.g. "יום ההולדת של" ──
+  ctx.font = '600 42px Assistant, sans-serif';
+  ctx.fillText(occasion + ' של', cx, 430);
+
+  // ── Celebrant name (large, pink, bold) ──
+  ctx.fillStyle = PINK;
+  ctx.font = '800 100px Assistant, sans-serif';
+  ctx.fillText(celebrant, cx, 560);
+
+  // ── Fixed block ──
+  ctx.fillStyle = GRAY;
+  ctx.font = '600 36px Assistant, sans-serif';
+  ctx.fillText('בתוכנית- סדנת הצ׳ארמים', cx, 640);
+  ctx.fillText('של', cx, 685);
+
+  ctx.fillStyle = PINK;
+  ctx.font = '700 48px Assistant, sans-serif';
+  ctx.fillText('C H A R M I N G', cx, 745);
+
+  ctx.fillStyle = GRAY;
+  ctx.font = '600 36px Assistant, sans-serif';
+  ctx.fillText('נייצר ביחד תכשיטי', cx, 805);
+  ctx.fillText('צ׳ארמים בהתאמה אישית!', cx, 850);
+
+  // ── Address ──
+  ctx.fillStyle = PINK;
+  ctx.font = '600 40px Assistant, sans-serif';
+  ctx.fillText('כתובת: ' + city, cx, 960);
+
+  // ── Date ──
+  ctx.fillText('תאריך : ' + dateStr, cx, 1060);
+
+  // ── Time ──
+  ctx.fillText('שעה: ' + timeStr, cx, 1120);
+
+  // ── "מצפה לראותך :)" ──
+  ctx.font = 'italic 600 44px Assistant, sans-serif';
+  ctx.fillText('מצפה לראותך :)', cx, 1210);
+
+  // Show modal
+  const modal = document.getElementById('invite-modal');
+  modal.style.display = '';
+  modal.removeAttribute('data-v');
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+}
+window.generateInvitation = generateInvitation;
+
+function closeInviteModal() {
+  const modal = document.getElementById('invite-modal');
+  modal.setAttribute('data-v', 'hidden');
+  modal.style.display = 'none';
+}
+window.closeInviteModal = closeInviteModal;
+
+function downloadInvitation() {
+  const canvas = document.getElementById('invite-canvas');
+  const link = document.createElement('a');
+  link.download = 'הזמנה_סדנא.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+window.downloadInvitation = downloadInvitation;
+
+function sendInviteWhatsApp() {
+  // Download the image first
+  downloadInvitation();
+  // Open WhatsApp to the client's phone
+  const phone = inviteCurrentPhone.replace(/[-\s]/g, '');
+  const intl = phone.startsWith('0') ? '972' + phone.slice(1) : phone;
+  const msg = encodeURIComponent('היי, הנה ההזמנה לסדנה שלנו! 💎✨');
+  setTimeout(() => {
+    window.open('https://wa.me/' + intl + '?text=' + msg, '_blank');
+  }, 500);
+}
+window.sendInviteWhatsApp = sendInviteWhatsApp;
+
 </script>
 
 <!-- ══ Workshop Card Modal ══ -->
@@ -9984,6 +10121,24 @@ window.exportToExcel = exportToExcel;
       <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2 rounded-full font-bold text-sm transition-all"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</button>
       <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-full font-bold text-sm transition-colors"><i data-lucide="message-circle" class="w-3.5 h-3.5 inline-block"></i> WhatsApp</button>
       <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-3 py-2 rounded-full font-bold text-sm transition-colors"><i data-lucide="calendar" class="w-4 h-4"></i></button>
+      <button id="wsc-invite-btn" class="w-full mt-1 border border-pink-300 text-pink-600 hover:bg-pink-50 px-4 py-2 rounded-full font-bold text-sm transition-colors flex items-center justify-center gap-1.5"><i data-lucide="mail" class="w-3.5 h-3.5"></i> הכן הזמנה</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invitation Preview Modal -->
+<div id="invite-modal" data-v="hidden" class="fixed inset-0 z-[600] flex items-center justify-center bg-black/50 transition-opacity" onclick="if(event.target===this)closeInviteModal()" style="display:none">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-[420px] w-[95%] max-h-[90vh] overflow-auto">
+    <div class="px-5 py-3 border-b border-[#f0dfc0] flex items-center justify-between">
+      <h3 class="font-bold text-gray-800">תצוגה מקדימה — הזמנה</h3>
+      <button onclick="closeInviteModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+    <div class="p-4">
+      <canvas id="invite-canvas" class="w-full rounded-xl shadow-md" style="aspect-ratio:1240/1748"></canvas>
+    </div>
+    <div class="px-5 py-3 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2">
+      <button onclick="downloadInvitation()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2.5 rounded-full font-bold text-sm transition-all flex items-center justify-center gap-1.5"><i data-lucide="download" class="w-4 h-4"></i> הורד תמונה</button>
+      <button onclick="sendInviteWhatsApp()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-full font-bold text-sm transition-all flex items-center justify-center gap-1.5"><i data-lucide="send" class="w-4 h-4"></i> שלח בוואצאפ</button>
     </div>
   </div>
 </div>
