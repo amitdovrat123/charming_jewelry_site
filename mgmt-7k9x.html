@@ -6071,7 +6071,7 @@ function openWsCard(id) {
   if (!pay.advancePaid) {
     ph+=`<button id="wsc-pay-action" onclick="toggleWscPayPanel('advance','${id}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-[#d4a373] border border-[#f0dfc0] hover:bg-[#fdf6ee] transition-colors flex items-center justify-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4"></i> אשר תשלום מקדמה</button>`;
   } else if (!pay.balancePaid) {
-    ph+=`<button id="wsc-pay-action" onclick="toggleWscPayPanel('balance','${id}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-blue-500 border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4"></i> אשר תשלום יתרה</button>`;
+    ph+=`<button id="wsc-pay-action" onclick="toggleWscPayPanel('balance','${id}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-emerald-600 border border-emerald-300 hover:bg-emerald-50 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4"></i> אשר תשלום יתרה</button>`;
   }
   // Expandable payment panel (hidden by default)
   ph+=`<div id="wsc-pay-panel" style="display:none" class="mt-2 p-3 rounded-xl border border-[#f0dfc0] bg-[#fdf8f5] space-y-3 fadein"></div>`;
@@ -6079,9 +6079,9 @@ function openWsCard(id) {
   if (pay.advancePaid && pay.balancePaid) {
     pe.className='p-4 rounded-xl border space-y-2 border-emerald-200 bg-emerald-50';
   } else if (pay.advancePaid) {
-    pe.className='p-4 rounded-xl border space-y-2 border-[#f0dfc0] bg-[#fdf8f5]';
+    pe.className='p-4 rounded-xl border space-y-2 border-[#f0dfc0] bg-[#fdf6ee]';
   } else {
-    pe.className='p-4 rounded-xl border space-y-2 border-[#f0dfc0] bg-[#fdf8f5]';
+    pe.className='p-4 rounded-xl border space-y-2 border-[#f0dfc0] bg-[#fdf6ee]';
   }
   pe.innerHTML=ph;
   if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
