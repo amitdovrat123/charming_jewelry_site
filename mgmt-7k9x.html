@@ -5591,9 +5591,13 @@ async function _saveWorkshop() {
     if (editWorkshopId) {
       // Check if advance was just toggled on (wasn't paid before)
       const wasAdvancePaid = prevWs?.payment?.advancePaid;
+      const wasBalancePaid = prevWs?.payment?.balancePaid;
       await updateDoc(doc(db, WORKSHOPS_COL, editWorkshopId), data);
       logAction(`סדנה "${name}" עודכנה`);
-      // Auto-expenses are created after workshop date passes (not on payment)
+      // Staff expense reminder when balance just got marked as paid
+      if (balancePaid && !wasBalancePaid) {
+        showStaffExpenseReminder(editWorkshopId, { ...data, eventDate: { seconds: new Date(date+'T'+time).getTime()/1000 } });
+      }
     } else {
       const ref = await addDoc(collection(db, WORKSHOPS_COL), data);
       editWorkshopId = ref.id; // Switch to edit mode immediately
