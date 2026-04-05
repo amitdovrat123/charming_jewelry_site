@@ -3797,7 +3797,7 @@ function renderFinancialReports() {
   if (el('wsd-pnl-margin')) el('wsd-pnl-margin').textContent = margin + '%';
   // P&L detail
   if (el('fin-revenue')) el('fin-revenue').textContent = revenue.toLocaleString('he-IL') + ' ₪';
-  if (el('wsd-pnl-materials')) el('wsd-pnl-materials').textContent = pnlMaterialCost.toLocaleString('he-IL') + ' ₪';
+  if (el('wsd-pnl-materials')) el('wsd-pnl-materials').textContent = (expByCategory.materials || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-staff')) el('wsd-pnl-staff').textContent = (expByCategory.staff || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-marketing')) el('wsd-pnl-marketing').textContent = (expByCategory.marketing || 0).toLocaleString('he-IL') + ' ₪';
   if (el('wsd-pnl-fuel')) el('wsd-pnl-fuel').textContent = (expByCategory.fuel || 0).toLocaleString('he-IL') + ' ₪';
