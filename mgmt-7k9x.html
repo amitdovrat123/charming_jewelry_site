@@ -5946,20 +5946,22 @@ async function _saveWorkshop() {
   });
   const balanceMethod = balancePayments[0]?.method || 'cash';
 
-  // Build payment object — preserve existing dates if already set
+  // Build payment object — use date inputs if available
   const existingWs = editWorkshopId ? allWorkshops.find(x => x.id === editWorkshopId) : null;
+  const advDateVal = document.getElementById('ws-advance-date-input')?.value;
+  const balDateVal = document.getElementById('ws-balance-date-input')?.value;
   const payment = {
     advancePaid,
     advanceAmount,
     advanceMethod,
     advancePaidDate: advancePaid
-      ? (existingWs?.payment?.advancePaidDate || Timestamp.now())
+      ? (advDateVal ? Timestamp.fromDate(new Date(advDateVal+'T12:00:00')) : existingWs?.payment?.advancePaidDate || Timestamp.now())
       : null,
     balancePaid,
     balanceAmount: Math.max(0, balanceAmount),
     balanceMethod,
     balancePaidDate: balancePaid
-      ? (existingWs?.payment?.balancePaidDate || Timestamp.now())
+      ? (balDateVal ? Timestamp.fromDate(new Date(balDateVal+'T12:00:00')) : existingWs?.payment?.balancePaidDate || Timestamp.now())
       : null,
     balancePayments: balancePaid && balancePayments.length > 0 ? balancePayments : (existingWs?.payment?.balancePayments || []),
   };
@@ -6079,12 +6081,12 @@ function openWorkshopModal(id) {
     if (pay.advancePaid && pay.advancePaidDate) {
       document.getElementById('ws-advance-date-wrap').classList.remove('hidden');
       const ad = pay.advancePaidDate?.seconds ? new Date(pay.advancePaidDate.seconds*1000) : new Date(pay.advancePaidDate);
-      document.getElementById('ws-advance-date-display').textContent = ad.toLocaleDateString('he-IL');
+      document.getElementById('ws-advance-date-input').value = ad.toISOString().split('T')[0];
     }
     if (pay.balancePaid && pay.balancePaidDate) {
       document.getElementById('ws-balance-date-wrap').classList.remove('hidden');
       const bd = pay.balancePaidDate?.seconds ? new Date(pay.balancePaidDate.seconds*1000) : new Date(pay.balancePaidDate);
-      document.getElementById('ws-balance-date-display').textContent = bd.toLocaleDateString('he-IL');
+      document.getElementById('ws-balance-date-input').value = bd.toISOString().split('T')[0];
     }
     updateWsTotal();
     updatePaymentBadge();
