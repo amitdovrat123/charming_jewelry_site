@@ -1331,18 +1331,22 @@
             <div class="relative">
               <button onclick="toggleExpFilterPopup()" class="flex items-center gap-1.5 text-xs border border-[#e8cfc4] bg-white hover:bg-[#fdf8f5] text-[#4a3f3c] px-3 py-1.5 rounded-full font-semibold transition-colors">
                 <i data-lucide="filter" class="w-3.5 h-3.5 text-[#d4a373]"></i>
-                <span id="exp-filter-label">החודש</span>
+                <span id="exp-filter-label"></span>
               </button>
               <div id="exp-filter-popup" style="display:none" class="absolute left-0 top-full mt-2 bg-white border border-[#f0dfc0] rounded-2xl shadow-xl z-30 p-4 space-y-3 min-w-[280px]">
                 <p class="text-[10px] font-bold text-[#9a8e8a]">סינון לפי תקופה</p>
                 <div class="space-y-1">
-                  <button onclick="setExpFilter('current','החודש')" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">החודש</button>
-                  <button onclick="setExpFilter('prev','חודש קודם')" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">חודש קודם</button>
+                  <button onclick="setExpFilter('current', expCurrentMonthLabel())" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">החודש</button>
+                  <button onclick="setExpFilter('prev', expPrevMonthLabel())" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">חודש קודם</button>
                   <button onclick="setExpFilter('all','הכל')" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">הכל</button>
                 </div>
                 <div class="border-t border-[#f0dfc0] pt-3">
                   <p class="text-[10px] font-bold text-[#9a8e8a] mb-1.5">חודש ספציפי</p>
-                  <select id="exp-filter-month-pick" onchange="setExpFilter('month', this.options[this.selectedIndex]?.text || 'חודש')" class="inp text-xs w-full"></select>
+                  <div class="flex gap-2">
+                    <div class="flex-1"><select id="exp-filter-month-num" class="inp text-xs w-full"><option value="">חודש</option><option value="1">ינואר</option><option value="2">פברואר</option><option value="3">מרץ</option><option value="4">אפריל</option><option value="5">מאי</option><option value="6">יוני</option><option value="7">יולי</option><option value="8">אוגוסט</option><option value="9">ספטמבר</option><option value="10">אוקטובר</option><option value="11">נובמבר</option><option value="12">דצמבר</option></select></div>
+                    <div class="flex-1"><select id="exp-filter-year" class="inp text-xs w-full"></select></div>
+                  </div>
+                  <button onclick="applyMonthFilter()" class="w-full mt-2 py-1.5 rounded-full text-[10px] font-bold border border-[#e8cfc4] text-[#d4a373] hover:bg-[#fdf6ee] transition-colors">הצג חודש</button>
                 </div>
                 <div class="border-t border-[#f0dfc0] pt-3">
                   <p class="text-[10px] font-bold text-[#9a8e8a] mb-1.5">טווח תאריכים</p>
@@ -7132,6 +7136,10 @@ const EXPENSE_CATEGORIES = {
 const EXPENSE_METHODS = { cash:'מזומן', bit:'Bit', transfer:'העברה', credit:'אשראי' };
 
 function initExpensesTab() {
+  // Set default filter label
+  const lbl = document.getElementById('exp-filter-label');
+  if (lbl && !lbl.textContent) lbl.textContent = expCurrentMonthLabel();
+
   const q = query(collection(db, EXPENSES_COL), orderBy('date','desc'));
   onSnapshot(q, snap => {
     allExpenses = snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -7334,21 +7342,40 @@ function toggleExpFilterPopup() {
   if (!popup) return;
   const isOpen = popup.style.display !== 'none';
   popup.style.display = isOpen ? 'none' : '';
-  if (!isOpen) populateExpMonthPicker();
+  if (!isOpen) populateExpYears();
 }
-function populateExpMonthPicker() {
-  const monthPick = document.getElementById('exp-filter-month-pick');
-  if (!monthPick) return;
-  const months = new Set();
-  allExpenses.forEach(e => { if (e.date) { const d = new Date(e.date); months.add(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }});
-  const sorted = [...months].sort().reverse();
-  monthPick.innerHTML = '<option value="">בחר חודש</option>';
-  sorted.forEach(m => {
-    const [y, mo] = m.split('-');
-    const label = new Date(y, mo-1).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
-    monthPick.innerHTML += `<option value="${m}">${label}</option>`;
-  });
+function populateExpYears() {
+  const yearSel = document.getElementById('exp-filter-year');
+  if (!yearSel || yearSel.options.length > 1) return;
+  const years = new Set();
+  allExpenses.forEach(e => { if (e.date) years.add(new Date(e.date).getFullYear()); });
+  const now = new Date().getFullYear();
+  years.add(now);
+  const sorted = [...years].sort((a,b) => b - a);
+  yearSel.innerHTML = '<option value="">שנה</option>';
+  sorted.forEach(y => { yearSel.innerHTML += `<option value="${y}"${y===now?' selected':''}>${y}</option>`; });
 }
+function applyMonthFilter() {
+  const m = document.getElementById('exp-filter-month-num')?.value;
+  const y = document.getElementById('exp-filter-year')?.value;
+  if (!m || !y) return;
+  const val = y + '-' + String(m).padStart(2,'0');
+  document.getElementById('exp-filter-type').value = 'month';
+  document.getElementById('exp-filter-type').dataset.monthVal = val;
+  const label = new Date(y, m-1).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+  setExpFilter('month', label);
+}
+window.applyMonthFilter = applyMonthFilter;
+
+function expCurrentMonthLabel() {
+  return new Date().toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+}
+function expPrevMonthLabel() {
+  const d = new Date(); d.setMonth(d.getMonth()-1);
+  return d.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+}
+window.expCurrentMonthLabel = expCurrentMonthLabel;
+window.expPrevMonthLabel = expPrevMonthLabel;
 function setExpFilter(type, label) {
   document.getElementById('exp-filter-type').value = type;
   document.getElementById('exp-filter-label').textContent = label;
@@ -7379,7 +7406,7 @@ function renderExpensesList() {
     const pm = curM === 0 ? 11 : curM - 1, py = curM === 0 ? curY - 1 : curY;
     filtered = allExpenses.filter(e => { const d = new Date(e.date); return d.getFullYear() === py && d.getMonth() === pm; });
   } else if (filter === 'month') {
-    const val = document.getElementById('exp-filter-month-pick')?.value || '';
+    const val = document.getElementById('exp-filter-type')?.dataset?.monthVal || '';
     if (val) {
       const [fy, fm] = val.split('-').map(Number);
       filtered = allExpenses.filter(e => { const d = new Date(e.date); return d.getFullYear() === fy && d.getMonth() === fm - 1; });
