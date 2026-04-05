@@ -886,8 +886,8 @@
           <div class="flex items-center gap-2">
             <!-- View toggle -->
             <div class="flex items-center bg-gray-100 rounded-full p-0.5">
-              <button id="ws-view-list" onclick="switchWsView('list')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all bg-white text-[#d4a373] shadow-sm">📋 רשימה</button>
-              <button id="ws-view-crm" onclick="switchWsView('crm')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all text-gray-400">📊 CRM</button>
+              <button id="ws-view-list" onclick="switchWsView('list')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all text-gray-400">📋 רשימה</button>
+              <button id="ws-view-crm" onclick="switchWsView('crm')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all bg-white text-[#d4a373] shadow-sm">📊 CRM</button>
             </div>
             <button onclick="openWorkshopModal()"
               class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
@@ -896,7 +896,7 @@
         </div>
 
         <!-- CRM Kanban View -->
-        <div id="ws-crm-view" style="display:none;" class="space-y-4">
+        <div id="ws-crm-view" class="space-y-4">
           <div class="grid grid-cols-1 gap-4 items-start" id="crm-board">
             <!-- Column 1: Leads — Purple (open) -->
             <div class="bg-purple-50 border border-purple-200 rounded-2xl overflow-hidden">
@@ -952,7 +952,7 @@
         </div>
 
         <!-- List View (default) -->
-        <div id="ws-list-view" class="space-y-6">
+        <div id="ws-list-view" style="display:none;" class="space-y-6">
 
         <!-- Section 1: Drafts (top priority) -->
         <div id="ws-section-drafts" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden" style="display:none;">
