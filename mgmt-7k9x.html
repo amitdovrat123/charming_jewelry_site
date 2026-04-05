@@ -6911,12 +6911,12 @@ function toggleWscPayPanel(type, wsId) {
   if (type === 'advance') {
     panel.innerHTML = `
       <p class="text-xs font-bold text-gray-700 mb-2">אישור תשלום מקדמה</p>
+      <div class="mb-2"><label class="text-[9px] text-gray-400">תאריך קבלת מקדמה</label><input id="wsc-adv-date" type="date" value="${todayStr}" class="inp text-sm mt-0.5" /></div>
       <div class="flex gap-3">
         <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label><input id="wsc-adv-amount" type="number" value="${advAmt}" class="inp text-sm mt-0.5" /></div>
         <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
           <select id="wsc-adv-method" class="inp text-sm mt-0.5">${methodOpts}</select>
         </div>
-        <div class="w-28"><label class="text-[9px] text-gray-400">תאריך</label><input id="wsc-adv-date" type="date" value="${todayStr}" class="inp text-sm mt-0.5" /></div>
       </div>
       <button onclick="executeWscPay('advance','${wsId}')" class="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#d4a373] hover:bg-[#b8893e] transition-colors flex items-center justify-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i> אשר מקדמה ${advAmt.toLocaleString('he-IL')}₪</button>`;
   } else {
