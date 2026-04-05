@@ -6580,23 +6580,23 @@ function showStaffExpenseReminder(wsId, w) {
   const el = document.createElement('div');
   el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/40';
   el.onclick = e => { if (e.target === el) el.remove(); };
-  el.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl max-w-sm w-[90%] overflow-hidden fadein">
+  el.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl max-w-sm w-[90%] overflow-hidden fadein border border-[#f0dfc0]">
     <div class="px-5 py-4 border-b border-[#f0dfc0] bg-[#fdf8f5]">
-      <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i data-lucide="user-check" class="w-4 h-4 text-blue-500"></i> תזכורת — הוצאת עובדת</h3>
-      <p class="text-[11px] text-gray-500 mt-1">יתרה אושרה עבור <b>${esc(wsName)}</b>. להוסיף הוצאת תשלום לעובדת?</p>
+      <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i data-lucide="user-check" class="w-4 h-4 text-[#d4a373]"></i> תזכורת — הוצאת עובדת</h3>
+      <p class="text-[11px] text-[#4a3f3c] mt-1">יתרה אושרה עבור <b class="text-[#d4a373]">${esc(wsName)}</b>. להוסיף הוצאת תשלום לעובדת?</p>
     </div>
-    <div class="px-5 py-4 space-y-3">
+    <div class="px-5 py-4 space-y-3 bg-[#fdf6ee]">
       <div class="flex gap-3">
-        <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label>
+        <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">סכום</label>
           <select id="staff-reminder-amount" class="inp text-sm mt-0.5"><option value="150">150 ₪</option><option value="200">200 ₪</option><option value="250">250 ₪</option><option value="300">300 ₪</option></select>
         </div>
-        <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
+        <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">אמצעי</label>
           <select id="staff-reminder-method" class="inp text-sm mt-0.5"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה</option></select>
         </div>
       </div>
       <div class="flex gap-2">
-        <button onclick="addStaffExpenseFromReminder('${wsId}','${esc(wsName)}','${dateStr}');this.closest('.fixed').remove()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-full font-bold text-sm transition-colors">הוסף הוצאה</button>
-        <button onclick="this.closest('.fixed').remove()" class="px-4 py-2.5 border border-gray-200 text-gray-500 hover:text-gray-700 rounded-full font-bold text-sm transition-colors">דלג</button>
+        <button onclick="addStaffExpenseFromReminder('${wsId}','${esc(wsName)}','${dateStr}');this.closest('.fixed').remove()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white py-2.5 rounded-full font-bold text-sm transition-colors">הוסף הוצאה</button>
+        <button onclick="this.closest('.fixed').remove()" class="px-4 py-2.5 border border-[#e8cfc4] text-[#9a8e8a] hover:text-[#4a3f3c] rounded-full font-bold text-sm transition-colors">דלג</button>
       </div>
     </div>
   </div>`;
