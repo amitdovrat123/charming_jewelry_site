@@ -6133,6 +6133,8 @@ function sendWorkshopWhatsApp() {
   if (!name || !phone) { errEl.textContent='יש להזין שם וטלפון.'; return; }
   if (!count || !route) { errEl.textContent='יש לבחור מספר משתתפות ומסלול.'; return; }
 
+  const customExtraAmt = parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0;
+  const customExtraNote = document.getElementById('ws-custom-extra-note')?.value?.trim() || '';
   const base    = getWsBasePrice();
   const total   = Math.round(base * (1 - disc/100) + arrival);
   const dateStr = date ? new Date(date).toLocaleDateString('he-IL') : '';
@@ -6178,6 +6180,7 @@ function sendWorkshopWhatsApp() {
     draftLines.push('*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA');
     draftLines.push('*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route);
     draftLines.push('*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA');
+    if (customExtraAmt > 0) draftLines.push('*\u05EA\u05D5\u05E1\u05E4\u05EA \u05DE\u05D9\u05D5\u05D7\u05D3\u05EA:* +' + customExtraAmt.toLocaleString('he-IL') + ' \u05E9\u05D7' + (customExtraNote ? ' (' + customExtraNote + ')' : ''));
     if (arrival > 0) draftLines.push('\u05D1\u05E0\u05D5\u05E1\u05E3 \u05EA\u05D9\u05D4\u05D9\u05D4 \u05E2\u05DC\u05D5\u05EA \u05D4\u05D2\u05E2\u05D4 \u05E2\u05DC \u05E1\u05DA ' + arrival + ' \u05E9\u05D7 (\u05D4\u05D4\u05E0\u05D7\u05D4 \u05D0\u05D9\u05E0\u05D4 \u05E0\u05DB\u05DC\u05DC\u05EA \u05E2\u05DC \u05E2\u05DC\u05D5\u05EA \u05D4\u05D4\u05D2\u05E2\u05D4 )');
     if (disc > 0) draftLines.push('\u05E7\u05D9\u05D1\u05DC\u05EA \u05D4\u05E0\u05D7\u05D4 \u05DE\u05D9\u05D5\u05D7\u05D3\u05EA \u05E2\u05DC \u05E1\u05DA ' + disc + '% \u05D4\u05E0\u05D7\u05D4 .');
     draftLines.push('*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7');
@@ -6199,6 +6202,7 @@ function sendWorkshopWhatsApp() {
     lines.push('*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA');
     lines.push('*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route);
     lines.push('*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA' + extraChargesText);
+    if (customExtraAmt > 0) lines.push('*\u05EA\u05D5\u05E1\u05E4\u05EA \u05DE\u05D9\u05D5\u05D7\u05D3\u05EA:* +' + customExtraAmt.toLocaleString('he-IL') + ' \u05E9\u05D7' + (customExtraNote ? ' (' + customExtraNote + ')' : ''));
     lines.push('*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7');
     lines.push('');
     lines.push('\u05E9\u05D5\u05DC\u05DE\u05D4 \u05DE\u05E7\u05D3\u05DE\u05D4 \u05E2\u05DC \u05E1\u05DA 500 \u05E9\u05D0\u05E8 \u05D4\u05E1\u05DB\u05D5\u05DD \u05D9\u05E0\u05EA\u05DF \u05D1\u05D9\u05D5\u05DD \u05D4\u05D0\u05D9\u05E8\u05D5\u05E2');
