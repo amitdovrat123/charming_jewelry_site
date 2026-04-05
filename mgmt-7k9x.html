@@ -1126,32 +1126,26 @@
                 </div>
               </div>
               <!-- Balance payment -->
-              <div class="flex flex-wrap items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
-                <div class="flex items-center gap-2 min-w-[140px]">
+              <div class="p-3 rounded-lg bg-gray-50 border border-gray-100 space-y-2">
+                <div class="flex items-center gap-2">
                   <label class="tog flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="ws-balance-paid" onchange="updatePaymentBadge()">
+                    <input type="checkbox" id="ws-balance-paid" onchange="updatePaymentBadge();toggleFormBalanceRows()">
                     <span class="tog-track"></span>
                   </label>
                   <span class="text-sm font-semibold text-gray-700">יתרה שולמה</span>
-                </div>
-                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-                  <div>
-                    <label class="text-[10px] text-gray-400">סכום יתרה</label>
-                    <p id="ws-balance-amount" class="text-sm font-bold text-gray-600 mt-1">— ₪</p>
-                  </div>
-                  <div>
-                    <label class="text-[10px] text-gray-400">אמצעי</label>
-                    <select id="ws-balance-method" class="inp text-sm w-28">
-                      <option value="cash">מזומן</option>
-                      <option value="bit">Bit</option>
-                      <option value="paybox">PayBox</option>
-                      <option value="transfer">העברה בנקאית</option>
-                    </select>
-                  </div>
+                  <span id="ws-balance-amount" class="text-sm font-bold text-gray-600 mr-auto">— ₪</span>
                   <div id="ws-balance-date-wrap" class="hidden">
-                    <label class="text-[10px] text-gray-400">תאריך</label>
-                    <p id="ws-balance-date-display" class="text-xs text-gray-500 mt-1">—</p>
+                    <p id="ws-balance-date-display" class="text-[10px] text-gray-400">—</p>
                   </div>
+                </div>
+                <div id="ws-balance-rows" style="display:none" class="space-y-2">
+                  <div class="flex gap-2 items-end ws-form-bal-row">
+                    <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label><input type="number" class="inp text-sm mt-0.5 ws-form-bal-amt" /></div>
+                    <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
+                      <select class="inp text-sm mt-0.5 ws-form-bal-mth"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option></select>
+                    </div>
+                  </div>
+                  <button type="button" onclick="addFormBalanceRow()" class="text-[10px] text-[#d4a373] hover:underline font-bold">+ הוסף אמצעי תשלום נוסף</button>
                 </div>
               </div>
             </div>
@@ -5341,6 +5335,67 @@ function updatePaymentBadge() {
 }
 window.updatePaymentBadge = updatePaymentBadge;
 
+function toggleFormBalanceRows() {
+  const checked = document.getElementById('ws-balance-paid')?.checked;
+  const rows = document.getElementById('ws-balance-rows');
+  if (rows) rows.style.display = checked ? '' : 'none';
+  // Set amount in first row
+  if (checked) {
+    const amtEl = rows?.querySelector('.ws-form-bal-amt');
+    const balText = document.getElementById('ws-balance-amount')?.textContent || '';
+    const balNum = parseInt(balText.replace(/[^\d]/g,'')) || 0;
+    if (amtEl && !amtEl.value) amtEl.value = balNum;
+  }
+}
+window.toggleFormBalanceRows = toggleFormBalanceRows;
+
+function addFormBalanceRow() {
+  const container = document.getElementById('ws-balance-rows');
+  if (!container) return;
+  const methodOpts = `<option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option>`;
+  const row = document.createElement('div');
+  row.className = 'flex gap-2 items-end ws-form-bal-row';
+  row.innerHTML = `
+    <div class="flex-1"><input type="number" class="inp text-sm ws-form-bal-amt" value="0" /></div>
+    <div class="flex-1"><select class="inp text-sm ws-form-bal-mth">${methodOpts}</select></div>
+    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 mb-1"><i data-lucide="x" class="w-4 h-4"></i></button>`;
+  container.querySelector('button[onclick*="addFormBalanceRow"]').before(row);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.addFormBalanceRow = addFormBalanceRow;
+
+function loadFormBalanceRows(pay, total, advanceAmount) {
+  const container = document.getElementById('ws-balance-rows');
+  if (!container) return;
+  const balAmt = Math.max(0, (total || 0) - (advanceAmount || 500));
+  // Clear extra rows (keep first)
+  container.querySelectorAll('.ws-form-bal-row').forEach((row, i) => { if (i > 0) row.remove(); });
+  const firstAmt = container.querySelector('.ws-form-bal-amt');
+  const firstMth = container.querySelector('.ws-form-bal-mth');
+  if (pay.balancePaid && Array.isArray(pay.balancePayments) && pay.balancePayments.length > 0) {
+    // Fill first row
+    firstAmt.value = pay.balancePayments[0].amount || balAmt;
+    firstMth.value = pay.balancePayments[0].method || 'cash';
+    // Add extra rows
+    for (let i = 1; i < pay.balancePayments.length; i++) {
+      addFormBalanceRow();
+      const rows = container.querySelectorAll('.ws-form-bal-row');
+      const lastRow = rows[rows.length - 1];
+      lastRow.querySelector('.ws-form-bal-amt').value = pay.balancePayments[i].amount || 0;
+      lastRow.querySelector('.ws-form-bal-mth').value = pay.balancePayments[i].method || 'cash';
+    }
+    container.style.display = '';
+  } else if (pay.balancePaid) {
+    firstAmt.value = balAmt;
+    firstMth.value = pay.balanceMethod || 'cash';
+    container.style.display = '';
+  } else {
+    firstAmt.value = balAmt;
+    firstMth.value = 'cash';
+    container.style.display = 'none';
+  }
+}
+
 function changeCalMonth(dir) {
   calMonth += dir;
   if (calMonth < 0) { calMonth = 11; calYear--; }
@@ -5556,8 +5611,16 @@ async function _saveWorkshop() {
   const advanceAmount = parseFloat(document.getElementById('ws-advance-amount').value) || 500;
   const advanceMethod = document.getElementById('ws-advance-method').value || 'paybox';
   const balancePaid   = document.getElementById('ws-balance-paid').checked;
-  const balanceMethod = document.getElementById('ws-balance-method').value || 'cash';
   const balanceAmount = total - advanceAmount;
+  // Collect split balance payments
+  const balanceRows = document.querySelectorAll('.ws-form-bal-row');
+  const balancePayments = [];
+  balanceRows.forEach(row => {
+    const amt = parseFloat(row.querySelector('.ws-form-bal-amt')?.value) || 0;
+    const mth = row.querySelector('.ws-form-bal-mth')?.value || 'cash';
+    if (amt > 0) balancePayments.push({ amount: amt, method: mth });
+  });
+  const balanceMethod = balancePayments[0]?.method || 'cash';
 
   // Build payment object — preserve existing dates if already set
   const existingWs = editWorkshopId ? allWorkshops.find(x => x.id === editWorkshopId) : null;
@@ -5574,6 +5637,7 @@ async function _saveWorkshop() {
     balancePaidDate: balancePaid
       ? (existingWs?.payment?.balancePaidDate || Timestamp.now())
       : null,
+    balancePayments: balancePaid && balancePayments.length > 0 ? balancePayments : (existingWs?.payment?.balancePayments || []),
   };
 
   const data = {
@@ -5661,7 +5725,8 @@ function openWorkshopModal(id) {
     document.getElementById('ws-advance-amount').value = pay.advanceAmount ?? 500;
     document.getElementById('ws-advance-method').value = pay.advanceMethod || 'paybox';
     document.getElementById('ws-balance-paid').checked = !!pay.balancePaid;
-    document.getElementById('ws-balance-method').value = pay.balanceMethod || 'cash';
+    // Load balance payment rows
+    loadFormBalanceRows(pay, w.total, pay.advanceAmount);
     // Show date displays if paid
     if (pay.advancePaid && pay.advancePaidDate) {
       document.getElementById('ws-advance-date-wrap').classList.remove('hidden');
