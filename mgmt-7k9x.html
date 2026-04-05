@@ -7251,11 +7251,34 @@ function updateExpenseKPIs() {
   if (el('exp-marketing-month')) el('exp-marketing-month').textContent = (byCategory.marketing||0).toLocaleString('he-IL')+' ₪';
 }
 
+function toggleExpFilter() {
+  const type = document.getElementById('exp-filter-type')?.value || 'current';
+  const monthPick = document.getElementById('exp-filter-month-pick');
+  const fromEl = document.getElementById('exp-filter-from');
+  const toEl = document.getElementById('exp-filter-to');
+  monthPick.style.display = type === 'month' ? '' : 'none';
+  fromEl.style.display = type === 'range' ? '' : 'none';
+  toEl.style.display = type === 'range' ? '' : 'none';
+  // Populate month picker from expense dates
+  if (type === 'month' && monthPick.options.length <= 1) {
+    const months = new Set();
+    allExpenses.forEach(e => { if (e.date) { const d = new Date(e.date); months.add(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }});
+    const sorted = [...months].sort().reverse();
+    monthPick.innerHTML = '<option value="">בחר חודש</option>';
+    sorted.forEach(m => {
+      const [y, mo] = m.split('-');
+      const label = new Date(y, mo-1).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+      monthPick.innerHTML += `<option value="${m}">${label}</option>`;
+    });
+  }
+}
+window.toggleExpFilter = toggleExpFilter;
+
 function renderExpensesList() {
   const list = document.getElementById('exp-list');
   if (!list) return;
 
-  const filter = document.getElementById('exp-filter-month')?.value || 'current';
+  const filter = document.getElementById('exp-filter-type')?.value || 'current';
   const now = new Date();
   const curY = now.getFullYear(), curM = now.getMonth();
 
@@ -7265,6 +7288,17 @@ function renderExpensesList() {
   } else if (filter === 'prev') {
     const pm = curM === 0 ? 11 : curM - 1, py = curM === 0 ? curY - 1 : curY;
     filtered = allExpenses.filter(e => { const d = new Date(e.date); return d.getFullYear() === py && d.getMonth() === pm; });
+  } else if (filter === 'month') {
+    const val = document.getElementById('exp-filter-month-pick')?.value || '';
+    if (val) {
+      const [fy, fm] = val.split('-').map(Number);
+      filtered = allExpenses.filter(e => { const d = new Date(e.date); return d.getFullYear() === fy && d.getMonth() === fm - 1; });
+    }
+  } else if (filter === 'range') {
+    const from = document.getElementById('exp-filter-from')?.value || '';
+    const to = document.getElementById('exp-filter-to')?.value || '';
+    if (from) filtered = filtered.filter(e => e.date >= from);
+    if (to) filtered = filtered.filter(e => e.date <= to);
   }
 
   if (!filtered.length) {
