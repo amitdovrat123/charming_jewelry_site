@@ -1459,16 +1459,7 @@
         </div>
         <!-- Detailed Reports -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Cash Flow Detail -->
-          <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
-            <button onclick="const el=document.getElementById('wsd-tx-cashflow');el.style.display=el.style.display==='none'?'':'none';this.querySelector('[data-chev]').style.transform=el.style.display==='none'?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5e6d5] transition-colors">
-              <i data-lucide="wallet" class="w-4 h-4 text-[#d4a373]"></i>
-              <div class="text-right"><h3 class="font-bold text-sm text-gray-800">פירוט תזרים מזומנים</h3><p id="wsd-tx-cf-period" class="text-[10px] text-gray-400"></p></div>
-              <i data-lucide="chevron-down" data-chev class="w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
-            </button>
-            <div id="wsd-tx-cashflow" style="display:none" class="p-4 max-h-[500px] overflow-auto"></div>
-          </div>
-          <!-- P&L Detail -->
+          <!-- P&L Detail (right in RTL) -->
           <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
             <button onclick="const el=document.getElementById('wsd-tx-pnl');el.style.display=el.style.display==='none'?'':'none';this.querySelector('[data-chev]').style.transform=el.style.display==='none'?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5e6d5] transition-colors">
               <i data-lucide="file-text" class="w-4 h-4 text-[#d4a373]"></i>
@@ -1476,6 +1467,15 @@
               <i data-lucide="chevron-down" data-chev class="w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
             </button>
             <div id="wsd-tx-pnl" style="display:none" class="p-4 max-h-[500px] overflow-auto"></div>
+          </div>
+          <!-- Cash Flow Detail (left in RTL) -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
+            <button onclick="const el=document.getElementById('wsd-tx-cashflow');el.style.display=el.style.display==='none'?'':'none';this.querySelector('[data-chev]').style.transform=el.style.display==='none'?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5e6d5] transition-colors">
+              <i data-lucide="wallet" class="w-4 h-4 text-[#d4a373]"></i>
+              <div class="text-right"><h3 class="font-bold text-sm text-gray-800">פירוט תזרים מזומנים</h3><p id="wsd-tx-cf-period" class="text-[10px] text-gray-400"></p></div>
+              <i data-lucide="chevron-down" data-chev class="w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
+            </button>
+            <div id="wsd-tx-cashflow" style="display:none" class="p-4 max-h-[500px] overflow-auto"></div>
           </div>
         </div>
 
