@@ -5924,7 +5924,8 @@ async function _saveWorkshop() {
   errEl.textContent='';
 
   const customExtraSave = parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0;
-  const base  = getWsBasePrice() + customExtraSave;
+  const baseRaw = getWsBasePrice();
+  const base  = baseRaw + customExtraSave;
   const pricingInfo = getWsPricingInfo();
   const pricingMode = document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra';
   const savedCount = (pricingInfo?.type === 'between' && pricingMode === 'tier' && pricingInfo.nextTier) ? pricingInfo.nextTier : count;
@@ -5967,7 +5968,7 @@ async function _saveWorkshop() {
   const data = {
     customerName: name, phone, celebrant, occasion, city, street: street||null,
     eventDate: Timestamp.fromDate(new Date(date+'T'+time)),
-    time, participantCount: savedCount, route, basePrice: base,
+    time, participantCount: savedCount, route, basePrice: baseRaw,
     pricingMode: document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra',
     customExtra: { amount: parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0, note: document.getElementById('ws-custom-extra-note')?.value?.trim() || '' },
     discount: disc, arrivalFee: arrival, total, notes: notes||null,
@@ -6804,7 +6805,13 @@ function openWsCard(id) {
 
   el('wsc-route').textContent = w.route||'';
   el('wsc-participants').textContent = `עד ${w.participantCount} משתתפות`;
+  const ce = w.customExtra || {};
   el('wsc-base-price').textContent = (w.basePrice||0).toLocaleString('he-IL')+' ₪';
+  if (ce.amount > 0) {
+    el('wsc-custom-extra-row').style.display='';
+    el('wsc-custom-extra').textContent=`+${ce.amount.toLocaleString('he-IL')} ₪`;
+    el('wsc-custom-extra-label').textContent = ce.note ? 'תוספת — '+ce.note : 'תוספת מיוחדת';
+  } else { el('wsc-custom-extra-row').style.display='none'; }
   if (w.discount>0){el('wsc-discount-row').style.display='';el('wsc-discount').textContent=`-${w.discount}%`;}else{el('wsc-discount-row').style.display='none';}
   if (w.arrivalFee>0){el('wsc-arrival-row').style.display='';el('wsc-arrival').textContent=`+${w.arrivalFee} ₪`;}else{el('wsc-arrival-row').style.display='none';}
   el('wsc-total').textContent = (w.total||0).toLocaleString('he-IL')+' ₪';
@@ -7087,7 +7094,7 @@ document.addEventListener('click', e => {
 });
 
 // ── CRM Kanban View ─────────────────────────────────────────────
-let wsCurrentView = 'list';
+let wsCurrentView = 'crm';
 function switchWsView(view) {
   wsCurrentView = view;
   sessionStorage.setItem('charming_ws_view', view);
@@ -11190,6 +11197,7 @@ window.sendInviteWhatsApp = sendInviteWhatsApp;
       </div>
       <div class="p-3 bg-[#fdf6ee] rounded-xl border border-[#f0dfc0]">
         <div class="flex justify-between mb-1.5"><span class="text-[11px] text-gray-500">מחיר בסיס</span><span id="wsc-base-price" class="text-[13px] font-bold text-gray-600"></span></div>
+        <div id="wsc-custom-extra-row" class="flex justify-between mb-1.5" style="display:none"><span id="wsc-custom-extra-label" class="text-[11px] text-gray-500">תוספת מיוחדת</span><span id="wsc-custom-extra" class="text-[13px] font-bold text-[#d4a373]"></span></div>
         <div id="wsc-discount-row" class="flex justify-between mb-1.5" style="display:none"><span class="text-[11px] text-gray-500">הנחה</span><span id="wsc-discount" class="text-[13px] font-bold text-emerald-500"></span></div>
         <div id="wsc-arrival-row" class="flex justify-between mb-1.5" style="display:none"><span class="text-[11px] text-gray-500">עלות הגעה</span><span id="wsc-arrival" class="text-[13px] font-bold text-gray-600"></span></div>
         <div class="border-t border-[#f0dfc0] pt-1.5 flex justify-between"><span class="text-[13px] font-bold text-gray-700">סה"כ</span><span id="wsc-total" class="text-lg font-black text-[#d4a373]"></span></div>
