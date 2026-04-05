@@ -5923,7 +5923,8 @@ async function _saveWorkshop() {
   if (!route)     { errEl.textContent='יש לבחור מסלול.'; return; }
   errEl.textContent='';
 
-  const base  = getWsBasePrice();
+  const customExtraSave = parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0;
+  const base  = getWsBasePrice() + customExtraSave;
   const pricingInfo = getWsPricingInfo();
   const pricingMode = document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra';
   const savedCount = (pricingInfo?.type === 'between' && pricingMode === 'tier' && pricingInfo.nextTier) ? pricingInfo.nextTier : count;
