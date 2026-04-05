@@ -3739,7 +3739,9 @@ function initFinancesTab() {
   renderFinancialReports();
 }
 
+let finFilterRestored = false;
 function renderFinancialReports() {
+  if (!finFilterRestored) { finFilterRestored = true; restoreFinFilter(); }
   const el = id => document.getElementById(id);
   const period = el('wsd-report-period')?.value || 'current';
   const now = new Date();
@@ -4018,6 +4020,21 @@ function toggleFinFilterPopup() {
 }
 window.toggleFinFilterPopup = toggleFinFilterPopup;
 
+function saveFinFilter() {
+  const p = document.getElementById('wsd-report-period');
+  localStorage.setItem('fin_filter', JSON.stringify({ value: p.value, monthVal: p.dataset.monthVal||'', from: p.dataset.from||'', to: p.dataset.to||'' }));
+}
+function restoreFinFilter() {
+  try {
+    const s = JSON.parse(localStorage.getItem('fin_filter'));
+    if (!s) return;
+    const p = document.getElementById('wsd-report-period');
+    p.value = s.value;
+    if (s.monthVal) p.dataset.monthVal = s.monthVal;
+    if (s.from) p.dataset.from = s.from;
+    if (s.to) p.dataset.to = s.to;
+  } catch(e) {}
+}
 function setFinFilter(type) {
   const periodEl = document.getElementById('wsd-report-period');
   periodEl.value = type;
@@ -4025,6 +4042,7 @@ function setFinFilter(type) {
   delete periodEl.dataset.from;
   delete periodEl.dataset.to;
   document.getElementById('fin-filter-modal').style.display = 'none';
+  saveFinFilter();
   renderFinancialReports();
 }
 window.setFinFilter = setFinFilter;
@@ -4037,6 +4055,7 @@ function applyFinMonthFilter() {
   periodEl.value = 'month';
   periodEl.dataset.monthVal = y + '-' + String(m).padStart(2,'0');
   document.getElementById('fin-filter-modal').style.display = 'none';
+  saveFinFilter();
   renderFinancialReports();
 }
 window.applyFinMonthFilter = applyFinMonthFilter;
@@ -4050,6 +4069,7 @@ function applyFinRangeFilter() {
   periodEl.dataset.from = from;
   periodEl.dataset.to = to;
   document.getElementById('fin-filter-modal').style.display = 'none';
+  saveFinFilter();
   renderFinancialReports();
 }
 window.applyFinRangeFilter = applyFinRangeFilter;
