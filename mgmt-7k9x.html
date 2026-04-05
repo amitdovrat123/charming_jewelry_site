@@ -6396,6 +6396,7 @@ function openWsCard(id) {
   const cl=d?generateCalendarLinks(w):'';
   const m=cl.match(/href="([^"]+)"/);
   el('wsc-cal-btn').onclick=()=>{if(m)window.open(m[1],'_blank');};
+  const callBtn = el('wsc-call-btn'); if (callBtn) callBtn.href = wp ? 'tel:' + wp : '#';
   el('wsc-invite-btn').onclick=()=>{generateInvitation(w);};
 
   el('ws-card-modal').removeAttribute('data-v');
@@ -6637,6 +6638,8 @@ function renderCrmBoard() {
     const daysLabel = diff === null ? '' : diff < 0 ? '<span class="text-gray-400">עבר</span>' : diff === 0 ? '<span class="text-emerald-500 font-bold">היום</span>' : `<span class="text-blue-500">בעוד ${diff} ימים</span>`;
 
     const actionBtn = '';
+    const noAddr = (w.bookingStatus || 'confirmed') === 'confirmed' && !w.street;
+    const addrBadge = noAddr ? '<span class="text-[9px] font-bold bg-red-100 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full">חסרה כתובת</span>' : '';
 
     const contact = w.customerName !== w.celebrant ? `<span class="text-[10px] text-gray-400 hidden lg:inline">👤 ${esc(w.customerName)}</span>` : '';
     return `<div class="bg-white rounded-xl border border-gray-100 p-2.5 lg:p-2 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isArchive ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
@@ -10593,6 +10596,7 @@ window.sendInviteWhatsApp = sendInviteWhatsApp;
       <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2 rounded-full font-bold text-sm transition-all"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</button>
       <button id="wsc-invite-btn" class="border border-pink-300 text-pink-600 hover:bg-pink-50 px-3 py-2 rounded-full font-bold text-xs transition-colors flex-shrink-0 flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5"></i> הזמנה</button>
       <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></button>
+      <a id="wsc-call-btn" href="tel:" class="border border-blue-300 text-blue-500 hover:bg-blue-50 px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0 flex items-center justify-center" title="חייג"><i data-lucide="phone" class="w-4 h-4"></i></a>
       <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0" title="יומן"><i data-lucide="calendar" class="w-4 h-4"></i></button>
     </div>
   </div>
