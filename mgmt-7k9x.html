@@ -5908,6 +5908,9 @@ async function _saveWorkshop() {
   errEl.textContent='';
 
   const base  = getWsBasePrice();
+  const pricingInfo = getWsPricingInfo();
+  const pricingMode = document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra';
+  const savedCount = (pricingInfo?.type === 'between' && pricingMode === 'tier' && pricingInfo.nextTier) ? pricingInfo.nextTier : count;
   const total = Math.round(base * (1 - disc/100) + arrival);
 
   // Payment tracking
@@ -5947,7 +5950,7 @@ async function _saveWorkshop() {
   const data = {
     customerName: name, phone, celebrant, occasion, city, street: street||null,
     eventDate: Timestamp.fromDate(new Date(date+'T'+time)),
-    time, participantCount: count, route, basePrice: base,
+    time, participantCount: savedCount, route, basePrice: base,
     pricingMode: document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra',
     customExtra: { amount: parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0, note: document.getElementById('ws-custom-extra-note')?.value?.trim() || '' },
     discount: disc, arrivalFee: arrival, total, notes: notes||null,
