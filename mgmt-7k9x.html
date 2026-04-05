@@ -5881,7 +5881,7 @@ function renderWorkshopCard(w, opts = {}) {
   const statusBadge = status === 'draft'
     ? '<span class="text-[10px] font-bold bg-red-100 text-red-500 border border-red-200 px-2 py-0.5 rounded-full">טרם הועברה מקדמה</span>'
     : '';
-  const noAddr = status === 'confirmed' && !w.street;
+  const noAddr = status === 'confirmed' && !w.street && !isPast;
   const addrBadge = noAddr ? '<span class="text-[9px] font-bold bg-red-100 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full">חסרה כתובת</span>' : '';
   const pastBadge = isPast
     ? '<span class="text-[10px] font-bold bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">סדנה עברה</span>'
@@ -6678,7 +6678,8 @@ function renderCrmBoard() {
     const daysLabel = diff === null ? '' : diff < 0 ? '<span class="text-gray-400">עבר</span>' : diff === 0 ? '<span class="text-emerald-500 font-bold">היום</span>' : `<span class="text-blue-500">בעוד ${diff} ימים</span>`;
 
     const actionBtn = '';
-    const noAddr = (w.bookingStatus || 'confirmed') === 'confirmed' && !w.street;
+    const isPastWs = d && d < now;
+    const noAddr = (w.bookingStatus || 'confirmed') === 'confirmed' && !w.street && !isPastWs;
     const addrBadge = noAddr ? '<span class="text-[9px] font-bold bg-red-100 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full">חסרה כתובת</span>' : '';
 
     const contact = w.customerName !== w.celebrant ? `<span class="text-[10px] text-gray-400 hidden lg:inline">👤 ${esc(w.customerName)}</span>` : '';
