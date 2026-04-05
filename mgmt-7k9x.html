@@ -1036,14 +1036,7 @@
             </div>
             <div>
               <label class="lbl">מספר משתתפות *</label>
-              <select id="ws-count" class="inp">
-                <option value="" disabled selected>בחרי כמות...</option>
-                <option value="10">עד 10</option>
-                <option value="15">עד 15</option>
-                <option value="20">עד 20</option>
-                <option value="25">עד 25</option>
-                <option value="30">עד 30</option>
-              </select>
+              <input id="ws-count" type="number" min="1" max="35" placeholder="כמות" class="inp" required />
             </div>
             <div>
               <label class="lbl">מסלול *</label>
@@ -1066,6 +1059,23 @@
                 <button type="button" onclick="suggestArrivalFee()" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-2 rounded-lg font-bold transition-colors whitespace-nowrap" title="חישוב אוטומטי לפי עיר">📍 חשב</button>
               </div>
               <p id="ws-arrival-hint" class="text-[10px] text-gray-400 mt-1">לא מושפע מההנחה</p>
+            </div>
+            <!-- Pricing breakdown panel -->
+            <div id="ws-pricing-panel" style="display:none" class="col-span-2 p-4 bg-[#fdf6ee] border border-[#f0dfc0] rounded-xl space-y-2">
+              <p class="text-[10px] font-bold text-[#9a8e8a] uppercase tracking-wide">פירוט תמחור</p>
+              <div id="ws-pricing-lines" class="space-y-1.5"></div>
+              <div id="ws-pricing-mode" style="display:none" class="mt-2 p-2.5 bg-white rounded-lg border border-[#e8cfc4] space-y-1.5">
+                <p class="text-[10px] font-bold text-[#9a8e8a]">שיטת חישוב</p>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ws-price-mode" value="extra" checked onchange="updateWsTotal()"><span class="text-xs text-gray-700" id="ws-mode-extra-label">תוספת משתתפים</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ws-price-mode" value="tier" onchange="updateWsTotal()"><span class="text-xs text-gray-700" id="ws-mode-tier-label">מדרגה הבאה</span></label>
+              </div>
+              <div id="ws-custom-extra-wrap" style="display:none" class="mt-2 p-2.5 bg-white rounded-lg border border-[#e8cfc4] space-y-2">
+                <div class="flex gap-2">
+                  <div class="flex-1"><label class="text-[9px] text-gray-400">סכום תוספת</label><input id="ws-custom-extra-amount" type="number" min="0" value="0" class="inp text-sm mt-0.5" onchange="updateWsTotal()" /></div>
+                  <div class="flex-1"><label class="text-[9px] text-gray-400">סיבה</label><input id="ws-custom-extra-note" type="text" placeholder="למשל: ציוד מיוחד" class="inp text-sm mt-0.5" /></div>
+                </div>
+              </div>
+              <button type="button" id="ws-custom-extra-btn" onclick="toggleCustomExtra()" class="text-[10px] text-[#d4a373] hover:underline font-bold">+ תוספת מיוחדת</button>
             </div>
             <div>
               <label class="lbl">הערות</label>
@@ -5418,12 +5428,57 @@ async function cleanupDuplicateExpenses() {
 }
 window.cleanupDuplicateExpenses = cleanupDuplicateExpenses;
 
-function getWsBasePrice() {
+const WS_TIERS = [10, 15, 20, 25, 30];
+
+function getWsPricingInfo() {
   const count = parseInt(document.getElementById('ws-count')?.value) || 0;
   const route = document.getElementById('ws-route')?.value || '';
-  if (!count || !route || !WS_PRICES[count]) return 0;
-  return WS_PRICES[count][route] || 0;
+  if (!count || !route) return null;
+
+  // Exact tier match
+  if (WS_PRICES[count] && WS_PRICES[count][route]) {
+    return { type: 'exact', tier: count, basePrice: WS_PRICES[count][route], extra: 0, perParticipant: 0, nextTier: null, nextPrice: 0 };
+  }
+
+  // Between tiers
+  const lowerTier = WS_TIERS.filter(t => t < count).pop();
+  const upperTier = WS_TIERS.find(t => t > count);
+  if (!lowerTier || !WS_PRICES[lowerTier] || !WS_PRICES[lowerTier][route]) return null;
+
+  const lowerPrice = WS_PRICES[lowerTier][route];
+  const perParticipant = Math.round(lowerPrice / lowerTier);
+  const extraCount = count - lowerTier;
+  const extraPrice = extraCount * perParticipant;
+  const nextPrice = upperTier && WS_PRICES[upperTier] ? (WS_PRICES[upperTier][route] || 0) : 0;
+
+  return { type: 'between', tier: lowerTier, basePrice: lowerPrice, extra: extraCount, perParticipant, extraPrice, nextTier: upperTier, nextPrice, count };
 }
+
+function getWsBasePrice() {
+  const info = getWsPricingInfo();
+  if (!info) return 0;
+  if (info.type === 'exact') return info.basePrice;
+
+  const mode = document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra';
+  if (mode === 'tier' && info.nextPrice) return info.nextPrice;
+  return info.basePrice + info.extraPrice;
+}
+
+function toggleCustomExtra() {
+  const wrap = document.getElementById('ws-custom-extra-wrap');
+  const btn = document.getElementById('ws-custom-extra-btn');
+  if (!wrap) return;
+  if (wrap.style.display === 'none') {
+    wrap.style.display = '';
+    btn.textContent = '− הסר תוספת מיוחדת';
+  } else {
+    wrap.style.display = 'none';
+    document.getElementById('ws-custom-extra-amount').value = 0;
+    btn.textContent = '+ תוספת מיוחדת';
+    updateWsTotal();
+  }
+}
+window.toggleCustomExtra = toggleCustomExtra;
 
 let prevWorkshopsMap = {};
 function initWorkshopsTab() {
@@ -5476,7 +5531,9 @@ function initWorkshopsTab() {
 }
 
 function updateWsTotal() {
-  const base    = getWsBasePrice();
+  const info = getWsPricingInfo();
+  const customExtra = parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0;
+  const base    = getWsBasePrice() + customExtra;
   const disc    = parseFloat(document.getElementById('ws-discount')?.value) || 0;
   const arrival = parseFloat(document.getElementById('ws-arrival')?.value) || 0;
   const total   = Math.round(base * (1 - disc/100) + arrival);
@@ -5485,6 +5542,50 @@ function updateWsTotal() {
   const totalEl = document.getElementById('ws-total-display');
   if (baseEl) baseEl.textContent = base ? base.toLocaleString('he-IL') + ' ₪' : '— ₪';
   if (totalEl) totalEl.textContent = (base ? total.toLocaleString('he-IL') : '0') + ' ₪';
+
+  // Pricing breakdown panel
+  const panel = document.getElementById('ws-pricing-panel');
+  const lines = document.getElementById('ws-pricing-lines');
+  const modePanel = document.getElementById('ws-pricing-mode');
+  if (panel && lines && info) {
+    panel.style.display = '';
+    const mode = document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra';
+    if (info.type === 'between') {
+      modePanel.style.display = '';
+      document.getElementById('ws-mode-extra-label').textContent = `תוספת ${info.extra} משתתפות (${(info.basePrice + info.extraPrice).toLocaleString('he-IL')}₪)`;
+      document.getElementById('ws-mode-tier-label').textContent = `מדרגה ${info.nextTier} משתתפות (${info.nextPrice.toLocaleString('he-IL')}₪)`;
+      if (mode === 'extra') {
+        let h = `<div class="flex justify-between text-xs"><span class="text-gray-600">מחיר בסיס (${info.tier} משתתפות)</span><span class="font-bold text-gray-800">${info.basePrice.toLocaleString('he-IL')} ₪</span></div>`;
+        h += `<div class="flex justify-between text-xs"><span class="text-gray-600">תוספת ${info.extra} משתתפות (× ${info.perParticipant}₪)</span><span class="font-bold text-[#d4a373]">+${info.extraPrice.toLocaleString('he-IL')} ₪</span></div>`;
+        if (customExtra > 0) {
+          const note = document.getElementById('ws-custom-extra-note')?.value || '';
+          h += `<div class="flex justify-between text-xs"><span class="text-gray-600">תוספת מיוחדת${note ? ' — '+esc(note) : ''}</span><span class="font-bold text-[#d4a373]">+${customExtra.toLocaleString('he-IL')} ₪</span></div>`;
+        }
+        h += `<div class="flex justify-between text-xs border-t border-[#e8cfc4] pt-1.5 mt-1"><span class="font-bold text-gray-700">סה"כ לפני הנחה ונסיעה</span><span class="font-black text-gray-800">${base.toLocaleString('he-IL')} ₪</span></div>`;
+        lines.innerHTML = h;
+      } else {
+        let h = `<div class="flex justify-between text-xs"><span class="text-gray-600">מחיר מדרגה (${info.nextTier} משתתפות)</span><span class="font-bold text-gray-800">${info.nextPrice.toLocaleString('he-IL')} ₪</span></div>`;
+        if (customExtra > 0) {
+          const note = document.getElementById('ws-custom-extra-note')?.value || '';
+          h += `<div class="flex justify-between text-xs"><span class="text-gray-600">תוספת מיוחדת${note ? ' — '+esc(note) : ''}</span><span class="font-bold text-[#d4a373]">+${customExtra.toLocaleString('he-IL')} ₪</span></div>`;
+        }
+        h += `<div class="flex justify-between text-xs border-t border-[#e8cfc4] pt-1.5 mt-1"><span class="font-bold text-gray-700">סה"כ לפני הנחה ונסיעה</span><span class="font-black text-gray-800">${base.toLocaleString('he-IL')} ₪</span></div>`;
+        lines.innerHTML = h;
+      }
+    } else {
+      modePanel.style.display = 'none';
+      let h = `<div class="flex justify-between text-xs"><span class="text-gray-600">מחיר בסיס (${info.tier} משתתפות)</span><span class="font-bold text-gray-800">${info.basePrice.toLocaleString('he-IL')} ₪</span></div>`;
+      if (customExtra > 0) {
+        const note = document.getElementById('ws-custom-extra-note')?.value || '';
+        h += `<div class="flex justify-between text-xs"><span class="text-gray-600">תוספת מיוחדת${note ? ' — '+esc(note) : ''}</span><span class="font-bold text-[#d4a373]">+${customExtra.toLocaleString('he-IL')} ₪</span></div>`;
+        h += `<div class="flex justify-between text-xs border-t border-[#e8cfc4] pt-1.5 mt-1"><span class="font-bold text-gray-700">סה"כ לפני הנחה ונסיעה</span><span class="font-black text-gray-800">${base.toLocaleString('he-IL')} ₪</span></div>`;
+      }
+      lines.innerHTML = h;
+    }
+  } else if (panel) {
+    panel.style.display = 'none';
+  }
+
   // Update balance amount display
   const advanceAmt = parseFloat(document.getElementById('ws-advance-amount')?.value) || 500;
   const balanceAmt = Math.max(0, total - advanceAmt);
@@ -5841,6 +5942,8 @@ async function _saveWorkshop() {
     customerName: name, phone, celebrant, occasion, city, street: street||null,
     eventDate: Timestamp.fromDate(new Date(date+'T'+time)),
     time, participantCount: count, route, basePrice: base,
+    pricingMode: document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra',
+    customExtra: { amount: parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0, note: document.getElementById('ws-custom-extra-note')?.value?.trim() || '' },
     discount: disc, arrivalFee: arrival, total, notes: notes||null,
     bookingStatus: advancePaid ? 'confirmed' : 'draft',
     payment,
@@ -5878,6 +5981,12 @@ function clearWorkshopForm() {
   document.getElementById('ws-route').value='';
   document.getElementById('ws-discount').value='0';
   document.getElementById('ws-arrival').value='0';
+  document.getElementById('ws-custom-extra-amount').value='0';
+  document.getElementById('ws-custom-extra-note').value='';
+  document.getElementById('ws-custom-extra-wrap').style.display='none';
+  document.getElementById('ws-custom-extra-btn').textContent='+ תוספת מיוחדת';
+  const extraRadio = document.querySelector('input[name="ws-price-mode"][value="extra"]');
+  if (extraRadio) extraRadio.checked = true;
   document.getElementById('ws-status').value='draft';
   document.getElementById('ws-err').textContent='';
   // Reset payment fields
@@ -5914,6 +6023,22 @@ function openWorkshopModal(id) {
     document.getElementById('ws-route').value = w.route||'';
     document.getElementById('ws-discount').value = w.discount||0;
     document.getElementById('ws-arrival').value = w.arrivalFee||0;
+    // Pricing mode
+    const modeRadio = document.querySelector(`input[name="ws-price-mode"][value="${w.pricingMode||'extra'}"]`);
+    if (modeRadio) modeRadio.checked = true;
+    // Custom extra
+    const ce = w.customExtra || {};
+    if (ce.amount > 0) {
+      document.getElementById('ws-custom-extra-amount').value = ce.amount;
+      document.getElementById('ws-custom-extra-note').value = ce.note || '';
+      document.getElementById('ws-custom-extra-wrap').style.display = '';
+      document.getElementById('ws-custom-extra-btn').textContent = '− הסר תוספת מיוחדת';
+    } else {
+      document.getElementById('ws-custom-extra-amount').value = 0;
+      document.getElementById('ws-custom-extra-note').value = '';
+      document.getElementById('ws-custom-extra-wrap').style.display = 'none';
+      document.getElementById('ws-custom-extra-btn').textContent = '+ תוספת מיוחדת';
+    }
     document.getElementById('ws-notes').value = w.notes||'';
     document.getElementById('ws-status').value = w.bookingStatus || 'confirmed';
     // Payment fields
