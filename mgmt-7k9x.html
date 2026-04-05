@@ -37,6 +37,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
   <style>
     * { font-family: 'Assistant', sans-serif; }
+    input[type="number"] { -moz-appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     [data-v] { display: none !important; }
     [data-erp-tab] { display: none !important; }
     .erp-nav-item--active { background: rgba(212,163,115,0.10); color: #d4a373; font-weight: 700; }
@@ -1035,7 +1038,7 @@
               <input id="ws-time" type="time" class="inp" required />
             </div>
             <div>
-              <label class="lbl">מספר משתתפות *</label>
+              <label class="lbl">עד מספר משתתפות *</label>
               <input id="ws-count" type="number" min="1" max="35" placeholder="כמות" class="inp" required />
             </div>
             <div>
@@ -2833,6 +2836,9 @@ function showSettingsGrid() {
 }
 window.showSettingsGrid = showSettingsGrid;
 // Inject back button into each settings sub-page
+// Prevent scroll changing number inputs
+document.addEventListener('wheel', (e) => { if (document.activeElement?.type === 'number') document.activeElement.blur(); }, { passive: true });
+
 document.addEventListener('DOMContentLoaded', () => {
   settingsSubPages.forEach(p => {
     const el = document.getElementById('settings-page-'+p);
