@@ -1391,27 +1391,42 @@
               <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-4 h-4 text-[#d4a373]"></i> דוח רווח והפסד</h3>
               <p id="wsd-pnl-period-label" class="text-[10px] text-gray-400 mt-0.5"></p>
             </div>
-            <div class="p-5 space-y-1">
-              <div class="flex justify-between p-2.5 bg-emerald-50 rounded-lg border border-emerald-100">
-                <span class="text-sm font-semibold text-emerald-700">הכנסות מסדנאות</span>
+            <div class="px-4 py-1">
+              <div class="flex justify-between py-2 bg-emerald-50/50 rounded-lg px-3 mt-1 mb-2">
+                <span class="text-xs font-black text-gray-700">סה"כ הכנסות</span>
                 <span id="fin-revenue" class="text-sm font-black text-emerald-600">—</span>
               </div>
-              <div class="border-t border-gray-100 my-2"></div>
-              <p class="text-[10px] text-gray-400 font-bold px-2 mb-1">פירוט הוצאות</p>
-              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='scissors' class='w-3.5 h-3.5 inline-block'></i> חומרי גלם</span><span id="wsd-pnl-materials" class="text-sm font-bold text-red-400">—</span></div>
-              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='user' class='w-3.5 h-3.5 inline-block'></i> עובדות</span><span id="wsd-pnl-staff" class="text-sm font-bold text-red-400">—</span></div>
-              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='megaphone' class='w-3.5 h-3.5 inline-block'></i> שיווק ממומן</span><span id="wsd-pnl-marketing" class="text-sm font-bold text-red-400">—</span></div>
-              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600"><i data-lucide='fuel' class='w-3.5 h-3.5 inline-block'></i> דלק / נסיעות</span><span id="wsd-pnl-fuel" class="text-sm font-bold text-red-400">—</span></div>
-              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600">🔧 ציוד קבוע</span><span id="wsd-pnl-equipment" class="text-sm font-bold text-red-400">—</span></div>
-              <div class="flex justify-between p-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"><span class="text-xs text-gray-600">📦 אחר</span><span id="wsd-pnl-other" class="text-sm font-bold text-red-400">—</span></div>
-              <div class="border-t border-gray-100 my-2"></div>
-              <div class="flex justify-between p-2.5 bg-red-50 rounded-lg border border-red-100">
-                <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
+              <div class="flex justify-between py-1.5 border-b border-gray-100 pr-3">
+                <span class="text-xs font-semibold text-gray-500">חומרי גלם</span>
+                <span id="wsd-pnl-materials" class="text-sm font-bold text-red-500">—</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-gray-100 pr-3">
+                <span class="text-xs font-semibold text-gray-500">עובדות</span>
+                <span id="wsd-pnl-staff" class="text-sm font-bold text-red-500">—</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-gray-100 pr-3">
+                <span class="text-xs font-semibold text-gray-500">שיווק ממומן</span>
+                <span id="wsd-pnl-marketing" class="text-sm font-bold text-red-500">—</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-gray-100 pr-3">
+                <span class="text-xs font-semibold text-gray-500">דלק / נסיעות</span>
+                <span id="wsd-pnl-fuel" class="text-sm font-bold text-red-500">—</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-gray-100 pr-3">
+                <span class="text-xs font-semibold text-gray-500">ציוד קבוע</span>
+                <span id="wsd-pnl-equipment" class="text-sm font-bold text-red-500">—</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b border-gray-100 pr-3">
+                <span class="text-xs font-semibold text-gray-500">אחר</span>
+                <span id="wsd-pnl-other" class="text-sm font-bold text-red-500">—</span>
+              </div>
+              <div class="flex justify-between py-2 bg-red-50/50 rounded-lg px-3 mt-1 mb-1">
+                <span class="text-xs font-black text-gray-700">סה"כ הוצאות</span>
                 <span id="fin-expenses" class="text-sm font-black text-red-500">—</span>
               </div>
-              <div class="flex justify-between p-3 rounded-lg border-2" id="wsd-pnl-profit-row">
-                <span class="text-sm font-bold">רווח נקי</span>
-                <span id="fin-profit" class="text-lg font-black">—</span>
+              <div class="flex justify-between py-2 bg-emerald-50 rounded-lg px-3" id="wsd-pnl-profit-row">
+                <span class="text-sm font-bold text-gray-800">רווח נקי</span>
+                <span id="fin-profit" class="text-base font-black text-emerald-600">—</span>
               </div>
             </div>
           </div>
