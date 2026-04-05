@@ -6391,7 +6391,7 @@ function openWsCard(id) {
 
   if (w.notes){el('wsc-notes-section').style.display='';el('wsc-notes').textContent=w.notes;}else{el('wsc-notes-section').style.display='none';}
 
-  el('wsc-edit-btn').onclick=()=>{closeWsCard();setTimeout(()=>openWorkshopModal(id),200);};
+  el('wsc-edit-btn').onclick=()=>{closeWsCard();showTab('workshops');setTimeout(()=>openWorkshopModal(id),300);};
   el('wsc-wa-btn').onclick=()=>{closeWsCard();showTab('workshops');setTimeout(()=>{openWorkshopModal(id);setTimeout(()=>sendWorkshopWhatsApp(),200);},300);};
   const cl=d?generateCalendarLinks(w):'';
   const m=cl.match(/href="([^"]+)"/);
