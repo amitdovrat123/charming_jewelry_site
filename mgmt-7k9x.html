@@ -1142,8 +1142,8 @@
                     </select>
                   </div>
                   <div id="ws-advance-date-wrap" class="hidden">
-                    <label class="text-[10px] text-gray-400">תאריך</label>
-                    <p id="ws-advance-date-display" class="text-xs text-gray-500 mt-1">—</p>
+                    <label class="text-[10px] text-gray-400">תאריך קבלת מקדמה</label>
+                    <input type="date" id="ws-advance-date-input" class="inp text-xs mt-0.5" />
                   </div>
                 </div>
               </div>
@@ -1157,7 +1157,8 @@
                   <span class="text-sm font-semibold text-gray-700">יתרה שולמה</span>
                   <span id="ws-balance-amount" class="text-sm font-bold text-gray-600 mr-auto">— ₪</span>
                   <div id="ws-balance-date-wrap" class="hidden">
-                    <p id="ws-balance-date-display" class="text-[10px] text-gray-400">—</p>
+                    <label class="text-[10px] text-gray-400">תאריך קבלת יתרה</label>
+                    <input type="date" id="ws-balance-date-input" class="inp text-xs mt-0.5" />
                   </div>
                 </div>
                 <div id="ws-balance-rows" style="display:none" class="space-y-2">
@@ -1357,25 +1358,23 @@
       <section id="tab-finances" data-erp-tab class="p-6 space-y-6">
         <div class="flex items-center justify-between flex-wrap gap-3">
           <h2 class="font-black text-gray-800 text-lg flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-[#d4a373] inline-block"></i> כספים ודוחות</h2>
-          <div class="flex items-center gap-1 bg-gray-100 rounded-full p-0.5">
-            <button id="fin-view-workshops" onclick="switchFinView('workshops')"
-              class="fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#d4a373] text-white shadow-sm">סדנאות</button>
-            <button id="fin-view-shop" onclick="switchFinView('shop')"
-              class="fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all text-gray-400 hover:text-[#d4a373]">חנות</button>
+          <div class="flex items-center gap-3">
+            <input type="hidden" id="wsd-report-period" value="current" />
+            <button onclick="toggleFinFilterPopup()" class="flex items-center gap-1.5 text-xs border border-[#e8cfc4] bg-white hover:bg-[#fdf8f5] text-[#4a3f3c] px-3 py-1.5 rounded-full font-semibold transition-colors">
+              <i data-lucide="filter" class="w-3.5 h-3.5 text-[#d4a373]"></i>
+              <span id="wsd-report-label"></span>
+            </button>
+            <div class="flex items-center gap-1 bg-gray-100 rounded-full p-0.5">
+              <button id="fin-view-workshops" onclick="switchFinView('workshops')"
+                class="fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#d4a373] text-white shadow-sm">סדנאות</button>
+              <button id="fin-view-shop" onclick="switchFinView('shop')"
+                class="fin-view-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all text-gray-400 hover:text-[#d4a373]">חנות</button>
+            </div>
           </div>
         </div>
 
         <!-- ═══ Workshops Finance View ═══ -->
         <div id="fin-workshops-view" class="space-y-6">
-
-        <!-- Report period selector -->
-        <div class="flex items-center gap-3">
-          <input type="hidden" id="wsd-report-period" value="current" />
-          <button onclick="toggleFinFilterPopup()" class="flex items-center gap-1.5 text-sm border border-[#e8cfc4] bg-white hover:bg-[#fdf8f5] text-[#4a3f3c] px-4 py-2.5 rounded-full font-semibold transition-colors shadow-sm">
-            <i data-lucide="filter" class="w-3.5 h-3.5 text-[#d4a373]"></i>
-            <span id="wsd-report-label"></span>
-          </button>
-        </div>
 
         <!-- Summary KPIs -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -6025,8 +6024,8 @@ function clearWorkshopForm() {
   document.getElementById('ws-balance-amount').textContent = '— ₪';
   document.getElementById('ws-advance-date-wrap').classList.add('hidden');
   document.getElementById('ws-balance-date-wrap').classList.add('hidden');
-  document.getElementById('ws-advance-date-display').textContent = '—';
-  document.getElementById('ws-balance-date-display').textContent = '—';
+  document.getElementById('ws-advance-date-input').value = '';
+  document.getElementById('ws-balance-date-input').value = '';
   editWorkshopId=null;
   updateWsTotal();
   updatePaymentBadge();
