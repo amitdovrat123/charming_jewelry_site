@@ -6363,11 +6363,11 @@ function openWsCard(id) {
     if (status === 'confirmed' && !w.street) {
       const waPhone = wp.startsWith('0') ? '972'+wp.slice(1) : wp;
       const addrMsg = encodeURIComponent(`היי, תודה על התשלום! 🙏\nלצורך הכנת ההזמנה ליום האירוע, אשמח לקבל את הכתובת המלאה (רחוב ומספר בית) ב${w.city || ''}.`);
-      addrBanner.innerHTML = `<div class="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
-        <i data-lucide="map-pin" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>
+      addrBanner.innerHTML = `<div class="flex items-start gap-2 p-2.5 bg-red-50 border border-red-200 rounded-xl">
+        <i data-lucide="map-pin" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"></i>
         <div class="flex-1 min-w-0">
-          <p class="text-[11px] font-semibold text-amber-700">חסרה כתובת מלאה</p>
-          <p class="text-[10px] text-amber-600 mt-0.5">נדרש רחוב ומספר בית להזמנה וליומן</p>
+          <p class="text-[11px] font-semibold text-red-700">חסרה כתובת מלאה</p>
+          <p class="text-[10px] text-red-500 mt-0.5">נדרש רחוב ומספר בית להזמנה וליומן</p>
         </div>
         <a href="https://wa.me/${waPhone}?text=${addrMsg}" target="_blank" class="text-[10px] font-bold text-emerald-600 border border-emerald-300 hover:bg-emerald-50 px-2.5 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap">בקשי כתובת</a>
       </div>`;
