@@ -1328,35 +1328,11 @@
         <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center justify-between">
             <h3 class="font-bold text-sm text-gray-800">רשימת הוצאות</h3>
-            <div class="relative">
+            <div>
               <button onclick="toggleExpFilterPopup()" class="flex items-center gap-1.5 text-xs border border-[#e8cfc4] bg-white hover:bg-[#fdf8f5] text-[#4a3f3c] px-3 py-1.5 rounded-full font-semibold transition-colors">
                 <i data-lucide="filter" class="w-3.5 h-3.5 text-[#d4a373]"></i>
                 <span id="exp-filter-label"></span>
               </button>
-              <div id="exp-filter-popup" style="display:none" class="absolute left-0 top-full mt-2 bg-white border border-[#f0dfc0] rounded-2xl shadow-xl z-30 p-4 space-y-3 min-w-[280px]">
-                <p class="text-[10px] font-bold text-[#9a8e8a]">סינון לפי תקופה</p>
-                <div class="space-y-1">
-                  <button onclick="setExpFilter('current', expCurrentMonthLabel())" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">החודש</button>
-                  <button onclick="setExpFilter('prev', expPrevMonthLabel())" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">חודש קודם</button>
-                  <button onclick="setExpFilter('all','הכל')" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">הכל</button>
-                </div>
-                <div class="border-t border-[#f0dfc0] pt-3">
-                  <p class="text-[10px] font-bold text-[#9a8e8a] mb-1.5">חודש ספציפי</p>
-                  <div class="flex gap-2">
-                    <div class="flex-1"><select id="exp-filter-month-num" class="inp text-xs w-full"><option value="">חודש</option><option value="1">ינואר</option><option value="2">פברואר</option><option value="3">מרץ</option><option value="4">אפריל</option><option value="5">מאי</option><option value="6">יוני</option><option value="7">יולי</option><option value="8">אוגוסט</option><option value="9">ספטמבר</option><option value="10">אוקטובר</option><option value="11">נובמבר</option><option value="12">דצמבר</option></select></div>
-                    <div class="flex-1"><select id="exp-filter-year" class="inp text-xs w-full"></select></div>
-                  </div>
-                  <button onclick="applyMonthFilter()" class="w-full mt-2 py-1.5 rounded-full text-[10px] font-bold border border-[#e8cfc4] text-[#d4a373] hover:bg-[#fdf6ee] transition-colors">הצג חודש</button>
-                </div>
-                <div class="border-t border-[#f0dfc0] pt-3">
-                  <p class="text-[10px] font-bold text-[#9a8e8a] mb-1.5">טווח תאריכים</p>
-                  <div class="flex gap-2">
-                    <div class="flex-1"><label class="text-[9px] text-gray-400">מתאריך</label><input id="exp-filter-from" type="date" class="inp text-xs mt-0.5 w-full" /></div>
-                    <div class="flex-1"><label class="text-[9px] text-gray-400">עד תאריך</label><input id="exp-filter-to" type="date" class="inp text-xs mt-0.5 w-full" /></div>
-                  </div>
-                  <button onclick="setExpFilter('range','טווח מותאם')" class="w-full mt-2 py-2 rounded-full text-xs font-bold bg-[#d4a373] hover:bg-[#b8893e] text-white transition-colors">החל סינון</button>
-                </div>
-              </div>
               <input type="hidden" id="exp-filter-type" value="current" />
             </div>
           </div>
@@ -1481,14 +1457,26 @@
             </div>
           </div>
         </div>
-        <!-- Detailed Transactions -->
-        <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
-          <button onclick="const el=document.getElementById('wsd-transactions');el.style.display=el.style.display==='none'?'':'none';this.querySelector('[data-chev]').style.transform=el.style.display==='none'?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5e6d5] transition-colors">
-            <i data-lucide="list" class="w-4 h-4 text-[#d4a373]"></i>
-            <h3 class="font-bold text-sm text-gray-800">פירוט תנועות</h3>
-            <i data-lucide="chevron-down" data-chev class="w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
-          </button>
-          <div id="wsd-transactions" style="display:none" class="p-4 max-h-[500px] overflow-auto"></div>
+        <!-- Detailed Reports -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Cash Flow Detail -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
+            <button onclick="const el=document.getElementById('wsd-tx-cashflow');el.style.display=el.style.display==='none'?'':'none';this.querySelector('[data-chev]').style.transform=el.style.display==='none'?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5e6d5] transition-colors">
+              <i data-lucide="wallet" class="w-4 h-4 text-[#d4a373]"></i>
+              <div class="text-right"><h3 class="font-bold text-sm text-gray-800">פירוט תזרים מזומנים</h3><p id="wsd-tx-cf-period" class="text-[10px] text-gray-400"></p></div>
+              <i data-lucide="chevron-down" data-chev class="w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
+            </button>
+            <div id="wsd-tx-cashflow" style="display:none" class="p-4 max-h-[500px] overflow-auto"></div>
+          </div>
+          <!-- P&L Detail -->
+          <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-md overflow-hidden">
+            <button onclick="const el=document.getElementById('wsd-tx-pnl');el.style.display=el.style.display==='none'?'':'none';this.querySelector('[data-chev]').style.transform=el.style.display==='none'?'':'rotate(180deg)'" class="w-full px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center gap-2 cursor-pointer hover:bg-[#f5e6d5] transition-colors">
+              <i data-lucide="file-text" class="w-4 h-4 text-[#d4a373]"></i>
+              <div class="text-right"><h3 class="font-bold text-sm text-gray-800">פירוט רווח והפסד</h3><p id="wsd-tx-pnl-period" class="text-[10px] text-gray-400"></p></div>
+              <i data-lucide="chevron-down" data-chev class="w-4 h-4 text-gray-400 mr-auto transition-transform duration-200"></i>
+            </button>
+            <div id="wsd-tx-pnl" style="display:none" class="p-4 max-h-[500px] overflow-auto"></div>
+          </div>
         </div>
 
         </div><!-- /fin-workshops-view -->
@@ -7338,11 +7326,14 @@ function updateExpenseKPIs() {
 }
 
 function toggleExpFilterPopup() {
-  const popup = document.getElementById('exp-filter-popup');
-  if (!popup) return;
-  const isOpen = popup.style.display !== 'none';
-  popup.style.display = isOpen ? 'none' : '';
-  if (!isOpen) populateExpYears();
+  const modal = document.getElementById('exp-filter-modal');
+  if (!modal) return;
+  const isOpen = modal.style.display !== 'none';
+  modal.style.display = isOpen ? 'none' : '';
+  if (!isOpen) {
+    populateExpYears();
+    if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
+  }
 }
 function populateExpYears() {
   const yearSel = document.getElementById('exp-filter-year');
@@ -7379,17 +7370,12 @@ window.expPrevMonthLabel = expPrevMonthLabel;
 function setExpFilter(type, label) {
   document.getElementById('exp-filter-type').value = type;
   document.getElementById('exp-filter-label').textContent = label;
-  document.getElementById('exp-filter-popup').style.display = 'none';
+  document.getElementById('exp-filter-modal').style.display = 'none';
   renderExpensesList();
 }
 window.toggleExpFilterPopup = toggleExpFilterPopup;
 window.setExpFilter = setExpFilter;
-// Close popup on outside click
-document.addEventListener('click', e => {
-  const popup = document.getElementById('exp-filter-popup');
-  const btn = e.target.closest('[onclick*="toggleExpFilterPopup"]');
-  if (popup && popup.style.display !== 'none' && !popup.contains(e.target) && !btn) popup.style.display = 'none';
-});
+// Modal closes via onclick on backdrop
 
 function renderExpensesList() {
   const list = document.getElementById('exp-list');
@@ -7427,7 +7413,7 @@ function renderExpensesList() {
   list.innerHTML = filtered.map(e => {
     const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
     const method = EXPENSE_METHODS[e.method] || e.method || '';
-    const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
+    const dateStr = e.date ? (()=>{ const d=new Date(e.date); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`; })() : '—';
     return `<div class="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="if(!event.target.closest('button'))openExpenseCard('${e.id}')">
       <span class="text-xs text-gray-500 w-14 flex-shrink-0">${dateStr}</span>
       <span class="text-xs ${cat.color} w-5 flex-shrink-0">${cat.icon}</span>
@@ -7452,7 +7438,7 @@ function openExpenseCard(id) {
   const e = allExpenses.find(x=>x.id===id);
   if (!e) return;
   const cat = EXPENSE_CATEGORIES[e.category] || { label: e.category, icon: '📦', color: 'text-gray-400' };
-  const dateStr = e.date ? new Date(e.date).toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
+  const dateStr = e.date ? (()=>{ const d=new Date(e.date); const dd=String(d.getDate()).padStart(2,'0'), mm=String(d.getMonth()+1).padStart(2,'0'), yy=String(d.getFullYear()).slice(-2); const wd=d.toLocaleDateString('he-IL',{weekday:'long'}); return `${wd}, ${dd}/${mm}/${yy}`; })() : '—';
   const mn = EXPENSE_METHODS[e.method] || e.method || '—';
 
   const modal = document.createElement('div');
@@ -10949,6 +10935,42 @@ window.sendInviteWhatsApp = sendInviteWhatsApp;
       <button id="wsc-wa-btn" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></button>
       <a id="wsc-call-btn" href="tel:" class="border border-blue-300 text-blue-500 hover:bg-blue-50 px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0 flex items-center justify-center" title="חייג"><i data-lucide="phone" class="w-4 h-4"></i></a>
       <button id="wsc-cal-btn" class="border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-2 rounded-full text-sm transition-colors flex-shrink-0" title="יומן"><i data-lucide="calendar" class="w-4 h-4"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Filter Modal -->
+<div id="exp-filter-modal" style="display:none" class="fixed inset-0 z-[9500] flex items-center justify-center bg-black/40" onclick="if(event.target===this)this.style.display='none'">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-[90%] overflow-hidden fadein border border-[#f0dfc0]">
+    <div class="px-5 py-4 border-b border-[#f0dfc0] bg-[#fdf8f5] flex items-center justify-between">
+      <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i data-lucide="filter" class="w-4 h-4 text-[#d4a373]"></i> סינון הוצאות</h3>
+      <button onclick="document.getElementById('exp-filter-modal').style.display='none'" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f0dfc0]/30 text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div class="px-5 py-4 space-y-4 bg-[#fdf6ee]">
+      <div class="space-y-1.5">
+        <p class="text-[10px] font-bold text-[#9a8e8a]">בחירה מהירה</p>
+        <div class="flex gap-2">
+          <button onclick="setExpFilter('current', expCurrentMonthLabel())" class="flex-1 py-2 rounded-full text-xs font-bold border border-[#e8cfc4] text-[#4a3f3c] hover:bg-white transition-colors">החודש</button>
+          <button onclick="setExpFilter('prev', expPrevMonthLabel())" class="flex-1 py-2 rounded-full text-xs font-bold border border-[#e8cfc4] text-[#4a3f3c] hover:bg-white transition-colors">חודש קודם</button>
+          <button onclick="setExpFilter('all','הכל')" class="flex-1 py-2 rounded-full text-xs font-bold border border-[#e8cfc4] text-[#4a3f3c] hover:bg-white transition-colors">הכל</button>
+        </div>
+      </div>
+      <div class="border-t border-[#f0dfc0] pt-3">
+        <p class="text-[10px] font-bold text-[#9a8e8a] mb-2">חודש ספציפי</p>
+        <div class="flex gap-2">
+          <div class="flex-1"><select id="exp-filter-month-num" class="inp text-xs w-full"><option value="">חודש</option><option value="1">ינואר</option><option value="2">פברואר</option><option value="3">מרץ</option><option value="4">אפריל</option><option value="5">מאי</option><option value="6">יוני</option><option value="7">יולי</option><option value="8">אוגוסט</option><option value="9">ספטמבר</option><option value="10">אוקטובר</option><option value="11">נובמבר</option><option value="12">דצמבר</option></select></div>
+          <div class="flex-1"><select id="exp-filter-year" class="inp text-xs w-full"></select></div>
+        </div>
+        <button onclick="applyMonthFilter()" class="w-full mt-2 py-2 rounded-full text-xs font-bold border border-[#d4a373] text-[#d4a373] hover:bg-[#d4a373] hover:text-white transition-colors">הצג חודש</button>
+      </div>
+      <div class="border-t border-[#f0dfc0] pt-3">
+        <p class="text-[10px] font-bold text-[#9a8e8a] mb-2">טווח תאריכים</p>
+        <div class="flex gap-2">
+          <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">מתאריך</label><input id="exp-filter-from" type="date" class="inp text-xs mt-0.5 w-full" /></div>
+          <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">עד תאריך</label><input id="exp-filter-to" type="date" class="inp text-xs mt-0.5 w-full" /></div>
+        </div>
+        <button onclick="setExpFilter('range','טווח מותאם')" class="w-full mt-2 py-2 rounded-full text-xs font-bold bg-[#d4a373] hover:bg-[#b8893e] text-white transition-colors">החל סינון</button>
+      </div>
     </div>
   </div>
 </div>
