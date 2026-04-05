@@ -5848,7 +5848,7 @@ function getWsDate(w) {
 
 function renderWorkshopCard(w, opts = {}) {
   const d = getWsDate(w);
-  const dateStr = d ? d.toLocaleDateString('he-IL') : '—';
+  const dateStr = d ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}` : '—';
   const status  = w.bookingStatus || 'confirmed';
   const isPast  = opts.isPast || false;
 
