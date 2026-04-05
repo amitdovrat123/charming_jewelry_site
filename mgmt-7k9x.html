@@ -1127,23 +1127,16 @@
                   </label>
                   <span class="text-sm font-semibold text-gray-700">מקדמה שולמה</span>
                 </div>
-                <div id="ws-advance-date-wrap" class="hidden">
-                  <label class="text-[10px] text-gray-400">תאריך קבלת מקדמה</label>
-                  <input type="date" id="ws-advance-date-input" class="inp text-sm mt-0.5" />
-                </div>
-                <div class="flex gap-3">
-                  <div class="flex-1">
-                    <label class="text-[10px] text-gray-400">סכום</label>
-                    <input id="ws-advance-amount" type="number" min="0" value="500" class="inp text-sm" />
-                  </div>
-                  <div class="flex-1">
-                    <label class="text-[10px] text-gray-400">אמצעי</label>
+                <div id="ws-advance-date-wrap" class="hidden space-y-2">
+                  <div><label class="text-[10px] text-gray-400">תאריך קבלת מקדמה</label>
+                  <input type="date" id="ws-advance-date-input" class="inp text-sm mt-0.5" /></div>
+                  <div class="flex gap-3">
+                    <div class="flex-1"><label class="text-[10px] text-gray-400">סכום</label>
+                    <input id="ws-advance-amount" type="number" min="0" value="500" class="inp text-sm" /></div>
+                    <div class="flex-1"><label class="text-[10px] text-gray-400">אמצעי</label>
                     <select id="ws-advance-method" class="inp text-sm">
-                      <option value="paybox">PayBox</option>
-                      <option value="bit">Bit</option>
-                      <option value="cash">מזומן</option>
-                      <option value="transfer">העברה בנקאית</option>
-                    </select>
+                      <option value="paybox">PayBox</option><option value="bit">Bit</option><option value="cash">מזומן</option><option value="transfer">העברה בנקאית</option>
+                    </select></div>
                   </div>
                 </div>
               </div>
@@ -1156,19 +1149,19 @@
                   </label>
                   <span class="text-sm font-semibold text-gray-700">יתרה שולמה</span>
                   <span id="ws-balance-amount" class="text-sm font-bold text-gray-600 mr-auto">— ₪</span>
-                  <div id="ws-balance-date-wrap" class="hidden">
-                    <label class="text-[10px] text-gray-400">תאריך קבלת יתרה</label>
-                    <input type="date" id="ws-balance-date-input" class="inp text-xs mt-0.5" />
-                  </div>
                 </div>
-                <div id="ws-balance-rows" style="display:none" class="space-y-2">
-                  <div class="flex gap-2 items-end ws-form-bal-row">
-                    <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label><input type="number" class="inp text-sm mt-0.5 ws-form-bal-amt" /></div>
-                    <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
-                      <select class="inp text-sm mt-0.5 ws-form-bal-mth"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option></select>
+                <div id="ws-balance-date-wrap" class="hidden space-y-2">
+                  <div><label class="text-[10px] text-gray-400">תאריך קבלת יתרה</label>
+                  <input type="date" id="ws-balance-date-input" class="inp text-sm mt-0.5" /></div>
+                  <div id="ws-balance-rows" class="space-y-2">
+                    <div class="flex gap-2 items-end ws-form-bal-row">
+                      <div class="flex-1"><label class="text-[9px] text-gray-400">סכום</label><input type="number" class="inp text-sm mt-0.5 ws-form-bal-amt" /></div>
+                      <div class="flex-1"><label class="text-[9px] text-gray-400">אמצעי</label>
+                        <select class="inp text-sm mt-0.5 ws-form-bal-mth"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option></select>
+                      </div>
                     </div>
+                    <button type="button" onclick="addFormBalanceRow()" class="text-[10px] text-[#d4a373] hover:underline font-bold">+ הוסף אמצעי תשלום נוסף</button>
                   </div>
-                  <button type="button" onclick="addFormBalanceRow()" class="text-[10px] text-[#d4a373] hover:underline font-bold">+ הוסף אמצעי תשלום נוסף</button>
                 </div>
               </div>
             </div>
