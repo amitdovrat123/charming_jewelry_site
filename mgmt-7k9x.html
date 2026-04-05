@@ -935,7 +935,16 @@
               </div>
               <div id="crm-col-pending" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-red-200"></div>
             </div>
-            <!-- Archive is shown via ws-section-archive below -->
+            <!-- Column 5: Archive — Gray (closed) -->
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
+              <div class="px-4 py-3 flex items-center gap-2 cursor-pointer" onclick="toggleCrmCol('crm-col-archive',this)">
+                <div class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
+                <h4 class="font-bold text-sm text-gray-500">ארכיון</h4>
+                <span id="crm-count-archive" class="text-[10px] font-bold bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 mr-auto"></span>
+                <svg class="crm-arrow w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div id="crm-col-archive" class="p-2 space-y-2 max-h-[60vh] overflow-y-auto border-t border-gray-200" style="display:none"></div>
+            </div>
           </div>
         </div>
 
@@ -1319,11 +1328,18 @@
         <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center justify-between">
             <h3 class="font-bold text-sm text-gray-800">רשימת הוצאות</h3>
-            <select id="exp-filter-month" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer">
-              <option value="current">החודש</option>
-              <option value="prev">חודש קודם</option>
-              <option value="all">הכל</option>
-            </select>
+            <div class="flex items-center gap-2">
+              <select id="exp-filter-type" onchange="toggleExpFilter();renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer">
+                <option value="current">החודש</option>
+                <option value="prev">חודש קודם</option>
+                <option value="month">חודש ספציפי</option>
+                <option value="range">טווח תאריכים</option>
+                <option value="all">הכל</option>
+              </select>
+              <select id="exp-filter-month-pick" style="display:none" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer"></select>
+              <input id="exp-filter-from" type="date" style="display:none" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-1.5 py-1 text-gray-500 cursor-pointer" />
+              <input id="exp-filter-to" type="date" style="display:none" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-1.5 py-1 text-gray-500 cursor-pointer" />
+            </div>
           </div>
           <div id="exp-list" class="divide-y divide-[#fdf6ee]"></div>
         </div>
@@ -6872,6 +6888,9 @@ function renderCrmBoard() {
   fillCol('crm-col-draft', drafts, w => crmCard(w));
   fillCol('crm-col-confirmed', confirmed, w => crmCard(w));
   fillCol('crm-col-pending', pending, w => crmCard(w));
+  if (el('crm-count-archive')) el('crm-count-archive').textContent = archive.length;
+  const archCol = el('crm-col-archive');
+  if (archCol) archCol.innerHTML = archive.slice(0,15).map(w => crmCard(w, {isArchive:true})).join('') || '';
   applyWsFilters();
 }
 window.renderCrmBoard = renderCrmBoard;
