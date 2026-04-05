@@ -6151,8 +6151,9 @@ function sendWorkshopWhatsApp() {
 
   const customExtraAmt = parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0;
   const customExtraNote = document.getElementById('ws-custom-extra-note')?.value?.trim() || '';
-  const base    = getWsBasePrice() + customExtraAmt;
-  const total   = Math.round(base * (1 - disc/100) + arrival);
+  const baseRaw = getWsBasePrice();
+  const base    = baseRaw + customExtraAmt;
+  const total   = parseInt(document.getElementById('ws-total-display')?.textContent.replace(/[^\d]/g,'')) || Math.round(base * (1 - disc/100) + arrival);
   const dateStr = date ? new Date(date).toLocaleDateString('he-IL') : '';
 
   // Calculate arrival time (30 min before)
