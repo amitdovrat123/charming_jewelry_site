@@ -1119,31 +1119,31 @@
             </button>
             <div id="ws-payment-body" class="p-4 space-y-4" style="display:none;">
               <!-- Advance payment -->
-              <div class="flex flex-wrap items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
-                <div class="flex items-center gap-2 min-w-[140px]">
+              <div class="p-3 rounded-lg bg-gray-50 border border-gray-100 space-y-2">
+                <div class="flex items-center gap-2">
                   <label class="tog flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="ws-advance-paid" onchange="updatePaymentBadge()">
                     <span class="tog-track"></span>
                   </label>
                   <span class="text-sm font-semibold text-gray-700">מקדמה שולמה</span>
                 </div>
-                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-                  <div>
+                <div id="ws-advance-date-wrap" class="hidden">
+                  <label class="text-[10px] text-gray-400">תאריך קבלת מקדמה</label>
+                  <input type="date" id="ws-advance-date-input" class="inp text-sm mt-0.5" />
+                </div>
+                <div class="flex gap-3">
+                  <div class="flex-1">
                     <label class="text-[10px] text-gray-400">סכום</label>
-                    <input id="ws-advance-amount" type="number" min="0" value="500" class="inp text-sm w-24" />
+                    <input id="ws-advance-amount" type="number" min="0" value="500" class="inp text-sm" />
                   </div>
-                  <div>
+                  <div class="flex-1">
                     <label class="text-[10px] text-gray-400">אמצעי</label>
-                    <select id="ws-advance-method" class="inp text-sm w-28">
+                    <select id="ws-advance-method" class="inp text-sm">
                       <option value="paybox">PayBox</option>
                       <option value="bit">Bit</option>
                       <option value="cash">מזומן</option>
                       <option value="transfer">העברה בנקאית</option>
                     </select>
-                  </div>
-                  <div id="ws-advance-date-wrap" class="hidden">
-                    <label class="text-[10px] text-gray-400">תאריך קבלת מקדמה</label>
-                    <input type="date" id="ws-advance-date-input" class="inp text-xs mt-0.5" />
                   </div>
                 </div>
               </div>
