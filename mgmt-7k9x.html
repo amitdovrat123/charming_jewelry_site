@@ -3900,6 +3900,59 @@ function renderFinancialReports() {
       </div>`;
     }).join('');
   }
+
+  // ── Detailed Transactions Table ──
+  const txEl = el('wsd-transactions');
+  if (txEl) {
+    const rows = [];
+    // Income: workshop payments in period
+    confirmed.forEach(w => {
+      const pay = w.payment || {};
+      const name = w.celebrant || w.customerName || '—';
+      if (pay.advancePaid && pay.advancePaidDate) {
+        const d = pay.advancePaidDate.seconds ? new Date(pay.advancePaidDate.seconds*1000) : new Date(pay.advancePaidDate);
+        if (inRange(d)) rows.push({ date: d, type: 'income', desc: 'מקדמה — ' + name, method: pay.advanceMethod, amount: pay.advanceAmount || 500 });
+      }
+      if (pay.balancePaid && pay.balancePaidDate) {
+        const d = pay.balancePaidDate.seconds ? new Date(pay.balancePaidDate.seconds*1000) : new Date(pay.balancePaidDate);
+        if (inRange(d)) rows.push({ date: d, type: 'income', desc: 'יתרה — ' + name, method: pay.balanceMethod, amount: pay.balanceAmount || 0 });
+      }
+    });
+    // Expenses in period
+    const expCats = { materials:'חומרי גלם', staff:'עובדות', marketing:'שיווק', fuel:'דלק/נסיעות', equipment:'ציוד', other:'אחר' };
+    allExpenses.forEach(e => {
+      if (!e.date) return;
+      const d = new Date(e.date);
+      if (inRange(d)) rows.push({ date: d, type: 'expense', desc: (expCats[e.category] || e.category || 'הוצאה') + (e.description ? ' — ' + e.description : ''), amount: e.amount || 0 });
+    });
+    rows.sort((a, b) => b.date - a.date);
+    const methods = { paybox:'PayBox', bit:'Bit', cash:'מזומן', transfer:'העברה' };
+    if (rows.length) {
+      let totalIn = 0, totalOut = 0;
+      let html = '<table class="w-full text-sm"><thead><tr class="border-b border-[#f0dfc0] text-[11px] text-gray-400 font-bold">' +
+        '<th class="text-right py-2 pr-2">תאריך</th><th class="text-right py-2">פירוט</th><th class="text-right py-2">אמצעי</th><th class="text-left py-2 pl-2">סכום</th></tr></thead><tbody>';
+      rows.forEach(r => {
+        const dateStr = `${String(r.date.getDate()).padStart(2,'0')}/${String(r.date.getMonth()+1).padStart(2,'0')}`;
+        const isIncome = r.type === 'income';
+        if (isIncome) totalIn += r.amount; else totalOut += r.amount;
+        html += `<tr class="border-b border-gray-50 hover:bg-gray-50/50">
+          <td class="py-2 pr-2 text-[11px] text-gray-400">${dateStr}</td>
+          <td class="py-2 text-xs text-gray-700">${esc(r.desc)}</td>
+          <td class="py-2 text-[11px] text-gray-400">${methods[r.method] || r.method || ''}</td>
+          <td class="py-2 pl-2 text-sm font-bold text-left ${isIncome ? 'text-emerald-600' : 'text-red-500'}">${isIncome ? '+' : '-'}${r.amount.toLocaleString('he-IL')} ₪</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      html += `<div class="flex justify-between items-center mt-3 pt-3 border-t border-[#f0dfc0]">
+        <div><span class="text-xs text-gray-500">הכנסות: </span><span class="text-sm font-bold text-emerald-600">${totalIn.toLocaleString('he-IL')} ₪</span></div>
+        <div><span class="text-xs text-gray-500">הוצאות: </span><span class="text-sm font-bold text-red-500">${totalOut.toLocaleString('he-IL')} ₪</span></div>
+        <div><span class="text-xs text-gray-700 font-bold">נטו: </span><span class="text-sm font-black ${totalIn-totalOut>=0?'text-emerald-600':'text-red-500'}">${(totalIn-totalOut).toLocaleString('he-IL')} ₪</span></div>
+      </div>`;
+      txEl.innerHTML = html;
+    } else {
+      txEl.innerHTML = '<p class="text-center text-gray-300 text-sm py-6">אין תנועות בתקופה זו</p>';
+    }
+  }
 }
 window.renderFinancialReports = renderFinancialReports;
 
