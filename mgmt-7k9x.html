@@ -1328,17 +1328,32 @@
         <div class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden">
           <div class="px-5 py-3 border-b border-[#f0dfc0] bg-[#fdf6ee] flex items-center justify-between">
             <h3 class="font-bold text-sm text-gray-800">רשימת הוצאות</h3>
-            <div class="flex items-center gap-2">
-              <select id="exp-filter-type" onchange="toggleExpFilter();renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer">
-                <option value="current">החודש</option>
-                <option value="prev">חודש קודם</option>
-                <option value="month">חודש ספציפי</option>
-                <option value="range">טווח תאריכים</option>
-                <option value="all">הכל</option>
-              </select>
-              <select id="exp-filter-month-pick" style="display:none" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-500 cursor-pointer"></select>
-              <input id="exp-filter-from" type="date" style="display:none" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-1.5 py-1 text-gray-500 cursor-pointer" />
-              <input id="exp-filter-to" type="date" style="display:none" onchange="renderExpensesList()" class="text-xs border border-gray-200 rounded-lg px-1.5 py-1 text-gray-500 cursor-pointer" />
+            <div class="relative">
+              <button onclick="toggleExpFilterPopup()" class="flex items-center gap-1.5 text-xs border border-[#e8cfc4] bg-white hover:bg-[#fdf8f5] text-[#4a3f3c] px-3 py-1.5 rounded-full font-semibold transition-colors">
+                <i data-lucide="filter" class="w-3.5 h-3.5 text-[#d4a373]"></i>
+                <span id="exp-filter-label">החודש</span>
+              </button>
+              <div id="exp-filter-popup" style="display:none" class="absolute left-0 top-full mt-2 bg-white border border-[#f0dfc0] rounded-2xl shadow-xl z-30 p-4 space-y-3 min-w-[280px]">
+                <p class="text-[10px] font-bold text-[#9a8e8a]">סינון לפי תקופה</p>
+                <div class="space-y-1">
+                  <button onclick="setExpFilter('current','החודש')" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">החודש</button>
+                  <button onclick="setExpFilter('prev','חודש קודם')" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">חודש קודם</button>
+                  <button onclick="setExpFilter('all','הכל')" class="exp-f-opt w-full text-right px-3 py-2 rounded-lg text-xs font-semibold hover:bg-[#fdf6ee] transition-colors">הכל</button>
+                </div>
+                <div class="border-t border-[#f0dfc0] pt-3">
+                  <p class="text-[10px] font-bold text-[#9a8e8a] mb-1.5">חודש ספציפי</p>
+                  <select id="exp-filter-month-pick" onchange="setExpFilter('month', this.options[this.selectedIndex]?.text || 'חודש')" class="inp text-xs w-full"></select>
+                </div>
+                <div class="border-t border-[#f0dfc0] pt-3">
+                  <p class="text-[10px] font-bold text-[#9a8e8a] mb-1.5">טווח תאריכים</p>
+                  <div class="flex gap-2">
+                    <div class="flex-1"><label class="text-[9px] text-gray-400">מתאריך</label><input id="exp-filter-from" type="date" class="inp text-xs mt-0.5 w-full" /></div>
+                    <div class="flex-1"><label class="text-[9px] text-gray-400">עד תאריך</label><input id="exp-filter-to" type="date" class="inp text-xs mt-0.5 w-full" /></div>
+                  </div>
+                  <button onclick="setExpFilter('range','טווח מותאם')" class="w-full mt-2 py-2 rounded-full text-xs font-bold bg-[#d4a373] hover:bg-[#b8893e] text-white transition-colors">החל סינון</button>
+                </div>
+              </div>
+              <input type="hidden" id="exp-filter-type" value="current" />
             </div>
           </div>
           <div id="exp-list" class="divide-y divide-[#fdf6ee]"></div>
@@ -7314,28 +7329,40 @@ function updateExpenseKPIs() {
   if (el('exp-marketing-month')) el('exp-marketing-month').textContent = (byCategory.marketing||0).toLocaleString('he-IL')+' ₪';
 }
 
-function toggleExpFilter() {
-  const type = document.getElementById('exp-filter-type')?.value || 'current';
-  const monthPick = document.getElementById('exp-filter-month-pick');
-  const fromEl = document.getElementById('exp-filter-from');
-  const toEl = document.getElementById('exp-filter-to');
-  monthPick.style.display = type === 'month' ? '' : 'none';
-  fromEl.style.display = type === 'range' ? '' : 'none';
-  toEl.style.display = type === 'range' ? '' : 'none';
-  // Populate month picker from expense dates
-  if (type === 'month' && monthPick.options.length <= 1) {
-    const months = new Set();
-    allExpenses.forEach(e => { if (e.date) { const d = new Date(e.date); months.add(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }});
-    const sorted = [...months].sort().reverse();
-    monthPick.innerHTML = '<option value="">בחר חודש</option>';
-    sorted.forEach(m => {
-      const [y, mo] = m.split('-');
-      const label = new Date(y, mo-1).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
-      monthPick.innerHTML += `<option value="${m}">${label}</option>`;
-    });
-  }
+function toggleExpFilterPopup() {
+  const popup = document.getElementById('exp-filter-popup');
+  if (!popup) return;
+  const isOpen = popup.style.display !== 'none';
+  popup.style.display = isOpen ? 'none' : '';
+  if (!isOpen) populateExpMonthPicker();
 }
-window.toggleExpFilter = toggleExpFilter;
+function populateExpMonthPicker() {
+  const monthPick = document.getElementById('exp-filter-month-pick');
+  if (!monthPick) return;
+  const months = new Set();
+  allExpenses.forEach(e => { if (e.date) { const d = new Date(e.date); months.add(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }});
+  const sorted = [...months].sort().reverse();
+  monthPick.innerHTML = '<option value="">בחר חודש</option>';
+  sorted.forEach(m => {
+    const [y, mo] = m.split('-');
+    const label = new Date(y, mo-1).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+    monthPick.innerHTML += `<option value="${m}">${label}</option>`;
+  });
+}
+function setExpFilter(type, label) {
+  document.getElementById('exp-filter-type').value = type;
+  document.getElementById('exp-filter-label').textContent = label;
+  document.getElementById('exp-filter-popup').style.display = 'none';
+  renderExpensesList();
+}
+window.toggleExpFilterPopup = toggleExpFilterPopup;
+window.setExpFilter = setExpFilter;
+// Close popup on outside click
+document.addEventListener('click', e => {
+  const popup = document.getElementById('exp-filter-popup');
+  const btn = e.target.closest('[onclick*="toggleExpFilterPopup"]');
+  if (popup && popup.style.display !== 'none' && !popup.contains(e.target) && !btn) popup.style.display = 'none';
+});
 
 function renderExpensesList() {
   const list = document.getElementById('exp-list');
