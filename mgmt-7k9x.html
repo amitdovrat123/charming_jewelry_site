@@ -6684,7 +6684,7 @@ function renderCrmBoard() {
   // Workshop card
   function crmCard(w, opts = {}) {
     const d = wsDate(w);
-    const dateStr = d ? d.toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
+    const dateStr = d ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}` : '—';
     const pay = w.payment || {};
     const diff = d ? Math.ceil((d - now) / 86400000) : null;
     const daysLabel = diff === null ? '' : diff < 0 ? '<span class="text-gray-400">עבר</span>' : diff === 0 ? '<span class="text-emerald-500 font-bold">היום</span>' : `<span class="text-blue-500">בעוד ${diff} ימים</span>`;
