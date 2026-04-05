@@ -1159,7 +1159,7 @@
           </div><!-- /px-6 py-5 -->
           <div class="px-6 py-4 border-t border-[#f0dfc0] bg-[#fdf8f5] flex gap-2 sticky bottom-0">
             <button onclick="saveWorkshop()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all">שמור סדנה</button>
-            <button onclick="sendWorkshopWhatsApp()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-2.5 py-2.5 rounded-full text-sm transition-colors flex-shrink-0" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></button>
+            <button onclick="openFormWaOptions()" class="border border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-2.5 py-2.5 rounded-full text-sm transition-colors flex-shrink-0" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></button>
             <a id="ws-call-btn" href="tel:" onclick="var p=document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');if(p)this.href='tel:'+p;" class="border border-blue-300 text-blue-500 hover:bg-blue-50 px-2.5 py-2.5 rounded-full text-sm transition-colors flex-shrink-0" title="חייג"><i data-lucide="phone" class="w-4 h-4"></i></a>
             <button id="ws-delete-btn" onclick="deleteWorkshopFromForm()" style="display:none" class="border border-red-300 text-red-500 hover:bg-red-50 px-2.5 py-2.5 rounded-full text-sm transition-colors flex-shrink-0" title="מחק"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           </div>
@@ -5826,6 +5826,27 @@ function sendWorkshopWhatsApp() {
   window.open('https://wa.me/' + waPhone + '?text=' + encoded, '_blank');
 }
 window.sendWorkshopWhatsApp = sendWorkshopWhatsApp;
+
+function openFormWaOptions() {
+  const phone = document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');
+  if (!phone) { document.getElementById('ws-err').textContent = 'יש להזין טלפון.'; return; }
+  const waNum = phone.startsWith('0') ? '972' + phone.slice(1) : phone;
+  const waOpts = document.getElementById('wsc-wa-options');
+  waOpts?.removeAttribute('data-v');
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+  // Wire up options for form context
+  document.getElementById('wsc-wa-summary').onclick = () => { waOpts.setAttribute('data-v',''); sendWorkshopWhatsApp(); };
+  document.getElementById('wsc-wa-info').onclick = () => {
+    waOpts.setAttribute('data-v','');
+    const infoMsg = `היי! אני ויקטוריה, ואני כאן לכל שאלה 🥰\nמקווה שהכל בסדר אצלכן לאור המצב🙏\nאז מה זאת בעצם סדנת Charming?✨\n\nאנחנו מביאות עד אליכן הביתה את חנות הצ'ארמים המושלמת! וכל מה שתצרכו - עמדות עבודה מעוצבות, חומרים בסטנדרט הגבוה ביותר ואווירה של יצירה ובוטיק.\nהסדנה אורכת כשעתיים עד שעתיים וחצי ומתאימה לקבוצות של עד 30 משתתפות החל מגיל 10 😊\n\nאז איך הערב שלנו נראה ?\n\n✅ התחרות של Charming: אנחנו מתחילות בתחרות "נכון או לא נכון" בין שתי קבוצות בנושא - תכשיטים.\n\n✅ נלמד איך לדעת מה יותר מחמיא לכל אחת - תכשיטי כסף או תכשיטי זהב לפי כמה שיטות🌟\n\nואז נעבור להרכבת התכשיט הייחודי של כל אחת:\nאנחנו דואגות לכן לחומרים הכי הכי איכותיים שיש !\n\n✅ בחירה מבין 3 סוגי שרשראות איכותיות מפלדת אל-חלד בציפוי כסף וזהב (לא מחליד, היפואלרגני)✨\n\n✅ בחירה אישית של עד 5 צ׳ארמים מהמבחר הענק שלנו גם כמובן מפלדת אל חלד.\nבתוספת של 20₪ למשתתפת ניתן להגדיל את כמות הצ׳ארמים ל-7 צ׳ארמים (ניתן להוסיף את השדרוג רק במסלול הראשון)\n\nהמשתתפות ילמדו איך מרכיבים תכשיט מההתחלה ועד הסוף – מהסוגר ועד התליון, והכול בידיים שלהן!\n\nאנחנו מגיעות לכל הארץ (מעבר לאזור המרכז יהיה תוספת תשלום על ההגעה)\n\nשימי ❤️ שבכל מסלול שתבחרי המשתתפות מקבלות גם טבעת לבחירה במתנה💍\n\nלאור המצב החלטנו לפנק אתכן ב-15% הנחה על כל המסלולים שלנו 💕, אנחנו עדיין עובדות ופעילות ונעשה הכל בשביל לשמח את הילדות בימים קשים אלו מגיע להן כמה שעות של כיף ויצירה ולשכוח מהכל❤️\nההנחה תקפה עד 31.3.2026\nאנחנו זמינות גם בטלפון לכן אם תרצי לשמוע את כל הפרטים בשיחה טלפונית תתקשרי בשמחה 😊\n\nמידע נוסף הכולל את המחירון שלנו מצורף בקישור הזה:\n\nhttps://charmingbyviktoriya.my.canva.site/by-viktoriya`;
+    window.open('https://wa.me/' + waNum + '?text=' + encodeURIComponent(infoMsg), '_blank');
+  };
+  document.getElementById('wsc-wa-empty').onclick = () => {
+    waOpts.setAttribute('data-v','');
+    window.open('https://wa.me/' + waNum, '_blank');
+  };
+}
+window.openFormWaOptions = openFormWaOptions;
 
 function generateCalendarLinks(ws) {
   const d = ws.eventDate?.seconds ? new Date(ws.eventDate.seconds*1000) : null;
