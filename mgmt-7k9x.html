@@ -6642,11 +6642,11 @@ function renderCrmBoard() {
     const addrBadge = noAddr ? '<span class="text-[9px] font-bold bg-red-100 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full">חסרה כתובת</span>' : '';
 
     const contact = w.customerName !== w.celebrant ? `<span class="text-[10px] text-gray-400 hidden lg:inline">👤 ${esc(w.customerName)}</span>` : '';
-    return `<div class="bg-white rounded-xl border border-gray-100 p-2.5 lg:p-2 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isArchive ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
+    return `<div class="bg-white rounded-xl border ${noAddr ? 'border-red-200' : 'border-gray-100'} p-2.5 lg:p-2 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isArchive ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
       <!-- Mobile layout -->
       <div class="lg:hidden">
         <div class="flex items-center justify-between gap-2 mb-1">
-          <p class="font-bold text-sm text-gray-800">${esc(w.celebrant || w.customerName)}</p>
+          <div class="flex items-center gap-1.5"><p class="font-bold text-sm text-gray-800">${esc(w.celebrant || w.customerName)}</p>${addrBadge}</div>
           <span class="font-black text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')}₪</span>
         </div>
         <div class="flex items-center justify-between">
@@ -6670,6 +6670,7 @@ function renderCrmBoard() {
         <span class="text-[10px] text-gray-500 w-8">👥${w.participantCount}</span>
         <span class="text-[10px] text-gray-500 flex-1 truncate">${esc(w.route || '')}</span>
         ${contact}
+        ${addrBadge}
         <span class="font-black text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')}₪</span>
         <span class="text-[10px]">${daysLabel}</span>
         ${actionBtn || ''}
