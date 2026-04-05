@@ -7244,6 +7244,7 @@ function initExpensesTab() {
     allExpenses = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderExpensesList();
     updateExpenseKPIs();
+    if (currentDashView === 'workshops') renderFinancialReports();
   }, err=>console.error('expenses:', err));
 
   // Show/hide staff quick-amount select when category changes
