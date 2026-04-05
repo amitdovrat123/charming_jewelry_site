@@ -881,11 +881,6 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <!-- View toggle -->
-            <div class="flex items-center bg-gray-100 rounded-full p-0.5">
-              <button id="ws-view-list" onclick="switchWsView('list')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all bg-white text-[#d4a373] shadow-sm">📋 רשימה</button>
-              <button id="ws-view-crm" onclick="switchWsView('crm')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all text-gray-400">📊 CRM</button>
-            </div>
             <button onclick="openWorkshopModal()"
               class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               + סדנה חדשה</button>
@@ -893,7 +888,7 @@
         </div>
 
         <!-- CRM Kanban View -->
-        <div id="ws-crm-view" style="display:none;" class="space-y-4">
+        <div id="ws-crm-view" class="space-y-4">
           <div class="grid grid-cols-1 gap-4 items-start" id="crm-board">
             <!-- Column 1: Leads — Purple (open) -->
             <div class="bg-purple-50 border border-purple-200 rounded-2xl overflow-hidden">
@@ -939,8 +934,8 @@
           </div>
         </div>
 
-        <!-- List View (default) -->
-        <div id="ws-list-view" class="space-y-6">
+        <!-- List View (hidden, replaced by CRM) -->
+        <div id="ws-list-view" class="space-y-6" style="display:none"
 
         <!-- Section 1: Drafts (top priority) -->
         <div id="ws-section-drafts" class="bg-white border border-[#f0dfc0] rounded-2xl shadow-sm overflow-hidden" style="display:none;">
@@ -3322,7 +3317,8 @@ function initERP(user) {
   showTab(savedTab);
   if (savedTab === 'dashboard') switchDashView(savedDashView || 'workshops');
   if (savedSettingsPage && savedTab === 'settings') setTimeout(() => showSettingsPage(savedSettingsPage), 100);
-  if (savedWsView && savedTab === 'workshops') switchWsView(savedWsView);
+  // Always use CRM view
+  renderCrmBoard();
   // Restore scroll position after a short delay (data needs to render)
   const savedScroll = sessionStorage.getItem('charming_scroll');
   if (savedScroll) setTimeout(() => window.scrollTo(0, parseInt(savedScroll) || 0), 500);
@@ -5518,7 +5514,8 @@ window.openWsFullView = openWsFullView;
 
 function closeWsFullView() {
   document.getElementById('ws-full-view').style.display = 'none';
-  document.getElementById('ws-list-view')?.style && (document.getElementById('ws-list-view').style.display = '');
+  document.getElementById('ws-crm-view').style.display = '';
+  renderCrmBoard();
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
 }
 window.closeWsFullView = closeWsFullView;
@@ -6672,7 +6669,7 @@ function renderCrmBoard() {
   // Workshop card
   function crmCard(w, opts = {}) {
     const d = wsDate(w);
-    const dateStr = d ? d.toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
+    const dateStr = d ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}` : '—';
     const pay = w.payment || {};
     const diff = d ? Math.ceil((d - now) / 86400000) : null;
     const daysLabel = diff === null ? '' : diff < 0 ? '<span class="text-gray-400">עבר</span>' : diff === 0 ? '<span class="text-emerald-500 font-bold">היום</span>' : `<span class="text-blue-500">בעוד ${diff} ימים</span>`;
