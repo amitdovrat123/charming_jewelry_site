@@ -3774,38 +3774,18 @@ function renderFinancialReports() {
   const periodWs = confirmed.filter(w => inRange(wsDate(w)));
   const revenue = periodWs.reduce((s, w) => s + (w.total || 0), 0);
 
-  // ── P&L: Expenses (real cost, not cash-based) ──
-  // Material cost = per-participant cost × participants (from workshop data, NOT from expenses collection)
-  const pnlMaterialCost = periodWs.reduce((s, w) => s + calcWsMaterialCost(w), 0);
-
-  // Other expenses from expenses collection (excluding materials — those are calculated above)
+  // ── P&L: Expenses (from actual expense records) ──
   const periodExp = allExpenses.filter(e => {
     if (!e.date) return false;
     const d = new Date(e.date);
     return d >= startDate && d <= endDate;
   });
   const expByCategory = {};
-  let totalExpOther = 0;
   periodExp.forEach(e => {
-    if (e.category === 'materials') return; // skip — we use real cost instead
-    expByCategory[e.category] = (expByCategory[e.category] || 0) + (e.amount || 0);
-    totalExpOther += (e.amount || 0);
-  });
-  // Fuel cost for P&L = actual distance-based cost for workshops in period
-  const pnlFuelCost = periodWs.reduce((s, w) => {
-    const dist = getCityDistance(w.city);
-    return s + (dist ? calcFuelCost(dist) : 0);
-  }, 0);
-  // Override fuel in expByCategory with calculated value
-  expByCategory.fuel = pnlFuelCost;
-  // Recalculate other expenses without fuel from expense records (avoid double counting)
-  totalExpOther = 0;
-  periodExp.forEach(e => {
-    if (e.category === 'materials' || e.category === 'fuel') return;
-    totalExpOther += (e.amount || 0);
+    expByCategory[e.category || 'other'] = (expByCategory[e.category || 'other'] || 0) + (e.amount || 0);
   });
 
-  const totalExp = pnlMaterialCost + pnlFuelCost + totalExpOther;
+  const totalExp = periodExp.reduce((s, e) => s + (e.amount || 0), 0);
   const profit = revenue - totalExp;
   const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 
