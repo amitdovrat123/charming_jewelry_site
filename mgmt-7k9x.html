@@ -6471,7 +6471,7 @@ function toggleWscPayPanel(type, wsId) {
   const advAmt = pay.advanceAmount || 500;
   const balAmt = Math.max(0, (w?.total||0) - advAmt);
 
-  const methodOpts = `<option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option>`;
+  const methodOpts = `<option value="paybox">PayBox</option><option value="bit">Bit</option><option value="cash">מזומן</option><option value="transfer">העברה בנקאית</option>`;
   if (type === 'advance') {
     panel.innerHTML = `
       <p class="text-xs font-bold text-gray-700 mb-2">אישור תשלום מקדמה</p>
@@ -6502,7 +6502,7 @@ window.toggleWscPayPanel = toggleWscPayPanel;
 function addBalanceRow(totalBal) {
   const container = document.getElementById('wsc-bal-rows');
   if (!container) return;
-  const methodOpts = `<option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה בנקאית</option>`;
+  const methodOpts = `<option value="paybox">PayBox</option><option value="bit">Bit</option><option value="cash">מזומן</option><option value="transfer">העברה בנקאית</option>`;
   // Calculate remaining
   let used = 0;
   container.querySelectorAll('.wsc-bal-amt').forEach(inp => { used += parseFloat(inp.value) || 0; });
