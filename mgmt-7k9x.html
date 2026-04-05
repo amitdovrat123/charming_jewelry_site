@@ -6020,7 +6020,8 @@ function clearWorkshopForm() {
   document.getElementById('ws-advance-amount').value = '500';
   document.getElementById('ws-advance-method').value = 'paybox';
   document.getElementById('ws-balance-paid').checked = false;
-  document.getElementById('ws-balance-method').value = 'cash';
+  const balMth = document.getElementById('ws-balance-method') || document.querySelector('.ws-form-bal-mth');
+  if (balMth) balMth.value = 'cash';
   document.getElementById('ws-balance-amount').textContent = '— ₪';
   document.getElementById('ws-advance-date-wrap').classList.add('hidden');
   document.getElementById('ws-balance-date-wrap').classList.add('hidden');
