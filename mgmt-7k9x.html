@@ -5631,9 +5631,14 @@ function updatePaymentBadge() {
     badge.textContent = 'לא שולם';
     badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-500 border border-red-200';
   }
-  // Show/hide date wrappers
+  // Show/hide date wrappers + set today as default
   document.getElementById('ws-advance-date-wrap')?.classList.toggle('hidden', !adv);
   document.getElementById('ws-balance-date-wrap')?.classList.toggle('hidden', !bal);
+  const today = new Date().toISOString().split('T')[0];
+  const advDateIn = document.getElementById('ws-advance-date-input');
+  if (adv && advDateIn && !advDateIn.value) advDateIn.value = today;
+  const balDateIn = document.getElementById('ws-balance-date-input');
+  if (bal && balDateIn && !balDateIn.value) balDateIn.value = today;
   // Update status display
   const statusIcon = document.getElementById('ws-status-icon');
   const statusText = document.getElementById('ws-status-text');
