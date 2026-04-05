@@ -5857,6 +5857,8 @@ function renderWorkshopCard(w, opts = {}) {
   const statusBadge = status === 'draft'
     ? '<span class="text-[10px] font-bold bg-red-100 text-red-500 border border-red-200 px-2 py-0.5 rounded-full">טרם הועברה מקדמה</span>'
     : '';
+  const noAddr = status === 'confirmed' && !w.street;
+  const addrBadge = noAddr ? '<span class="text-[9px] font-bold bg-red-100 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full">חסרה כתובת</span>' : '';
   const pastBadge = isPast
     ? '<span class="text-[10px] font-bold bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">סדנה עברה</span>'
     : '';
@@ -5916,7 +5918,7 @@ function renderWorkshopCard(w, opts = {}) {
       <div class="flex items-center justify-between gap-2 mb-1">
         <div class="flex items-center gap-2 min-w-0">
           <p class="font-bold text-sm text-gray-800 truncate">${esc(w.celebrant || w.customerName)}</p>
-          ${statusBadge}${payBadge}
+          ${statusBadge}${payBadge}${addrBadge}
         </div>
         <span class="font-black text-sm text-[#d4a373] flex-shrink-0">${(w.total || 0).toLocaleString('he-IL')}₪</span>
       </div>
@@ -5940,7 +5942,7 @@ function renderWorkshopCard(w, opts = {}) {
       <span class="text-[10px] text-gray-500 w-8">👥${w.participantCount}</span>
       <span class="text-[10px] text-gray-500 flex-1 truncate">${esc(w.route || '')}</span>
       ${contact}
-      ${statusBadge}${payBadge}
+      ${statusBadge}${payBadge}${addrBadge}
       <span class="font-black text-sm text-[#d4a373]">${(w.total || 0).toLocaleString('he-IL')}₪</span>
       ${daysLabel}
     </div>
