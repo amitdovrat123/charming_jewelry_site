@@ -1357,13 +1357,11 @@
 
         <!-- Report period selector -->
         <div class="flex items-center gap-3">
-          <select id="wsd-report-period" onchange="renderFinancialReports()" class="text-sm border border-[#f0dfc0] rounded-xl px-4 py-2.5 text-gray-700 cursor-pointer font-semibold bg-white shadow-sm">
-            <option value="current">החודש הנוכחי</option>
-            <option value="prev">חודש קודם</option>
-            <option value="quarter">רבעון אחרון</option>
-            <option value="year">שנה נוכחית</option>
-          </select>
-          <span id="wsd-report-label" class="text-sm font-semibold text-[#d4a373]"></span>
+          <input type="hidden" id="wsd-report-period" value="current" />
+          <button onclick="toggleFinFilterPopup()" class="flex items-center gap-1.5 text-sm border border-[#e8cfc4] bg-white hover:bg-[#fdf8f5] text-[#4a3f3c] px-4 py-2.5 rounded-full font-semibold transition-colors shadow-sm">
+            <i data-lucide="filter" class="w-3.5 h-3.5 text-[#d4a373]"></i>
+            <span id="wsd-report-label"></span>
+          </button>
         </div>
 
         <!-- Summary KPIs -->
@@ -1441,6 +1439,7 @@
                 <span class="text-sm font-semibold text-red-600">סה"כ הוצאות</span>
                 <span id="wsd-cf-total-out" class="text-sm font-black text-red-500">—</span>
               </div>
+              <div id="wsd-cf-categories" class="space-y-1 pr-3"></div>
               <div class="flex justify-between p-3 rounded-lg border-2 mt-1" id="wsd-cf-net-row">
                 <span class="text-sm font-bold">תזרים נטו</span>
                 <span id="wsd-cf-net" class="text-lg font-black">—</span>
@@ -3732,6 +3731,7 @@ function renderFinancialReports() {
   const curY = now.getFullYear(), curM = now.getMonth();
 
   // Determine date range
+  const periodEl = el('wsd-report-period');
   let startDate, endDate, label;
   if (period === 'current') {
     startDate = new Date(curY, curM, 1);
@@ -3746,6 +3746,15 @@ function renderFinancialReports() {
     startDate = new Date(curY, curM - 2, 1);
     endDate = new Date(curY, curM + 1, 0, 23, 59, 59);
     label = '3 חודשים אחרונים';
+  } else if (period === 'month' && periodEl?.dataset.monthVal) {
+    const [y, m] = periodEl.dataset.monthVal.split('-').map(Number);
+    startDate = new Date(y, m - 1, 1);
+    endDate = new Date(y, m, 0, 23, 59, 59);
+    label = startDate.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+  } else if (period === 'range' && periodEl?.dataset.from && periodEl?.dataset.to) {
+    startDate = new Date(periodEl.dataset.from);
+    endDate = new Date(periodEl.dataset.to + 'T23:59:59');
+    label = startDate.toLocaleDateString('he-IL') + ' – ' + endDate.toLocaleDateString('he-IL');
   } else {
     startDate = new Date(curY, 0, 1);
     endDate = new Date(curY, 11, 31, 23, 59, 59);
@@ -3983,6 +3992,62 @@ function renderFinancialReports() {
   }
 }
 window.renderFinancialReports = renderFinancialReports;
+
+function toggleFinFilterPopup() {
+  const modal = document.getElementById('fin-filter-modal');
+  if (!modal) return;
+  const isOpen = modal.style.display !== 'none';
+  modal.style.display = isOpen ? 'none' : '';
+  if (!isOpen) {
+    const yearSel = document.getElementById('fin-filter-year');
+    if (yearSel && yearSel.options.length <= 1) {
+      const years = new Set();
+      allWorkshops.forEach(w => { const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null; if (d) years.add(d.getFullYear()); });
+      allExpenses.forEach(e => { if (e.date) years.add(new Date(e.date).getFullYear()); });
+      years.add(new Date().getFullYear());
+      yearSel.innerHTML = '<option value="">שנה</option>';
+      [...years].sort((a,b) => b-a).forEach(y => { yearSel.innerHTML += `<option value="${y}"${y===new Date().getFullYear()?' selected':''}>${y}</option>`; });
+    }
+    if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
+  }
+}
+window.toggleFinFilterPopup = toggleFinFilterPopup;
+
+function setFinFilter(type) {
+  const periodEl = document.getElementById('wsd-report-period');
+  periodEl.value = type;
+  delete periodEl.dataset.monthVal;
+  delete periodEl.dataset.from;
+  delete periodEl.dataset.to;
+  document.getElementById('fin-filter-modal').style.display = 'none';
+  renderFinancialReports();
+}
+window.setFinFilter = setFinFilter;
+
+function applyFinMonthFilter() {
+  const m = document.getElementById('fin-filter-month-num')?.value;
+  const y = document.getElementById('fin-filter-year')?.value;
+  if (!m || !y) return;
+  const periodEl = document.getElementById('wsd-report-period');
+  periodEl.value = 'month';
+  periodEl.dataset.monthVal = y + '-' + String(m).padStart(2,'0');
+  document.getElementById('fin-filter-modal').style.display = 'none';
+  renderFinancialReports();
+}
+window.applyFinMonthFilter = applyFinMonthFilter;
+
+function applyFinRangeFilter() {
+  const from = document.getElementById('fin-filter-from')?.value;
+  const to = document.getElementById('fin-filter-to')?.value;
+  if (!from || !to) return;
+  const periodEl = document.getElementById('wsd-report-period');
+  periodEl.value = 'range';
+  periodEl.dataset.from = from;
+  periodEl.dataset.to = to;
+  document.getElementById('fin-filter-modal').style.display = 'none';
+  renderFinancialReports();
+}
+window.applyFinRangeFilter = applyFinRangeFilter;
 
 function updateInventoryStats() {
   const el = id => document.getElementById(id);
@@ -10991,6 +11056,43 @@ window.sendInviteWhatsApp = sendInviteWhatsApp;
           <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">עד תאריך</label><input id="exp-filter-to" type="date" class="inp text-xs mt-0.5 w-full" /></div>
         </div>
         <button onclick="setExpFilter('range','טווח מותאם')" class="w-full mt-2 py-2 rounded-full text-xs font-bold bg-[#d4a373] hover:bg-[#b8893e] text-white transition-colors">החל סינון</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Finance Filter Modal -->
+<div id="fin-filter-modal" style="display:none" class="fixed inset-0 z-[9500] flex items-center justify-center bg-black/40" onclick="if(event.target===this)this.style.display='none'">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-[90%] overflow-hidden fadein border border-[#f0dfc0]">
+    <div class="px-5 py-4 border-b border-[#f0dfc0] bg-[#fdf8f5] flex items-center justify-between">
+      <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i data-lucide="filter" class="w-4 h-4 text-[#d4a373]"></i> סינון דוחות</h3>
+      <button onclick="document.getElementById('fin-filter-modal').style.display='none'" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f0dfc0]/30 text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div class="px-5 py-4 space-y-4 bg-[#fdf6ee]">
+      <div class="space-y-1.5">
+        <p class="text-[10px] font-bold text-[#9a8e8a]">בחירה מהירה</p>
+        <div class="flex gap-2">
+          <button onclick="setFinFilter('current')" class="flex-1 py-2 rounded-full text-xs font-bold border border-[#e8cfc4] text-[#4a3f3c] hover:bg-white transition-colors">החודש</button>
+          <button onclick="setFinFilter('prev')" class="flex-1 py-2 rounded-full text-xs font-bold border border-[#e8cfc4] text-[#4a3f3c] hover:bg-white transition-colors">חודש קודם</button>
+          <button onclick="setFinFilter('quarter')" class="flex-1 py-2 rounded-full text-xs font-bold border border-[#e8cfc4] text-[#4a3f3c] hover:bg-white transition-colors">רבעון</button>
+          <button onclick="setFinFilter('year')" class="flex-1 py-2 rounded-full text-xs font-bold border border-[#e8cfc4] text-[#4a3f3c] hover:bg-white transition-colors">שנה</button>
+        </div>
+      </div>
+      <div class="border-t border-[#f0dfc0] pt-3">
+        <p class="text-[10px] font-bold text-[#9a8e8a] mb-2">חודש ספציפי</p>
+        <div class="flex gap-2">
+          <div class="flex-1"><select id="fin-filter-month-num" class="inp text-xs w-full"><option value="">חודש</option><option value="1">ינואר</option><option value="2">פברואר</option><option value="3">מרץ</option><option value="4">אפריל</option><option value="5">מאי</option><option value="6">יוני</option><option value="7">יולי</option><option value="8">אוגוסט</option><option value="9">ספטמבר</option><option value="10">אוקטובר</option><option value="11">נובמבר</option><option value="12">דצמבר</option></select></div>
+          <div class="flex-1"><select id="fin-filter-year" class="inp text-xs w-full"></select></div>
+        </div>
+        <button onclick="applyFinMonthFilter()" class="w-full mt-2 py-2 rounded-full text-xs font-bold border border-[#d4a373] text-[#d4a373] hover:bg-[#d4a373] hover:text-white transition-colors">הצג חודש</button>
+      </div>
+      <div class="border-t border-[#f0dfc0] pt-3">
+        <p class="text-[10px] font-bold text-[#9a8e8a] mb-2">טווח תאריכים</p>
+        <div class="flex gap-2">
+          <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">מתאריך</label><input id="fin-filter-from" type="date" class="inp text-xs mt-0.5 w-full" /></div>
+          <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">עד תאריך</label><input id="fin-filter-to" type="date" class="inp text-xs mt-0.5 w-full" /></div>
+        </div>
+        <button onclick="applyFinRangeFilter()" class="w-full mt-2 py-2 rounded-full text-xs font-bold bg-[#d4a373] hover:bg-[#b8893e] text-white transition-colors">החל סינון</button>
       </div>
     </div>
   </div>
