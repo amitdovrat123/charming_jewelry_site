@@ -1069,8 +1069,8 @@
               <div id="ws-pricing-lines" class="space-y-1.5"></div>
               <div id="ws-pricing-mode" style="display:none" class="mt-2 p-2.5 bg-white rounded-lg border border-[#e8cfc4] space-y-1.5">
                 <p class="text-[10px] font-bold text-[#9a8e8a]">שיטת חישוב</p>
-                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ws-price-mode" value="extra" checked onchange="updateWsTotal()"><span class="text-xs text-gray-700" id="ws-mode-extra-label">תוספת משתתפים</span></label>
-                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ws-price-mode" value="tier" onchange="updateWsTotal()"><span class="text-xs text-gray-700" id="ws-mode-tier-label">מדרגה הבאה</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ws-price-mode" value="extra" checked onchange="onPriceModeChange()"><span class="text-xs text-gray-700" id="ws-mode-extra-label">תוספת משתתפים</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ws-price-mode" value="tier" onchange="onPriceModeChange()"><span class="text-xs text-gray-700" id="ws-mode-tier-label">מדרגה הבאה</span></label>
               </div>
               <div id="ws-custom-extra-wrap" style="display:none" class="mt-2 p-2.5 bg-white rounded-lg border border-[#e8cfc4] space-y-2">
                 <div class="flex gap-2">
@@ -5535,6 +5535,22 @@ function initWorkshopsTab() {
   updateWsTotal();
   updatePaymentBadge();
 }
+
+let _wsOriginalCount = null;
+function onPriceModeChange() {
+  const mode = document.querySelector('input[name="ws-price-mode"]:checked')?.value || 'extra';
+  const countEl = document.getElementById('ws-count');
+  const info = getWsPricingInfo();
+  if (mode === 'tier' && info?.nextTier) {
+    if (_wsOriginalCount === null) _wsOriginalCount = parseInt(countEl.value) || 0;
+    countEl.value = info.nextTier;
+  } else if (_wsOriginalCount !== null) {
+    countEl.value = _wsOriginalCount;
+    _wsOriginalCount = null;
+  }
+  updateWsTotal();
+}
+window.onPriceModeChange = onPriceModeChange;
 
 function updateWsTotal() {
   const info = getWsPricingInfo();
