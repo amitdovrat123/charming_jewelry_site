@@ -6663,6 +6663,10 @@ function showStaffExpenseReminder(wsId, w) {
           <select id="staff-reminder-method" class="inp text-sm mt-0.5"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה</option></select>
         </div>
       </div>
+      <div>
+        <label class="text-[9px] text-[#9a8e8a]">הערות</label>
+        <input id="staff-reminder-notes" type="text" class="inp text-sm mt-0.5" placeholder="למשל: שם העובדת" value="" />
+      </div>
       <div class="flex gap-2">
         <button onclick="addStaffExpenseFromReminder('${wsId}','${esc(wsName)}','${dateStr}');this.closest('.fixed').remove()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white py-2.5 rounded-full font-bold text-sm transition-colors">הוסף הוצאה</button>
         <button onclick="this.closest('.fixed').remove()" class="px-4 py-2.5 border border-[#e8cfc4] text-[#9a8e8a] hover:text-[#4a3f3c] rounded-full font-bold text-sm transition-colors">דלג</button>
@@ -6676,14 +6680,18 @@ function showStaffExpenseReminder(wsId, w) {
 async function addStaffExpenseFromReminder(wsId, wsName, dateStr) {
   const amount = parseFloat(document.getElementById('staff-reminder-amount')?.value) || 150;
   const method = document.getElementById('staff-reminder-method')?.value || 'cash';
+  const customNotes = document.getElementById('staff-reminder-notes')?.value.trim() || '';
+  const notes = customNotes ? `תשלום לעובדת — ${wsName} — ${customNotes}` : `תשלום לעובדת — ${wsName}`;
   try {
     await addDoc(collection(db, EXPENSES_COL), {
       date: dateStr, category: 'staff', amount, method,
       workshopId: wsId, workshopName: wsName,
-      notes: `תשלום לעובדת — ${wsName}`, createdAt: serverTimestamp(),
+      notes, createdAt: serverTimestamp(),
     });
     showToast(`הוצאת עובדת ${amount}₪ נוספה`);
     logAction(`הוצאת עובדת ${amount}₪ — "${wsName}"`);
+    // Refresh expenses if already loaded
+    if (allExpenses.length > 0) renderExpensesList();
   } catch(e) { console.error(e); }
 }
 window.addStaffExpenseFromReminder = addStaffExpenseFromReminder;
