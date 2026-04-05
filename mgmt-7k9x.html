@@ -3861,6 +3861,14 @@ function renderFinancialReports() {
   if (el('wsd-cf-balances')) el('wsd-cf-balances').textContent = balancesIn.toLocaleString('he-IL') + ' ₪';
   if (el('wsd-cf-total-in')) el('wsd-cf-total-in').textContent = totalIn.toLocaleString('he-IL') + ' ₪';
   if (el('wsd-cf-total-out')) el('wsd-cf-total-out').textContent = cfExpenses.toLocaleString('he-IL') + ' ₪';
+  const cfCatEl = el('wsd-cf-categories');
+  if (cfCatEl) {
+    const pExps = allExpenses.filter(e => { if (!e.date) return false; const d = new Date(e.date); return d >= startDate && d <= endDate; });
+    const catMap = {};
+    pExps.forEach(e => { catMap[e.category||'other'] = (catMap[e.category||'other']||0) + (e.amount||0); });
+    const catL = {materials:'חומרי גלם',marketing:'שיווק ממומן',staff:'עובדים',equipment:'ציוד',fuel:'דלק / נסיעות',other:'אחר'};
+    cfCatEl.innerHTML = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`<div class="flex justify-between py-0.5"><span class="text-[10px] text-gray-500">${catL[c]||c}</span><span class="text-[10px] font-bold text-red-400">${a.toLocaleString('he-IL')} ₪</span></div>`).join('');
+  }
   if (el('wsd-cf-net')) el('wsd-cf-net').textContent = cfNet.toLocaleString('he-IL') + ' ₪';
 
   const cfNetRow = el('wsd-cf-net-row');
