@@ -5772,27 +5772,24 @@ function sendWorkshopWhatsApp() {
 
   let msg;
   if (status === 'draft') {
-    var draftLines = [];
-    draftLines.push('הייי ' + name + ', איזה כיף שדיברנו! ' + _PH.SMILE);
-    draftLines.push('הנה סיכום הפרטים שדיברנו עליהם (התאריך עדיין לא משוריין סופית):');
-    draftLines.push('*תאריך:* ' + dateStr);
-    draftLines.push('*שעה :* ' + time);
-    draftLines.push('*שם החוגגת:* ' + celebrant);
-    draftLines.push('*לכבוד:* ' + occasion);
-    draftLines.push('*מספר משתתפות :* עד ' + count + ' משתתפות');
-    draftLines.push('*מסלול:* ' + route);
-    draftLines.push('*סכום :* ' + base.toLocaleString('he-IL') + '₪');
-    if (arrival > 0) {
-      draftLines.push('בנוסף תיהיה עלות הגעה על סך ' + arrival + ' שח (ההנחה אינה נכללת על עלות ההגעה )');
-    }
-    if (disc > 0) {
-      draftLines.push('קיבלת הנחה מיוחדת על סך ' + disc + '% הנחה .');
-    }
-    draftLines.push('*סכום סופי:* ' + total.toLocaleString('he-IL') + ' שח');
-    draftLines.push('על מנת לשריין את הסדנה באופן סופי יש להעביר למספר זה מקדמה על סך 500₪ (ניתן בביט או פייבוקס, עם עדיפות לפייבוקס)');
-    draftLines.push('כאשר תשולם המקדמה אשלח לך אישור סופי עם כל הפרטים ' + _PH.HHANDS);
-    draftLines.push('אם יש שאלות אני כאן!');
-    msg = draftLines.join('\n');
+    msg = [
+      '\u05D4\u05D9\u05D9\u05D9 ' + name + ', \u05D0\u05D9\u05D6\u05D4 \u05DB\u05D9\u05E3 \u05E9\u05D3\u05D9\u05D1\u05E8\u05E0\u05D5! ' + _PH.SMILE,
+      '\u05D4\u05E0\u05D4 \u05E1\u05D9\u05DB\u05D5\u05DD \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05E9\u05D3\u05D9\u05D1\u05E8\u05E0\u05D5 \u05E2\u05DC\u05D9\u05D4\u05DD (\u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05DE\u05E9\u05D5\u05E8\u05D9\u05D9\u05DF \u05E1\u05D5\u05E4\u05D9\u05EA):',
+      '',
+      '*\u05EA\u05D0\u05E8\u05D9\u05DA:* ' + dateStr,
+      '*\u05E9\u05E2\u05D4 :* ' + time,
+      '*\u05E9\u05DD \u05D4\u05D7\u05D5\u05D2\u05D2\u05EA:* ' + celebrant,
+      '*\u05DC\u05DB\u05D1\u05D5\u05D3:* ' + occasion,
+      '*\u05DE\u05E1\u05E4\u05E8 \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA :* \u05E2\u05D3 ' + count + ' \u05DE\u05E9\u05EA\u05EA\u05E4\u05D5\u05EA',
+      '*\u05DE\u05E1\u05DC\u05D5\u05DC:* ' + route,
+      '*\u05E1\u05DB\u05D5\u05DD :* ' + base.toLocaleString('he-IL') + '\u20AA',
+      (discountLine ? discountLine : ''),
+      (arrivalFeeLine ? arrivalFeeLine : ''),
+      '*\u05E1\u05DB\u05D5\u05DD \u05E1\u05D5\u05E4\u05D9:* ' + total.toLocaleString('he-IL') + ' \u05E9\u05D7',
+      '',
+      '\u05D1\u05E8\u05D2\u05E2 \u05E9\u05E0\u05E1\u05D2\u05D5\u05E8 \u05D0\u05EA \u05D4\u05EA\u05D0\u05E8\u05D9\u05DA \u05D0\u05E9\u05DC\u05D7 \u05DC\u05DA \u05D0\u05D9\u05E9\u05D5\u05E8 \u05E1\u05D5\u05E4\u05D9 \u05E2\u05DD \u05DB\u05DC \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD ' + _PH.HHANDS,
+      '\u05D0\u05DD \u05D9\u05E9 \u05E9\u05D0\u05DC\u05D5\u05EA \u05D0\u05E0\u05D9 \u05DB\u05D0\u05DF!'
+    ].filter(function(l){return l !== '';}).join('\n');
   } else {
     // Confirmed message — V19.7 template
     var lines = [];
