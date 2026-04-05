@@ -2307,6 +2307,30 @@ Charming by Vik 💛</textarea>
   </div>
 </div>
 
+<!-- WhatsApp message picker modal -->
+<div id="wsc-wa-options" data-v class="fixed inset-0 z-[9999] flex items-center justify-center p-4" style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)" onclick="if(event.target===this)this.setAttribute('data-v','')">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm fadein overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#f0dfc0]">
+      <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i> בחר הודעת WhatsApp</h3>
+      <button onclick="document.getElementById('wsc-wa-options').setAttribute('data-v','')" class="text-gray-300 hover:text-gray-500 text-xl leading-none transition-colors">✕</button>
+    </div>
+    <div class="p-4 space-y-2.5">
+      <button id="wsc-wa-summary" class="w-full text-right bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors group">
+        <p class="text-sm font-bold text-gray-800">סיכום שיחה</p>
+        <p class="text-[10px] text-gray-400 mt-0.5">הודעת סיכום מותאמת לפי פרטי הסדנה</p>
+      </button>
+      <button id="wsc-wa-info" class="w-full text-right bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors group">
+        <p class="text-sm font-bold text-gray-800">הודעת מידע ומחירון</p>
+        <p class="text-[10px] text-gray-400 mt-0.5">הצגת הסדנה, מסלולים, מחירים וקישור</p>
+      </button>
+      <button id="wsc-wa-empty" class="w-full text-right bg-white border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors group">
+        <p class="text-sm font-bold text-gray-800">פתח WhatsApp ריק</p>
+        <p class="text-[10px] text-gray-400 mt-0.5">פתיחת צ'אט ללא הודעה מוכנה</p>
+      </button>
+    </div>
+  </div>
+</div>
+
 <style>
   .lbl { display:block; font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
   .inp { width:100%; max-width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:9px 14px; font-size:.875rem; background:#f9fafb; transition:border-color .2s, box-shadow .2s; font-family:inherit; box-sizing:border-box; }
@@ -6394,22 +6418,20 @@ function openWsCard(id) {
   if (w.notes){el('wsc-notes-section').style.display='';el('wsc-notes').textContent=w.notes;}else{el('wsc-notes-section').style.display='none';}
 
   el('wsc-edit-btn').onclick=()=>{closeWsCard();showTab('workshops');setTimeout(()=>openWorkshopModal(id),300);};
-  // WhatsApp options toggle
+  // WhatsApp options modal
   const waOpts = el('wsc-wa-options');
-  if (waOpts) waOpts.style.display = 'none';
-  el('wsc-wa-btn').onclick=()=>{ waOpts.style.display = waOpts.style.display === 'none' ? '' : 'none'; };
-  // Option 1: Summary message (existing flow)
-  el('wsc-wa-summary').onclick=()=>{waOpts.style.display='none';closeWsCard();showTab('workshops');setTimeout(()=>{openWorkshopModal(id);setTimeout(()=>sendWorkshopWhatsApp(),200);},300);};
-  // Option 2: Info message
+  const closeWaOpts = () => waOpts?.setAttribute('data-v','');
+  const waNum = wp.startsWith('0') ? '972'+wp.slice(1) : wp;
+  el('wsc-wa-btn').onclick=()=>{ waOpts?.removeAttribute('data-v'); if(typeof lucide!=='undefined')setTimeout(()=>lucide.createIcons(),0); };
+  el('wsc-wa-summary').onclick=()=>{closeWaOpts();closeWsCard();showTab('workshops');setTimeout(()=>{openWorkshopModal(id);setTimeout(()=>sendWorkshopWhatsApp(),200);},300);};
   el('wsc-wa-info').onclick=()=>{
-    waOpts.style.display='none';
+    closeWaOpts();
     const infoMsg = `היי! אני ויקטוריה, ואני כאן לכל שאלה 🥰\nמקווה שהכל בסדר אצלכן לאור המצב🙏\nאז מה זאת בעצם סדנת Charming?✨\n\nאנחנו מביאות עד אליכן הביתה את חנות הצ'ארמים המושלמת! וכל מה שתצרכו - עמדות עבודה מעוצבות, חומרים בסטנדרט הגבוה ביותר ואווירה של יצירה ובוטיק.\nהסדנה אורכת כשעתיים עד שעתיים וחצי ומתאימה לקבוצות של עד 30 משתתפות החל מגיל 10 😊\n\nאז איך הערב שלנו נראה ?\n\n✅ התחרות של Charming: אנחנו מתחילות בתחרות "נכון או לא נכון" בין שתי קבוצות בנושא - תכשיטים.\n\n✅ נלמד איך לדעת מה יותר מחמיא לכל אחת - תכשיטי כסף או תכשיטי זהב לפי כמה שיטות🌟\n\nואז נעבור להרכבת התכשיט הייחודי של כל אחת:\nאנחנו דואגות לכן לחומרים הכי הכי איכותיים שיש !\n\n✅ בחירה מבין 3 סוגי שרשראות איכותיות מפלדת אל-חלד בציפוי כסף וזהב (לא מחליד, היפואלרגני)✨\n\n✅ בחירה אישית של עד 5 צ׳ארמים מהמבחר הענק שלנו גם כמובן מפלדת אל חלד.\nבתוספת של 20₪ למשתתפת ניתן להגדיל את כמות הצ׳ארמים ל-7 צ׳ארמים (ניתן להוסיף את השדרוג רק במסלול הראשון)\n\nהמשתתפות ילמדו איך מרכיבים תכשיט מההתחלה ועד הסוף – מהסוגר ועד התליון, והכול בידיים שלהן!\n\nאנחנו מגיעות לכל הארץ (מעבר לאזור המרכז יהיה תוספת תשלום על ההגעה)\n\nשימי ❤️ שבכל מסלול שתבחרי המשתתפות מקבלות גם טבעת לבחירה במתנה💍\n\nלאור המצב החלטנו לפנק אתכן ב-15% הנחה על כל המסלולים שלנו 💕, אנחנו עדיין עובדות ופעילות ונעשה הכל בשביל לשמח את הילדות בימים קשים אלו מגיע להן כמה שעות של כיף ויצירה ולשכוח מהכל❤️\nההנחה תקפה עד 31.3.2026\nאנחנו זמינות גם בטלפון לכן אם תרצי לשמוע את כל הפרטים בשיחה טלפונית תתקשרי בשמחה 😊\n\nמידע נוסף הכולל את המחירון שלנו מצורף בקישור הזה:\n\nhttps://charmingbyviktoriya.my.canva.site/by-viktoriya`;
-    window.open('https://wa.me/' + (wp.startsWith('0')?'972'+wp.slice(1):wp) + '?text=' + encodeURIComponent(infoMsg), '_blank');
+    window.open('https://wa.me/' + waNum + '?text=' + encodeURIComponent(infoMsg), '_blank');
   };
-  // Option 3: Empty WhatsApp
   el('wsc-wa-empty').onclick=()=>{
-    waOpts.style.display='none';
-    window.open('https://wa.me/' + (wp.startsWith('0')?'972'+wp.slice(1):wp), '_blank');
+    closeWaOpts();
+    window.open('https://wa.me/' + waNum, '_blank');
   };
   const cl=d?generateCalendarLinks(w):'';
   const m=cl.match(/href="([^"]+)"/);
@@ -10610,16 +10632,6 @@ window.sendInviteWhatsApp = sendInviteWhatsApp;
       </div>
       <div id="wsc-payment" class="p-3 rounded-xl border space-y-1.5"></div>
       <div id="wsc-notes-section" class="p-2.5 bg-gray-50 rounded-xl" style="display:none"><p class="text-[10px] text-gray-400 mb-0.5">הערות</p><p id="wsc-notes" class="text-[13px] text-gray-600"></p></div>
-    </div>
-    <!-- WhatsApp options popup -->
-    <div id="wsc-wa-options" class="px-5 py-3 border-t border-emerald-200 bg-emerald-50 space-y-2" style="display:none">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-emerald-700">בחר הודעת WhatsApp</span>
-        <button onclick="document.getElementById('wsc-wa-options').style.display='none'" class="text-gray-400 hover:text-gray-600 text-sm">✕</button>
-      </div>
-      <button id="wsc-wa-summary" class="w-full text-right text-xs bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-3 py-2 transition-colors text-gray-700 font-semibold">סיכום שיחה</button>
-      <button id="wsc-wa-info" class="w-full text-right text-xs bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-3 py-2 transition-colors text-gray-700 font-semibold">הודעת מידע ומחירון</button>
-      <button id="wsc-wa-empty" class="w-full text-right text-xs bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-3 py-2 transition-colors text-gray-700 font-semibold">פתח WhatsApp ריק</button>
     </div>
     <div class="px-5 py-3 border-t border-[#f0dfc0] bg-[#fdf8f5] flex items-center gap-2">
       <button id="wsc-edit-btn" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white px-4 py-2 rounded-full font-bold text-sm transition-all"><i data-lucide="pencil" class="w-3.5 h-3.5 inline-block"></i> עריכה</button>
