@@ -10462,8 +10462,18 @@ function buildCalendarEvent(w) {
   };
 }
 
+const _calSyncInFlight = new Set();
 async function syncCalendarEvent(workshopId, wsData) {
-  const w = wsData || allWorkshops.find(x => x.id === workshopId);
+  if (_calSyncInFlight.has(workshopId)) return;
+  _calSyncInFlight.add(workshopId);
+  try {
+  // Always fetch the latest doc to get the freshest calendarEventId (avoid duplicates from stale snapshots)
+  let w;
+  try {
+    const snap = await getDoc(doc(db, WORKSHOPS_COL, workshopId));
+    if (snap.exists()) w = { id: workshopId, ...snap.data() };
+  } catch(e) { console.warn('Calendar: fetch latest failed, using cached', e); }
+  if (!w) w = wsData || allWorkshops.find(x => x.id === workshopId);
   if (!w) return;
   const event = buildCalendarEvent(w);
   if (!event) return;
@@ -10488,6 +10498,7 @@ async function syncCalendarEvent(workshopId, wsData) {
       await createCalendarEvent(workshopId, event, headers, calId);
     }
   } catch(e) { console.error('Calendar sync error:', e); }
+  } finally { _calSyncInFlight.delete(workshopId); }
 }
 
 async function createCalendarEvent(workshopId, event, headers, calId) {
