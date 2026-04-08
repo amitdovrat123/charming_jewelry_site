@@ -166,8 +166,8 @@ const STATUS_CLR = {
 // Column color groups per sheet
 const SHEET_COLORS = {
   'סדנאות': [
-    {s:1,e:4,c:CLR.customer}, {s:5,e:10,c:CLR.event}, {s:11,e:14,c:CLR.pricing},
-    {s:15,e:15,c:CLR.status}, {s:16,e:24,c:CLR.payment}, {s:25,e:27,c:CLR.meta}
+    {s:1,e:4,c:CLR.customer}, {s:5,e:10,c:CLR.event}, {s:11,e:17,c:CLR.pricing},
+    {s:18,e:18,c:CLR.status}, {s:19,e:28,c:CLR.payment}, {s:29,e:32,c:CLR.meta}
   ],
   'הזמנות': [
     {s:1,e:2,c:CLR.meta}, {s:3,e:8,c:CLR.customer}, {s:9,e:9,c:CLR.event},
@@ -186,7 +186,7 @@ const SHEET_COLORS = {
     {s:16,e:17,c:CLR.desc}, {s:18,e:19,c:CLR.meta}, {s:20,e:21,c:CLR.meta}
   ],
   'קופונים': [
-    {s:1,e:1,c:CLR.customer}, {s:2,e:3,c:CLR.pricing}, {s:4,e:5,c:CLR.event}, {s:6,e:7,c:CLR.meta}
+    {s:1,e:1,c:CLR.customer}, {s:2,e:3,c:CLR.pricing}, {s:4,e:5,c:CLR.event}, {s:6,e:7,c:CLR.meta}, {s:8,e:9,c:CLR.meta}
   ],
 };
 
@@ -256,11 +256,11 @@ const INQ_STATUS = { new:'חדשה', handled:'טופל', archived:'בארכיו�
 const workshopHeaders = [
   'שם מלא איש קשר','טלפון','שם החוגג/ת','לכבוד מה האירוע',
   'עיר','רחוב ומספר','תאריך אירוע','שעת התחלה','מספר משתתפות','מסלול',
-  'מחיר בסיס (₪)','הנחה (%)','עלות הגעה (₪)','סה"כ לתשלום (₪)',
+  'מחיר בסיס (₪)','מצב תמחור','תוספת מותאמת (₪)','הערת תוספת','הנחה (%)','עלות הגעה (₪)','סה"כ לתשלום (₪)',
   'סטטוס הזמנה',
   'מקדמה שולמה','סכום מקדמה (₪)','אמצעי תשלום מקדמה','תאריך תשלום מקדמה',
-  'יתרה שולמה','סכום יתרה (₪)','אמצעי תשלום יתרה','תאריך תשלום יתרה',
-  'נותר לתשלום (₪)','בארכיון','הערות','תאריך יצירת הזמנה'
+  'יתרה שולמה','סכום יתרה (₪)','אמצעי תשלום יתרה','תאריך תשלום יתרה','פיצול תשלומי יתרה',
+  'נותר לתשלום (₪)','בארכיון','הערות','מזהה אירוע ביומן','תאריך יצירת הזמנה'
 ];
 
 function workshopRow(doc) {
@@ -273,14 +273,33 @@ function workshopRow(doc) {
   const remaining = Math.max(0, total - advAmt - balAmt);
   const status = gf(doc, 'bookingStatus') || '';
 
+  const customExtra = gf(doc, 'customExtra') || {};
+  const extraAmt = gmf(customExtra, 'amount') || '';
+  const extraNote = gmf(customExtra, 'note') || '';
+  const pricingMode = gf(doc, 'pricingMode') || '';
+  const pricingModeLabel = pricingMode === 'extra' ? 'תוספת מותאמת' : pricingMode === 'tier' ? 'מסלול' : pricingMode;
+
+  // Format split balance payments: "120₪ PayBox | 80₪ Bit"
+  const balPayments = gmf(pay, 'balancePayments');
+  let balPaymentsStr = '';
+  if (Array.isArray(balPayments) && balPayments.length > 0) {
+    balPaymentsStr = balPayments.map(p => {
+      const fields = (p && p.mapValue && p.mapValue.fields) ? p.mapValue.fields : (p && p.fields ? p.fields : null);
+      if (!fields) return '';
+      const amt = gmf(fields, 'amount') || '';
+      const m = gmf(fields, 'method') || '';
+      return amt + '₪ ' + (PAY_METHOD[m] || m);
+    }).filter(Boolean).join(' | ');
+  }
+
   return [
     gf(doc, 'customerName'), gf(doc, 'phone'), gf(doc, 'celebrant'), gf(doc, 'occasion'),
     gf(doc, 'city'), gf(doc, 'street') || '', fd(gf(doc, 'eventDate')), gf(doc, 'time'), gf(doc, 'participantCount'), gf(doc, 'route'),
-    gf(doc, 'basePrice') || 0, gf(doc, 'discount') || 0, gf(doc, 'arrivalFee') || 0, total,
+    gf(doc, 'basePrice') || 0, pricingModeLabel, extraAmt, extraNote, gf(doc, 'discount') || 0, gf(doc, 'arrivalFee') || 0, total,
     WS_STATUS[status] || status,
     advPaid ? 'כן' : 'לא', advPaid ? advAmt : '', advPaid ? (PAY_METHOD[gmf(pay,'advanceMethod')] || gmf(pay,'advanceMethod') || '') : '', advPaid ? fd(gmf(pay,'advancePaidDate')) : '',
-    balPaid ? 'כן' : 'לא', balPaid ? balAmt : '', balPaid ? (PAY_METHOD[gmf(pay,'balanceMethod')] || gmf(pay,'balanceMethod') || '') : '', balPaid ? fd(gmf(pay,'balancePaidDate')) : '',
-    remaining, gf(doc, 'archived') === true ? 'כן' : 'לא', gf(doc, 'notes') || '', fdt(gf(doc, 'createdAt'))
+    balPaid ? 'כן' : 'לא', balPaid ? balAmt : '', balPaid ? (PAY_METHOD[gmf(pay,'balanceMethod')] || gmf(pay,'balanceMethod') || '') : '', balPaid ? fd(gmf(pay,'balancePaidDate')) : '', balPaymentsStr,
+    remaining, gf(doc, 'archived') === true ? 'כן' : 'לא', gf(doc, 'notes') || '', gf(doc, 'calendarEventId') || '', fdt(gf(doc, 'createdAt'))
   ];
 }
 
@@ -382,25 +401,28 @@ function productRow(doc) {
 }
 
 // ── Customers ──
-const customerHeaders = ['שם','אימייל','טלפון','יום הולדת','עיר','הערות'];
+const customerHeaders = ['שם','אימייל','טלפון','יום הולדת','עיר','רחוב','קומה','דירה','מיקוד','הערות'];
 
 function customerRow(doc) {
+  const bd = gf(doc, 'birthDate');
   return [
     gf(doc, 'displayName') || gf(doc, 'fullName') || gf(doc, 'name') || '',
     gf(doc, 'email') || '', gf(doc, 'phone') || '',
-    fd(gf(doc, 'birthDate')) || gf(doc, 'birthday') || '',
-    gf(doc, 'city') || '', gf(doc, 'notes') || ''
+    (bd instanceof Date ? fd(bd) : (bd || gf(doc, 'birthday') || '')),
+    gf(doc, 'city') || '', gf(doc, 'street') || '', gf(doc, 'floor') || '',
+    gf(doc, 'apt') || '', gf(doc, 'zip') || '', gf(doc, 'notes') || ''
   ];
 }
 
 // ── Coupons ──
-const couponHeaders = ['קוד','סוג','ערך','מגבלת שימוש','שימושים','תוקף','נוצר'];
+const couponHeaders = ['קוד','סוג','ערך','מגבלת שימוש','מקסימום למשתמש','שימושים','תוקף','נוצר','עודכן'];
 
 function couponRow(doc) {
   return [
     gf(doc, 'code') || '', gf(doc, 'type') === 'percent' ? 'אחוז' : 'סכום קבוע',
     gf(doc, 'value') || 0, gf(doc, 'usageLimit') || 'ללא הגבלה',
-    gf(doc, 'usedCount') || 0, fd(gf(doc, 'expiryDate')), fdt(gf(doc, 'createdAt'))
+    gf(doc, 'maxPerUser') || 'ללא הגבלה',
+    gf(doc, 'usedCount') || 0, fd(gf(doc, 'expiryDate')), fdt(gf(doc, 'createdAt')), fdt(gf(doc, 'updatedAt'))
   ];
 }
 
