@@ -3445,8 +3445,13 @@ html.view-routing #view-home { display: none; }
 /* ===== Shop Page (SPA view-shop) ===== */
 .sp-section {
   min-height: 80vh;
-  padding: 80px 0 120px;
+  padding: 100px 0 120px;
   background: var(--sand);
+}
+/* Pages with the announcement ticker need extra top padding so the breadcrumb
+   isn't hidden behind the fixed navbar + ticker (ticker 38px + navbar ≈ 70px). */
+.has-ticker .sp-section {
+  padding-top: 130px;
 }
 
 .sp-back-btn {
