@@ -588,7 +588,7 @@ const _en = {
   /* ── Catalog.js dynamic content ─────────────────── */
   shop_back_home: '\u2039 Back to Home',
   shop_filter_sort: 'Filter & Sort',
-  co_free_ship_over: '\ud83d\ude9a Free shipping on orders over',
+  co_free_ship_over: 'Free shipping on orders over',
   co_free_ship_more: 'more',
   co_apt_label_checkout: 'Floor / Apt',
   home_featured_title: 'Featured Products',

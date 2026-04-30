@@ -505,11 +505,11 @@ function bindShopCardClicks(container) {
 function freeShipBannerHTML(subtotal) {
   if (subtotal >= FREE_SHIP_THRESHOLD) {
     return `<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:#15803d;margin-bottom:16px;">
-      ✅ ${t('co_free_ship_congrats','מזל טוב! הגעת ל-')}${FREE_SHIP_THRESHOLD} ₪ — <strong>${t('co_free_ship_note','משלוח חינם!')}</strong>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> ${t('co_free_ship_congrats','מזל טוב! הגעת ל-')}${FREE_SHIP_THRESHOLD} ₪ — <strong>${t('co_free_ship_note','משלוח חינם!')}</strong>
     </div>`;
   }
   return `<div style="background:var(--pink-light);border:1.5px solid var(--sand-dark);border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:var(--ink-soft);margin-bottom:16px;">
-    🚚 ${t('co_free_ship_over','משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — ${t('co_free_ship_more','עוד')} <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>!` : ''}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ${t('co_free_ship_over','משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — ${t('co_free_ship_more','עוד')} <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>!` : ''}
   </div>`;
 }
 
@@ -587,8 +587,8 @@ function renderShop() {
 
   const hasActiveFilter = shopFilterCat || shopFilterColor || shopFilterFeatured || shopFilterPriceMax || shopFilterOnSale;
   const freeShipLine = subtotal >= FREE_SHIP_THRESHOLD
-    ? `✅ ${t('shop_free_ship_eligible','זכאית למשלוח חינם!')}`
-    : `🚚 ${t('co_free_ship_over','משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — ${t('co_free_ship_more','עוד')} <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>` : ''}`;
+    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> ${t('shop_free_ship_eligible','זכאית למשלוח חינם!')}`
+    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ${t('co_free_ship_over','משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — ${t('co_free_ship_more','עוד')} <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>` : ''}`;
 
   el.innerHTML = `
     <section class="sp-section">
@@ -1663,7 +1663,7 @@ function renderCheckoutForm(el) {
                 <label class="co-delivery-option${pre.ship === 'delivery' ? ' co-delivery-option--active' : ''}">
                   <input type="radio" name="co-ship" value="delivery" ${pre.ship === 'delivery' ? 'checked' : ''} />
                   <span class="co-delivery-name">${t('co_home_delivery','משלוח עד הבית')}</span>
-                  <span class="co-delivery-cost" id="co-dlv-cost">${isFreeInit && pre.ship === 'delivery' ? t('co_free','חינם') + ' ✅' : pre.ship === 'delivery' ? `${SHIPPING} ₪` : `${SHIPPING} ₪`}</span>
+                  <span class="co-delivery-cost" id="co-dlv-cost">${isFreeInit && pre.ship === 'delivery' ? `${t('co_free','חינם')} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>` : pre.ship === 'delivery' ? `${SHIPPING} ₪` : `${SHIPPING} ₪`}</span>
                 </label>
                 <label class="co-delivery-option${pre.ship === 'pickup' ? ' co-delivery-option--active' : ''}">
                   <input type="radio" name="co-ship" value="pickup" ${pre.ship === 'pickup' ? 'checked' : ''} />
@@ -1767,7 +1767,7 @@ function renderCheckoutForm(el) {
               </div>
             </div>
             <div id="co-freeship-note" class="co-freeship-note"${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? '' : ' style="display:none;"'}>
-              ${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? `🚚 ${t('co_free_ship_more','עוד')} ${FREE_SHIP_THRESHOLD - subtotal} ₪ ${t('co_free_ship_goal','למשלוח חינם!')}` : ''}
+              ${pre.ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ${t('co_free_ship_more','עוד')} ${FREE_SHIP_THRESHOLD - subtotal} ₪ ${t('co_free_ship_goal','למשלוח חינם!')}` : ''}
             </div>
           </aside>
 
@@ -1806,7 +1806,7 @@ function renderCheckoutForm(el) {
     });
 
     const dlvCostEl = document.getElementById('co-dlv-cost');
-    if (dlvCostEl) dlvCostEl.textContent = ship === 'pickup' ? t('co_free','חינם') : (isFree ? t('co_free','חינם') + ' ✅' : `${SHIPPING} ₪`);
+    if (dlvCostEl) dlvCostEl.innerHTML = ship === 'pickup' ? t('co_free','חינם') : (isFree ? `${t('co_free','חינם')} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>` : `${SHIPPING} ₪`);
 
     const shipEl = document.getElementById('co-ship-cost-el');
     if (shipEl) shipEl.textContent = shipCost === 0 ? t('co_free','חינם') : `${shipCost} ₪`;
@@ -1817,7 +1817,7 @@ function renderCheckoutForm(el) {
     const noteEl = document.getElementById('co-freeship-note');
     if (noteEl) {
       if (ship === 'delivery' && subtotal < FREE_SHIP_THRESHOLD) {
-        noteEl.textContent = `🚚 ${t('co_free_ship_more','עוד')} ${FREE_SHIP_THRESHOLD - subtotal} ₪ ${t('co_free_ship_goal','למשלוח חינם!')}`;
+        noteEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ${t('co_free_ship_more','עוד')} ${FREE_SHIP_THRESHOLD - subtotal} ₪ ${t('co_free_ship_goal','למשלוח חינם!')}`;
         noteEl.style.display = '';
       } else {
         noteEl.style.display = 'none';
