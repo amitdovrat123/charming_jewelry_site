@@ -3756,6 +3756,32 @@ html.view-routing #view-home { display: none; }
   fill: var(--pink-deep);
 }
 
+/* Wishlist heart on the product detail page (next to product name) */
+.pv-fav-btn {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.pv-fav-btn:hover {
+  color: var(--pink-deep);
+  transform: scale(1.08);
+}
+.pv-fav-btn.is-fav {
+  color: var(--pink-deep);
+}
+.pv-fav-btn.is-fav svg {
+  fill: var(--pink-deep);
+}
+
 .sp-card-body {
   padding: 10px 4px 6px;
   display: flex;

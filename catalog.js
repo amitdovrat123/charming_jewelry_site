@@ -764,7 +764,7 @@ function renderProductView() {
   ].filter(Boolean).join('');
 
   const mainImg = pvImages[0]
-    ? `<img id="pv-main-img-el" src="${esc(pvImages[0])}" style="width:100%;height:100%;object-fit:cover;" alt="${esc(data.name)}" />`
+    ? `<img id="pv-main-img-el" src="${esc(pvImages[0])}" fetchpriority="high" decoding="async" style="width:100%;height:100%;object-fit:cover;" alt="${esc(data.name)}" />`
     : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;">💎</div>`;
 
   const navArrows = pvImages.length > 1 ? `
@@ -2542,8 +2542,11 @@ function init() {
     else             homeEl.style.display = 'block';
   }
 
-  // Show a skeleton in the product view immediately while Firestore loads,
-  // so deep-linked product pages don't flash an empty navbar+footer.
+  // Fast-path product render for deep links (?product=ID):
+  //   1. Try sessionStorage handoff from shop.html — instant, no network.
+  //   2. Else fire a single getDoc for that one product — much faster than
+  //      waiting for the full collection subscription to fire.
+  //   3. Show a skeleton meanwhile so the page never flashes navbar+footer only.
   if (_productParam) {
     const pvEl = document.getElementById('view-product');
     if (pvEl) {
@@ -2565,6 +2568,32 @@ function init() {
           </div>
         </section>`;
       currentView = 'product';
+    }
+
+    // 1) sessionStorage handoff
+    try {
+      const cached = sessionStorage.getItem('charming_pending_product');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        sessionStorage.removeItem('charming_pending_product');
+        if (parsed && parsed.id === _productParam && parsed.data) {
+          pendingProductId = null;
+          showProduct(parsed);
+        }
+      }
+    } catch {}
+
+    // 2) Direct single-doc fetch (runs in parallel with subscribeProducts)
+    if (currentView !== 'product' || !currentProduct) {
+      getDoc(doc(db, COL_PATH, _productParam))
+        .then(snap => {
+          if (!snap.exists()) return;
+          // If subscribeProducts already rendered it first, skip
+          if (currentProduct && currentProduct.id === _productParam) return;
+          pendingProductId = null;
+          showProduct({ id: snap.id, data: snap.data() });
+        })
+        .catch(() => { /* fall through to subscribeProducts */ });
     }
   }
 

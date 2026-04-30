@@ -384,6 +384,14 @@ function render() {
   // Card click → product detail on index.html
   el.querySelectorAll('.sp-shop-card').forEach(card => {
     const go = () => {
+      // Hand off the product data in sessionStorage so the product page can render
+      // instantly without waiting for Firestore. The page validates it by id before use.
+      const product = allProducts.find(p => p.id === card.dataset.viewId);
+      if (product) {
+        try {
+          sessionStorage.setItem('charming_pending_product', JSON.stringify({ id: product.id, data: product.data }));
+        } catch {}
+      }
       window.location.href = 'index.html?product=' + encodeURIComponent(card.dataset.viewId);
     };
     card.addEventListener('click', go);
