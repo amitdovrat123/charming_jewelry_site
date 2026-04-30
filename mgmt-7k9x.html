@@ -1777,9 +1777,26 @@ Charming by Vik 💛</textarea>
                 <input id="wa-tpl-name" type="text" placeholder='למשל: "הצעת מחיר", "תזכורת לפני סדנא"' class="inp" />
               </div>
               <div>
+                <label class="lbl">מתי להציג את ההודעה (טריגר)</label>
+                <select id="wa-tpl-trigger" class="inp">
+                  <option value="always">תמיד מוצג בתפריט</option>
+                  <option value="unpaid">רק כשהמקדמה עוד לא שולמה</option>
+                  <option value="paid">רק כשהמקדמה שולמה (סדנא מאושרת)</option>
+                </select>
+                <p class="text-[10px] text-gray-400 mt-1">קובע מתי הכפתור יופיע בתפריט "בחר הודעת WhatsApp" שנפתח מכרטיס הסדנא</p>
+              </div>
+              <div>
                 <label class="lbl">תוכן ההודעה *</label>
-                <textarea id="wa-tpl-body" rows="6" class="inp text-sm leading-relaxed" placeholder="כתוב את ההודעה כאן...&#10;&#10;משתנים זמינים: {שם_לקוח}, {שם_חוגגת}, {תאריך}, {שעה}, {מסלול}, {משתתפות}, {עיר}, {סכום}, {מקדמה}, {יתרה}"></textarea>
-                <p class="text-[10px] text-gray-400 mt-1">השתמש ב-{שם_לקוח} וכו' כדי להחליף אוטומטית בפרטי הסדנא</p>
+                <textarea id="wa-tpl-body" rows="8" class="inp text-sm leading-relaxed" placeholder="כתבי את ההודעה כאן..."></textarea>
+                <details class="mt-2">
+                  <summary class="text-[11px] text-[#d4a373] cursor-pointer font-bold hover:underline">הצגת רשימת המשתנים הזמינים</summary>
+                  <div class="text-[11px] text-gray-500 mt-2 leading-relaxed bg-[#fdf6ee] border border-[#f0dfc0] rounded-lg p-3 space-y-1">
+                    <p><b>פרטי לקוח/אירוע:</b> <code>{שם_לקוח}</code> · <code>{שם_חוגגת}</code> · <code>{סיבה}</code> · <code>{תאריך}</code> · <code>{שעה}</code> · <code>{שעת_הגעה}</code> · <code>{מסלול}</code> · <code>{משתתפות}</code> · <code>{עיר}</code> · <code>{כתובת}</code></p>
+                    <p><b>תשלום:</b> <code>{מחיר_בסיס}</code> · <code>{הנחה_אחוז}</code> · <code>{עלות_הגעה}</code> · <code>{תוספת_מיוחדת_סכום}</code> · <code>{תוספת_מיוחדת_הערה}</code> · <code>{סכום}</code> · <code>{מקדמה}</code> · <code>{יתרה}</code></p>
+                    <p><b>קישורים:</b> <code>{קישור_תיק}</code> (גלריית התמונות מענני)</p>
+                    <p class="pt-1 border-t border-[#f0dfc0]"><b>בלוקים מותנים:</b> כיתבי <code>{?הנחה_אחוז}שורה{/?}</code> כדי שהשורה תופיע רק אם יש הנחה. עובד עם כל משתנה שערכו עשוי להיות 0/ריק.</p>
+                  </div>
+                </details>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button onclick="saveWaTpl()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full font-bold text-sm transition-colors">שמור</button>
@@ -2375,24 +2392,14 @@ Charming by Vik 💛</textarea>
 
 <!-- WhatsApp message picker modal -->
 <div id="wsc-wa-options" data-v class="fixed inset-0 z-[9999] flex items-center justify-center p-4" style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)" onclick="if(event.target===this)this.setAttribute('data-v','')">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm fadein overflow-hidden">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-[#f0dfc0]">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm fadein overflow-hidden flex flex-col" style="max-height:90vh;">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#f0dfc0] flex-shrink-0">
       <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i> בחר הודעת WhatsApp</h3>
       <button onclick="document.getElementById('wsc-wa-options').setAttribute('data-v','')" class="text-gray-300 hover:text-gray-500 text-xl leading-none transition-colors">✕</button>
     </div>
-    <div class="p-4 space-y-2.5">
-      <button id="wsc-wa-summary" class="w-full text-right bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors group">
-        <p class="text-sm font-bold text-gray-800">סיכום שיחה</p>
-        <p class="text-[10px] text-gray-400 mt-0.5">הודעת סיכום מותאמת לפי פרטי הסדנה</p>
-      </button>
-      <button id="wsc-wa-info" class="w-full text-right bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors group">
-        <p class="text-sm font-bold text-gray-800">הודעת מידע ומחירון</p>
-        <p class="text-[10px] text-gray-400 mt-0.5">הצגת הסדנה, מסלולים, מחירים וקישור</p>
-      </button>
-      <button id="wsc-wa-empty" class="w-full text-right bg-white border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors group">
-        <p class="text-sm font-bold text-gray-800">פתח WhatsApp ריק</p>
-        <p class="text-[10px] text-gray-400 mt-0.5">פתיחת צ'אט ללא הודעה מוכנה</p>
-      </button>
+    <div id="wsc-wa-options-list" class="p-4 space-y-2.5 overflow-y-auto"></div>
+    <div class="px-4 py-3 border-t border-[#f0dfc0] bg-[#fdf6ee] flex-shrink-0">
+      <a href="#" onclick="event.preventDefault(); document.getElementById('wsc-wa-options').setAttribute('data-v',''); showTab('settings'); setTimeout(()=>showSettingsPage('wa-templates'), 100);" class="text-[11px] text-[#d4a373] hover:underline font-bold flex items-center gap-1"><i data-lucide="settings" class="w-3 h-3"></i> ניהול הודעות מוכנות</a>
     </div>
   </div>
 </div>
@@ -3385,6 +3392,9 @@ function initERP(user) {
 
   // Start notifications
   initNotifications();
+
+  // Eager-load WhatsApp templates so the picker has them ready everywhere
+  if (typeof initWaTemplates === 'function') initWaTemplates();
 
   // Register delegations ONCE
   document.getElementById('tbl-body').addEventListener('click', handleRowAction);
@@ -7599,12 +7609,27 @@ window.toggleCrmCol = toggleCrmCol;
 const WA_TPL_COL = 'artifacts/charming-3dd6f/public/data/waTemplates';
 let allWaTemplates = [];
 let editWaTplId = null;
+let waTemplatesSeeded = false;
 
+const WA_TRIGGER_LABELS = {
+  always: 'תמיד מוצג',
+  unpaid: 'מקדמה לא שולמה',
+  paid:   'מקדמה שולמה',
+};
+const WA_TRIGGER_BADGE_CLASS = {
+  always: 'bg-gray-100 text-gray-500',
+  unpaid: 'bg-amber-100 text-amber-700',
+  paid:   'bg-emerald-100 text-emerald-700',
+};
+
+let waTemplatesUnsub = null;
 function initWaTemplates() {
+  if (waTemplatesUnsub) { renderWaTemplates(); return; }
   const q = query(collection(db, WA_TPL_COL), orderBy('createdAt','desc'));
-  onSnapshot(q, snap => {
+  waTemplatesUnsub = onSnapshot(q, snap => {
     allWaTemplates = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderWaTemplates();
+    seedDefaultWaTemplates();
   }, err=>console.error('waTemplates:', err));
 }
 
@@ -7615,25 +7640,35 @@ function renderWaTemplates() {
   if (count) count.textContent = allWaTemplates.length;
 
   if (!allWaTemplates.length) {
-    list.innerHTML = '<p class="text-gray-300 text-sm text-center py-8">אין הודעות מוכנות — לחץ "+ הודעה חדשה"</p>';
+    list.innerHTML = '<p class="text-gray-300 text-sm text-center py-8">אין הודעות מוכנות — לחצי "+ הודעה חדשה"</p>';
     return;
   }
 
-  list.innerHTML = allWaTemplates.map(tpl => `
+  list.innerHTML = allWaTemplates.map(tpl => {
+    const trig = tpl.trigger || 'always';
+    const trigLabel = WA_TRIGGER_LABELS[trig] || trig;
+    const trigClass = WA_TRIGGER_BADGE_CLASS[trig] || 'bg-gray-100 text-gray-500';
+    const sysBadge = tpl.systemKey ? `<span class="text-[9px] bg-[#fdf6ee] text-[#d4a373] border border-[#f0dfc0] rounded-full px-2 py-0.5 font-bold">ברירת מחדל</span>` : '';
+    return `
     <div class="px-5 py-4 hover:bg-[#fdf6ee] transition-colors">
       <div class="flex items-start justify-between gap-3">
         <div class="flex-1 min-w-0">
-          <p class="font-semibold text-sm text-gray-800">${esc(tpl.name)}</p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <p class="font-semibold text-sm text-gray-800">${esc(tpl.name)}</p>
+            <span class="text-[9px] ${trigClass} rounded-full px-2 py-0.5 font-bold">${esc(trigLabel)}</span>
+            ${sysBadge}
+          </div>
           <p class="text-xs text-gray-400 mt-1 whitespace-pre-wrap line-clamp-3">${esc(tpl.body || '').slice(0, 200)}${(tpl.body||'').length > 200 ? '...' : ''}</p>
         </div>
         <div class="flex gap-1 flex-shrink-0">
           <button onclick="sendWaTplToWorkshop('${tpl.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1.5 rounded-full font-bold transition-colors" title="שלח לסדנא הנוכחית"><i data-lucide='send' class='w-3 h-3 inline-block'></i> שלח</button>
           <button onclick="openWaTplForm('${tpl.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
-          <button onclick="deleteWaTpl('${tpl.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2.5 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
+          ${tpl.systemKey ? '' : `<button onclick="deleteWaTpl('${tpl.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2.5 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>`}
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
+  if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 }
 
 function openWaTplForm(id) {
@@ -7645,10 +7680,12 @@ function openWaTplForm(id) {
     editWaTplId = tpl.id;
     document.getElementById('wa-tpl-name').value = tpl.name || '';
     document.getElementById('wa-tpl-body').value = tpl.body || '';
+    document.getElementById('wa-tpl-trigger').value = tpl.trigger || 'always';
   } else {
     editWaTplId = null;
     document.getElementById('wa-tpl-name').value = '';
     document.getElementById('wa-tpl-body').value = '';
+    document.getElementById('wa-tpl-trigger').value = 'always';
   }
   document.getElementById('wa-tpl-err').textContent = '';
   form.scrollIntoView({behavior:'smooth'});
@@ -7664,16 +7701,18 @@ window.closeWaTplForm = closeWaTplForm;
 async function saveWaTpl() {
   const name = document.getElementById('wa-tpl-name').value.trim();
   const body = document.getElementById('wa-tpl-body').value.trim();
+  const trigger = document.getElementById('wa-tpl-trigger').value || 'always';
   const err = document.getElementById('wa-tpl-err');
   if (!name) { err.textContent='יש להזין שם.'; return; }
   if (!body) { err.textContent='יש להזין תוכן.'; return; }
   err.textContent='';
-  const data = { name, body, createdAt: serverTimestamp() };
   try {
     if (editWaTplId) {
+      const data = { name, body, trigger, updatedAt: serverTimestamp() };
       await updateDoc(doc(db, WA_TPL_COL, editWaTplId), data);
       logAction(`תבנית WhatsApp עודכנה — "${name}"`);
     } else {
+      const data = { name, body, trigger, createdAt: serverTimestamp() };
       await addDoc(collection(db, WA_TPL_COL), data);
       logAction(`תבנית WhatsApp חדשה — "${name}"`);
     }
@@ -7684,52 +7723,240 @@ window.saveWaTpl = saveWaTpl;
 
 async function deleteWaTpl(id) {
   const tpl = allWaTemplates.find(x=>x.id===id);
-  if (tpl && confirm(`למחוק תבנית "${tpl.name}"?`)) {
+  if (!tpl) return;
+  if (tpl.systemKey) { alert('לא ניתן למחוק תבנית ברירת מחדל. אפשר לערוך את התוכן שלה.'); return; }
+  if (confirm(`למחוק תבנית "${tpl.name}"?`)) {
     try { await deleteDoc(doc(db, WA_TPL_COL, id)); logAction(`תבנית WhatsApp נמחקה — "${tpl.name}"`); }
     catch(ex) { console.error(ex); }
   }
 }
 window.deleteWaTpl = deleteWaTpl;
 
-function sendWaTplToWorkshop(tplId) {
-  const tpl = allWaTemplates.find(x=>x.id===tplId);
-  if (!tpl) return;
+// ── Default WhatsApp Templates ──────────────────────────────────
+// Seeded once into Firestore on first load. After that the user edits them
+// like any other template via Settings → הודעות WhatsApp.
+const WA_TPL_DEFAULTS = [
+  {
+    systemKey: 'summary-unpaid',
+    trigger: 'unpaid',
+    name: 'סיכום שיחה — מקדמה לא שולמה',
+    order: 10,
+    body:
+`היי {שם_חוגגת}, איזה כיף שדיברנו! 😊
+הנה סיכום הפרטים שדיברנו עליהם (התאריך עדיין לא משוריין סופית):
+*תאריך:* {תאריך}
+*שעה :* {שעה}
+*שם החוגגת:* {שם_חוגגת}
+*לכבוד:* {סיבה}
+*מספר משתתפות :* עד {משתתפות} משתתפות
+*מסלול:* {מסלול}
+*סכום :* {מחיר_בסיס}₪
+{?תוספת_מיוחדת_סכום}*תוספת מיוחדת:* +{תוספת_מיוחדת_סכום} ש"ח {?תוספת_מיוחדת_הערה}({תוספת_מיוחדת_הערה}){/?}{/?}
+{?עלות_הגעה}בנוסף תיהיה עלות הגעה על סך {עלות_הגעה} שח (ההנחה אינה נכללת על עלות ההגעה ){/?}
+{?הנחה_אחוז}קיבלת הנחה מיוחדת על סך {הנחה_אחוז}% הנחה .{/?}
+*סכום סופי:* {סכום} ש"ח
+על מנת לשריין את הסדנה באופן סופי יש להעביר למספר זה מקדמה על סך 500₪ (ניתן בביט או פייבוקס, עם עדיפות לפייבוקס)
+כאשר תשולם המקדמה אשלח לך אישור סופי עם כל הפרטים 🫶
+אם יש שאלות אני כאן!`,
+  },
+  {
+    systemKey: 'summary-paid',
+    trigger: 'paid',
+    name: 'סיכום שיחה — מקדמה שולמה',
+    order: 20,
+    body:
+`אני שולחת לך את סיכום הפרטים לסדנא:
 
-  // Get current workshop data from form
-  const name      = document.getElementById('ws-name')?.value.trim();
-  const phone     = document.getElementById('ws-phone')?.value.trim().replace(/[-\s]/g,'');
-  const celebrant = document.getElementById('ws-celebrant')?.value.trim();
-  const occasion  = document.getElementById('ws-occasion')?.value.trim();
-  const date      = document.getElementById('ws-date')?.value;
-  const time      = document.getElementById('ws-time')?.value;
-  const count     = document.getElementById('ws-count')?.value;
-  const route     = document.getElementById('ws-route')?.value;
-  const city      = document.getElementById('ws-city')?.value.trim();
-  const street    = document.getElementById('ws-street')?.value.trim();
+איזה כיף שסגרתן איתנו עם charming 🥰 מתרגשת מאוד לחגוג איתכן את היום המשמח הזה 🤩
+לסיכום השיחה שלנו :
+*תאריך:* {תאריך}
+*שעה :* {שעה}
+*שם החוגגת:* {שם_חוגגת}
+*לכבוד:* {סיבה}
+*מספר משתתפות :* עד {משתתפות} משתתפות
+*מסלול:* {מסלול}
+*סכום :* {מחיר_בסיס}₪
+{?הנחה_אחוז}קיבלת הנחה מיוחדת על סך {הנחה_אחוז}% הנחה .{/?}
+{?עלות_הגעה}בנוסף תיהיה עלות הגעה על סך {עלות_הגעה} שח (ההנחה אינה נכללת על עלות ההגעה ){/?}
+{?תוספת_מיוחדת_סכום}*תוספת מיוחדת:* +{תוספת_מיוחדת_סכום} ש"ח {?תוספת_מיוחדת_הערה}({תוספת_מיוחדת_הערה}){/?}{/?}
+*סכום סופי:* {סכום} ש"ח
+
+שולמה מקדמה על סך 500 שאר הסכום ינתן ביום האירוע
+
+לסדנה יש להכין שולחן מרכזי סביבו הבנות ישבו לכל אחת צריך להיות כיסא ובנוסף שולחן בצד בסגנון בופה עליו יהיו הצ'ארמים והשרשאות . את עיצוב שולחן הצ'ארמים אני מעצבת 😊
+
+אנחנו נגיע חצי שעה לפני תחילת הסדנא על מנת לסדר את העמדה זה אומר שאם שעת הסדנא מתחילה ב-{שעה} אנחנו נגיע ב-{שעת_הגעה}.
+
+אם יש לכן שאלות , בקשות וכל דבר אחר אני זמינה להכל !!!🫶
+
+דוגמאות לסידור השולחן (בקישור כאן⬇️)
+{קישור_תיק}`,
+  },
+  {
+    systemKey: 'info-pricelist',
+    trigger: 'always',
+    name: 'הודעת מידע ומחירון',
+    order: 30,
+    body:
+`היי! אני ויקטוריה, ואני כאן לכל שאלה 🥰
+מקווה שהכל בסדר אצלכן לאור המצב🙏
+אז מה זאת בעצם סדנת Charming?✨
+
+אנחנו מביאות עד אליכן הביתה את חנות הצ'ארמים המושלמת! וכל מה שתצרכו - עמדות עבודה מעוצבות, חומרים בסטנדרט הגבוה ביותר ואווירה של יצירה ובוטיק.
+הסדנה אורכת כשעתיים עד שעתיים וחצי ומתאימה לקבוצות של עד 30 משתתפות החל מגיל 10 😊
+
+אז איך הערב שלנו נראה ?
+
+✅ התחרות של Charming: אנחנו מתחילות בתחרות "נכון או לא נכון" בין שתי קבוצות בנושא - תכשיטים.
+
+✅ נלמד איך לדעת מה יותר מחמיא לכל אחת - תכשיטי כסף או תכשיטי זהב לפי כמה שיטות🌟
+
+ואז נעבור להרכבת התכשיט הייחודי של כל אחת:
+אנחנו דואגות לכן לחומרים הכי הכי איכותיים שיש !
+
+✅ בחירה מבין 3 סוגי שרשראות איכותיות מפלדת אל-חלד בציפוי כסף וזהב (לא מחליד, היפואלרגני)✨
+
+✅ בחירה אישית של עד 5 צ׳ארמים מהמבחר הענק שלנו גם כמובן מפלדת אל חלד.
+בתוספת של 20₪ למשתתפת ניתן להגדיל את כמות הצ׳ארמים ל-7 צ׳ארמים (ניתן להוסיף את השדרוג רק במסלול הראשון)
+
+המשתתפות ילמדו איך מרכיבים תכשיט מההתחלה ועד הסוף – מהסוגר ועד התליון, והכול בידיים שלהן!
+
+אנחנו מגיעות לכל הארץ (מעבר לאזור המרכז יהיה תוספת תשלום על ההגעה)
+
+שימי ❤️ שבכל מסלול שתבחרי המשתתפות מקבלות גם טבעת לבחירה במתנה💍
+
+לאור המצב החלטנו לפנק אתכן ב-15% הנחה על כל המסלולים שלנו 💕, אנחנו עדיין עובדות ופעילות ונעשה הכל בשביל לשמח את הילדות בימים קשים אלו מגיע להן כמה שעות של כיף ויצירה ולשכוח מהכל❤️
+ההנחה תקפה עד 31.3.2026
+אנחנו זמינות גם בטלפון לכן אם תרצי לשמוע את כל הפרטים בשיחה טלפונית תתקשרי בשמחה 😊
+
+מידע נוסף הכולל את המחירון שלנו מצורף בקישור הזה:
+
+https://charmingbyviktoriya.my.canva.site/by-viktoriya`,
+  },
+];
+
+async function seedDefaultWaTemplates() {
+  if (waTemplatesSeeded) return;
+  waTemplatesSeeded = true;
+  const existingKeys = new Set(allWaTemplates.map(t => t.systemKey).filter(Boolean));
+  const missing = WA_TPL_DEFAULTS.filter(d => !existingKeys.has(d.systemKey));
+  if (!missing.length) return;
+  for (const def of missing) {
+    try {
+      await addDoc(collection(db, WA_TPL_COL), {
+        ...def,
+        createdAt: serverTimestamp(),
+      });
+    } catch(ex) { console.error('seed waTemplate failed:', def.systemKey, ex); }
+  }
+}
+
+// Build the placeholder map from current form state (and a few derived values)
+function buildWsPlaceholderVars() {
+  const name      = document.getElementById('ws-name')?.value.trim() || '';
+  const phone     = (document.getElementById('ws-phone')?.value.trim() || '').replace(/[-\s]/g,'');
+  const celebrant = document.getElementById('ws-celebrant')?.value.trim() || '';
+  const occasion  = document.getElementById('ws-occasion')?.value.trim() || '';
+  const date      = document.getElementById('ws-date')?.value || '';
+  const time      = document.getElementById('ws-time')?.value || '';
+  const count     = document.getElementById('ws-count')?.value || '';
+  const route     = document.getElementById('ws-route')?.value || '';
+  const city      = document.getElementById('ws-city')?.value.trim() || '';
+  const street    = document.getElementById('ws-street')?.value.trim() || '';
   const fullAddress = [street, city].filter(Boolean).join(', ');
+  const disc      = parseFloat(document.getElementById('ws-discount')?.value) || 0;
+  const arrival   = parseFloat(document.getElementById('ws-arrival')?.value) || 0;
+  const customExtraAmt  = parseFloat(document.getElementById('ws-custom-extra-amount')?.value) || 0;
+  const customExtraNote = document.getElementById('ws-custom-extra-note')?.value?.trim() || '';
+  const baseRaw   = (typeof getWsBasePrice === 'function') ? getWsBasePrice() : 0;
+  const basePrice = baseRaw + customExtraAmt;
   const total     = document.getElementById('ws-total-display')?.textContent.replace(/[^\d]/g,'') || '0';
   const advance   = document.getElementById('ws-advance-amount')?.value || '500';
   const balance   = document.getElementById('ws-balance-amount')?.textContent.replace(/[^\d]/g,'') || '0';
   const dateStr   = date ? new Date(date).toLocaleDateString('he-IL') : '';
 
+  // Arrival time = scheduled start minus 30 minutes
+  let arrivalTime = '';
+  if (time) {
+    const [h, m] = time.split(':').map(Number);
+    if (!isNaN(h) && !isNaN(m)) {
+      const d = new Date(2000, 0, 1, h, m - 30);
+      arrivalTime = d.toTimeString().slice(0, 5);
+    }
+  }
+
+  return {
+    phone,
+    vars: {
+      'שם_לקוח':            name,
+      'שם_חוגגת':           celebrant,
+      'סיבה':               occasion,
+      'תאריך':              dateStr,
+      'שעה':                time,
+      'שעת_הגעה':           arrivalTime,
+      'מסלול':              route,
+      'משתתפות':            count,
+      'עיר':                city,
+      'כתובת':              fullAddress || city,
+      'מחיר_בסיס':          basePrice ? basePrice.toLocaleString('he-IL') : '',
+      'הנחה_אחוז':          disc > 0 ? String(disc) : '',
+      'עלות_הגעה':          arrival > 0 ? String(arrival) : '',
+      'תוספת_מיוחדת_סכום':  customExtraAmt > 0 ? customExtraAmt.toLocaleString('he-IL') : '',
+      'תוספת_מיוחדת_הערה':  customExtraNote,
+      'סכום':               total,
+      'מקדמה':              advance,
+      'יתרה':               balance,
+      'קישור_תיק':          'https://collection.cloudinary.com/dhri2dbek/eea3f87f5bbcd1d24c0a33e39b5399f4',
+    },
+  };
+}
+
+// Apply placeholders (and {?cond}...{/?} conditional blocks) to a template body
+function renderWaTemplateBody(body, vars) {
+  if (!body) return '';
+  let out = body;
+
+  // Conditional blocks: {?key}...{/?}
+  // The block is kept only if vars[key] is non-empty AND not "0".
+  // Supports nesting via repeated passes.
+  const condRe = /\{\?([^}]+)\}([\s\S]*?)\{\/\?\}/g;
+  let prev;
+  do {
+    prev = out;
+    out = out.replace(condRe, (m, key, content) => {
+      const v = vars[key.trim()];
+      const has = v != null && String(v).trim() !== '' && String(v).trim() !== '0';
+      return has ? content : '';
+    });
+  } while (out !== prev);
+
+  // Simple placeholders: {key}
+  out = out.replace(/\{([^?{}\/][^{}]*)\}/g, (m, key) => {
+    const v = vars[key.trim()];
+    return v != null ? String(v) : '';
+  });
+
+  // Drop blank lines that were left behind by removed conditional blocks
+  out = out.replace(/^[ \t]*\n/gm, m => m); // (no-op placeholder, kept for clarity)
+  out = out.split('\n').filter((line, i, arr) => {
+    // collapse runs of 3+ blank lines to 2
+    if (line.trim() !== '') return true;
+    if (i > 0 && arr[i-1].trim() === '' && (arr[i-2] || '').trim() === '') return false;
+    return true;
+  }).join('\n');
+
+  return out;
+}
+
+function sendWaTplToWorkshop(tplId) {
+  const tpl = allWaTemplates.find(x=>x.id===tplId);
+  if (!tpl) return;
+
+  const { phone, vars } = buildWsPlaceholderVars();
   if (!phone) { alert('יש למלא טלפון בטופס הסדנא קודם'); return; }
 
-  // Replace placeholders
-  let msg = tpl.body
-    .replace(/\{שם_לקוח\}/g, name || '')
-    .replace(/\{שם_חוגגת\}/g, celebrant || '')
-    .replace(/\{תאריך\}/g, dateStr)
-    .replace(/\{שעה\}/g, time || '')
-    .replace(/\{מסלול\}/g, route || '')
-    .replace(/\{משתתפות\}/g, count || '')
-    .replace(/\{עיר\}/g, city || '')
-    .replace(/\{כתובת\}/g, fullAddress || city || '')
-    .replace(/\{סכום\}/g, total)
-    .replace(/\{מקדמה\}/g, advance)
-    .replace(/\{יתרה\}/g, balance)
-    .replace(/\{סיבה\}/g, occasion || '');
-
-  const waPhone = phone.startsWith('0') ? '972'+phone.slice(1) : phone;
+  const msg = renderWaTemplateBody(tpl.body || '', vars);
+  const waPhone = phone.startsWith('0') ? '972' + phone.slice(1) : phone;
   window.open('https://wa.me/' + waPhone + '?text=' + encodeURIComponent(msg), '_blank');
 }
 window.sendWaTplToWorkshop = sendWaTplToWorkshop;
