@@ -207,7 +207,8 @@ function render() {
   const checkSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>`;
   const truckSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
   const freeShipLine = cartSubtotal >= FREE_SHIP_THRESHOLD
-    ? `${checkSvg} ${t('shop_freeship_eligible', 'זכאית למשלוח חינם!')}`
+    ? `<div>${checkSvg} <strong>${t('shop_freeship_eligible','הקנייה שלך זכאית למשלוח חינם!')}</strong></div>
+       <div style="font-size:0.74rem;color:var(--muted);margin-top:3px;">${t('shop_freeship_warn','שימי לב: הורדת פריטים שתפחית את העגלה מתחת ל־')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong> ${t('shop_freeship_warn_2','תבטל את ההטבה')}</div>`
     : `${truckSvg} ${t('shop_freeship_over', 'משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${cartSubtotal > 0 ? ` — ${t('shop_freeship_more', 'עוד')} <strong>${FREE_SHIP_THRESHOLD - cartSubtotal} ₪</strong>` : ''}`;
 
   // Category pills — top bar (outside drawer)
