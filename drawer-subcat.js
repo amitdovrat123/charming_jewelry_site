@@ -1,24 +1,13 @@
-// Dynamically populates the side drawer's sub-category lists from Firestore products.
-// For each main category, finds unique `collection` values across published products
-// and inserts them as links into the matching <ul.nav-sublist>.
+// Dynamically populates the side drawer's sub-category lists.
+// Source of truth: the `categoriesConfig` doc in Firestore, which the admin
+// manages via the "ערוך תתי קטגוריות לקטגוריה זו" button in the product form.
 
 import { db } from './firebase-config.js';
 import {
-  collection, query, onSnapshot,
+  doc, onSnapshot,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-const COL_PATH = 'artifacts/charming-3dd6f/public/data/products';
-
-function findExpandableForCategory(catName) {
-  const buttons = document.querySelectorAll('.nav-expand-btn');
-  for (const btn of buttons) {
-    const span = btn.querySelector('span');
-    if (span && span.textContent.trim() === catName) {
-      return btn.parentElement;
-    }
-  }
-  return null;
-}
+const SUBCAT_DOC_PATH = 'artifacts/charming-3dd6f/public/data/settings/categoriesConfig';
 
 function renderSublist(li, catName, subCats) {
   const sublist = li.querySelector('.nav-sublist');
@@ -34,26 +23,21 @@ function renderSublist(li, catName, subCats) {
   sublist.innerHTML = items.join('');
 }
 
-const q = query(collection(db, COL_PATH));
-onSnapshot(q, (snap) => {
-  const subsByCat = new Map();
-  snap.docs.forEach(doc => {
-    const d = doc.data();
-    if (d.status !== 'published') return;
-    const cat = d.category;
-    const sub = (d.collection || '').trim();
-    if (!cat || !sub) return;
-    if (!subsByCat.has(cat)) subsByCat.set(cat, new Set());
-    subsByCat.get(cat).add(sub);
-  });
-
+function applyConfig(subCatsByCat) {
   document.querySelectorAll('.nav-item-expandable').forEach(li => {
     const span = li.querySelector('.nav-expand-btn span');
     if (!span) return;
     const catName = span.textContent.trim();
-    const subs = [...(subsByCat.get(catName) || [])].sort();
+    const subs = Array.isArray(subCatsByCat[catName]) ? subCatsByCat[catName] : [];
     renderSublist(li, catName, subs);
   });
+}
+
+onSnapshot(doc(db, SUBCAT_DOC_PATH), (snap) => {
+  const cfg = (snap.exists() && snap.data()?.subCategories) || {};
+  applyConfig(cfg);
 }, (err) => {
-  console.warn('[drawer-subcat] Firestore subscription failed:', err);
+  console.warn('[drawer-subcat] subscription failed:', err);
+  // Render with empty config so the static "all" + "sale" links still appear
+  applyConfig({});
 });

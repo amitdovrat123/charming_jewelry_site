@@ -95,6 +95,12 @@ service cloud.firestore {
         allow update, delete: if false;
       }
 
+      // תצורת תתי-קטגוריות — קריאה ציבורית (לתפריט הצד), כתיבה רק לאדמין
+      match /settings/categoriesConfig {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
       // הגדרות מערכת: רק אדמין
       match /settings/{settingId} {
         allow read, write: if isAdmin();

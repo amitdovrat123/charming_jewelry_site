@@ -2073,15 +2073,10 @@ Charming by Vik 💛</textarea>
         </div>
         <div>
           <label class="lbl">תת-קטגוריה</label>
-          <input type="text" id="p-col" class="inp" list="subcategory-suggestions" placeholder="לדוגמה: טבעות מתכוונות, קולקציית קיץ" />
-          <datalist id="subcategory-suggestions">
-            <option value="טבעות מתכוונות"></option>
-            <option value="טבעות לפי מידה"></option>
-            <option value="קולקציית קיץ"></option>
-            <option value="צ'ארמס"></option>
-            <option value="מתנות"></option>
-            <option value="חדשים"></option>
-          </datalist>
+          <select id="p-col" class="inp">
+            <option value="">—</option>
+          </select>
+          <button type="button" id="p-col-edit" class="text-xs text-[#a8705a] hover:text-[#7d4f3f] mt-1.5 underline disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed" disabled>✏️ ערוך תתי קטגוריות לקטגוריה זו</button>
         </div>
         <div>
           <label class="lbl">חומר</label>
@@ -2242,6 +2237,29 @@ Charming by Vik 💛</textarea>
     <div class="flex gap-3">
       <button id="del-cancel" class="flex-1 border border-gray-200 text-gray-500 hover:border-gray-300 rounded-full py-3 font-bold text-sm transition-colors">ביטול</button>
       <button id="del-confirm" class="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-full py-3 font-bold text-sm transition-colors">מחקי</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SUB-CATEGORY EDIT MODAL ════ -->
+<div id="subcat-modal" data-v
+  class="fixed inset-0 z-[9999] items-center justify-center p-4"
+  style="display:none;background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
+  onclick="if(event.target===this)closeSubCatModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fadein">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-gray-800 text-base">תתי קטגוריות עבור <span id="subcat-modal-cat" class="text-[#a8705a]"></span></h3>
+      <button onclick="closeSubCatModal()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none">✕</button>
+    </div>
+    <ul id="subcat-list" class="space-y-2 mb-4 max-h-72 overflow-y-auto"></ul>
+    <div class="flex gap-2 mb-2">
+      <input type="text" id="subcat-new-input" class="inp flex-1" placeholder="הקלידי תת-קטגוריה חדשה" />
+      <button id="subcat-add-btn" type="button" class="bg-[#a8705a] hover:bg-[#7d4f3f] text-white rounded-full px-4 font-bold text-sm transition-colors">הוסיפי</button>
+    </div>
+    <p id="subcat-err" class="text-red-500 text-xs min-h-[16px] mb-3"></p>
+    <div class="flex gap-3 pt-3 border-t border-gray-100">
+      <button id="subcat-cancel" type="button" class="flex-1 border border-gray-200 text-gray-500 hover:border-gray-300 rounded-full py-2 font-bold text-sm transition-colors">סגור</button>
+      <button id="subcat-save" type="button" class="flex-1 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-full py-2 font-bold text-sm transition-colors">שמרי</button>
     </div>
   </div>
 </div>
@@ -4718,6 +4736,124 @@ document.getElementById('ring-add-size')?.addEventListener('click', () => {
 });
 document.getElementById('p-ring-adjustable')?.addEventListener('change', syncRingOptionsVisibility);
 document.getElementById('p-cat')?.addEventListener('change', syncRingOptionsVisibility);
+
+// ===== Sub-categories config (per main category) =====
+const SUBCAT_DOC = `${SETTINGS_COL}/categoriesConfig`;
+let subCatsByCat = {}; // { "טבעות": ["טבעות מתכוונות", ...], ... }
+let subCatsModalCat = '';
+let subCatsModalList = [];
+
+function getCurrentMainCat() {
+  return document.getElementById('p-cat').value;
+}
+
+function refreshSubCatSelect() {
+  const sel = document.getElementById('p-col');
+  const editBtn = document.getElementById('p-col-edit');
+  const cat = getCurrentMainCat();
+  const prevValue = sel.value;
+  const subs = (cat && subCatsByCat[cat]) ? subCatsByCat[cat] : [];
+  let html = '<option value="">—</option>';
+  subs.forEach(s => {
+    html += `<option value="${s.replace(/"/g, '&quot;')}">${s}</option>`;
+  });
+  sel.innerHTML = html;
+  // Try to keep the previous selection if still valid
+  if (subs.includes(prevValue)) sel.value = prevValue;
+  editBtn.disabled = !cat;
+  editBtn.title = cat ? `ניהול תתי-קטגוריות עבור ${cat}` : 'בחרי קודם קטגוריה ראשית';
+}
+
+document.getElementById('p-cat')?.addEventListener('change', refreshSubCatSelect);
+
+// Subscribe to the config doc — keeps the select in sync with admin edits live
+onSnapshot(doc(db, SUBCAT_DOC), (snap) => {
+  subCatsByCat = (snap.exists() && snap.data()?.subCategories) || {};
+  refreshSubCatSelect();
+}, (err) => console.warn('[subcat] config subscribe failed:', err));
+
+// ───── Modal: edit sub-categories for the currently-selected main category ─────
+function openSubCatModal() {
+  const cat = getCurrentMainCat();
+  if (!cat) return;
+  subCatsModalCat = cat;
+  subCatsModalList = [...(subCatsByCat[cat] || [])];
+  document.getElementById('subcat-modal-cat').textContent = cat;
+  document.getElementById('subcat-new-input').value = '';
+  document.getElementById('subcat-err').textContent = '';
+  renderSubCatList();
+  document.getElementById('subcat-modal').style.display = 'flex';
+}
+
+function closeSubCatModal() {
+  document.getElementById('subcat-modal').style.display = 'none';
+}
+window.closeSubCatModal = closeSubCatModal;
+
+function renderSubCatList() {
+  const ul = document.getElementById('subcat-list');
+  if (!subCatsModalList.length) {
+    ul.innerHTML = '<li class="text-gray-400 text-sm text-center py-4">אין תתי-קטגוריות עדיין. הוסיפי את הראשונה למטה.</li>';
+    return;
+  }
+  ul.innerHTML = subCatsModalList.map((s, i) => `
+    <li class="flex items-center gap-2 px-3 py-2 bg-[#fdf8f5] rounded-lg">
+      <span class="flex-1 text-sm text-gray-700">${s.replace(/</g, '&lt;')}</span>
+      <button type="button" data-subcat-rm="${i}" class="text-gray-400 hover:text-red-500 text-lg leading-none transition-colors" aria-label="הסירי">✕</button>
+    </li>
+  `).join('');
+}
+
+document.getElementById('subcat-list')?.addEventListener('click', (e) => {
+  const rm = e.target.closest('[data-subcat-rm]');
+  if (!rm) return;
+  const idx = parseInt(rm.dataset.subcatRm);
+  subCatsModalList.splice(idx, 1);
+  renderSubCatList();
+});
+
+document.getElementById('subcat-add-btn')?.addEventListener('click', () => {
+  const inp = document.getElementById('subcat-new-input');
+  const err = document.getElementById('subcat-err');
+  const val = inp.value.trim();
+  if (!val) { err.textContent = 'יש להקליד שם.'; return; }
+  if (subCatsModalList.includes(val)) { err.textContent = 'תת-קטגוריה זו כבר קיימת.'; return; }
+  subCatsModalList.push(val);
+  inp.value = '';
+  err.textContent = '';
+  renderSubCatList();
+  inp.focus();
+});
+
+document.getElementById('subcat-new-input')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('subcat-add-btn').click(); }
+});
+
+document.getElementById('subcat-cancel')?.addEventListener('click', closeSubCatModal);
+
+document.getElementById('subcat-save')?.addEventListener('click', async () => {
+  const btn = document.getElementById('subcat-save');
+  const err = document.getElementById('subcat-err');
+  btn.disabled = true;
+  err.textContent = '';
+  try {
+    const newAll = { ...subCatsByCat, [subCatsModalCat]: subCatsModalList };
+    await setDoc(doc(db, SUBCAT_DOC), {
+      subCategories: newAll,
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.email || '',
+    }, { merge: true });
+    logAction(`תתי-קטגוריות עודכנו: ${subCatsModalCat}`);
+    closeSubCatModal();
+  } catch (ex) {
+    console.error(ex);
+    err.textContent = 'שמירה נכשלה. נסי שוב.';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('p-col-edit')?.addEventListener('click', openSubCatModal);
 
 document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
