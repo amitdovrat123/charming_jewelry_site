@@ -725,6 +725,7 @@ function renderProductView() {
   if (!el || !currentProduct) return;
 
   const { data, id } = currentProduct;
+  const sid = esc(id);
   pvImages   = getImages(data);
   pvSlideIdx = 0;
   pvSelectedSize = '';
