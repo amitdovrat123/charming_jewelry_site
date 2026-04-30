@@ -4719,6 +4719,27 @@ html.view-routing #view-home { display: none; }
   }
 }
 
+/* ===== Product view loading skeleton ===== */
+@keyframes pv-skel-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.pv-skel-block {
+  background: linear-gradient(90deg, var(--pink-light) 0%, var(--sand-dark) 50%, var(--pink-light) 100%);
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: pv-skel-pulse 1.4s ease-in-out infinite;
+}
+.pv-skel-img {
+  aspect-ratio: 1;
+  border-radius: 20px;
+}
+.pv-skel-line { height: 14px; margin-bottom: 14px; }
+.pv-skel-line--title { height: 28px; width: 70%; margin-bottom: 18px; }
+.pv-skel-line--price { height: 22px; width: 35%; margin-bottom: 22px; }
+.pv-skel-line--short { width: 60%; }
+.pv-skel-line--btn   { height: 48px; border-radius: 50px; margin-top: 18px; }
+
 
 /* ===== Main wrapper (isolates CSS filters from fixed elements) ===== */
 #main-wrapper {

@@ -2542,6 +2542,32 @@ function init() {
     else             homeEl.style.display = 'block';
   }
 
+  // Show a skeleton in the product view immediately while Firestore loads,
+  // so deep-linked product pages don't flash an empty navbar+footer.
+  if (_productParam) {
+    const pvEl = document.getElementById('view-product');
+    if (pvEl) {
+      pvEl.style.display = 'block';
+      pvEl.innerHTML = `
+        <section style="min-height:80vh;padding:100px 0 110px;background:var(--sand);">
+          <div class="container">
+            <div class="pv-layout">
+              <div><div class="pv-skel-block pv-skel-img"></div></div>
+              <div>
+                <div class="pv-skel-block pv-skel-line pv-skel-line--title"></div>
+                <div class="pv-skel-block pv-skel-line pv-skel-line--price"></div>
+                <div class="pv-skel-block pv-skel-line"></div>
+                <div class="pv-skel-block pv-skel-line"></div>
+                <div class="pv-skel-block pv-skel-line pv-skel-line--short"></div>
+                <div class="pv-skel-block pv-skel-line pv-skel-line--btn"></div>
+              </div>
+            </div>
+          </div>
+        </section>`;
+      currentView = 'product';
+    }
+  }
+
   subscribeProducts();
   subscribeAuth();
 
