@@ -2345,15 +2345,28 @@ function _unused_renderCheckoutStep3(el) {
 function subscribeProducts() {
   const q = query(collection(db, COL_PATH), orderBy('createdAt', 'desc'));
   onSnapshot(q, snap => {
+    const fromCache = !!(snap.metadata && snap.metadata.fromCache);
+    const docs      = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+
+    // Don't act on the first empty snapshot from local cache — it's not real data
+    if (fromCache && docs.length === 0 && !productsLoaded) return;
+
     productsLoaded = true;
-    allProducts    = snap.docs.map(d => ({ id: d.id, data: d.data() }));
-    // Handle ?product=ID redirect from shop.html
+    allProducts    = docs;
+
+    // Handle ?product=ID redirect from shop.html / direct URL
     if (pendingProductId) {
       const _pending = allProducts.find(p => p.id === pendingProductId);
-      pendingProductId = null;
-      if (_pending) { showProduct(_pending); return; }
-      // Product not found → fall back to home
-      switchView('home');
+      if (_pending) {
+        pendingProductId = null;
+        showProduct(_pending);
+        return;
+      }
+      // Server data with no match → product really doesn't exist
+      if (!fromCache) {
+        pendingProductId = null;
+        switchView('home');
+      }
       return;
     }
     if      (currentView === 'home')                        renderHome();
@@ -2362,6 +2375,8 @@ function subscribeProducts() {
       const updated = allProducts.find(p => p.id === currentProduct.id);
       if (updated) currentProduct = updated;
     }
+  }, err => {
+    console.error('[catalog.js] Firestore error:', err);
   });
 }
 
