@@ -283,6 +283,7 @@ function localColor(val)    { return (typeof t === 'function' && _colorMap[val])
 function localMaterial(val) { return (typeof t === 'function' && _matMap[val])   ? t(_matMap[val], val)   : val; }
 
 // ── Card HTML ──────────────────────────────────────────────────
+// Mirrors shop.js cardHTML — keep both in sync so home and shop look identical.
 function cardHTML(product) {
   const { data, id } = product;
   const imgs  = getImages(data);
@@ -291,42 +292,71 @@ function cardHTML(product) {
   const sp    = sellPrice(data);
   const badge = getBadge(data);
   const oos   = isOOS(data);
+  const sid   = esc(id);
 
-  const imgHtml = imgs[0]
-    ? `<img src="${esc(imgs[0])}" alt="${esc(data.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;">💎</div>`;
+  const imgHtml = imgs.length
+    ? imgs.map((src, i) =>
+        `<img class="sp-slide${i === 0 ? ' sp-slide--active' : ''}" src="${esc(src)}" alt="${esc(data.name)}" loading="${i === 0 ? 'eager' : 'lazy'}" />`
+      ).join('')
+    : `<div class="sp-card-img-placeholder">💎</div>`;
 
-  const badgeHtml = badge
-    ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;">${esc(localBadge(badge))}</span>` : '';
-  const oosHtml = oos
-    ? `<span class="shop-card-badge" style="position:absolute;top:10px;right:10px;background:var(--muted);">${t('pv_oos_badge','אזל')}</span>` : '';
+  const badgeHtml = (badge && !oos) ? `<span class="sp-card-badge">${esc(localBadge(badge))}</span>` : '';
+  const oosBadge  = oos ? `<span class="sp-card-badge sp-card-badge--oos">${t('pv_oos_badge', 'אזל')}</span>` : '';
 
   const priceHtml = (sale > 0 && sale < price)
-    ? `<span style="font-weight:700;color:var(--pink-deep);">${sp} ₪</span> <span style="color:var(--muted);text-decoration:line-through;font-size:0.85rem;">${price} ₪</span>`
-    : `<span class="shop-card-price">${price} ₪</span>`;
+    ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
+    : `<span class="sp-card-price">${sp} ₪</span>`;
+
+  const customBadge = data.isCustomizable
+    ? `<div class="sp-custom-badge">${t('shop_customizable', '✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה')}</div>` : '';
+
+  const actionBtn = oos
+    ? `<button class="sp-card-add sp-card-add--oos" disabled>${t('shop_oos', 'אזל מהמלאי')}</button>`
+    : `<button class="sp-card-add" data-add-id="${sid}">${t('shop_add_to_cart', 'הוסיפי לסל')}</button>`;
 
   const pName = localName(data);
   return `
-    <div class="shop-card fadein" data-product-id="${esc(id)}" style="cursor:pointer;" role="button" tabindex="0" aria-label="${esc(pName)}">
-      <div class="shop-card-img" style="position:relative;overflow:hidden;">
-        ${imgHtml}${badgeHtml || oosHtml}
+    <div class="sp-shop-card fadein" data-product-id="${sid}" role="button" tabindex="0" aria-label="${esc(pName)}">
+      <div class="sp-card-img-wrap">
+        ${imgHtml}${badgeHtml || oosBadge}
       </div>
-      <div class="shop-card-body" style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;">
-        <h3 style="font-size:0.97rem;font-weight:600;color:var(--ink);margin:0;line-height:1.35;">${esc(pName)}</h3>
-        <div style="display:flex;align-items:center;gap:8px;">${priceHtml}</div>
-        <button class="btn" style="margin-top:6px;min-height:40px;font-size:0.82rem;pointer-events:none;">${t('pv_view_product','צפי במוצר')}</button>
+      <div class="sp-card-body">
+        <h3 class="sp-card-name">${esc(pName)}</h3>
+        <div class="sp-card-price-row">${priceHtml}</div>
+        ${customBadge}
+        ${actionBtn}
       </div>
     </div>`;
 }
 
 function bindCardClicks(container) {
-  container.querySelectorAll('.shop-card').forEach(card => {
+  container.querySelectorAll('.sp-shop-card').forEach(card => {
     const handler = () => {
       const product = allProducts.find(p => p.id === card.dataset.productId);
       if (product) showProduct(product);
     };
     card.addEventListener('click', handler);
     card.addEventListener('keydown', e => { if (e.key === 'Enter') handler(); });
+
+    // Hover/touch preview: show 2nd image while pointer is over the card
+    const wrap = card.querySelector('.sp-card-img-wrap');
+    const slides = wrap ? wrap.querySelectorAll('.sp-slide') : [];
+    if (slides.length >= 2) {
+      const setActive = (idx) => {
+        slides.forEach((s, i) => s.classList.toggle('sp-slide--active', i === idx));
+      };
+      card.addEventListener('pointerenter', () => setActive(1));
+      card.addEventListener('pointerleave', () => setActive(0));
+    }
+  });
+
+  // Add-to-cart button (does not trigger card click)
+  container.querySelectorAll('.sp-card-add:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const product = allProducts.find(p => p.id === btn.dataset.addId);
+      if (product) addToCart(product, null);
+    });
   });
 }
 

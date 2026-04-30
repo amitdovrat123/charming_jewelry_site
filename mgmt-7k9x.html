@@ -2090,6 +2090,28 @@ Charming by Vik 💛</textarea>
         </div>
       </div>
 
+      <!-- Row 3b: Ring options (visible only for category=טבעות) -->
+      <div id="ring-options" class="ring-options" data-v>
+        <div class="flex items-center gap-2 mb-3">
+          <label class="tog flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="p-ring-adjustable" />
+            <span class="tog-track"></span>
+          </label>
+          <span class="text-sm text-gray-600 font-semibold">טבעת מתכווננת (ניתנת להגדלה והקטנה עצמאית)</span>
+        </div>
+        <div id="ring-sizes-block">
+          <div class="flex items-center justify-between mb-2">
+            <label class="lbl !mb-0">מידות ומלאי</label>
+            <button type="button" id="ring-add-size"
+              class="flex items-center gap-1.5 text-xs font-bold text-[#d4a373] hover:text-[#b8893e] border border-[#f0dfc0] hover:border-[#d4a373] px-3 py-1.5 rounded-full transition-colors">
+              + הוסיפי מידה
+            </button>
+          </div>
+          <div id="ring-sizes-list" class="ring-sizes-list"></div>
+          <p class="text-[11px] text-gray-400 mt-1">השאירי ריק כדי להציג את הטבעת ללא מידות (זמינה לרכישה ללא ספירת מלאי).</p>
+        </div>
+      </div>
+
       <!-- Row 4: Badge + Status + Color + toggles -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end">
         <div>
@@ -2410,6 +2432,16 @@ Charming by Vik 💛</textarea>
   /* Toast banner */
   .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-120%);background:#065f46;color:#fff;padding:10px 24px;border-radius:12px;font-size:.875rem;font-weight:700;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:transform .35s ease,opacity .35s ease;opacity:0;pointer-events:none;}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+  /* Ring options block */
+  .ring-options[data-v] { display:none; }
+  .ring-options { background:#fdf8f5; border:1px dashed #f0dfc0; border-radius:12px; padding:14px 16px; }
+  .ring-sizes-list { display:flex; flex-direction:column; gap:8px; }
+  .ring-size-row { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center; }
+  .ring-size-row .inp { padding:7px 12px; font-size:.82rem; }
+  .ring-size-del { width:34px; height:34px; border-radius:50%; border:1px solid #fecaca; background:#fff; color:#ef4444; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+  .ring-size-del:hover { background:#fef2f2; }
+  #ring-sizes-block.is-disabled { opacity:.5; pointer-events:none; }
 </style>
 
 <script type="module">
@@ -4582,7 +4614,14 @@ function openModal(mode, product=null) {
     uploadedImages = [...imgs];
     document.getElementById('p-imgs').value = JSON.stringify(uploadedImages);
     renderImageGrid();
+    // Ring fields
+    document.getElementById('p-ring-adjustable').checked = !!product.isAdjustable;
+    ringSizes = Array.isArray(product.sizes)
+      ? product.sizes.map(s => ({ size: String(s.size ?? '').trim(), stock: Number.isFinite(s.stock) ? s.stock : (s.stock===null||s.stock===undefined?null:parseInt(s.stock)) }))
+      : [];
   }
+  syncRingOptionsVisibility();
+  renderRingSizes();
 
   const titles     = {add:'מוצר חדש',edit:'עריכת מוצר',duplicate:'שכפול מוצר'};
   const saveLabels = {add:'שמרי מוצר',edit:'עדכני מוצר',duplicate:'שמרי עותק'};
@@ -4605,6 +4644,10 @@ function clearForm() {
   document.getElementById('p-status').value = 'published';
   document.getElementById('p-featured').checked     = false;
   document.getElementById('p-customizable').checked = false;
+  document.getElementById('p-ring-adjustable').checked = false;
+  ringSizes = [];
+  syncRingOptionsVisibility();
+  renderRingSizes();
   uploadedImages = [];
   document.getElementById('p-imgs').value = '[]';
   document.getElementById('img-grid').innerHTML = '';
@@ -4612,6 +4655,53 @@ function clearForm() {
   document.getElementById('form-err').textContent = '';
   document.getElementById('ai-err').textContent   = '';
 }
+
+// ── Ring sizes UI ─────────────────────────────────────────────────
+let ringSizes = []; // [{ size: '7', stock: 3 }, ...]
+
+function syncRingOptionsVisibility() {
+  const cat = document.getElementById('p-cat').value;
+  const wrap = document.getElementById('ring-options');
+  if (cat === 'טבעות') wrap.removeAttribute('data-v');
+  else                 wrap.setAttribute('data-v','');
+  // Disable sizes block when adjustable is on
+  const block = document.getElementById('ring-sizes-block');
+  if (document.getElementById('p-ring-adjustable').checked) block.classList.add('is-disabled');
+  else block.classList.remove('is-disabled');
+}
+
+function renderRingSizes() {
+  const list = document.getElementById('ring-sizes-list');
+  if (!list) return;
+  list.innerHTML = ringSizes.map((row, idx) => `
+    <div class="ring-size-row">
+      <input type="text" class="inp" placeholder="מידה (למשל 7)" data-ring-size="${idx}" value="${(row.size||'').replace(/"/g,'&quot;')}" />
+      <input type="number" class="inp" placeholder="מלאי" min="0" data-ring-stock="${idx}" value="${row.stock===null||row.stock===undefined?'':row.stock}" />
+      <button type="button" class="ring-size-del" data-ring-del="${idx}" aria-label="מחקי מידה">✕</button>
+    </div>`).join('');
+  list.querySelectorAll('[data-ring-size]').forEach(inp => {
+    inp.addEventListener('input', e => { ringSizes[parseInt(e.target.dataset.ringSize)].size = e.target.value; });
+  });
+  list.querySelectorAll('[data-ring-stock]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const v = e.target.value.trim();
+      ringSizes[parseInt(e.target.dataset.ringStock)].stock = v === '' ? null : parseInt(v);
+    });
+  });
+  list.querySelectorAll('[data-ring-del]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      ringSizes.splice(parseInt(e.currentTarget.dataset.ringDel), 1);
+      renderRingSizes();
+    });
+  });
+}
+
+document.getElementById('ring-add-size')?.addEventListener('click', () => {
+  ringSizes.push({ size: '', stock: null });
+  renderRingSizes();
+});
+document.getElementById('p-ring-adjustable')?.addEventListener('change', syncRingOptionsVisibility);
+document.getElementById('p-cat')?.addEventListener('change', syncRingOptionsVisibility);
 
 document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
