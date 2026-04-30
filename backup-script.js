@@ -157,6 +157,12 @@ const CLR = {
 
 // Status cell colors
 const STATUS_CLR = {
+  // Workshop CRM categories (match dashboard column colors)
+  'טיוטה — טרם הועברה מקדמה':'#FCE7F3', // pink-50
+  'סדנה אושרה':'#D1FAE5',                // emerald-100
+  'בוצעה וממתינה לתשלום':'#FEE2E2',      // red-100
+  'ארכיון':'#E5E7EB',                    // gray-200
+  // Legacy / other sheets
   'טיוטה':'#FFF3CD', 'מאושרת':'#D4EDDA', 'בארכיון':'#E2E3E5',
   'ממתין לתשלום':'#FFF3CD', 'בטיפול':'#D6EAF8', 'נשלח':'#FFE8CC', 'נמסר':'#D4EDDA', 'בוטל':'#F5D5D5',
   'חדשה':'#FFF3CD', 'טופל':'#D4EDDA',
@@ -247,7 +253,23 @@ function writeSheet(ss, sheetName, headers, rows) {
 // ══════════════════════════════════════════════════════════════
 
 const PAY_METHOD = { paybox:'PayBox', bit:'Bit', cash:'מזומן', transfer:'העברה בנקאית' };
-const WS_STATUS  = { draft:'טיוטה', confirmed:'מאושרת', archived:'בארכיון' };
+// Computed CRM categories (match dashboard logic in mgmt-7k9x.html → renderCrmBoard)
+const WS_CAT_DRAFT     = 'טיוטה — טרם הועברה מקדמה';
+const WS_CAT_CONFIRMED = 'סדנה אושרה';
+const WS_CAT_PENDING   = 'בוצעה וממתינה לתשלום';
+const WS_CAT_ARCHIVE   = 'ארכיון';
+function computeWsCategory(bookingStatus, eventDate, balancePaid, archivedFlag) {
+  if (archivedFlag === true) return WS_CAT_ARCHIVE;
+  const status = bookingStatus || 'confirmed';
+  const now = new Date(); now.setHours(0,0,0,0);
+  const d = (eventDate instanceof Date) ? eventDate : null;
+  const isPast = d && d < now;
+  if (status === 'draft' && !isPast)     return WS_CAT_DRAFT;
+  if (status === 'confirmed' && !isPast) return WS_CAT_CONFIRMED;
+  if (isPast && !balancePaid)            return WS_CAT_PENDING;
+  if (isPast && balancePaid)             return WS_CAT_ARCHIVE;
+  return status;
+}
 const ORD_STATUS = { pending_payment:'ממתין לתשלום', processing:'בטיפול', shipped:'נשלח', delivered:'נמסר', cancelled:'בוטל' };
 const EXP_CAT   = { materials:'חומרי גלם', staff:'תשלום לעובדת', fuel:'דלק / נסיעות', marketing:'שיווק ממומן', other:'אחר' };
 const INQ_STATUS = { new:'חדשה', handled:'טופל', archived:'בארכיון' };
@@ -272,6 +294,9 @@ function workshopRow(doc) {
   const balAmt = balPaid ? (gmf(pay, 'balanceAmount') || 0) : 0;
   const remaining = Math.max(0, total - advAmt - balAmt);
   const status = gf(doc, 'bookingStatus') || '';
+  const eventDate = gf(doc, 'eventDate');
+  const archivedFlag = gf(doc, 'archived') === true;
+  const wsCategory = computeWsCategory(status, eventDate, balPaid, archivedFlag);
 
   const customExtra = gf(doc, 'customExtra') || {};
   const extraAmt = gmf(customExtra, 'amount') || '';
@@ -296,7 +321,7 @@ function workshopRow(doc) {
     gf(doc, 'customerName'), gf(doc, 'phone'), gf(doc, 'celebrant'), gf(doc, 'occasion'),
     gf(doc, 'city'), gf(doc, 'street') || '', fd(gf(doc, 'eventDate')), gf(doc, 'time'), gf(doc, 'participantCount'), gf(doc, 'route'),
     gf(doc, 'basePrice') || 0, pricingModeLabel, extraAmt, extraNote, gf(doc, 'discount') || 0, gf(doc, 'arrivalFee') || 0, total,
-    WS_STATUS[status] || status,
+    wsCategory,
     advPaid ? 'כן' : 'לא', advPaid ? advAmt : '', advPaid ? (PAY_METHOD[gmf(pay,'advanceMethod')] || gmf(pay,'advanceMethod') || '') : '', advPaid ? fd(gmf(pay,'advancePaidDate')) : '',
     balPaid ? 'כן' : 'לא', balPaid ? balAmt : '', balPaid ? (PAY_METHOD[gmf(pay,'balanceMethod')] || gmf(pay,'balanceMethod') || '') : '', balPaid ? fd(gmf(pay,'balancePaidDate')) : '', balPaymentsStr,
     remaining, gf(doc, 'archived') === true ? 'כן' : 'לא', gf(doc, 'notes') || '', gf(doc, 'calendarEventId') || '', fdt(gf(doc, 'createdAt'))

@@ -246,6 +246,13 @@ function getImages(data) {
   if (data.imageUrl) return [data.imageUrl];
   return [];
 }
+// Inject a Cloudinary width transformation into admin-uploaded URLs so the
+// browser downloads an appropriately sized image rather than the full original.
+function optImg(url, w) {
+  if (typeof url !== 'string' || !url.includes('res.cloudinary.com')) return url;
+  if (/[\/,]w_\d+/.test(url)) return url;
+  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${w}/`);
+}
 function getPrice(data)  { return parseInt(data.priceOriginal ?? data.price)    || 0; }
 function getSale(data)   { return parseInt(data.priceSale    ?? data.salePrice) || 0; }
 function getStock(data)  { return data.stockCount ?? data.stock ?? null; }
@@ -331,9 +338,10 @@ function cardHTML(product) {
   const oos   = isOOS(data);
   const sid   = esc(id);
 
-  const imgHtml = imgs.length
-    ? imgs.map((src, i) =>
-        `<img class="sp-slide${i === 0 ? ' sp-slide--active' : ''}" src="${esc(src)}" alt="${esc(data.name)}" loading="${i === 0 ? 'eager' : 'lazy'}" />`
+  const cardImgs = imgs.slice(0, 2);
+  const imgHtml = cardImgs.length
+    ? cardImgs.map((src, i) =>
+        `<img class="sp-slide${i === 0 ? ' sp-slide--active' : ''}" src="${esc(optImg(src, 600))}" alt="${esc(data.name)}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" />`
       ).join('')
     : `<div class="sp-card-img-placeholder">💎</div>`;
 
@@ -413,7 +421,7 @@ function shopCardHTML(product) {
   const oos   = isOOS(data);
 
   const imgHtml = imgs[0]
-    ? `<img src="${esc(imgs[0])}" alt="${esc(data.name)}" loading="lazy" />`
+    ? `<img src="${esc(optImg(imgs[0], 600))}" alt="${esc(data.name)}" loading="lazy" decoding="async" />`
     : `<div class="sp-card-img-placeholder">💎</div>`;
 
   const badgeHtml = (badge && !oos)
@@ -770,7 +778,7 @@ function renderProductView() {
   ].filter(Boolean).join('<span style="color:var(--sand-dark);">|</span>');
 
   const mainImg = pvImages[0]
-    ? `<img id="pv-main-img-el" src="${esc(pvImages[0])}" fetchpriority="high" decoding="async" style="width:100%;height:100%;object-fit:cover;" alt="${esc(data.name)}" />`
+    ? `<img id="pv-main-img-el" src="${esc(optImg(pvImages[0], 1200))}" fetchpriority="high" decoding="async" style="width:100%;height:100%;object-fit:cover;" alt="${esc(data.name)}" />`
     : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;">💎</div>`;
 
   const navArrows = pvImages.length > 1 ? `
@@ -781,7 +789,7 @@ function renderProductView() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
       ${pvImages.map((img, i) =>
         `<div class="pv-thumb" data-pv-thumb="${i}" style="width:60px;height:60px;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid ${i === 0 ? 'var(--pink)' : 'var(--sand-dark)'};flex-shrink:0;transition:.2s;">
-          <img src="${esc(img)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />
+          <img src="${esc(optImg(img, 120))}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" />
         </div>`
       ).join('')}
     </div>` : '';
@@ -1056,7 +1064,7 @@ function renderProductView() {
 function pvSetSlide(idx) {
   pvSlideIdx = idx;
   const imgEl = document.getElementById('pv-main-img-el');
-  if (imgEl) imgEl.src = pvImages[idx];
+  if (imgEl) imgEl.src = optImg(pvImages[idx], 1200);
   document.querySelectorAll('.pv-thumb').forEach((t, i) => {
     t.style.borderColor = i === idx ? 'var(--pink)' : 'var(--sand-dark)';
   });

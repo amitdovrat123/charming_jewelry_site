@@ -2472,6 +2472,22 @@ Charming by Vik 💛</textarea>
   .ring-size-del { width:34px; height:34px; border-radius:50%; border:1px solid #fecaca; background:#fff; color:#ef4444; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
   .ring-size-del:hover { background:#fef2f2; }
   #ring-sizes-block.is-disabled { opacity:.5; pointer-events:none; }
+
+  /* ─── Stock tooltip (hover על מלאי טבעת עם מידות) ─── */
+  .stk-cell { position:relative; display:inline-flex; align-items:center; gap:5px; cursor:help; padding:2px 4px; border-radius:6px; transition:background .15s; }
+  .stk-cell:hover, .stk-cell:focus-visible { background:#fdf6ee; outline:none; }
+  .stk-icon { width:13px; height:13px; color:#d4a373; flex-shrink:0; }
+  .stk-cell::after { content:''; position:absolute; bottom:100%; right:50%; width:8px; height:8px; transform:translateX(50%) rotate(45deg); background:#fff; border:1px solid #f0dfc0; border-bottom:none; border-left:none; box-shadow:none; opacity:0; pointer-events:none; transition:opacity .15s; margin-bottom:-4px; z-index:101; }
+  .stk-cell:hover::after, .stk-cell:focus-visible::after, .stk-cell:focus-within::after { opacity:1; }
+  .stk-tip { position:absolute; bottom:calc(100% + 6px); right:50%; transform:translateX(50%); background:#fff; border:1px solid #f0dfc0; border-radius:12px; padding:8px 10px; min-width:160px; box-shadow:0 6px 20px rgba(0,0,0,.08); opacity:0; pointer-events:none; transition:opacity .15s; z-index:100; }
+  .stk-cell:hover .stk-tip, .stk-cell:focus-visible .stk-tip, .stk-cell:focus-within .stk-tip { opacity:1; pointer-events:auto; }
+  .stk-tip-title { font-size:10px; font-weight:800; color:#9a8e8a; letter-spacing:.06em; padding-bottom:5px; margin-bottom:5px; border-bottom:1px solid #f5ece7; text-align:right; }
+  .stk-tip-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:3px 0; font-size:11px; }
+  .stk-tip-row + .stk-tip-row { border-top:1px dashed #fdf6ee; }
+  .stk-tip-size { color:#4a3f3c; font-weight:600; }
+  .stk-tip-qty { font-weight:800; color:#2c2a29; min-width:24px; text-align:left; }
+  .stk-tip-qty.oos { color:#ef4444; }
+  .stk-tip-qty.untracked { color:#c9b8b3; font-weight:600; }
 </style>
 
 <script type="module">

@@ -73,6 +73,15 @@ function getImages(data) {
   if (data.imageUrl) return [data.imageUrl];
   return [];
 }
+// Inject a Cloudinary width transformation into admin-uploaded URLs so the
+// browser downloads a card-sized image (~600px) rather than the full original
+// (often 2000px+). Non-Cloudinary URLs and URLs that already constrain width
+// pass through unchanged.
+function optImg(url, w) {
+  if (typeof url !== 'string' || !url.includes('res.cloudinary.com')) return url;
+  if (/[\/,]w_\d+/.test(url)) return url;
+  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${w}/`);
+}
 function getPrice(data)  { return parseInt(data.priceOriginal ?? data.price)    || 0; }
 function getSale(data)   { return parseInt(data.priceSale    ?? data.salePrice) || 0; }
 function sellPrice(data) { const p = getPrice(data), s = getSale(data); return (s > 0 && s < p) ? s : p; }
@@ -135,9 +144,12 @@ function cardHTML(product) {
   const oos   = isOOS(data);
   const sid   = esc(id);
 
-  const imgHtml = imgs.length
-    ? imgs.map((src, i) =>
-        `<img class="sp-slide${i === 0 ? ' sp-slide--active' : ''}" src="${esc(src)}" alt="${esc(data.name)}" loading="${i === 0 ? 'eager' : 'lazy'}" />`
+  // Only render the first 2 images per card (default + hover preview); the
+  // rest are unused on the card grid and just bloat the DOM/network.
+  const cardImgs = imgs.slice(0, 2);
+  const imgHtml = cardImgs.length
+    ? cardImgs.map((src, i) =>
+        `<img class="sp-slide${i === 0 ? ' sp-slide--active' : ''}" src="${esc(optImg(src, 600))}" alt="${esc(data.name)}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" />`
       ).join('')
     : `<div class="sp-card-img-placeholder">💎</div>`;
 
