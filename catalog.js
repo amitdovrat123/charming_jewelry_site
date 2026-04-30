@@ -504,9 +504,9 @@ function bindShopCardClicks(container) {
 // ── Free-ship banner helper ────────────────────────────────────
 function freeShipBannerHTML(subtotal) {
   if (subtotal >= FREE_SHIP_THRESHOLD) {
-    return `<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:#15803d;margin-bottom:16px;line-height:1.5;">
-      <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> <strong>${t('co_free_ship_eligible','הקנייה שלך זכאית למשלוח חינם!')}</strong></div>
-      <div style="font-size:0.74rem;color:#16a34a;opacity:0.85;margin-top:3px;">${t('co_free_ship_warn','שימי לב: הורדת פריטים שתפחית את העגלה מתחת ל־')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong> ${t('co_free_ship_warn_2','תבטל את ההטבה')}</div>
+    return `<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 16px;text-align:center;color:#15803d;margin-bottom:16px;line-height:1.5;">
+      <div style="font-size:1rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> <strong>${t('co_free_ship_eligible','הקנייה שלך זכאית למשלוח חינם!')}</strong></div>
+      <div style="font-size:0.78rem;color:#16a34a;opacity:0.85;margin-top:4px;">${t('co_free_ship_warn','שימי לב: הורדת פריטים שתפחית את העגלה מתחת ל־')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong> ${t('co_free_ship_warn_2','תבטל את ההטבה')}</div>
     </div>`;
   }
   return `<div style="background:var(--pink-light);border:1.5px solid var(--sand-dark);border-radius:12px;padding:10px 16px;text-align:center;font-size:0.85rem;color:var(--ink-soft);margin-bottom:16px;">
@@ -588,8 +588,8 @@ function renderShop() {
 
   const hasActiveFilter = shopFilterCat || shopFilterColor || shopFilterFeatured || shopFilterPriceMax || shopFilterOnSale;
   const freeShipLine = subtotal >= FREE_SHIP_THRESHOLD
-    ? `<div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> <strong>${t('shop_free_ship_eligible','הקנייה שלך זכאית למשלוח חינם!')}</strong></div>
-       <div style="font-size:0.74rem;color:var(--muted);margin-top:3px;">${t('shop_free_ship_warn','שימי לב: הורדת פריטים שתפחית את העגלה מתחת ל־')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong> ${t('shop_free_ship_warn_2','תבטל את ההטבה')}</div>`
+    ? `<div style="font-size:1rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> <strong>${t('shop_free_ship_eligible','הקנייה שלך זכאית למשלוח חינם!')}</strong></div>
+       <div style="font-size:0.74rem;color:var(--muted);margin-top:4px;">${t('shop_free_ship_warn','שימי לב: הורדת פריטים שתפחית את העגלה מתחת ל־')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong> ${t('shop_free_ship_warn_2','תבטל את ההטבה')}</div>`
     : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;display:inline-block;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ${t('co_free_ship_over','משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${subtotal > 0 ? ` — ${t('co_free_ship_more','עוד')} <strong>${FREE_SHIP_THRESHOLD - subtotal} ₪</strong>` : ''}`;
 
   el.innerHTML = `
