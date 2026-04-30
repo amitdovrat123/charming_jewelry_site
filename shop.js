@@ -127,10 +127,6 @@ function cardHTML(product) {
       ).join('')
     : `<div class="sp-card-img-placeholder">💎</div>`;
 
-  const arrowsHtml = imgs.length > 1
-    ? `<button class="sp-img-arrow sp-img-arrow--prev" aria-label="תמונה קודמת">‹</button><button class="sp-img-arrow sp-img-arrow--next" aria-label="תמונה הבאה">›</button><div class="sp-img-dots">${imgs.map((_, i) => `<span class="sp-img-dot${i === 0 ? ' sp-img-dot--active' : ''}" data-dot="${i}"></span>`).join('')}</div>`
-    : '';
-
   const badgeHtml = (badge && !oos) ? `<span class="sp-card-badge">${esc(localBadge(badge))}</span>` : '';
   const oosBadge  = oos ? `<span class="sp-card-badge sp-card-badge--oos">${t('shop_oos_badge', 'אזל')}</span>` : '';
 
@@ -149,10 +145,7 @@ function cardHTML(product) {
   return `
     <div class="sp-shop-card fadein" data-view-id="${sid}" role="button" tabindex="0" aria-label="${esc(pName)}">
       <div class="sp-card-img-wrap">
-        ${imgHtml}${arrowsHtml}${badgeHtml || oosBadge}
-        <button class="sp-card-quickview" data-view-id="${sid}" aria-label="${t('shop_quickview', 'צפייה מהירה')}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
+        ${imgHtml}${badgeHtml || oosBadge}
       </div>
       <div class="sp-card-body">
         <h3 class="sp-card-name">${esc(pName)}</h3>
@@ -384,14 +377,6 @@ function render() {
     card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   });
 
-  // Quick-view (same navigation as card click)
-  el.querySelectorAll('.sp-card-quickview').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      window.location.href = 'index.html?product=' + encodeURIComponent(btn.dataset.viewId);
-    });
-  });
-
   // Add-to-cart buttons
   el.querySelectorAll('[data-add-id]').forEach(btn => {
     btn.addEventListener('click', e => {
@@ -400,47 +385,14 @@ function render() {
     });
   });
 
-  // Image slide arrows
-  el.querySelectorAll('.sp-img-arrow').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const wrap = btn.closest('.sp-card-img-wrap');
-      const slides = wrap.querySelectorAll('.sp-slide');
-      const dots = wrap.querySelectorAll('.sp-img-dot');
-      if (slides.length < 2) return;
-      const cur = wrap.querySelector('.sp-slide--active');
-      const idx = [...slides].indexOf(cur);
-      const dir = btn.classList.contains('sp-img-arrow--next') ? 1 : -1;
-      const next = (idx + dir + slides.length) % slides.length;
-      cur.classList.remove('sp-slide--active');
-      slides[next].classList.add('sp-slide--active');
-      dots.forEach((d, i) => d.classList.toggle('sp-img-dot--active', i === next));
-    });
-  });
-
-  // Image dots
-  el.querySelectorAll('.sp-img-dot').forEach(dot => {
-    dot.addEventListener('click', e => {
-      e.stopPropagation();
-      const wrap = dot.closest('.sp-card-img-wrap');
-      const slides = wrap.querySelectorAll('.sp-slide');
-      const dots = wrap.querySelectorAll('.sp-img-dot');
-      const target = parseInt(dot.dataset.dot);
-      slides.forEach((s, i) => s.classList.toggle('sp-slide--active', i === target));
-      dots.forEach((d, i) => d.classList.toggle('sp-img-dot--active', i === target));
-    });
-  });
-
   // Hover/touch preview: show 2nd image while pointer is over the card
   el.querySelectorAll('.sp-shop-card').forEach(card => {
     const wrap = card.querySelector('.sp-card-img-wrap');
     if (!wrap) return;
     const slides = wrap.querySelectorAll('.sp-slide');
-    const dots = wrap.querySelectorAll('.sp-img-dot');
     if (slides.length < 2) return;
     const setActive = (idx) => {
       slides.forEach((s, i) => s.classList.toggle('sp-slide--active', i === idx));
-      dots.forEach((d, i) => d.classList.toggle('sp-img-dot--active', i === idx));
     };
     card.addEventListener('pointerenter', () => setActive(1));
     card.addEventListener('pointerleave', () => setActive(0));

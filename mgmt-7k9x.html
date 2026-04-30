@@ -5987,13 +5987,14 @@ async function _saveWorkshop() {
   const prevWs = editWorkshopId ? allWorkshops.find(x => x.id === editWorkshopId) : null;
   try {
     if (editWorkshopId) {
-      // Check if advance was just toggled on (wasn't paid before)
+      // Check if advance/balance was just toggled on (wasn't paid before)
       const wasAdvancePaid = prevWs?.payment?.advancePaid;
+      const wasBalancePaid = prevWs?.payment?.balancePaid;
       await updateDoc(doc(db, WORKSHOPS_COL, editWorkshopId), data);
       logAction(`סדנה "${name}" עודכנה`);
-      // Staff + fuel expense reminders whenever balance is marked as paid.
-      // The duplicate-check inside each reminder skips silently if expenses already exist.
-      if (balancePaid) {
+      // Staff + fuel expense reminders fire only when balance was JUST toggled from off to on.
+      // Re-saving a workshop that already had balance paid (e.g. typo fix) won't re-trigger them.
+      if (balancePaid && !wasBalancePaid) {
         showStaffExpenseReminder(editWorkshopId, { ...data, eventDate: { seconds: new Date(date+'T'+time).getTime()/1000 } });
       }
     } else {
