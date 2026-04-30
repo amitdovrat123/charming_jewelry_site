@@ -29,7 +29,7 @@
     }
   </script>
   <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@400;500;600;700;800&family=Karantina:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Heebo:wght@300;400;500;600;700;800&family=Karantina:wght@400;700&family=Fredoka:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Gveret+Levin&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -1009,7 +1009,7 @@
             <button onclick="closeWsForm()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
           </div>
           <div class="px-6 py-5">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 [&>*]:min-w-0">
             <div>
               <label class="lbl">שם מלא איש קשר *</label>
               <input id="ws-name" type="text" placeholder="שם מלא" class="inp" required />
@@ -1069,7 +1069,7 @@
               <p id="ws-arrival-hint" class="text-[10px] text-gray-400 mt-1">לא מושפע מההנחה</p>
             </div>
             <!-- Pricing breakdown panel -->
-            <div id="ws-pricing-panel" style="display:none" class="col-span-2 p-4 bg-[#fdf6ee] border border-[#f0dfc0] rounded-xl space-y-2">
+            <div id="ws-pricing-panel" style="display:none" class="lg:col-span-2 p-4 bg-[#fdf6ee] border border-[#f0dfc0] rounded-xl space-y-2">
               <p class="text-[10px] font-bold text-[#9a8e8a] uppercase tracking-wide">פירוט תמחור</p>
               <div id="ws-pricing-lines" class="space-y-1.5"></div>
               <div id="ws-pricing-mode" style="display:none" class="mt-2 p-2.5 bg-white rounded-lg border border-[#e8cfc4] space-y-1.5">
@@ -5989,11 +5989,11 @@ async function _saveWorkshop() {
     if (editWorkshopId) {
       // Check if advance was just toggled on (wasn't paid before)
       const wasAdvancePaid = prevWs?.payment?.advancePaid;
-      const wasBalancePaid = prevWs?.payment?.balancePaid;
       await updateDoc(doc(db, WORKSHOPS_COL, editWorkshopId), data);
       logAction(`סדנה "${name}" עודכנה`);
-      // Staff expense reminder when balance just got marked as paid
-      if (balancePaid && !wasBalancePaid) {
+      // Staff + fuel expense reminders whenever balance is marked as paid.
+      // The duplicate-check inside each reminder skips silently if expenses already exist.
+      if (balancePaid) {
         showStaffExpenseReminder(editWorkshopId, { ...data, eventDate: { seconds: new Date(date+'T'+time).getTime()/1000 } });
       }
     } else {
@@ -7074,7 +7074,12 @@ async function executeWscPay(type, wsId) {
 }
 window.executeWscPay = executeWscPay;
 
-function showStaffExpenseReminder(wsId, w) {
+async function showStaffExpenseReminder(wsId, w) {
+  // Prevent duplicates — silently skip and chain to fuel reminder
+  if (await hasExpenseForWorkshop(wsId, 'staff')) {
+    showFuelExpenseReminder(wsId);
+    return;
+  }
   const wsName = w.celebrant || w.customerName || '';
   const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null;
   const dateStr = d ? d.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
@@ -7109,11 +7114,23 @@ function showStaffExpenseReminder(wsId, w) {
   if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 }
 
+// Generic duplicate check — returns true if an expense of the given category
+// already exists for this workshop. Used by staff + fuel reminders.
+async function hasExpenseForWorkshop(wsId, category) {
+  try {
+    const snap = await getDocs(query(collection(db, EXPENSES_COL), where('workshopId', '==', wsId), where('category', '==', category)));
+    return !snap.empty;
+  } catch(e) { console.warn(`Expense duplicate check failed (${category}):`, e); return false; }
+}
+
 // Fuel-expense reminder — opens after the staff reminder closes (Add or Skip).
 // Always shows, even if route calc failed (manual entry fallback).
+// Skipped silently if a fuel expense already exists for this workshop.
 async function showFuelExpenseReminder(wsId) {
   const w = allWorkshops.find(x => x.id === wsId);
   if (!w) return;
+  // Prevent duplicates — silently skip
+  if (await hasExpenseForWorkshop(wsId, 'fuel')) return;
   const wsName = w.celebrant || w.customerName || '';
   const city = w.city || '';
   const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null;
@@ -7179,6 +7196,11 @@ window.showFuelExpenseReminder = showFuelExpenseReminder;
 async function addFuelExpenseFromReminder(wsId, wsName, city, dateStr, km) {
   const amount = parseFloat(document.getElementById('fuel-reminder-amount')?.value) || 0;
   if (amount <= 0) { showToast('יש להזין סכום'); return; }
+  // Final duplicate guard — prevents race conditions on rapid double-click
+  if (await hasExpenseForWorkshop(wsId, 'fuel')) {
+    showToast('הוצאת דלק כבר קיימת לסדנא הזו');
+    return;
+  }
   const method = document.getElementById('fuel-reminder-method')?.value || 'cash';
   const customNotes = document.getElementById('fuel-reminder-notes')?.value.trim() || '';
   const kmStr = (km && km !== null) ? `דלק ${km} ק"מ × ${FUEL_RATE}₪ — ${city}` : `דלק — ${city}`;
@@ -7198,6 +7220,11 @@ window.addFuelExpenseFromReminder = addFuelExpenseFromReminder;
 
 async function addStaffExpenseFromReminder(wsId, wsName, dateStr) {
   const amount = parseFloat(document.getElementById('staff-reminder-amount')?.value) || 150;
+  // Final duplicate guard — prevents race conditions on rapid double-click
+  if (await hasExpenseForWorkshop(wsId, 'staff')) {
+    showToast('הוצאת עובדת כבר קיימת לסדנא הזו');
+    return;
+  }
   const method = document.getElementById('staff-reminder-method')?.value || 'cash';
   const customNotes = document.getElementById('staff-reminder-notes')?.value.trim() || '';
   const notes = customNotes ? `תשלום לעובדת — ${wsName} — ${customNotes}` : `תשלום לעובדת — ${wsName}`;
@@ -11215,9 +11242,12 @@ const GRAY = '#5a5a5a';
 // Pre-load fonts for canvas
 async function preloadInviteFonts() {
   try {
+    await document.fonts.load('300 48px Assistant');
     await document.fonts.load('700 48px Heebo');
-    await document.fonts.load('700 48px Karantina');
-    await document.fonts.load('700 48px Fredoka');
+    await document.fonts.load('400 48px "Frank Ruhl Libre"');
+    await document.fonts.load('500 48px "Frank Ruhl Libre"');
+    await document.fonts.load('700 48px "Frank Ruhl Libre"');
+    await document.fonts.load('400 160px "Gveret Levin"');
   } catch(e) { console.log('Font preload:', e); }
 }
 preloadInviteFonts();
@@ -11270,52 +11300,52 @@ async function generateInvitation(w) {
   // Ensure fonts are ready
   await document.fonts.ready;
 
-  // ── "הינך מוזמנת לחגוג איתנו את" ──
-  ctx.fillStyle = GRAY;
-  ctx.font = '600 58px Heebo, sans-serif';
+  // ── "הינך מוזמנת לחגוג איתנו את" (The Seasons → Frank Ruhl Libre) ──
+  ctx.fillStyle = PINK;
+  ctx.font = '500 58px "Frank Ruhl Libre", serif';
   ctx.fillText('הינך מוזמנת לחגוג איתנו את', cx, 400);
 
   // ── Occasion ──
-  ctx.font = '600 58px Heebo, sans-serif';
+  ctx.font = '500 58px "Frank Ruhl Libre", serif';
   ctx.fillText(occasion + ' של', cx, 475);
 
-  // ── Celebrant name (large, pink, rounded) ──
+  // ── Celebrant name (Afarsek → Gveret Levin, Hebrew handwriting) ──
   ctx.fillStyle = PINK;
-  ctx.font = '700 160px Fredoka, sans-serif';
-  ctx.fillText(celebrant, cx, 650);
+  ctx.font = '400 200px "Gveret Levin", cursive';
+  ctx.fillText(celebrant, cx, 680);
 
-  // ── Fixed block ──
-  ctx.fillStyle = GRAY;
-  ctx.font = '700 48px Heebo, sans-serif';
-  ctx.fillText('בתוכנית- סדנת הצ׳ארמים', cx, 755);
-  ctx.fillText('של', cx, 813);
-
+  // ── Fixed block (Choco → tracked Assistant, slightly bolder) ──
   ctx.fillStyle = PINK;
-  ctx.font = '700 62px Heebo, sans-serif';
-  ctx.letterSpacing = '8px';
-  ctx.fillText('C H A R M I N G', cx, 895);
+  ctx.font = '600 46px Assistant, sans-serif';
+  ctx.letterSpacing = '6px';
+  ctx.fillText('בתוכנית- סדנת הצ׳ארמים', cx, 770);
+  ctx.fillText('של', cx, 833);
+
+  ctx.font = '600 56px Assistant, sans-serif';
+  ctx.letterSpacing = '12px';
+  ctx.fillText('C H A R M I N G', cx, 905);
+
+  ctx.font = '600 46px Assistant, sans-serif';
+  ctx.letterSpacing = '6px';
+  ctx.fillText('נייצר ביחד תכשיטי', cx, 985);
+  ctx.fillText('צ׳ארמים בהתאמה אישית!', cx, 1043);
   ctx.letterSpacing = '0px';
 
-  ctx.fillStyle = GRAY;
-  ctx.font = '700 48px Heebo, sans-serif';
-  ctx.fillText('נייצר ביחד תכשיטי', cx, 975);
-  ctx.fillText('צ׳ארמים בהתאמה אישית!', cx, 1033);
-
-  // ── Address ──
+  // ── Address (The Seasons → Frank Ruhl Libre) ──
   ctx.fillStyle = PINK;
-  ctx.font = '600 52px Heebo, sans-serif';
-  ctx.fillText('כתובת: ' + city, cx, 1150);
+  ctx.font = '500 52px "Frank Ruhl Libre", serif';
+  ctx.fillText('כתובת: ' + city, cx, 1170);
 
   // ── Date ──
-  ctx.font = '700 56px Heebo, sans-serif';
-  ctx.fillText('תאריך : ' + dateStr, cx, 1260);
+  ctx.font = '500 56px "Frank Ruhl Libre", serif';
+  ctx.fillText('תאריך : ' + dateStr, cx, 1280);
 
   // ── Time ──
-  ctx.fillText('שעה: ' + timeStr, cx, 1340);
+  ctx.fillText('שעה: ' + timeStr, cx, 1360);
 
-  // ── "מצפה לראותך :)" ──
-  ctx.font = '700 68px Fredoka, sans-serif';
-  ctx.fillText('מצפה לראותך :)', cx, 1470);
+  // ── "מצפה לראותך :)" (Afarsek → Gveret Levin, Hebrew handwriting) ──
+  ctx.font = '400 95px "Gveret Levin", cursive';
+  ctx.fillText('מצפה לראותך :)', cx, 1485);
 
   // Show modal
   const modal = document.getElementById('invite-modal');
