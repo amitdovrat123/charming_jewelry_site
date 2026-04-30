@@ -895,6 +895,12 @@
           </div>
         </div>
 
+        <!-- Search bar -->
+        <div id="ws-search-wrap" class="bg-white border border-[#f0dfc0] rounded-2xl px-4 py-3 shadow-sm">
+          <input id="ws-search" type="search" placeholder="חיפוש לפי שם החוגג / איש קשר / טלפון / עיר..."
+            class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:border-[#d4a373] transition-colors" />
+        </div>
+
         <!-- CRM Kanban View -->
         <div id="ws-crm-view" class="space-y-4">
           <div class="grid grid-cols-1 gap-4 items-start" id="crm-board">
@@ -7102,6 +7108,23 @@ document.addEventListener('click', e => {
 
 // ── CRM Kanban View ─────────────────────────────────────────────
 let wsCurrentView = 'crm';
+let wsSearchQ = '';
+function wsMatchesSearch(w) {
+  if (!wsSearchQ) return true;
+  return ((w.celebrant||'') + ' ' + (w.customerName||'') + ' ' + (w.phone||'') + ' ' + (w.city||'')).toLowerCase().includes(wsSearchQ);
+}
+function wsLeadMatchesSearch(i) {
+  if (!wsSearchQ) return true;
+  return ((i.name||'') + ' ' + (i.phone||'') + ' ' + (i.city||'')).toLowerCase().includes(wsSearchQ);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('ws-search');
+  if (!input) return;
+  input.addEventListener('input', e => {
+    wsSearchQ = e.target.value.trim().toLowerCase();
+    if (wsCurrentView === 'crm') renderCrmBoard();
+  });
+});
 function switchWsView(view) {
   wsCurrentView = view;
   sessionStorage.setItem('charming_ws_view', view);
@@ -7109,6 +7132,8 @@ function switchWsView(view) {
   document.getElementById('ws-crm-view').style.display = view === 'crm' ? '' : 'none';
   const filterBtn = document.getElementById('ws-filter-btn');
   if (filterBtn) filterBtn.parentElement.style.display = view === 'crm' ? '' : 'none';
+  const searchWrap = document.getElementById('ws-search-wrap');
+  if (searchWrap) searchWrap.style.display = view === 'crm' ? '' : 'none';
   document.getElementById('ws-view-list').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
     (view === 'list' ? 'bg-white text-[#d4a373] shadow-sm' : 'text-gray-400');
   document.getElementById('ws-view-crm').className = 'ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ' +
@@ -7153,12 +7178,19 @@ function renderCrmBoard() {
   pending.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
   archive.sort((a,b) => ((wsDate(b)?.getTime()||0) - (wsDate(a)?.getTime()||0)));
 
+  // Apply search filter
+  const fLeads = leads.filter(wsLeadMatchesSearch);
+  const fDrafts = drafts.filter(wsMatchesSearch);
+  const fConfirmed = confirmed.filter(wsMatchesSearch);
+  const fPending = pending.filter(wsMatchesSearch);
+  const fArchive = archive.filter(wsMatchesSearch);
+
   // Counts
   const el = i => document.getElementById(i);
-  if (el('crm-count-leads')) el('crm-count-leads').textContent = leads.length;
-  if (el('crm-count-draft')) el('crm-count-draft').textContent = drafts.length;
-  if (el('crm-count-confirmed')) el('crm-count-confirmed').textContent = confirmed.length;
-  if (el('crm-count-pending')) el('crm-count-pending').textContent = pending.length;
+  if (el('crm-count-leads')) el('crm-count-leads').textContent = fLeads.length;
+  if (el('crm-count-draft')) el('crm-count-draft').textContent = fDrafts.length;
+  if (el('crm-count-confirmed')) el('crm-count-confirmed').textContent = fConfirmed.length;
+  if (el('crm-count-pending')) el('crm-count-pending').textContent = fPending.length;
 
   // Lead card (from inquiries)
   function leadCard(inq) {
@@ -7235,13 +7267,13 @@ function renderCrmBoard() {
       if (arrow) arrow.classList.toggle('rotate-180', items.length > 0);
     }
   }
-  fillCol('crm-col-leads', leads, i => leadCard(i));
-  fillCol('crm-col-draft', drafts, w => crmCard(w));
-  fillCol('crm-col-confirmed', confirmed, w => crmCard(w));
-  fillCol('crm-col-pending', pending, w => crmCard(w));
-  if (el('crm-count-archive')) el('crm-count-archive').textContent = archive.length;
+  fillCol('crm-col-leads', fLeads, i => leadCard(i));
+  fillCol('crm-col-draft', fDrafts, w => crmCard(w));
+  fillCol('crm-col-confirmed', fConfirmed, w => crmCard(w));
+  fillCol('crm-col-pending', fPending, w => crmCard(w));
+  if (el('crm-count-archive')) el('crm-count-archive').textContent = fArchive.length;
   const archCol = el('crm-col-archive');
-  if (archCol) archCol.innerHTML = archive.slice(0,15).map(w => crmCard(w, {isArchive:true})).join('') || '';
+  if (archCol) archCol.innerHTML = (wsSearchQ ? fArchive : fArchive.slice(0,15)).map(w => crmCard(w, {isArchive:true})).join('') || '';
   applyWsFilters();
 }
 window.renderCrmBoard = renderCrmBoard;
