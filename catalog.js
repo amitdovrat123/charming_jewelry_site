@@ -993,7 +993,23 @@ function renderProductView() {
         if (e.key === 'Escape' && guideOverlay.classList.contains('is-open')) closeGuide();
       });
     }
+  }
 
+  // Wishlist heart (works regardless of OOS state — favorites can include sold-out items)
+  const favBtn = el.querySelector('#pv-fav-btn');
+  if (favBtn && window.WishlistAPI) {
+    favBtn.addEventListener('click', () => {
+      window.WishlistAPI.toggle({
+        id,
+        name:     localName(data),
+        price:    sellPrice(data),
+        imageUrl: pvImages[0] || '',
+      });
+      favBtn.classList.toggle('is-fav', window.WishlistAPI.isInWishlist(id));
+    });
+  }
+
+  if (!oos) {
     const requireSize = () => {
       if (needsSize && !pvSelectedSize) {
         showToast(t('pv_size_required','יש לבחור מידה'));
