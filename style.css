@@ -1355,6 +1355,11 @@ ul { list-style: none; }
   /* --- WhatsApp FAB mobile --- */
   .whatsapp-fab { width: 54px; height: 54px; bottom: 20px; right: 16px; }
   .whatsapp-fab svg { width: 26px; height: 26px; }
+
+  /* --- Footer brand: center on mobile --- */
+  .footer-brand { text-align: center; }
+  .footer-brand p { max-width: 100%; margin-right: auto; margin-left: auto; }
+  .footer-social { justify-content: center; }
 }
 
 @media (max-width: 480px) {
