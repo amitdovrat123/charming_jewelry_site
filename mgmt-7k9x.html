@@ -10012,12 +10012,12 @@ function renderBiStores() {
     html += '</div>';
   }
 
-  // Stock value + summary KPIs
-  const productsWithStock = allProducts.filter(p => (p.stockCount ?? p.stock) !== null && (p.stockCount ?? p.stock) !== undefined);
+  // Stock value + summary KPIs (כולל מלאי לפי מידות)
+  const productsWithStock = allProducts.filter(p => productStockTotal(p) !== null);
   let totalStockValue = 0;
   let totalStockUnits = 0;
   productsWithStock.forEach(p => {
-    const stock = p.stockCount ?? p.stock ?? 0;
+    const stock = productStockTotal(p) ?? 0;
     const price = p.priceSale || p.priceOriginal || 0;
     totalStockValue += stock * price;
     totalStockUnits += stock;
@@ -10027,7 +10027,7 @@ function renderBiStores() {
   html += _storeKpi('סה"כ מוצרים', allProducts.length, '');
   html += _storeKpi('יח\' במלאי', totalStockUnits, '');
   html += _storeKpi('שווי מלאי', totalStockValue.toLocaleString('he-IL') + ' \u20AA', '');
-  html += _storeKpi('אזל מהמלאי', allProducts.filter(p => (p.stockCount ?? p.stock) === 0).length, '');
+  html += _storeKpi('אזל מהמלאי', allProducts.filter(p => productIsOOS(p)).length, '');
   html += '</div>';
 
   // Slow movers — products not sold in last 30 days
@@ -10041,8 +10041,8 @@ function renderBiStores() {
     }
   });
   const slowMovers = allProducts.filter(p => {
-    const stock = p.stockCount ?? p.stock;
-    return stock !== null && stock > 0 && !recentlySoldNames.has(p.name);
+    const total = productStockTotal(p);
+    return total !== null && total > 0 && !recentlySoldNames.has(p.name);
   });
 
   if (slowMovers.length > 0) {
@@ -10050,7 +10050,7 @@ function renderBiStores() {
     html += '<p class="text-sm font-bold text-amber-700 mb-2">&#128034; מוצרים איטיים — לא נמכרו ב-30 יום האחרונים (' + slowMovers.length + ')</p>';
     html += '<div class="space-y-1.5">';
     slowMovers.slice(0, 10).forEach(p => {
-      const stock = p.stockCount ?? p.stock ?? 0;
+      const stock = productStockTotal(p) ?? 0;
       const price = p.priceSale || p.priceOriginal || 0;
       html += '<div class="flex items-center justify-between text-sm">';
       html += '<span class="text-gray-700 font-medium truncate flex-1">' + esc(p.name) + '</span>';
@@ -10516,11 +10516,11 @@ function _buildBiDataSummary() {
   });
   const peakDay = dayNames[days.indexOf(Math.max(...days))];
 
-  // Low stock
+  // Low stock (מודע למידות)
   const lowStock = allProducts.filter(p => {
-    const s = p.stockCount ?? p.stock;
-    return s !== null && s !== undefined && s < 5;
-  }).map(p => ({ name: p.name, stock: p.stockCount ?? p.stock }));
+    const total = productStockTotal(p);
+    return total !== null && total < 5;
+  }).map(p => ({ name: p.name, stock: productStockTotal(p) }));
 
   // Conversion rate
   const conversionRate = sessions > 0 ? ((rangeOrders.length / sessions) * 100).toFixed(1) : 0;
