@@ -7252,39 +7252,74 @@ function saveRouteCache() {
 // Hydrate CITY_DISTANCE_KM from cache so card displays work after reload
 Object.keys(routeCache).forEach(k => { CITY_DISTANCE_KM[k] = routeCache[k].km; });
 
-// Live route: Nominatim geocode → OSRM route. Tries multiple query variants
-// before giving up, so transient empty results don't lock out known cities.
+// Haversine straight-line distance in km
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Geocoding: try Photon (komoot) primary, Nominatim fallback. Returns {lat,lon} or null.
+async function geocodeCity(city) {
+  const variants = [city, city + ', Israel', city + ', ישראל'];
+  for (const q of variants) {
+    try {
+      const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5`);
+      if (!r.ok) continue;
+      const d = await r.json();
+      const hit = (d.features || []).find(f => f.properties && f.properties.countrycode === 'IL') || (d.features || [])[0];
+      if (hit && hit.geometry && Array.isArray(hit.geometry.coordinates)) {
+        const [lon, lat] = hit.geometry.coordinates;
+        return { lat, lon };
+      }
+    } catch(e) { /* try next */ }
+  }
+  for (const q of variants) {
+    try {
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=il`,
+        { headers: { 'Accept-Language': 'he' } }
+      );
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (d && d.length) return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) };
+    } catch(e) { /* try next */ }
+  }
+  return null;
+}
+
+// Live route: geocode → OSRM (preferred) → haversine fallback when OSRM is down.
 async function getRouteInfo(city) {
   if (routeCache[city]) return routeCache[city];
   const cached = Object.keys(routeCache).find(k => city.includes(k) || k.includes(city));
   if (cached) return routeCache[cached];
 
-  // Try several query variants — Nominatim sometimes misses the first form
-  const variants = [
-    city + ', ישראל',
-    city,
-    city + ', Israel'
-  ];
-  let geoHit = null;
-  for (const q of variants) {
-    try {
-      const geoRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=il`,
-        { headers: { 'Accept-Language': 'he' } }
-      );
-      if (!geoRes.ok) continue;
-      const geoData = await geoRes.json();
-      if (geoData && geoData.length) { geoHit = geoData[0]; break; }
-    } catch(e) { /* try next variant */ }
+  const geo = await geocodeCity(city);
+  if (!geo) return null;
+
+  let info = null;
+  try {
+    const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${ORIGIN_LNG},${ORIGIN_LAT};${geo.lon},${geo.lat}?overview=false`);
+    if (routeRes.ok) {
+      const routeData = await routeRes.json();
+      if (routeData.routes && routeData.routes.length) {
+        const r = routeData.routes[0];
+        info = { km: Math.round(r.distance / 1000), baseMinutes: Math.round(r.duration / 60) };
+      }
+    }
+  } catch(e) { /* fall through to haversine */ }
+
+  // Fallback when OSRM is down: straight-line × 1.3 detour, 75 km/h avg
+  if (!info) {
+    const straightKm = haversineKm(ORIGIN_LAT, ORIGIN_LNG, geo.lat, geo.lon);
+    const km = Math.round(straightKm * 1.3);
+    const baseMinutes = Math.round((km / 75) * 60);
+    info = { km, baseMinutes };
   }
-  if (!geoHit) return null;
 
-  const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${ORIGIN_LNG},${ORIGIN_LAT};${geoHit.lon},${geoHit.lat}?overview=false`);
-  const routeData = await routeRes.json();
-  if (!routeData.routes || !routeData.routes.length) return null;
-
-  const r = routeData.routes[0];
-  const info = { km: Math.round(r.distance / 1000), baseMinutes: Math.round(r.duration / 60) };
   routeCache[city] = info;
   CITY_DISTANCE_KM[city] = info.km;
   saveRouteCache();

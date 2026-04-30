@@ -248,8 +248,33 @@ function render() {
       ? filtered.map(cardHTML).join('')
       : `<div class="sp-empty"><p>${t('shop_no_results', 'לא נמצאו מוצרים התואמים את הסינון שנבחר')}</p><button class="btn btn-outline" id="reset-filters-btn">${t('shop_reset_filters', 'איפוס פילטרים')}</button></div>`;
 
+  // Breadcrumb showing the full path back to home — every step clickable
+  const crumbs = [
+    { label: t('nav_home', 'דף הבית'), href: 'index.html' },
+    { label: t('nav_shop', 'החנות'),    href: 'shop.html' },
+  ];
+  if (filterCat) {
+    crumbs.push({ label: localCat(filterCat), href: `shop.html?cat=${encodeURIComponent(filterCat)}` });
+  }
+  if (filterSubCat) {
+    crumbs.push({ label: filterSubCat, href: `shop.html?cat=${encodeURIComponent(filterCat)}&subCat=${encodeURIComponent(filterSubCat)}` });
+  }
+  const breadcrumbHtml = `
+    <nav class="pv-breadcrumb" aria-label="breadcrumb">
+      ${crumbs.map((c, i) => {
+        const sep    = i === 0 ? '' : '<span class="pv-breadcrumb-sep">/</span>';
+        const isLast = i === crumbs.length - 1;
+        const item   = isLast
+          ? `<span class="pv-breadcrumb-current">${esc(c.label)}</span>`
+          : `<a href="${c.href}">${esc(c.label)}</a>`;
+        return sep + item;
+      }).join('')}
+    </nav>`;
+
   el.innerHTML = `
     <div class="container">
+
+      ${breadcrumbHtml}
 
       <div class="sp-hero">
         <h1 class="sp-title">${t('shop_hero_title_js', 'החנות שלנו')}</h1>
