@@ -40,17 +40,18 @@ if (hamburger && navLinks) {
 
   backdrop.addEventListener('click', closeDrawer);
 
-  navLinks.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeDrawer);
+  // Event delegation — also catches links added dynamically by drawer-subcat.js
+  navLinks.addEventListener('click', (e) => {
+    if (e.target.closest('a')) closeDrawer();
   });
 
-  // Accordion expand/collapse for sub-categories inside the drawer
-  navLinks.querySelectorAll('.nav-expand-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', String(!isExpanded));
-      btn.parentElement.classList.toggle('is-expanded', !isExpanded);
-    });
+  // Accordion expand/collapse — delegated so it works regardless of timing
+  navLinks.addEventListener('click', (e) => {
+    const btn = e.target.closest('.nav-expand-btn');
+    if (!btn) return;
+    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!isExpanded));
+    btn.parentElement.classList.toggle('is-expanded', !isExpanded);
   });
 
   document.addEventListener('keydown', (e) => {

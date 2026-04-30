@@ -44,7 +44,8 @@
       </div>
       <nav>
         <ul class="nav-links">
-          <li class="nav-lang-item">
+          <li class="nav-top-row">
+            <span id="auth-nav-item" class="nav-auth-slot"><a href="#" class="auth-nav-link" id="auth-nav-btn" data-i18n="nav_login">התחברות / הרשמה</a></span>
             <div class="lang-dropdown"><button class="lang-dropdown-btn" aria-label="שפה">Lang</button><div class="lang-dropdown-menu"><button data-lang="he">עברית</button><button data-lang="en">English</button></div></div>
           </li>
           <li class="nav-item-link"><a href="workshops.html" data-i18n="nav_workshops">סדנאות</a></li>
@@ -102,7 +103,6 @@
           </li>
           <li class="nav-item-link nav-link-accent"><a href="shop.html?sale=1">מבצעים</a></li>
           <li class="nav-item-link"><a href="workshops.html#signup" data-i18n="nav_contact">צור קשר</a></li>
-          <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn" data-i18n="nav_login">התחברות / הרשמה</a></li>
         </ul>
       </nav>
     </div>
@@ -556,6 +556,7 @@
   <script src="lang.js"></script>
   <script src="main.js"></script>
   <script src="nav.js"></script>
+  <script type="module" src="drawer-subcat.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="tracker.js"></script>
   <script type="module" src="accessibility.js"></script>

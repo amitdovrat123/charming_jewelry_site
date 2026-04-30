@@ -752,27 +752,25 @@ function renderProductView() {
   if (isAdjRing) {
     ringHtml = `<div class="pv-ring-note">${t('pv_ring_adjustable','✦ טבעת מתכווננת — ניתנת להגדלה והקטנה לגודל המתאים לך')}</div>`;
   } else if (needsSize) {
-    const pills = ringSizes.map(s => {
-      const label  = esc(String(s.size));
-      const stock  = s.stock;
-      const isOut  = stock === 0;
-      const stockTxt = isOut
-        ? t('pv_size_out','אזל')
-        : (stock === null || stock === undefined)
-          ? t('pv_size_in','במלאי')
-          : `${stock} ${t('pv_size_left','במלאי')}`;
-      return `<button type="button" class="pv-size-pill${isOut ? ' pv-size-pill--out' : ''}" data-pv-size="${label}" ${isOut ? 'disabled' : ''}>
-                <span class="pv-size-pill-label">${label}</span>
-                <span class="pv-size-pill-stock">${stockTxt}</span>
-              </button>`;
+    const options = ringSizes.map(s => {
+      const label = esc(String(s.size));
+      const isOut = s.stock === 0;
+      const text  = isOut
+        ? `${label} — ${t('pv_size_out','אזל במלאי')}`
+        : `${t('pv_size_label_only','מידה')} ${label}`;
+      return `<option value="${label}" ${isOut ? 'disabled' : ''}>${text}</option>`;
     }).join('');
     ringHtml = `
       <div class="pv-sizes" id="pv-sizes">
-        <div class="pv-sizes-header">
-          <span class="pv-sizes-title">${t('pv_choose_size','בחרי מידה')}</span>
-          <span class="pv-sizes-help">${t('pv_size_help','* יש לבחור מידה לפני הוספה לסל')}</span>
+        <label class="pv-sizes-title" for="pv-size-select">${t('pv_choose_size','בחרי מידה')}</label>
+        <div class="pv-size-select-wrap">
+          <select id="pv-size-select" class="pv-size-select">
+            <option value="" disabled selected>${t('pv_size_placeholder','— בחרי מידה —')}</option>
+            ${options}
+          </select>
+          <span class="pv-size-select-arrow" aria-hidden="true">▾</span>
         </div>
-        <div class="pv-sizes-list">${pills}</div>
+        <span class="pv-sizes-help">${t('pv_size_help','* יש לבחור מידה לפני הוספה לסל')}</span>
       </div>`;
   }
 
@@ -827,15 +825,13 @@ function renderProductView() {
   });
 
   if (!oos) {
-    // Ring size pill selection
-    el.querySelectorAll('[data-pv-size]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.disabled) return;
-        pvSelectedSize = btn.dataset.pvSize;
-        el.querySelectorAll('[data-pv-size]').forEach(b =>
-          b.classList.toggle('pv-size-pill--active', b.dataset.pvSize === pvSelectedSize));
+    // Ring size dropdown
+    const sizeSelect = el.querySelector('#pv-size-select');
+    if (sizeSelect) {
+      sizeSelect.addEventListener('change', () => {
+        pvSelectedSize = sizeSelect.value || '';
       });
-    });
+    }
 
     const requireSize = () => {
       if (needsSize && !pvSelectedSize) {

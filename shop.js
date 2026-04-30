@@ -26,6 +26,7 @@ let filterFeatured = _p.has('featured');
 let filterSearch   = '';
 let filterPriceMax = parseInt(_p.get('price') || '0') || 0;
 let filterOnSale   = _p.has('sale');
+let filterSubCat   = _p.get('subCat') || '';
 
 // ── Cart ───────────────────────────────────────────────────────
 function loadCart() {
@@ -181,6 +182,7 @@ function render() {
   // Apply all active filters
   let filtered = published;
   if (filterCat)      filtered = filtered.filter(p => p.data.category === filterCat);
+  if (filterSubCat)   filtered = filtered.filter(p => p.data.collection === filterSubCat);
   if (filterColor)    filtered = filtered.filter(p => p.data.color    === filterColor);
   if (filterFeatured) filtered = filtered.filter(p => p.data.isFeatured);
   if (filterSearch) {

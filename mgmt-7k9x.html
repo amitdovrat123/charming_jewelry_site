@@ -2072,11 +2072,16 @@ Charming by Vik 💛</textarea>
           </select>
         </div>
         <div>
-          <label class="lbl">אוסף</label>
-          <select id="p-col" class="inp">
-            <option value="">—</option>
-            <option>קיץ 2025</option><option>חגים</option><option>יומיום</option><option>מתנות</option>
-          </select>
+          <label class="lbl">תת-קטגוריה</label>
+          <input type="text" id="p-col" class="inp" list="subcategory-suggestions" placeholder="לדוגמה: טבעות מתכוונות, קולקציית קיץ" />
+          <datalist id="subcategory-suggestions">
+            <option value="טבעות מתכוונות"></option>
+            <option value="טבעות לפי מידה"></option>
+            <option value="קולקציית קיץ"></option>
+            <option value="צ'ארמס"></option>
+            <option value="מתנות"></option>
+            <option value="חדשים"></option>
+          </datalist>
         </div>
         <div>
           <label class="lbl">חומר</label>
@@ -2474,6 +2479,7 @@ import {
 import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc, setDoc,
   doc, getDoc, onSnapshot, query, orderBy, where, serverTimestamp, getDocs, Timestamp, writeBatch,
+  arrayUnion, arrayRemove,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── Firebase Config (public client-side key — protected by Firestore Rules) ──
@@ -6386,24 +6392,90 @@ function sendWorkshopWhatsApp() {
 }
 window.sendWorkshopWhatsApp = sendWorkshopWhatsApp;
 
+// Decide which payment-status mode applies right now.
+// Drives which templates show in the picker:
+//   - 'always' → both states see it
+//   - 'unpaid' → only when advance was not paid yet
+//   - 'paid'   → only when advance was paid (workshop confirmed)
+function getWsPaymentMode(workshop) {
+  if (workshop) {
+    return workshop.payment?.advancePaid ? 'paid' : 'unpaid';
+  }
+  // Form context
+  const status = document.getElementById('ws-status')?.value;
+  if (status === 'draft') return 'unpaid';
+  // Default: confirmed → check advance amount field as a hint
+  return 'paid';
+}
+
+// Render the WhatsApp picker buttons dynamically based on current payment mode.
+// onPick is called with the template id when the user picks one;
+// it should handle the actual send (which differs between form & wsCard contexts).
+function renderWaPickerOptions(mode, phone, onPick) {
+  const list = document.getElementById('wsc-wa-options-list');
+  if (!list) return;
+
+  // Sort: explicit `order` first, then by name.
+  const tpls = (allWaTemplates || [])
+    .filter(t => {
+      const trig = t.trigger || 'always';
+      return trig === 'always' || trig === mode;
+    })
+    .sort((a,b) => (a.order||999) - (b.order||999) || (a.name||'').localeCompare(b.name||'','he'));
+
+  const empty = !tpls.length;
+  const triggerHint = (trig) => {
+    if (!trig || trig === 'always') return 'מוצג תמיד';
+    if (trig === 'unpaid')          return 'מוצג כשמקדמה לא שולמה';
+    if (trig === 'paid')            return 'מוצג כשמקדמה שולמה';
+    return trig;
+  };
+
+  let html = '';
+  if (empty) {
+    html += `<p class="text-gray-300 text-xs text-center py-4">אין הודעות מוכנות שתואמות למצב הסדנא.<br/>אפשר להוסיף ב"ניהול הודעות מוכנות" למטה.</p>`;
+  } else {
+    html += tpls.map(tpl => `
+      <button data-tpl-id="${tpl.id}" class="wsc-wa-tpl-btn w-full text-right bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors">
+        <p class="text-sm font-bold text-gray-800">${esc(tpl.name)}</p>
+        <p class="text-[10px] text-gray-400 mt-0.5">${esc(triggerHint(tpl.trigger))}</p>
+      </button>
+    `).join('');
+  }
+
+  // Always provide an "empty WhatsApp" fallback at the bottom.
+  html += `
+    <button id="wsc-wa-empty" class="w-full text-right bg-white border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-xl px-4 py-3 transition-colors">
+      <p class="text-sm font-bold text-gray-800">פתח WhatsApp ריק</p>
+      <p class="text-[10px] text-gray-400 mt-0.5">פתיחת צ'אט ללא הודעה מוכנה</p>
+    </button>`;
+
+  list.innerHTML = html;
+
+  list.querySelectorAll('.wsc-wa-tpl-btn').forEach(btn => {
+    btn.onclick = () => onPick(btn.dataset.tplId);
+  });
+  const emptyBtn = document.getElementById('wsc-wa-empty');
+  if (emptyBtn) {
+    emptyBtn.onclick = () => {
+      document.getElementById('wsc-wa-options').setAttribute('data-v','');
+      const waNum = phone.startsWith('0') ? '972' + phone.slice(1) : phone;
+      window.open('https://wa.me/' + waNum, '_blank');
+    };
+  }
+}
+
 function openFormWaOptions() {
   const phone = document.getElementById('ws-phone').value.trim().replace(/[-\s]/g,'');
   if (!phone) { document.getElementById('ws-err').textContent = 'יש להזין טלפון.'; return; }
-  const waNum = phone.startsWith('0') ? '972' + phone.slice(1) : phone;
   const waOpts = document.getElementById('wsc-wa-options');
+  const mode = getWsPaymentMode(null);
+  renderWaPickerOptions(mode, phone, (tplId) => {
+    waOpts.setAttribute('data-v','');
+    sendWaTplToWorkshop(tplId);
+  });
   waOpts?.removeAttribute('data-v');
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
-  // Wire up options for form context
-  document.getElementById('wsc-wa-summary').onclick = () => { waOpts.setAttribute('data-v',''); sendWorkshopWhatsApp(); };
-  document.getElementById('wsc-wa-info').onclick = () => {
-    waOpts.setAttribute('data-v','');
-    const infoMsg = `היי! אני ויקטוריה, ואני כאן לכל שאלה 🥰\nמקווה שהכל בסדר אצלכן לאור המצב🙏\nאז מה זאת בעצם סדנת Charming?✨\n\nאנחנו מביאות עד אליכן הביתה את חנות הצ'ארמים המושלמת! וכל מה שתצרכו - עמדות עבודה מעוצבות, חומרים בסטנדרט הגבוה ביותר ואווירה של יצירה ובוטיק.\nהסדנה אורכת כשעתיים עד שעתיים וחצי ומתאימה לקבוצות של עד 30 משתתפות החל מגיל 10 😊\n\nאז איך הערב שלנו נראה ?\n\n✅ התחרות של Charming: אנחנו מתחילות בתחרות "נכון או לא נכון" בין שתי קבוצות בנושא - תכשיטים.\n\n✅ נלמד איך לדעת מה יותר מחמיא לכל אחת - תכשיטי כסף או תכשיטי זהב לפי כמה שיטות🌟\n\nואז נעבור להרכבת התכשיט הייחודי של כל אחת:\nאנחנו דואגות לכן לחומרים הכי הכי איכותיים שיש !\n\n✅ בחירה מבין 3 סוגי שרשראות איכותיות מפלדת אל-חלד בציפוי כסף וזהב (לא מחליד, היפואלרגני)✨\n\n✅ בחירה אישית של עד 5 צ׳ארמים מהמבחר הענק שלנו גם כמובן מפלדת אל חלד.\nבתוספת של 20₪ למשתתפת ניתן להגדיל את כמות הצ׳ארמים ל-7 צ׳ארמים (ניתן להוסיף את השדרוג רק במסלול הראשון)\n\nהמשתתפות ילמדו איך מרכיבים תכשיט מההתחלה ועד הסוף – מהסוגר ועד התליון, והכול בידיים שלהן!\n\nאנחנו מגיעות לכל הארץ (מעבר לאזור המרכז יהיה תוספת תשלום על ההגעה)\n\nשימי ❤️ שבכל מסלול שתבחרי המשתתפות מקבלות גם טבעת לבחירה במתנה💍\n\nלאור המצב החלטנו לפנק אתכן ב-15% הנחה על כל המסלולים שלנו 💕, אנחנו עדיין עובדות ופעילות ונעשה הכל בשביל לשמח את הילדות בימים קשים אלו מגיע להן כמה שעות של כיף ויצירה ולשכוח מהכל❤️\nההנחה תקפה עד 31.3.2026\nאנחנו זמינות גם בטלפון לכן אם תרצי לשמוע את כל הפרטים בשיחה טלפונית תתקשרי בשמחה 😊\n\nמידע נוסף הכולל את המחירון שלנו מצורף בקישור הזה:\n\nhttps://charmingbyviktoriya.my.canva.site/by-viktoriya`;
-    window.open('https://wa.me/' + waNum + '?text=' + encodeURIComponent(infoMsg), '_blank');
-  };
-  document.getElementById('wsc-wa-empty').onclick = () => {
-    waOpts.setAttribute('data-v','');
-    window.open('https://wa.me/' + waNum, '_blank');
-  };
 }
 window.openFormWaOptions = openFormWaOptions;
 
@@ -7039,20 +7111,23 @@ function openWsCard(id) {
   if (w.notes){el('wsc-notes-section').style.display='';el('wsc-notes').textContent=w.notes;}else{el('wsc-notes-section').style.display='none';}
 
   el('wsc-edit-btn').onclick=()=>{closeWsCard();showTab('workshops');setTimeout(()=>openWorkshopModal(id),300);};
-  // WhatsApp options modal
+  // WhatsApp options modal — dynamic templates from Settings → הודעות WhatsApp
   const waOpts = el('wsc-wa-options');
-  const closeWaOpts = () => waOpts?.setAttribute('data-v','');
-  const waNum = wp.startsWith('0') ? '972'+wp.slice(1) : wp;
-  el('wsc-wa-btn').onclick=()=>{ waOpts?.removeAttribute('data-v'); if(typeof lucide!=='undefined')setTimeout(()=>lucide.createIcons(),0); };
-  el('wsc-wa-summary').onclick=()=>{closeWaOpts();closeWsCard();showTab('workshops');setTimeout(()=>{openWorkshopModal(id);setTimeout(()=>sendWorkshopWhatsApp(),200);},300);};
-  el('wsc-wa-info').onclick=()=>{
-    closeWaOpts();
-    const infoMsg = `היי! אני ויקטוריה, ואני כאן לכל שאלה 🥰\nמקווה שהכל בסדר אצלכן לאור המצב🙏\nאז מה זאת בעצם סדנת Charming?✨\n\nאנחנו מביאות עד אליכן הביתה את חנות הצ'ארמים המושלמת! וכל מה שתצרכו - עמדות עבודה מעוצבות, חומרים בסטנדרט הגבוה ביותר ואווירה של יצירה ובוטיק.\nהסדנה אורכת כשעתיים עד שעתיים וחצי ומתאימה לקבוצות של עד 30 משתתפות החל מגיל 10 😊\n\nאז איך הערב שלנו נראה ?\n\n✅ התחרות של Charming: אנחנו מתחילות בתחרות "נכון או לא נכון" בין שתי קבוצות בנושא - תכשיטים.\n\n✅ נלמד איך לדעת מה יותר מחמיא לכל אחת - תכשיטי כסף או תכשיטי זהב לפי כמה שיטות🌟\n\nואז נעבור להרכבת התכשיט הייחודי של כל אחת:\nאנחנו דואגות לכן לחומרים הכי הכי איכותיים שיש !\n\n✅ בחירה מבין 3 סוגי שרשראות איכותיות מפלדת אל-חלד בציפוי כסף וזהב (לא מחליד, היפואלרגני)✨\n\n✅ בחירה אישית של עד 5 צ׳ארמים מהמבחר הענק שלנו גם כמובן מפלדת אל חלד.\nבתוספת של 20₪ למשתתפת ניתן להגדיל את כמות הצ׳ארמים ל-7 צ׳ארמים (ניתן להוסיף את השדרוג רק במסלול הראשון)\n\nהמשתתפות ילמדו איך מרכיבים תכשיט מההתחלה ועד הסוף – מהסוגר ועד התליון, והכול בידיים שלהן!\n\nאנחנו מגיעות לכל הארץ (מעבר לאזור המרכז יהיה תוספת תשלום על ההגעה)\n\nשימי ❤️ שבכל מסלול שתבחרי המשתתפות מקבלות גם טבעת לבחירה במתנה💍\n\nלאור המצב החלטנו לפנק אתכן ב-15% הנחה על כל המסלולים שלנו 💕, אנחנו עדיין עובדות ופעילות ונעשה הכל בשביל לשמח את הילדות בימים קשים אלו מגיע להן כמה שעות של כיף ויצירה ולשכוח מהכל❤️\nההנחה תקפה עד 31.3.2026\nאנחנו זמינות גם בטלפון לכן אם תרצי לשמוע את כל הפרטים בשיחה טלפונית תתקשרי בשמחה 😊\n\nמידע נוסף הכולל את המחירון שלנו מצורף בקישור הזה:\n\nhttps://charmingbyviktoriya.my.canva.site/by-viktoriya`;
-    window.open('https://wa.me/' + waNum + '?text=' + encodeURIComponent(infoMsg), '_blank');
-  };
-  el('wsc-wa-empty').onclick=()=>{
-    closeWaOpts();
-    window.open('https://wa.me/' + waNum, '_blank');
+  el('wsc-wa-btn').onclick=()=>{
+    const mode = getWsPaymentMode(w);
+    renderWaPickerOptions(mode, wp, (tplId) => {
+      // Switch to workshops tab + open the form so placeholders pick up live data,
+      // then send through the same template-driven path as the form's WA button.
+      waOpts.setAttribute('data-v','');
+      closeWsCard();
+      showTab('workshops');
+      setTimeout(() => {
+        openWorkshopModal(id);
+        setTimeout(() => sendWaTplToWorkshop(tplId), 200);
+      }, 300);
+    });
+    waOpts?.removeAttribute('data-v');
+    if(typeof lucide!=='undefined')setTimeout(()=>lucide.createIcons(),0);
   };
   const cl=d?generateCalendarLinks(w):'';
   const m=cl.match(/href="([^"]+)"/);
@@ -7663,7 +7738,7 @@ function renderWaTemplates() {
         <div class="flex gap-1 flex-shrink-0">
           <button onclick="sendWaTplToWorkshop('${tpl.id}')" class="text-[10px] border border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2.5 py-1.5 rounded-full font-bold transition-colors" title="שלח לסדנא הנוכחית"><i data-lucide='send' class='w-3 h-3 inline-block'></i> שלח</button>
           <button onclick="openWaTplForm('${tpl.id}')" class="text-[10px] border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] px-2.5 py-1.5 rounded-full font-bold transition-colors">עריכה</button>
-          ${tpl.systemKey ? '' : `<button onclick="deleteWaTpl('${tpl.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2.5 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>`}
+          <button onclick="deleteWaTpl('${tpl.id}')" class="text-[10px] border border-red-200 text-red-400 hover:bg-red-50 px-2.5 py-1.5 rounded-full font-bold transition-colors">מחיקה</button>
         </div>
       </div>
     </div>`;
@@ -7724,10 +7799,26 @@ window.saveWaTpl = saveWaTpl;
 async function deleteWaTpl(id) {
   const tpl = allWaTemplates.find(x=>x.id===id);
   if (!tpl) return;
-  if (tpl.systemKey) { alert('לא ניתן למחוק תבנית ברירת מחדל. אפשר לערוך את התוכן שלה.'); return; }
-  if (confirm(`למחוק תבנית "${tpl.name}"?`)) {
-    try { await deleteDoc(doc(db, WA_TPL_COL, id)); logAction(`תבנית WhatsApp נמחקה — "${tpl.name}"`); }
-    catch(ex) { console.error(ex); }
+  const isSystem = !!tpl.systemKey;
+  const msg = isSystem
+    ? `למחוק את תבנית ברירת המחדל "${tpl.name}"?\n\nהתבנית תוסר מהתפריט ולא תיווצר שוב אוטומטית.\nאפשר תמיד ליצור הודעה חדשה במקום.`
+    : `למחוק תבנית "${tpl.name}"?`;
+  if (!confirm(msg)) return;
+  try {
+    if (isSystem) {
+      // Remember the user explicitly removed this default, so seedDefaultWaTemplates
+      // will not recreate it on the next page load.
+      await setDoc(
+        doc(db, SETTINGS_COL, 'waTemplatesMeta'),
+        { deletedSystemKeys: arrayUnion(tpl.systemKey) },
+        { merge: true }
+      );
+    }
+    await deleteDoc(doc(db, WA_TPL_COL, id));
+    logAction(`תבנית WhatsApp נמחקה — "${tpl.name}"`);
+  } catch(ex) {
+    console.error(ex);
+    alert('שגיאה במחיקה: ' + (ex.code || ex.message || ex));
   }
 }
 window.deleteWaTpl = deleteWaTpl;
@@ -7839,7 +7930,17 @@ async function seedDefaultWaTemplates() {
   if (waTemplatesSeeded) return;
   waTemplatesSeeded = true;
   const existingKeys = new Set(allWaTemplates.map(t => t.systemKey).filter(Boolean));
-  const missing = WA_TPL_DEFAULTS.filter(d => !existingKeys.has(d.systemKey));
+
+  // Respect templates the user has explicitly deleted — don't recreate them.
+  let deletedKeys = new Set();
+  try {
+    const metaSnap = await getDoc(doc(db, SETTINGS_COL, 'waTemplatesMeta'));
+    if (metaSnap.exists()) {
+      deletedKeys = new Set(metaSnap.data().deletedSystemKeys || []);
+    }
+  } catch(ex) { console.error('waTemplatesMeta read failed:', ex); }
+
+  const missing = WA_TPL_DEFAULTS.filter(d => !existingKeys.has(d.systemKey) && !deletedKeys.has(d.systemKey));
   if (!missing.length) return;
   for (const def of missing) {
     try {
@@ -7936,8 +8037,7 @@ function renderWaTemplateBody(body, vars) {
     return v != null ? String(v) : '';
   });
 
-  // Drop blank lines that were left behind by removed conditional blocks
-  out = out.replace(/^[ \t]*\n/gm, m => m); // (no-op placeholder, kept for clarity)
+  // Collapse runs of 3+ blank lines (left behind by removed conditional blocks) to 2
   out = out.split('\n').filter((line, i, arr) => {
     // collapse runs of 3+ blank lines to 2
     if (line.trim() !== '') return true;
