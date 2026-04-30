@@ -869,7 +869,7 @@
       <!-- ─── TAB: WORKSHOPS ─── -->
       <section id="tab-workshops" data-erp-tab class="p-6 space-y-6">
         <div class="flex flex-wrap justify-between items-center gap-3">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-shrink-0">
             <h2 class="font-black text-gray-800 text-lg">ניהול סדנאות</h2>
             <div class="relative">
               <button id="ws-filter-btn" onclick="document.getElementById('ws-filter-dropdown').style.display=document.getElementById('ws-filter-dropdown').style.display==='none'?'':'none'" class="w-8 h-8 flex items-center justify-center rounded-full border border-[#f0dfc0] text-[#d4a373] hover:bg-[#fdf6ee] transition-colors" title="סינון סטטוסים"><i data-lucide="filter" class="w-4 h-4"></i></button>
@@ -883,22 +883,19 @@
               </div>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <!-- View toggle -->
-            <div class="flex items-center bg-gray-100 rounded-full p-0.5">
-              <button id="ws-view-list" onclick="switchWsView('list')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all text-gray-400">📋 רשימה</button>
-              <button id="ws-view-crm" onclick="switchWsView('crm')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all bg-white text-[#d4a373] shadow-sm">📊 CRM</button>
-            </div>
-            <button onclick="openWorkshopModal()"
-              class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-              + סדנה חדשה</button>
+          <!-- View toggle -->
+          <div class="flex items-center bg-gray-100 rounded-full p-0.5 flex-shrink-0">
+            <button id="ws-view-list" onclick="switchWsView('list')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all text-gray-400">📋 רשימה</button>
+            <button id="ws-view-crm" onclick="switchWsView('crm')" class="ws-view-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition-all bg-white text-[#d4a373] shadow-sm">📊 CRM</button>
           </div>
-        </div>
-
-        <!-- Search bar -->
-        <div id="ws-search-wrap" class="bg-white border border-[#f0dfc0] rounded-2xl px-4 py-3 shadow-sm">
-          <input id="ws-search" type="search" placeholder="חיפוש לפי שם החוגג / איש קשר / טלפון / עיר..."
-            class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:border-[#d4a373] transition-colors" />
+          <!-- Search -->
+          <div id="ws-search-wrap" class="flex-1 min-w-[160px] max-w-md">
+            <input id="ws-search" type="search" placeholder="חיפוש לפי שם החוגג / איש קשר / טלפון / עיר..."
+              class="w-full border border-[#f0dfc0] rounded-full px-4 py-2 text-sm bg-white shadow-sm focus:outline-none focus:border-[#d4a373] transition-colors" />
+          </div>
+          <button onclick="openWorkshopModal()"
+            class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex-shrink-0">
+            + סדנה חדשה</button>
         </div>
 
         <!-- CRM Kanban View -->
@@ -1029,7 +1026,7 @@
             </div>
             <div>
               <label class="lbl">עיר *</label>
-              <input id="ws-city" type="text" placeholder="עיר האירוע" class="inp" required />
+              <input id="ws-city" type="text" placeholder="עיר האירוע" class="inp" required onblur="autoCalcRouteOnCityChange()" />
             </div>
             <div>
               <label class="lbl">רחוב ומספר בית</label>
@@ -5979,6 +5976,9 @@ async function _saveWorkshop() {
     discount: disc, arrivalFee: arrival, total, notes: notes||null,
     bookingStatus: advancePaid ? 'confirmed' : 'draft',
     payment,
+    routeInfo: (currentRouteInfo && currentRouteInfo.city === city)
+      ? { city: currentRouteInfo.city, km: currentRouteInfo.km, baseMinutes: currentRouteInfo.baseMinutes, fuelCost: currentRouteInfo.fuelCost }
+      : (existingWs?.routeInfo && existingWs.routeInfo.city === city ? existingWs.routeInfo : null),
     createdAt: serverTimestamp(),
   };
 
@@ -6034,6 +6034,9 @@ function clearWorkshopForm() {
   document.getElementById('ws-advance-date-input').value = '';
   document.getElementById('ws-balance-date-input').value = '';
   editWorkshopId=null;
+  currentRouteInfo = null;
+  const arrHint = document.getElementById('ws-arrival-hint');
+  if (arrHint) { arrHint.textContent = 'לא מושפע מההנחה'; arrHint.className = 'text-[10px] text-gray-400 mt-1'; }
   updateWsTotal();
   updatePaymentBadge();
 }
@@ -6095,10 +6098,21 @@ function openWorkshopModal(id) {
     }
     updateWsTotal();
     updatePaymentBadge();
+    // Restore cached route info — avoids re-calling the API when reopening a workshop
+    if (w.routeInfo && w.routeInfo.city === w.city) {
+      currentRouteInfo = { ...w.routeInfo, fee: calcArrivalFee(w.routeInfo.baseMinutes), calculatedAt: Date.now() };
+      const wsDate = document.getElementById('ws-date')?.value;
+      const wsTime = document.getElementById('ws-time')?.value;
+      const arrivalApplied = (parseFloat(document.getElementById('ws-arrival').value) || 0) === currentRouteInfo.fee;
+      renderArrivalHint(w.routeInfo.city, { km: w.routeInfo.km, baseMinutes: w.routeInfo.baseMinutes }, wsDate, wsTime, arrivalApplied);
+    } else {
+      currentRouteInfo = null;
+    }
     const titleEl = document.getElementById('ws-modal-title');
     if (titleEl) titleEl.textContent = 'עריכת סדנה';
   } else {
     clearWorkshopForm();
+    currentRouteInfo = null;
     const titleEl = document.getElementById('ws-modal-title');
     if (titleEl) titleEl.textContent = 'סדנה חדשה';
   }
@@ -6689,12 +6703,54 @@ function getCityDistance(city) {
   return k !== undefined ? CITY_DISTANCE_KM[k] : null;
 }
 
-async function suggestArrivalFee() {
+// Cache of the last successfully calculated route for the OPEN workshop form.
+// Reset when modal opens; reused by the fuel-expense reminder so we don't re-call the API.
+let currentRouteInfo = null; // { city, km, baseMinutes, fuelCost, fee, calculatedAt }
+
+function renderArrivalHint(city, route, wsDate, wsTime, applied) {
+  const hintEl = document.getElementById('ws-arrival-hint');
+  if (!hintEl) return;
+  const fee = calcArrivalFee(route.baseMinutes);
+  const fuel = calcFuelCost(route.km);
+  const bH = Math.floor(route.baseMinutes / 60), bM = route.baseMinutes % 60;
+  const baseTimeStr = bH > 0 ? `${bH} שע' ו-${bM} דק'` : `${bM} דק'`;
+  const est = calcTravelEstimate(route.baseMinutes, wsDate, wsTime);
+  const eH = Math.floor(est.estMinutes / 60), eM = est.estMinutes % 60;
+  const estTimeStr = eH > 0 ? `${eH} שע' ו-${eM} דק'` : `${eM} דק'`;
+  const hasDateTime = wsDate && wsTime;
+  const feeColor = fee === 0 ? '#16a34a' : '#d4a373';
+  const feeLabel = fee === 0 ? 'ללא תוספת' : fee + '₪';
+  const detailId = 'arrival-detail-' + Date.now();
+  // "Apply" button only if not already applied
+  const applyBtn = applied ? '' : `<button type="button" onclick="applyArrivalFeeFromCalc()" style="background:#d4a373;color:#fff;border:none;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;cursor:pointer;">📌 השתמש (${feeLabel})</button>`;
+  hintEl.innerHTML = `<div style="background:#fdf6ee;border:1px solid #f0dfc0;border-radius:12px;overflow:hidden;margin-top:8px;font-size:11px;">
+    <div onclick="var d=document.getElementById('${detailId}');var a=this.querySelector('.arr-arrow');if(d.style.display==='none'){d.style.display='';a.style.transform='rotate(180deg)';}else{d.style.display='none';a.style.transform='';}" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;cursor:pointer;background:#f5ece7;gap:8px;">
+      <span style="font-weight:800;color:#2c2a29;font-size:12px;flex:1;">✓ ${city} — המלצה: <span style="color:${feeColor}">${feeLabel}</span></span>
+      ${applyBtn}
+      <span class="arr-arrow" style="font-size:10px;color:#9a8e8a;transition:transform 0.2s;display:inline-block;">▼</span>
+    </div>
+    <div id="${detailId}" style="display:none;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:5px 12px;color:#9a8e8a;">מרחק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${route.km} ק"מ</td></tr>
+        <tr><td style="padding:5px 12px;color:#9a8e8a;">נסיעה (ללא פקקים)</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${baseTimeStr}</td></tr>
+        <tr><td style="padding:5px 12px;color:#9a8e8a;">עלות דלק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">~${fuel}₪</td></tr>
+        ${hasDateTime ? `<tr style="border-top:1px solid #f0dfc0;background:#f9f5f1;"><td colspan="2" style="padding:6px 12px;color:#9a8e8a;font-size:10px;font-weight:600;">🔒 תכנון פנימי</td></tr>
+        <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">נסיעה עם פקקים</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${estTimeStr}</td></tr>
+        <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">שעת יציאה</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${est.label}</td></tr>` : ''}
+      </table>
+    </div>
+  </div>${!hasDateTime ? '<p style="font-size:10px;color:#9a8e8a;margin-top:4px;">הזן תאריך ושעה לחישוב זמן נסיעה עם פקקים</p>' : ''}`;
+  hintEl.className = 'mt-1';
+}
+
+// Core: fetch route, cache, render hint. Optionally write the recommended fee into ws-arrival.
+async function calcRouteForCity({ applyFee = false } = {}) {
   const city = document.getElementById('ws-city')?.value.trim();
   const wsDate = document.getElementById('ws-date')?.value;
   const wsTime = document.getElementById('ws-time')?.value;
   const hintEl = document.getElementById('ws-arrival-hint');
-  if (!city) { hintEl.textContent = 'יש להזין עיר קודם'; hintEl.className = 'text-[10px] text-red-400 mt-1'; return; }
+  if (!hintEl) return null;
+  if (!city) { hintEl.textContent = 'יש להזין עיר קודם'; hintEl.className = 'text-[10px] text-red-400 mt-1'; return null; }
 
   hintEl.innerHTML = '⏳ מחשב מסלול נסיעה...';
   hintEl.className = 'text-[10px] text-gray-400 mt-1';
@@ -6702,50 +6758,51 @@ async function suggestArrivalFee() {
   try {
     const route = await getRouteInfo(city);
     if (route) {
-      // Fee for client quote — fixed, based on base time only (no traffic)
       const fee = calcArrivalFee(route.baseMinutes);
-      const fuel = calcFuelCost(route.km);
-      document.getElementById('ws-arrival').value = fee;
-      updateWsTotal();
-
-      // Base time display
-      const bH = Math.floor(route.baseMinutes / 60), bM = route.baseMinutes % 60;
-      const baseTimeStr = bH > 0 ? `${bH} שע' ו-${bM} דק'` : `${bM} דק'`;
-
-      // Traffic estimate — internal planning info
-      const est = calcTravelEstimate(route.baseMinutes, wsDate, wsTime);
-      const eH = Math.floor(est.estMinutes / 60), eM = est.estMinutes % 60;
-      const estTimeStr = eH > 0 ? `${eH} שע' ו-${eM} דק'` : `${eM} דק'`;
-      const hasDateTime = wsDate && wsTime;
-
-      const feeColor = fee === 0 ? '#16a34a' : '#d4a373';
-      const feeLabel = fee === 0 ? 'ללא תוספת' : fee + '₪';
-      const detailId = 'arrival-detail-' + Date.now();
-      hintEl.innerHTML = `<div style="background:#fdf6ee;border:1px solid #f0dfc0;border-radius:12px;overflow:hidden;margin-top:8px;font-size:11px;">
-        <div onclick="var d=document.getElementById('${detailId}');var a=this.querySelector('.arr-arrow');if(d.style.display==='none'){d.style.display='';a.style.transform='rotate(180deg)';}else{d.style.display='none';a.style.transform='';}" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;cursor:pointer;background:#f5ece7;">
-          <span style="font-weight:800;color:#2c2a29;font-size:12px;">✓ ${city} — <span style="color:${feeColor}">${feeLabel}</span></span>
-          <span class="arr-arrow" style="font-size:10px;color:#9a8e8a;transition:transform 0.2s;display:inline-block;">▼</span>
-        </div>
-        <div id="${detailId}" style="display:none;">
-          <table style="width:100%;border-collapse:collapse;">
-            <tr><td style="padding:5px 12px;color:#9a8e8a;">מרחק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${route.km} ק"מ</td></tr>
-            <tr><td style="padding:5px 12px;color:#9a8e8a;">נסיעה (ללא פקקים)</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">${baseTimeStr}</td></tr>
-            <tr><td style="padding:5px 12px;color:#9a8e8a;">עלות דלק</td><td style="padding:5px 12px;font-weight:700;color:#2c2a29;">~${fuel}₪</td></tr>
-            ${hasDateTime ? `<tr style="border-top:1px solid #f0dfc0;background:#f9f5f1;"><td colspan="2" style="padding:6px 12px;color:#9a8e8a;font-size:10px;font-weight:600;">🔒 תכנון פנימי</td></tr>
-            <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">נסיעה עם פקקים</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${estTimeStr}</td></tr>
-            <tr style="background:#f9f5f1;"><td style="padding:4px 12px;color:#9a8e8a;">שעת יציאה</td><td style="padding:4px 12px;font-weight:700;color:#4a3f3c;">${est.label}</td></tr>` : ''}
-          </table>
-        </div>
-      </div>${!hasDateTime ? '<p style="font-size:10px;color:#9a8e8a;margin-top:4px;">הזן תאריך ושעה לחישוב זמן נסיעה עם פקקים</p>' : ''}`;
-      hintEl.className = 'mt-1';
-      return;
+      const fuelCost = calcFuelCost(route.km);
+      currentRouteInfo = { city, km: route.km, baseMinutes: route.baseMinutes, fuelCost, fee, calculatedAt: Date.now() };
+      if (applyFee) {
+        document.getElementById('ws-arrival').value = fee;
+        updateWsTotal();
+      }
+      renderArrivalHint(city, route, wsDate, wsTime, applyFee);
+      return currentRouteInfo;
     }
   } catch(e) { console.warn('Route calc failed:', e); }
 
   hintEl.textContent = `⚠ "${city}" לא נמצאה — הזן סכום ידנית`;
   hintEl.className = 'text-[10px] text-amber-500 mt-1';
+  return null;
+}
+
+// Manual button — applies the recommended fee to the form (explicit user action).
+async function suggestArrivalFee() {
+  await calcRouteForCity({ applyFee: true });
 }
 window.suggestArrivalFee = suggestArrivalFee;
+
+// Blur handler on the city input — auto-calculates if the city changed (vs. last calc).
+// Never modifies the arrival-fee field; only displays the recommendation.
+async function autoCalcRouteOnCityChange() {
+  const city = document.getElementById('ws-city')?.value.trim();
+  if (!city) return;
+  if (currentRouteInfo && currentRouteInfo.city === city) return; // already calculated for this city
+  await calcRouteForCity({ applyFee: false });
+}
+window.autoCalcRouteOnCityChange = autoCalcRouteOnCityChange;
+
+// Apply-button inside the recommendation panel — writes the recommended fee into ws-arrival.
+function applyArrivalFeeFromCalc() {
+  if (!currentRouteInfo) return;
+  document.getElementById('ws-arrival').value = currentRouteInfo.fee;
+  updateWsTotal();
+  // Re-render with applied=true to hide the apply button
+  const wsDate = document.getElementById('ws-date')?.value;
+  const wsTime = document.getElementById('ws-time')?.value;
+  renderArrivalHint(currentRouteInfo.city, { km: currentRouteInfo.km, baseMinutes: currentRouteInfo.baseMinutes }, wsDate, wsTime, true);
+  showToast(`עלות הגעה: ${currentRouteInfo.fee}₪`);
+}
+window.applyArrivalFeeFromCalc = applyArrivalFeeFromCalc;
 
 // ── Workshop Card Modal ─────────────────────────────────────────
 let wsCardCurrentId = null;
@@ -7224,19 +7281,18 @@ function renderCrmBoard() {
     return `<div class="bg-white rounded-xl border ${noAddr ? 'border-red-200' : 'border-gray-100'} p-2.5 lg:p-2 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer${opts.isArchive ? ' opacity-60' : ''}" onclick="openWsCard('${w.id}')">
       <!-- Mobile layout -->
       <div class="lg:hidden">
-        <div class="flex items-center justify-between gap-2 mb-1">
-          <div class="flex items-center gap-1.5"><p class="font-bold text-sm text-gray-800">${esc(w.celebrant || w.customerName)}</p>${addrBadge}</div>
-          <span class="font-black text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')}₪</span>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5 min-w-0 flex-1"><p class="font-bold text-sm text-gray-800 truncate">${esc(w.celebrant || w.customerName)}</p>${addrBadge}</div>
+          <span class="font-black text-sm text-[#d4a373] flex-shrink-0">${(w.total||0).toLocaleString('he-IL')}₪</span>
         </div>
-        <div class="flex items-center justify-between">
-          <div class="flex gap-1.5 text-[10px]">
-            <span class="text-gray-500">${dateStr}</span>
-            <span class="text-gray-400">${w.time || ''}</span>
-            <span class="text-gray-400">📍${esc(w.city || '')}</span>
-            <span class="text-gray-400">👥${w.participantCount}</span>
-            <span class="text-gray-400 truncate">${esc(w.route || '')}</span>
+        <div class="flex items-center justify-between gap-1.5 mt-0.5 text-[10px]">
+          <div class="flex gap-1.5 text-gray-500 min-w-0 flex-1 truncate">
+            <span>${dateStr}</span>
+            <span>${w.time || ''}</span>
+            <span>📍${esc(w.city || '')}</span>
+            <span>👥${w.participantCount}</span>
           </div>
-          <span class="text-[10px]">${daysLabel}</span>
+          <span class="flex-shrink-0">${daysLabel}</span>
         </div>
         ${actionBtn ? `<div class="mt-1.5">${actionBtn}</div>` : ''}
       </div>
