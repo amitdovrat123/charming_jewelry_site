@@ -430,6 +430,21 @@ function render() {
       dots.forEach((d, i) => d.classList.toggle('sp-img-dot--active', i === target));
     });
   });
+
+  // Hover/touch preview: show 2nd image while pointer is over the card
+  el.querySelectorAll('.sp-shop-card').forEach(card => {
+    const wrap = card.querySelector('.sp-card-img-wrap');
+    if (!wrap) return;
+    const slides = wrap.querySelectorAll('.sp-slide');
+    const dots = wrap.querySelectorAll('.sp-img-dot');
+    if (slides.length < 2) return;
+    const setActive = (idx) => {
+      slides.forEach((s, i) => s.classList.toggle('sp-slide--active', i === idx));
+      dots.forEach((d, i) => d.classList.toggle('sp-img-dot--active', i === idx));
+    };
+    card.addEventListener('pointerenter', () => setActive(1));
+    card.addEventListener('pointerleave', () => setActive(0));
+  });
 }
 
 // ── Firestore real-time subscription ──────────────────────────
