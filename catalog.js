@@ -901,7 +901,12 @@ function renderProductView() {
           </div>
           <div style="display:flex;flex-direction:column;gap:18px;">
             ${data.sku ? `<p style="font-size:0.75rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:0;">SKU: ${esc(data.sku)}</p>` : ''}
-            <h1 style="font-size:1.75rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25;">${esc(localName(data))}</h1>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;">
+              <h1 style="font-size:1.75rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25;flex:1;">${esc(localName(data))}</h1>
+              <button type="button" class="pv-fav-btn${(window.WishlistAPI && window.WishlistAPI.isInWishlist(id)) ? ' is-fav' : ''}" data-fav-id="${sid}" id="pv-fav-btn" aria-label="${t('pv_add_to_wishlist','הוספה למוצרים שאהבתי')}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </button>
+            </div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">${priceHtml}</div>
             ${metaChips ? `<div style="display:flex;gap:8px;flex-wrap:wrap;">${metaChips}</div>` : ''}
             ${localDesc(data) ? `<p style="font-size:0.97rem;color:var(--ink-soft);line-height:1.75;margin:0;">${esc(localDesc(data))}</p>` : ''}

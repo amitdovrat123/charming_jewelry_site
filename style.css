@@ -6174,8 +6174,7 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
   top: 0;
   right: 0;
   bottom: 0;
-  width: 75%;
-  max-width: 480px;
+  width: min(88%, 360px);
   background: var(--sand-light);
   z-index: 9999;
   display: flex;
@@ -6395,7 +6394,6 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
 .wl-toast--show { opacity: 1; }
 
 @media (max-width: 480px) {
-  .wl-drawer { width: 100vw; }
   .wl-item { grid-template-columns: 80px 1fr; }
   .wl-item-img { width: 80px; height: 80px; }
 }
