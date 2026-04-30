@@ -44,6 +44,15 @@ if (hamburger && navLinks) {
     link.addEventListener('click', closeDrawer);
   });
 
+  // Accordion expand/collapse for sub-categories inside the drawer
+  navLinks.querySelectorAll('.nav-expand-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!isExpanded));
+      btn.parentElement.classList.toggle('is-expanded', !isExpanded);
+    });
+  });
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && navLinks.classList.contains('is-open')) closeDrawer();
   });

@@ -49,13 +49,27 @@
       </div>
       <nav>
         <ul class="nav-links">
-          <li><a href="index.html" data-i18n="nav_home">דף הבית</a></li>
+          <li class="nav-lang-item">
+            <div class="lang-dropdown"><button class="lang-dropdown-btn" aria-label="שפה">Lang</button><div class="lang-dropdown-menu"><button data-lang="he">עברית</button><button data-lang="en">English</button></div></div>
+          </li>
           <li><a href="workshops.html" data-i18n="nav_workshops">סדנאות</a></li>
-          <li><a href="shop.html" class="nav-link--active" data-i18n="nav_shop">חנות</a></li>
-          <li><a href="workshops.html#faq" data-i18n="nav_faq">שאלות ותשובות</a></li>
+          <li class="nav-item-expandable">
+            <button type="button" class="nav-expand-btn" aria-expanded="false">
+              <span data-i18n="nav_shop">חנות</span>
+              <svg class="nav-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-sublist">
+              <li><a href="shop.html" data-i18n="menu_all_collection">כל הקולקציה</a></li>
+              <li><a href="shop.html?cat=%D7%A9%D7%A8%D7%A9%D7%A8%D7%90%D7%95%D7%AA">שרשראות</a></li>
+              <li><a href="shop.html?cat=%D7%A6%D7%9E%D7%99%D7%93%D7%99%D7%9D">צמידים</a></li>
+              <li><a href="shop.html?cat=%D7%A2%D7%92%D7%99%D7%9C%D7%99%D7%9D">עגילים</a></li>
+              <li><a href="shop.html?cat=%D7%98%D7%91%D7%A2%D7%95%D7%AA">טבעות</a></li>
+              <li><a href="shop.html?cat=%D7%9E%D7%90%D7%A8%D7%96%D7%99%20Charming">מארזי Charming</a></li>
+              <li><a href="shop.html?sale=1" data-i18n="menu_on_sale">מבצעים</a></li>
+            </ul>
+          </li>
           <li><a href="workshops.html#signup" data-i18n="nav_contact">צור קשר</a></li>
           <li id="auth-nav-item" class="auth-nav-item"><a href="#" class="auth-nav-link" id="auth-nav-btn" data-i18n="nav_login">התחברות / הרשמה</a></li>
-          <li class="lang-toggle-mobile"><div class="lang-dropdown"><button class="lang-dropdown-btn" aria-label="שפה">Lang</button><div class="lang-dropdown-menu"><button data-lang="he">עברית</button><button data-lang="en">English</button></div></div></li>
         </ul>
       </nav>
     </div>
@@ -112,6 +126,7 @@
           <a href="index.html"      class="footer-policy-btn" data-i18n="footer_home">דף הבית</a>
           <a href="shop.html"       class="footer-policy-btn" data-i18n="footer_shop">החנות</a>
           <a href="workshops.html"  class="footer-policy-btn" data-i18n="footer_workshops">סדנאות</a>
+          <a href="workshops.html#faq" class="footer-policy-btn" data-i18n="footer_faq">שאלות ותשובות</a>
           <a href="workshops.html#signup" class="footer-policy-btn" data-i18n="footer_contact_link">צור קשר</a>
         </div>
       </div>

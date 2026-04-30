@@ -705,7 +705,16 @@ function renderProductView() {
   // Ring size info
   const isRing      = data.category === 'טבעות';
   const isAdjRing   = isRing && !!data.isAdjustable;
-  const ringSizes   = isRing && !isAdjRing ? ringSizesOf(data) : [];
+  // Default Israeli ring sizes when admin hasn't configured any (stock=null → "במלאי")
+  const DEFAULT_RING_SIZES = [
+    { size: '6', stock: null }, { size: '7', stock: null },
+    { size: '8', stock: null }, { size: '9', stock: null },
+  ];
+  let ringSizes = [];
+  if (isRing && !isAdjRing) {
+    const configured = ringSizesOf(data);
+    ringSizes = configured.length ? configured : DEFAULT_RING_SIZES;
+  }
   const needsSize   = ringSizes.length > 0;
 
   const priceHtml = (sale > 0 && sale < price)
