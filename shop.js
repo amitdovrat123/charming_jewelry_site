@@ -238,7 +238,6 @@ function render() {
     <div class="container">
 
       <div class="sp-hero">
-        <span class="section-eyebrow">${t('shop_hero_eyebrow_js', 'כל הקולקציה')}</span>
         <h1 class="sp-title">${t('shop_hero_title_js', 'החנות שלנו')}</h1>
         <p class="sp-subtitle">${t('shop_hero_sub_js', 'כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.')}</p>
       </div>

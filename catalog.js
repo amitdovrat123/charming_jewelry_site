@@ -600,7 +600,6 @@ function renderShop() {
         </button>
 
         <div class="sp-hero">
-          <span class="section-eyebrow">${t('shop_eyebrow','כל הקולקציה')}</span>
           <h1 class="sp-title">${t('shop_title','החנות שלנו')}</h1>
           <p class="sp-subtitle">${t('shop_subtitle','כל הפריטים הזמינים — סני לפי קטגוריה, גוון, או מוצרים מומלצים.')}</p>
         </div>
@@ -921,17 +920,9 @@ function renderProductView() {
   if (typeof applyLang === 'function') applyLang();
 
   el.querySelector('#pv-crumb-home')?.addEventListener('click', e => { e.preventDefault(); switchView('home'); });
-  // Category crumb navigates to shop.html — make it also work within the SPA
-  el.querySelector('#pv-crumb-cat')?.addEventListener('click', e => {
-    e.preventDefault();
-    // If we have the shop view in this page, filter and show it
-    if (document.getElementById('view-shop')) {
-      shopFilterCat = crumbCat;
-      switchView('shop');
-    } else {
-      window.location.href = e.currentTarget.href;
-    }
-  });
+  // Category crumb: always navigate to the real shop.html?cat=... page
+  // (the in-page SPA shop view is intentionally bypassed — it's a stripped-down
+  // copy without filters/sub-cats and was confusing users)
 
   if (!oos) {
     // Custom size dropdown (replaces native <select> for full styling control)
