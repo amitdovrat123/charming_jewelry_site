@@ -890,7 +890,8 @@
           </div>
           <!-- Search -->
           <div id="ws-search-wrap" class="flex-1 min-w-[160px] max-w-md">
-            <input id="ws-search" type="search" placeholder="חיפוש לפי שם החוגג / איש קשר / טלפון / עיר..."
+            <input id="ws-search" type="search" name="ws-search-q" placeholder="חיפוש לפי שם החוגג / איש קשר / טלפון / עיר..."
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" data-lpignore="true" data-1p-ignore
               class="w-full border border-[#f0dfc0] rounded-full px-4 py-2 text-sm bg-white shadow-sm focus:outline-none focus:border-[#d4a373] transition-colors" />
           </div>
           <button onclick="openWorkshopModal()"
@@ -7098,7 +7099,73 @@ function showStaffExpenseReminder(wsId, w) {
         <input id="staff-reminder-notes" type="text" class="inp text-sm mt-0.5" placeholder="למשל: שם העובדת" value="" />
       </div>
       <div class="flex gap-2">
-        <button onclick="addStaffExpenseFromReminder('${wsId}','${esc(wsName)}','${dateStr}');this.closest('.fixed').remove()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white py-2.5 rounded-full font-bold text-sm transition-colors">הוסף הוצאה</button>
+        <button onclick="addStaffExpenseFromReminder('${wsId}','${esc(wsName)}','${dateStr}');this.closest('.fixed').remove();showFuelExpenseReminder('${wsId}')" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white py-2.5 rounded-full font-bold text-sm transition-colors">הוסף הוצאה</button>
+        <button onclick="this.closest('.fixed').remove();showFuelExpenseReminder('${wsId}')" class="px-4 py-2.5 border border-[#e8cfc4] text-[#9a8e8a] hover:text-[#4a3f3c] rounded-full font-bold text-sm transition-colors">דלג</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+  if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
+}
+
+// Fuel-expense reminder — opens after the staff reminder closes (Add or Skip).
+// Always shows, even if route calc failed (manual entry fallback).
+async function showFuelExpenseReminder(wsId) {
+  const w = allWorkshops.find(x => x.id === wsId);
+  if (!w) return;
+  const wsName = w.celebrant || w.customerName || '';
+  const city = w.city || '';
+  const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null;
+  const dateStr = d ? d.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
+  // Prefer cached routeInfo on doc; otherwise try a fresh calc once
+  let routeInfo = (w.routeInfo && w.routeInfo.city === city) ? w.routeInfo : null;
+  if (!routeInfo && city) {
+    try {
+      const r = await getRouteInfo(city);
+      if (r) {
+        routeInfo = { city, km: r.km, baseMinutes: r.baseMinutes, fuelCost: calcFuelCost(r.km) };
+        try { await updateDoc(doc(db, WORKSHOPS_COL, wsId), { routeInfo }); } catch(e) {}
+      }
+    } catch(e) { console.warn('Fuel reminder: route calc failed', e); }
+  }
+
+  const fuelAmount = routeInfo ? routeInfo.fuelCost : 0;
+  const calcDetail = routeInfo
+    ? `<div style="background:#fff;border:1px solid #f0dfc0;border-radius:10px;padding:10px 12px;font-size:11px;">
+        <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#9a8e8a;">עיר</span><span style="font-weight:700;color:#2c2a29;">${esc(city)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#9a8e8a;">מרחק (כיוון אחד)</span><span style="font-weight:700;color:#2c2a29;">${routeInfo.km} ק"מ</span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:#9a8e8a;">חישוב</span><span style="font-weight:700;color:#2c2a29;">${routeInfo.km} × ${FUEL_RATE}₪</span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0;border-top:1px solid #f0dfc0;margin-top:4px;padding-top:6px;"><span style="color:#9a8e8a;">המלצה</span><span style="font-weight:800;color:#d4a373;">${routeInfo.fuelCost}₪</span></div>
+      </div>`
+    : `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;font-size:11px;color:#9a3412;">
+        ⚠ לא ניתן לחשב מסלול ל-"${esc(city)}" — הזן סכום ידנית
+      </div>`;
+
+  const el = document.createElement('div');
+  el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/40';
+  el.onclick = e => { if (e.target === el) el.remove(); };
+  el.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl max-w-sm w-[90%] overflow-hidden fadein border border-[#f0dfc0]">
+    <div class="px-5 py-4 border-b border-[#f0dfc0] bg-[#fdf8f5]">
+      <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i data-lucide="fuel" class="w-4 h-4 text-[#d4a373]"></i> תזכורת — הוצאת דלק</h3>
+      <p class="text-[11px] text-[#4a3f3c] mt-1">להוסיף הוצאת דלק עבור <b class="text-[#d4a373]">${esc(wsName)}</b>?</p>
+    </div>
+    <div class="px-5 py-4 space-y-3 bg-[#fdf6ee]">
+      ${calcDetail}
+      <div class="flex gap-3">
+        <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">סכום (₪)</label>
+          <input id="fuel-reminder-amount" type="number" min="0" step="1" class="inp text-sm mt-0.5" value="${fuelAmount}" />
+        </div>
+        <div class="flex-1"><label class="text-[9px] text-[#9a8e8a]">אמצעי</label>
+          <select id="fuel-reminder-method" class="inp text-sm mt-0.5"><option value="cash">מזומן</option><option value="bit">Bit</option><option value="paybox">PayBox</option><option value="transfer">העברה</option></select>
+        </div>
+      </div>
+      <div>
+        <label class="text-[9px] text-[#9a8e8a]">הערות</label>
+        <input id="fuel-reminder-notes" type="text" class="inp text-sm mt-0.5" placeholder="הערות נוספות (לא חובה)" value="" />
+      </div>
+      <div class="flex gap-2">
+        <button onclick="addFuelExpenseFromReminder('${wsId}','${esc(wsName)}','${esc(city)}','${dateStr}',${routeInfo ? routeInfo.km : 'null'});this.closest('.fixed').remove()" class="flex-1 bg-[#d4a373] hover:bg-[#b8893e] text-white py-2.5 rounded-full font-bold text-sm transition-colors">הוסף הוצאה</button>
         <button onclick="this.closest('.fixed').remove()" class="px-4 py-2.5 border border-[#e8cfc4] text-[#9a8e8a] hover:text-[#4a3f3c] rounded-full font-bold text-sm transition-colors">דלג</button>
       </div>
     </div>
@@ -7106,6 +7173,27 @@ function showStaffExpenseReminder(wsId, w) {
   document.body.appendChild(el);
   if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
 }
+window.showFuelExpenseReminder = showFuelExpenseReminder;
+
+async function addFuelExpenseFromReminder(wsId, wsName, city, dateStr, km) {
+  const amount = parseFloat(document.getElementById('fuel-reminder-amount')?.value) || 0;
+  if (amount <= 0) { showToast('יש להזין סכום'); return; }
+  const method = document.getElementById('fuel-reminder-method')?.value || 'cash';
+  const customNotes = document.getElementById('fuel-reminder-notes')?.value.trim() || '';
+  const kmStr = (km && km !== null) ? `דלק ${km} ק"מ × ${FUEL_RATE}₪ — ${city}` : `דלק — ${city}`;
+  const notes = customNotes ? `${kmStr} — ${customNotes}` : kmStr;
+  try {
+    await addDoc(collection(db, EXPENSES_COL), {
+      date: dateStr, category: 'fuel', amount, method,
+      workshopId: wsId, workshopName: wsName,
+      notes, createdAt: serverTimestamp(),
+    });
+    showToast(`הוצאת דלק ${amount}₪ נוספה`);
+    logAction(`הוצאת דלק ${amount}₪ — "${wsName}"`);
+    if (allExpenses.length > 0) renderExpensesList();
+  } catch(e) { console.error(e); }
+}
+window.addFuelExpenseFromReminder = addFuelExpenseFromReminder;
 
 async function addStaffExpenseFromReminder(wsId, wsName, dateStr) {
   const amount = parseFloat(document.getElementById('staff-reminder-amount')?.value) || 150;
