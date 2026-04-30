@@ -138,8 +138,6 @@ function cardHTML(product) {
     ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
     : `<span class="sp-card-price">${sp} ₪</span>`;
 
-  const metalChip    = data.color    ? `<span class="sp-card-metal">${esc(localColor(data.color))}</span>`    : '';
-  const matChip      = data.material ? `<span class="sp-card-material">${esc(localMaterial(data.material))}</span>` : '';
   const customBadge  = data.isCustomizable
     ? `<div class="sp-custom-badge">${t('shop_customizable', '✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה')}</div>` : '';
 
@@ -158,10 +156,10 @@ function cardHTML(product) {
       </div>
       <div class="sp-card-body">
         <h3 class="sp-card-name">${esc(pName)}</h3>
-        <div class="sp-card-price-row">${priceHtml}${metalChip}${matChip}</div>
+        <div class="sp-card-price-row">${priceHtml}</div>
+        ${customBadge}
         ${actionBtn}
       </div>
-      ${customBadge}
     </div>`;
 }
 

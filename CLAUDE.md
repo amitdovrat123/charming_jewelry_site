@@ -27,6 +27,16 @@ python3 -m http.server 8000
 - `skills/design_expert.md` — UI/UX design system, interaction rules, and image integration
 - `skills/copywriting_skill.md` — brand voice, approved CTAs, and content guidelines
 
+## תקשורת עם המשתמשת — חשוב
+
+**כל סיכום פעולה / הודעה למשתמשת חייב להיות בעברית בלבד.** אסור להשתמש באנגלית בסיכומים אלא אם חובה טכנית (שמות פונקציות, קבצים, נתיבים, מונחי קוד).
+
+- אסור להוסיף בלוקים באנגלית כמו "What changed", "Summary", או רשימות תכונות באנגלית.
+- אסור לערבב משפטים באנגלית בתוך הסיכום.
+- אם צריך להזכיר שם פונקציה / משתנה / קובץ — מותר רק את המונח עצמו, השאר בעברית.
+- הסיכום צריך להיות **קצר**: 2–4 שורות. רק מה השתנה ומה לבדוק.
+- שמות מקטעי קוד / מספרי שורות מותרים אך לא חובה.
+
 ## Site Architecture
 
 **Static site** with a single shared stylesheet:

@@ -3918,13 +3918,13 @@ ul { list-style: none; }
 
 /* Customization badge */
 .sp-custom-badge {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--pink-deep);
   background: var(--pink-light);
-  padding: 6px 12px;
+  padding: 5px 10px;
   text-align: center;
-  line-height: 1.5;
-  border-top: 1px solid var(--sand-dark);
+  line-height: 1.4;
+  border-radius: 50px;
 }
 
 /* Material chip */
