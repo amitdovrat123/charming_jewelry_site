@@ -11,6 +11,13 @@ const hamburger = document.querySelector('.nav-hamburger');
 const navLinks  = document.querySelector('.nav-links');
 
 if (hamburger && navLinks) {
+  // Move the drawer out of <header.navbar> so it escapes the navbar's
+  // stacking context (z-index: 100). Otherwise the body-level backdrop
+  // (z-index 350) paints OVER the drawer, leaving it blurred + unclickable.
+  if (navLinks.parentElement !== document.body) {
+    document.body.appendChild(navLinks);
+  }
+
   // Lazily inject the backdrop once
   let backdrop = document.querySelector('.nav-backdrop');
   if (!backdrop) {
