@@ -59,7 +59,7 @@
     .tog input:checked ~ .tog-track::after { transform:translateX(-18px); }
 
     /* Table row actions */
-    .act-btns { opacity:0; transition:.15s; }
+    .act-btns { opacity:.7; transition:.15s; }
     tr:hover .act-btns { opacity:1; }
 
     /* Sort indicator */
@@ -2474,13 +2474,12 @@ Charming by Vik 💛</textarea>
   #ring-sizes-block.is-disabled { opacity:.5; pointer-events:none; }
 
   /* ─── Stock tooltip (hover על מלאי טבעת עם מידות) ─── */
-  .stk-cell { position:relative; display:inline-flex; align-items:center; gap:5px; cursor:help; padding:2px 4px; border-radius:6px; transition:background .15s; }
+  .stk-cell { display:inline-flex; align-items:center; gap:5px; cursor:help; padding:2px 4px; border-radius:6px; transition:background .15s; }
   .stk-cell:hover, .stk-cell:focus-visible { background:#fdf6ee; outline:none; }
   .stk-icon { width:13px; height:13px; color:#d4a373; flex-shrink:0; }
-  .stk-cell::after { content:''; position:absolute; bottom:100%; right:50%; width:8px; height:8px; transform:translateX(50%) rotate(45deg); background:#fff; border:1px solid #f0dfc0; border-bottom:none; border-left:none; box-shadow:none; opacity:0; pointer-events:none; transition:opacity .15s; margin-bottom:-4px; z-index:101; }
-  .stk-cell:hover::after, .stk-cell:focus-visible::after, .stk-cell:focus-within::after { opacity:1; }
-  .stk-tip { position:absolute; bottom:calc(100% + 6px); right:50%; transform:translateX(50%); background:#fff; border:1px solid #f0dfc0; border-radius:12px; padding:8px 10px; min-width:160px; box-shadow:0 6px 20px rgba(0,0,0,.08); opacity:0; pointer-events:none; transition:opacity .15s; z-index:100; }
-  .stk-cell:hover .stk-tip, .stk-cell:focus-visible .stk-tip, .stk-cell:focus-within .stk-tip { opacity:1; pointer-events:auto; }
+  /* טולטיפ צף ברמת body — לא נחתך ע"י overflow של הטבלה */
+  #stk-floating-tip { position:fixed; background:#fff; border:1px solid #f0dfc0; border-radius:12px; padding:8px 10px; min-width:160px; box-shadow:0 6px 20px rgba(0,0,0,.1); z-index:9999; pointer-events:none; opacity:0; transform:translateY(4px); transition:opacity .12s, transform .12s; font-family:inherit; direction:rtl; }
+  #stk-floating-tip.is-open { opacity:1; transform:translateY(0); }
   .stk-tip-title { font-size:10px; font-weight:800; color:#9a8e8a; letter-spacing:.06em; padding-bottom:5px; margin-bottom:5px; border-bottom:1px solid #f5ece7; text-align:right; }
   .stk-tip-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:3px 0; font-size:11px; }
   .stk-tip-row + .stk-tip-row { border-top:1px dashed #fdf6ee; }
@@ -3492,6 +3491,7 @@ function initERP(user) {
 
   // Register delegations ONCE
   document.getElementById('tbl-body').addEventListener('click', handleRowAction);
+  initStockSizesTooltip();
   document.getElementById('orders-body').addEventListener('change', handleOrderStatusChange);
   document.getElementById('orders-body').addEventListener('click', handleOrdersClick);
   document.getElementById('inquiries-body').addEventListener('change', handleInquiryStatusChange);
@@ -4574,6 +4574,86 @@ const BADGE_CLASS = {
   'מבצע':'bg-red-50 text-red-500 border border-red-200',
 };
 
+// ── Stock-by-size tooltip (טולטיפ צף לטבעות עם מידות) ───────────
+// מציג חלון פירוט מלאי בריחוף על תא המלאי בטבלת הקטלוג.
+// משתמש ב-position:fixed כדי לא להיחתך ע"י overflow של עטיפת הטבלה.
+function initStockSizesTooltip() {
+  const tbody = document.getElementById('tbl-body');
+  if (!tbody || tbody._stkInited) return;
+  tbody._stkInited = true;
+
+  let tipEl = null;
+  const ensureTip = () => {
+    if (tipEl) return tipEl;
+    tipEl = document.createElement('div');
+    tipEl.id = 'stk-floating-tip';
+    tipEl.setAttribute('role', 'tooltip');
+    document.body.appendChild(tipEl);
+    return tipEl;
+  };
+
+  const showFor = (cell) => {
+    const raw = cell.getAttribute('data-stk-sizes');
+    if (!raw) return;
+    let sizes;
+    try { sizes = JSON.parse(raw); } catch { return; }
+    if (!Array.isArray(sizes) || !sizes.length) return;
+
+    const rowsHTML = sizes.map(s => {
+      let qty;
+      if (s.stock === null) qty = `<span class="stk-tip-qty untracked">∞</span>`;
+      else if (s.stock === 0) qty = `<span class="stk-tip-qty oos">אזל</span>`;
+      else qty = `<span class="stk-tip-qty">${s.stock}</span>`;
+      return `<div class="stk-tip-row"><span class="stk-tip-size">מידה ${esc(String(s.size))}</span>${qty}</div>`;
+    }).join('');
+
+    const tip = ensureTip();
+    tip.innerHTML = `<div class="stk-tip-title">פירוט מלאי לפי מידה</div>${rowsHTML}`;
+
+    // מיקום מעל התא; אם אין מקום למעלה — מציגים מתחת
+    const r = cell.getBoundingClientRect();
+    tip.style.visibility = 'hidden';
+    tip.classList.add('is-open');
+    const tw = tip.offsetWidth;
+    const th = tip.offsetHeight;
+    const margin = 8;
+
+    let top = r.top - th - margin;
+    if (top < 8) top = r.bottom + margin;
+
+    let left = r.left + (r.width / 2) - (tw / 2);
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+
+    tip.style.top  = top + 'px';
+    tip.style.left = left + 'px';
+    tip.style.visibility = '';
+  };
+
+  const hide = () => {
+    if (tipEl) tipEl.classList.remove('is-open');
+  };
+
+  tbody.addEventListener('mouseover', e => {
+    const cell = e.target.closest('.stk-cell');
+    if (cell && tbody.contains(cell)) showFor(cell);
+  });
+  tbody.addEventListener('mouseout', e => {
+    const cell = e.target.closest('.stk-cell');
+    if (!cell) return;
+    // הסתר רק אם יוצאים מהתא לחלוטין (relatedTarget לא בתוכו)
+    if (!cell.contains(e.relatedTarget)) hide();
+  });
+  tbody.addEventListener('focusin', e => {
+    const cell = e.target.closest('.stk-cell');
+    if (cell) showFor(cell);
+  });
+  tbody.addEventListener('focusout', e => {
+    if (e.target.closest('.stk-cell')) hide();
+  });
+  // הסתר בגלילה כדי שלא יישאר תלוי במיקום ישן
+  window.addEventListener('scroll', hide, { capture: true, passive: true });
+}
+
 function renderTable() {
   let list = allProducts.filter(p => {
     if (searchQ && !(p.name?.toLowerCase().includes(searchQ)||p.sku?.toLowerCase().includes(searchQ))) return false;
@@ -4633,15 +4713,31 @@ function renderTable() {
     const total = productStockTotal(p);
     const isOOS = productIsOOS(p);
     const outSizes = productSizeStockouts(p);
+    const ringSizes = _ringSizes(p);
     let stockHTML;
-    if (isOOS) {
+    if (ringSizes.length) {
+      // טבעת עם מידות — תצוגה עם אייקון שכבות שמסמן שיש פירוט בריחוף
+      const sizesData = ringSizes.map(s => ({
+        size: String(s.size),
+        stock: Number.isFinite(s.stock) ? s.stock : null
+      }));
+      const icon = `<svg class="stk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`;
+      let summary;
+      if (isOOS) {
+        summary = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400">אזל</span>`;
+      } else if (outSizes.length) {
+        const sizeLabel = outSizes.length === 1 ? `מידה ${esc(outSizes[0])} אזלה` : `${outSizes.length} מידות אזלו`;
+        const totalTxt = total !== null ? `<span class="text-xs text-gray-600 font-semibold">${total}</span>` : '';
+        summary = `${totalTxt}<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-500">${sizeLabel}</span>`;
+      } else if (total !== null) {
+        summary = `<span class="text-xs text-gray-600 font-semibold">${total}</span>`;
+      } else {
+        summary = `<span class="text-xs text-gray-400">${ringSizes.length} מידות</span>`;
+      }
+      const sizesAttr = JSON.stringify(sizesData).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      stockHTML = `<span class="stk-cell" tabindex="0" data-stk-sizes="${sizesAttr}" aria-label="פירוט מלאי לפי מידה">${summary}${icon}</span>`;
+    } else if (isOOS) {
       stockHTML = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400">אזל</span>`;
-    } else if (outSizes.length) {
-      const sizeLabel = outSizes.length === 1
-        ? `מידה ${esc(outSizes[0])} אזלה`
-        : `${outSizes.length} מידות אזלו`;
-      const totalTxt = total !== null ? `<span class="text-xs text-gray-600 font-semibold">${total}</span>` : '';
-      stockHTML = `<div class="flex flex-wrap items-center gap-1 justify-end">${totalTxt}<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-500" title="מידות שאזלו">${sizeLabel}</span></div>`;
     } else if (total !== null) {
       stockHTML = `<span class="text-xs text-gray-600 font-semibold">${total}</span>`;
     } else {
@@ -4737,6 +4833,9 @@ function openModal(mode, product=null) {
   }
   syncRingOptionsVisibility();
   renderRingSizes();
+  // Setting select.value via JS doesn't fire 'change' — refresh the sub-cat
+  // select + edit button manually so they reflect the loaded product's category.
+  if (typeof refreshSubCatSelect === 'function') refreshSubCatSelect();
 
   const titles     = {add:'מוצר חדש',edit:'עריכת מוצר',duplicate:'שכפול מוצר'};
   const saveLabels = {add:'שמרי מוצר',edit:'עדכני מוצר',duplicate:'שמרי עותק'};
@@ -4854,6 +4953,9 @@ onSnapshot(doc(db, SUBCAT_DOC), (snap) => {
 }, (err) => console.warn('[subcat] config subscribe failed:', err));
 
 // ───── Modal: edit sub-categories for the currently-selected main category ─────
+// Note: visibility is controlled via the [data-v] attribute (matches the rest of
+// the dashboard's modals), because the global [data-v]{display:none!important}
+// CSS rule overrides any inline style.display.
 function openSubCatModal() {
   const cat = getCurrentMainCat();
   if (!cat) return;
@@ -4863,11 +4965,15 @@ function openSubCatModal() {
   document.getElementById('subcat-new-input').value = '';
   document.getElementById('subcat-err').textContent = '';
   renderSubCatList();
-  document.getElementById('subcat-modal').style.display = 'flex';
+  const modal = document.getElementById('subcat-modal');
+  modal.removeAttribute('data-v');
+  modal.style.display = 'flex';
 }
 
 function closeSubCatModal() {
-  document.getElementById('subcat-modal').style.display = 'none';
+  const modal = document.getElementById('subcat-modal');
+  modal.setAttribute('data-v', '');
+  modal.style.display = 'none';
 }
 window.closeSubCatModal = closeSubCatModal;
 
