@@ -132,6 +132,29 @@ let shopFilterOnSale   = false;
 // View state
 let currentView  = 'home';
 let previousView = 'home';
+let _suppressUrlSync = false;   // skip URL push during init/popstate
+
+// ── URL sync ──────────────────────────────────────────────────
+function _syncUrlForView(view) {
+  if (_suppressUrlSync) return;
+  const params = new URLSearchParams(window.location.search);
+  if (view === 'home') {
+    params.delete('product');
+    params.delete('view');
+  } else if (view === 'product' && currentProduct) {
+    params.delete('view');
+    params.set('product', currentProduct.id);
+  } else if (view === 'shop' || view === 'profile' || view === 'checkout') {
+    params.delete('product');
+    params.set('view', view);
+  } else {
+    return; // thank-you and others: leave URL alone
+  }
+  const qs       = params.toString();
+  const newUrl   = window.location.pathname + (qs ? '?' + qs : '');
+  const curUrl   = window.location.pathname + window.location.search;
+  if (newUrl !== curUrl) window.history.pushState({ view }, '', newUrl);
+}
 
 // ── View management ────────────────────────────────────────────
 function switchView(view) {
@@ -143,6 +166,7 @@ function switchView(view) {
   const el = document.getElementById('view-' + view);
   if (el) el.style.display = 'block';
   window.scrollTo(0, 0);
+  _syncUrlForView(view);
   if (view === 'home')       renderHome();
   if (view === 'shop')       renderShop();
   if (view === 'product')    renderProductView();
@@ -752,27 +776,96 @@ function renderProductView() {
   if (isAdjRing) {
     ringHtml = `<div class="pv-ring-note">${t('pv_ring_adjustable','✦ טבעת מתכווננת — ניתנת להגדלה והקטנה לגודל המתאים לך')}</div>`;
   } else if (needsSize) {
-    const options = ringSizes.map(s => {
+    const optionItems = ringSizes.map(s => {
       const label = esc(String(s.size));
       const isOut = s.stock === 0;
-      const text  = isOut
-        ? `${label} — ${t('pv_size_out','אזל במלאי')}`
-        : `${t('pv_size_label_only','מידה')} ${label}`;
-      return `<option value="${label}" ${isOut ? 'disabled' : ''}>${text}</option>`;
+      return `<li class="pv-size-option${isOut ? ' pv-size-option--out' : ''}" role="option"
+                  data-size="${label}" ${isOut ? 'aria-disabled="true"' : ''}>
+        <span>${t('pv_size_label_only','מידה')} ${label}</span>
+        ${isOut ? `<span class="pv-size-out-tag">${t('pv_size_out','אזל במלאי')}</span>` : ''}
+      </li>`;
     }).join('');
     ringHtml = `
       <div class="pv-sizes" id="pv-sizes">
-        <label class="pv-sizes-title" for="pv-size-select">${t('pv_choose_size','בחרי מידה')}</label>
-        <div class="pv-size-select-wrap">
-          <select id="pv-size-select" class="pv-size-select">
-            <option value="" disabled selected>${t('pv_size_placeholder','— בחרי מידה —')}</option>
-            ${options}
-          </select>
-          <span class="pv-size-select-arrow" aria-hidden="true">▾</span>
+        <div class="pv-sizes-row">
+          <label class="pv-sizes-title">${t('pv_choose_size','בחרי מידה')}</label>
+          <button type="button" class="pv-size-guide-btn" id="pv-size-guide-open" aria-haspopup="dialog">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 15.3 8.7 2.7a1 1 0 0 0-1.4 0L2.7 7.3a1 1 0 0 0 0 1.4l12.6 12.6a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4z"/><path d="m7.5 7.5 3 3"/><path d="m10.5 4.5 3 3"/><path d="m4.5 10.5 3 3"/><path d="m13.5 13.5 3 3"/></svg>
+            <span>${t('pv_size_guide','מדריך מידות')}</span>
+          </button>
         </div>
+        <div class="pv-size-dd" id="pv-size-dd">
+          <button type="button" class="pv-size-trigger" id="pv-size-trigger" aria-haspopup="listbox" aria-expanded="false">
+            <span class="pv-size-current">${t('pv_size_placeholder','— בחרי מידה —')}</span>
+            <svg class="pv-size-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <ul class="pv-size-options" id="pv-size-options" role="listbox" hidden>
+            ${optionItems}
+          </ul>
+        </div>
+        <input type="hidden" id="pv-size-select" />
         <span class="pv-sizes-help">${t('pv_size_help','* יש לבחור מידה לפני הוספה לסל')}</span>
       </div>`;
   }
+
+  // Size guide modal — only rendered when sizes are needed
+  const sizeGuideHtml = needsSize ? `
+    <div class="pv-guide-overlay" id="pv-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="pv-guide-title" hidden>
+      <div class="pv-guide-modal">
+        <div class="pv-guide-header">
+          <h2 class="pv-guide-title" id="pv-guide-title">${t('pv_guide_title','בחר מידה — מדריך מידות וטיפים')}</h2>
+          <button type="button" class="pv-guide-close" id="pv-guide-close" aria-label="${t('pv_guide_close','סגור')}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="pv-guide-body">
+          <section class="pv-guide-section">
+            <h3 class="pv-guide-h3">${t('pv_guide_h_measure','מדידת האצבע')}</h3>
+            <p>${t('pv_guide_measure_p','אפשר להשתמש בכלי מדידה פשוטים מהבית כדי למדוד במהירות את היקף האצבע.')}</p>
+            <ol class="pv-guide-list">
+              <li>${t('pv_guide_step1','כרכי חוט או רצועת נייר דקה סביב האצבע במקום שבו תיענד הטבעת.')}</li>
+              <li>${t('pv_guide_step2','סמני את הנקודה שבה החוט נפגש (הצמדה נוחה — לא לוחצת).')}</li>
+              <li>${t('pv_guide_step3','מדדי את האורך במ״מ עם סרגל — הערך הזה הוא היקף האצבע.')}</li>
+              <li>${t('pv_guide_step4','השוואי את היקף האצבע לטבלת המידות למטה.')}</li>
+            </ol>
+          </section>
+          <section class="pv-guide-section">
+            <h3 class="pv-guide-h3">${t('pv_guide_h_choose','איך לבחור את המידה הנכונה')}</h3>
+            <ul class="pv-guide-tips">
+              <li>${t('pv_guide_tip1','מומלץ למדוד את האצבע בתחילת ובסוף היום, מכיוון שגודל האצבע משתנה.')}</li>
+              <li>${t('pv_guide_tip2','הטבעת צריכה להיות צמודה ובטוחה, אך עדיין להחליק על האצבע בקלות.')}</li>
+              <li>${t('pv_guide_tip3','מתלבטת בין שתי מידות? עדיף לבחור מידה גדולה יותר.')}</li>
+              <li>${t('pv_guide_tip4','עבור טבעות סטייטמנט רחבות, מומלץ לקחת מידה אחת גדולה יותר ממידת הטבעת הרגילה שלך.')}</li>
+            </ul>
+          </section>
+          <section class="pv-guide-section">
+            <h3 class="pv-guide-h3">${t('pv_guide_h_table','טבלת מידות')}</h3>
+            <p class="pv-guide-table-intro">${t('pv_guide_table_intro','לכל טבעת מבחר ייחודי של מידות זמינות.')}</p>
+            <div class="pv-guide-table-wrap">
+              <table class="pv-guide-table">
+                <thead>
+                  <tr>
+                    <th>${t('pv_guide_col_circ','היקף (מ״מ)')}</th>
+                    <th>${t('pv_guide_col_diam','קוטר (מ״מ)')}</th>
+                    <th>${t('pv_guide_col_us','מידה (US)')}</th>
+                    <th>${t('pv_guide_col_ukeu','מידה (UK/EU)')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>48</td><td>15.3</td><td>4.5</td><td>48</td></tr>
+                  <tr><td>50</td><td>16.0</td><td>5</td><td>50</td></tr>
+                  <tr><td>52</td><td>16.5</td><td>6</td><td>52</td></tr>
+                  <tr><td>54</td><td>17.2</td><td>7</td><td>54</td></tr>
+                  <tr><td>56</td><td>17.8</td><td>7.5</td><td>56</td></tr>
+                  <tr><td>58</td><td>18.5</td><td>8.5</td><td>58</td></tr>
+                  <tr><td>60</td><td>19.0</td><td>9</td><td>60</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>` : '';
 
   const actionHtml = oos
     ? `<div style="padding:14px 18px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca;font-size:0.9rem;color:#b91c1c;text-align:center;">${t('pv_oos_msg','המוצר אזל מהמלאי — חיזרי בקרוב')}</div>`
@@ -807,7 +900,8 @@ function renderProductView() {
           </div>
         </div>
       </div>
-    </section>`;
+    </section>
+    ${sizeGuideHtml}`;
 
   if (typeof applyLang === 'function') applyLang();
 
@@ -825,11 +919,72 @@ function renderProductView() {
   });
 
   if (!oos) {
-    // Ring size dropdown
-    const sizeSelect = el.querySelector('#pv-size-select');
-    if (sizeSelect) {
-      sizeSelect.addEventListener('change', () => {
-        pvSelectedSize = sizeSelect.value || '';
+    // Custom size dropdown (replaces native <select> for full styling control)
+    const sizeDD       = el.querySelector('#pv-size-dd');
+    const sizeTrigger  = el.querySelector('#pv-size-trigger');
+    const sizeOptsList = el.querySelector('#pv-size-options');
+    const sizeCurrent  = el.querySelector('.pv-size-current');
+    const sizeHidden   = el.querySelector('#pv-size-select');
+
+    if (sizeDD && sizeTrigger && sizeOptsList) {
+      const closeDD = () => {
+        sizeDD.classList.remove('is-open');
+        sizeOptsList.hidden = true;
+        sizeTrigger.setAttribute('aria-expanded', 'false');
+      };
+      const openDD = () => {
+        sizeDD.classList.add('is-open');
+        sizeOptsList.hidden = false;
+        sizeTrigger.setAttribute('aria-expanded', 'true');
+      };
+
+      sizeTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (sizeDD.classList.contains('is-open')) closeDD(); else openDD();
+      });
+
+      sizeOptsList.addEventListener('click', (e) => {
+        const opt = e.target.closest('.pv-size-option');
+        if (!opt || opt.classList.contains('pv-size-option--out')) return;
+        const val = opt.dataset.size;
+        pvSelectedSize = val;
+        if (sizeHidden) sizeHidden.value = val;
+        sizeOptsList.querySelectorAll('.pv-size-option').forEach(o => o.classList.remove('pv-size-option--selected'));
+        opt.classList.add('pv-size-option--selected');
+        sizeCurrent.textContent = `${t('pv_size_label_only','מידה')} ${val}`;
+        sizeCurrent.classList.add('pv-size-current--filled');
+        closeDD();
+      });
+
+      // Close on outside click / Esc
+      const docClick = (e) => { if (!sizeDD.contains(e.target)) closeDD(); };
+      const docKey   = (e) => { if (e.key === 'Escape') closeDD(); };
+      document.addEventListener('click', docClick);
+      document.addEventListener('keydown', docKey);
+    }
+
+    // Size guide modal — open/close
+    const guideOverlay = el.querySelector('#pv-guide-overlay');
+    const guideOpen    = el.querySelector('#pv-size-guide-open');
+    const guideClose   = el.querySelector('#pv-guide-close');
+    if (guideOverlay && guideOpen) {
+      const openGuide = () => {
+        guideOverlay.hidden = false;
+        guideOverlay.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      };
+      const closeGuide = () => {
+        guideOverlay.classList.remove('is-open');
+        guideOverlay.hidden = true;
+        document.body.style.overflow = '';
+      };
+      guideOpen.addEventListener('click', openGuide);
+      guideClose?.addEventListener('click', closeGuide);
+      guideOverlay.addEventListener('click', (e) => {
+        if (e.target === guideOverlay) closeGuide();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && guideOverlay.classList.contains('is-open')) closeGuide();
       });
     }
 
@@ -2183,6 +2338,9 @@ function subscribeProducts() {
       const _pending = allProducts.find(p => p.id === pendingProductId);
       pendingProductId = null;
       if (_pending) { showProduct(_pending); return; }
+      // Product not found → fall back to home
+      switchView('home');
+      return;
     }
     if      (currentView === 'home')                        renderHome();
     else if (currentView === 'shop')                        renderShop();
@@ -2345,39 +2503,66 @@ function init() {
   injectViews();
   setupNav();
   updateCartBadge();
+
+  const _params       = new URLSearchParams(window.location.search);
+  const _viewParam    = _params.get('view');
+  const _productParam = _params.get('product');
+  const _paymentOk    = _params.get('payment') === 'success';
+  const hasDeepLink   = !!(_productParam || _paymentOk ||
+                           (_viewParam && ['shop', 'profile', 'checkout'].includes(_viewParam)));
+
+  _suppressUrlSync = true;
+
+  // Hide home view inline so removing the .view-routing class doesn't reveal it
+  // before the deep-linked view (product/etc) has been rendered.
   const homeEl = document.getElementById('view-home');
-  if (homeEl) homeEl.style.display = 'block';
+  if (homeEl) {
+    if (hasDeepLink) homeEl.style.display = 'none';
+    else             homeEl.style.display = 'block';
+  }
+
   subscribeProducts();
   subscribeAuth();
 
-  // Handle redirect from other pages: index.html?view=profile / checkout / shop
-  const _params    = new URLSearchParams(window.location.search);
-  const _viewParam = _params.get('view');
   if (_viewParam && ['shop', 'profile', 'checkout'].includes(_viewParam)) {
-    window.history.replaceState({}, '', window.location.pathname);
     switchView(_viewParam);
   }
 
-  // Handle ?product=ID redirect from shop.html card click
-  const _productParam = _params.get('product');
   if (_productParam) {
-    window.history.replaceState({}, '', window.location.pathname);
     pendingProductId = _productParam;
-    // Products may not be loaded yet — subscribeProducts will resolve it
-    // If already loaded, try immediately
     if (productsLoaded) {
       const _p = allProducts.find(p => p.id === _productParam);
       if (_p) { pendingProductId = null; showProduct(_p); }
     }
   }
 
-  // Handle ?payment=success callback (e.g. from external payment gateway)
-  if (_params.get('payment') === 'success') {
+  if (_paymentOk) {
     const _oid = _params.get('orderId') || localStorage.getItem('charming_last_order') || null;
     window.history.replaceState({}, '', window.location.pathname);
     if (_oid) orderIdGenerated = _oid;
     switchView('thank-you');
   }
+
+  _suppressUrlSync = false;
+  document.documentElement.classList.remove('view-routing');
+
+  // Browser back/forward → resync view from URL
+  window.addEventListener('popstate', () => {
+    const p   = new URLSearchParams(window.location.search);
+    const pid = p.get('product');
+    const v   = p.get('view');
+    _suppressUrlSync = true;
+    if (pid) {
+      const found = allProducts.find(x => x.id === pid);
+      if (found) showProduct(found);
+      else { pendingProductId = pid; switchView('home'); }
+    } else if (v && ['shop', 'profile', 'checkout'].includes(v)) {
+      switchView(v);
+    } else {
+      switchView('home');
+    }
+    _suppressUrlSync = false;
+  });
 
   // Promotional popup — 5 s delay, once per 7 days
   setTimeout(injectPromoPopup, 5000);
