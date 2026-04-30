@@ -11235,7 +11235,10 @@ async function ensureCalendarToken() {
 function buildCalendarEvent(w) {
   const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
   if (!d) return null;
+  // Calendar block starts 30 min before the actual event (buffer for arrival/setup)
+  const calStart = new Date(d.getTime() - 30 * 60 * 1000);
   const end = new Date(d.getTime() + 2 * 60 * 60 * 1000);
+  const actualTimeStr = d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
   const pay = w.payment || {};
   const total = w.total || 0;
   const advanceAmount = pay.advanceAmount || 0;
@@ -11245,6 +11248,8 @@ function buildCalendarEvent(w) {
     ? (balancePaid ? `שולם במלואו (${total} ₪)` : `מקדמה ${advanceAmount} ₪ — יתרה לתשלום: ${remaining} ₪`)
     : `לא שולמה מקדמה — סה"כ לתשלום: ${total} ₪`;
   const desc = [
+    `שעת התחלה בפועל: ${actualTimeStr} (היומן מוקדם ב-30 דק' לבאפר הגעה)`,
+    ``,
     `שם מלא איש קשר: ${w.customerName || ''}`,
     `שם החוגג/חוגגת: ${w.celebrant || ''}`,
     `לכבוד מה האירוע: ${w.occasion || ''}`,
@@ -11260,7 +11265,7 @@ function buildCalendarEvent(w) {
     summary: `${w.celebrant || w.customerName}, אירוע charming`,
     location: fullAddress,
     description: desc,
-    start: { dateTime: d.toISOString(), timeZone: 'Asia/Jerusalem' },
+    start: { dateTime: calStart.toISOString(), timeZone: 'Asia/Jerusalem' },
     end: { dateTime: end.toISOString(), timeZone: 'Asia/Jerusalem' },
     reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 1440 }, { method: 'popup', minutes: 120 }] },
   };
