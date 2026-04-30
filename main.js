@@ -26,6 +26,17 @@ if (hamburger && navLinks) {
     document.body.appendChild(backdrop);
   }
 
+  // Inject a dedicated close (X) button at the top of the drawer
+  if (!navLinks.querySelector('.nav-drawer-close')) {
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'nav-drawer-close';
+    closeBtn.setAttribute('aria-label', 'סגור תפריט');
+    closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    navLinks.insertBefore(closeBtn, navLinks.firstChild);
+    closeBtn.addEventListener('click', () => closeDrawer());
+  }
+
   function closeDrawer() {
     navLinks.classList.remove('is-open');
     backdrop.classList.remove('is-open');

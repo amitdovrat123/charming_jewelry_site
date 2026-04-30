@@ -163,6 +163,30 @@ ul { list-style: none; }
 }
 .nav-links.is-open { transform: translateX(0); }
 
+/* Dedicated close (X) button injected by main.js — top-left of drawer
+   (in RTL: physical left = the inner edge closest to the page) */
+.nav-drawer-close {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 5;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.nav-drawer-close:hover {
+  background: var(--pink-light);
+  color: var(--pink-deep);
+}
+
 .nav-links li { list-style: none; }
 
 /* Default link rows */
