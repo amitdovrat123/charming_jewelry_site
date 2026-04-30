@@ -757,7 +757,6 @@ function renderProductView() {
     : `<span style="font-size:1.6rem;font-weight:700;color:var(--ink);">${price} ₪</span>`;
 
   const metaChips = [
-    data.category && `<span style="background:var(--pink-light);color:var(--pink-deep);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(localCat(data.category))}</span>`,
     badge         && `<span style="background:var(--pink);color:#fff;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:50px;">${esc(localBadge(badge))}</span>`,
   ].filter(Boolean).join('');
 
