@@ -148,7 +148,8 @@ function cardHTML(product) {
     ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
     : `<span class="sp-card-price">${sp} ₪</span>`;
 
-  const favBtn = `<button class="sp-card-fav" data-fav-id="${sid}" aria-label="${t('shop_add_to_wishlist','הוספה למוצרים שאהבתי')}" type="button">
+  const isFav  = !!(window.WishlistAPI && window.WishlistAPI.isInWishlist(id));
+  const favBtn = `<button class="sp-card-fav${isFav ? ' is-fav' : ''}" data-fav-id="${sid}" aria-label="${t('shop_add_to_wishlist','הוספה למוצרים שאהבתי')}" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
   </button>`;
 
@@ -388,11 +389,19 @@ function render() {
     card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   });
 
-  // Wishlist heart button (visual toggle only — full logic later)
+  // Wishlist heart button — toggle via WishlistAPI (persists in localStorage)
   el.querySelectorAll('.sp-card-fav').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      btn.classList.toggle('is-fav');
+      const id = btn.getAttribute('data-fav-id');
+      const product = allProducts.find(p => p.id === id);
+      if (!product || !window.WishlistAPI) return;
+      window.WishlistAPI.toggle({
+        id,
+        name:     localName(product.data),
+        price:    sellPrice(product.data),
+        imageUrl: getImages(product.data)[0] || '',
+      });
     });
   });
 
