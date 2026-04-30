@@ -114,8 +114,10 @@ ul { list-style: none; }
   align-items: center;
   gap: 4px;
 }
-.nav-side-end   { justify-self: end; }
-.nav-side-start { justify-self: start; }
+/* In RTL grid, "start" of the inline axis is the right edge,
+   so end-side group aligns start (right) and start-side aligns end (left). */
+.nav-side-end   { justify-self: start; }
+.nav-side-start { justify-self: end; }
 
 .logo {
   font-family: 'Heebo', sans-serif;
@@ -3143,23 +3145,23 @@ ul { list-style: none; }
 /* Nav icon button */
 .nav-icon-btn {
   position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid var(--sand-dark);
-  background: var(--sand-light);
+  width: 36px;
+  height: 36px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
   color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.25s, border-color 0.25s, transform 0.2s;
+  transition: color 0.2s, transform 0.2s;
   flex-shrink: 0;
+  padding: 0;
 }
 
 .nav-icon-btn:hover {
-  background: var(--pink-light);
-  border-color: var(--pink);
+  color: var(--pink-deep);
   transform: translateY(-1px);
 }
 
@@ -3199,7 +3201,7 @@ ul { list-style: none; }
 }
 
 @media (max-width: 768px) {
-  .nav-icon-btn { width: 36px; height: 36px; }
+  .nav-icon-btn { width: 34px; height: 34px; }
 }
 
 /* Product cards v2 — cursor pointer already set inline, hover handled by existing .shop-card styles */
