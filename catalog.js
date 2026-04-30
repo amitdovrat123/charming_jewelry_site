@@ -2364,6 +2364,12 @@ function subscribeProducts() {
 
     // Handle ?product=ID redirect from shop.html / direct URL
     if (pendingProductId) {
+      // Already rendered by the fast-path (sessionStorage / getDoc) — skip
+      // showProduct to avoid a visible re-render flash.
+      if (currentProduct && currentProduct.id === pendingProductId) {
+        pendingProductId = null;
+        return;
+      }
       const _pending = allProducts.find(p => p.id === pendingProductId);
       if (_pending) {
         pendingProductId = null;
@@ -2620,7 +2626,10 @@ function init() {
     switchView(_viewParam);
   }
 
-  if (_productParam) {
+  // Only queue pendingProductId if the fast-path (sessionStorage / getDoc)
+  // hasn't already rendered the product. Otherwise subscribeProducts would
+  // call showProduct() a second time and cause a visible re-render flash.
+  if (_productParam && !(currentProduct && currentProduct.id === _productParam)) {
     pendingProductId = _productParam;
     if (productsLoaded) {
       const _p = allProducts.find(p => p.id === _productParam);
