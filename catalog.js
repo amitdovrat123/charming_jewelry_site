@@ -761,8 +761,9 @@ function renderProductView() {
     badge         && `<span style="background:var(--pink);color:#fff;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:50px;">${esc(localBadge(badge))}</span>`,
   ].filter(Boolean).join('');
 
-  // Material / color shown as plain inline text (label + value), no pills
+  // SKU / material / color shown as plain inline text (label + value), no pills
   const metaText = [
+    data.sku      && `<span><span style="color:var(--muted);">SKU:</span> ${esc(data.sku)}</span>`,
     data.material && `<span><span style="color:var(--muted);">${t('pv_material','חומר')}:</span> ${esc(localMaterial(data.material))}</span>`,
     data.color    && `<span><span style="color:var(--muted);">${t('pv_color','צבע')}:</span> ${esc(localColor(data.color))}</span>`,
   ].filter(Boolean).join('<span style="color:var(--sand-dark);">|</span>');
@@ -904,7 +905,6 @@ function renderProductView() {
             ${thumbnails}
           </div>
           <div style="display:flex;flex-direction:column;gap:18px;">
-            ${data.sku ? `<p style="font-size:0.75rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:0;">SKU: ${esc(data.sku)}</p>` : ''}
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;">
               <h1 style="font-size:1.75rem;font-weight:700;color:var(--ink);margin:0;line-height:1.25;flex:1;">${esc(localName(data))}</h1>
               <button type="button" class="pv-fav-btn${(window.WishlistAPI && window.WishlistAPI.isInWishlist(id)) ? ' is-fav' : ''}" data-fav-id="${sid}" id="pv-fav-btn" aria-label="${t('pv_add_to_wishlist','הוספה למוצרים שאהבתי')}">
