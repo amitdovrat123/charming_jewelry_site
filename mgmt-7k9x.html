@@ -1009,7 +1009,7 @@
             <button onclick="closeWsForm()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
           </div>
           <div class="px-6 py-5">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 [&>*]:min-w-0">
+          <div class="grid grid-cols-2 gap-3 sm:gap-4 [&>*]:min-w-0">
             <div>
               <label class="lbl">שם מלא איש קשר *</label>
               <input id="ws-name" type="text" placeholder="שם מלא" class="inp" required />
@@ -1069,7 +1069,7 @@
               <p id="ws-arrival-hint" class="text-[10px] text-gray-400 mt-1">לא מושפע מההנחה</p>
             </div>
             <!-- Pricing breakdown panel -->
-            <div id="ws-pricing-panel" style="display:none" class="lg:col-span-2 p-4 bg-[#fdf6ee] border border-[#f0dfc0] rounded-xl space-y-2">
+            <div id="ws-pricing-panel" style="display:none" class="col-span-2 p-4 bg-[#fdf6ee] border border-[#f0dfc0] rounded-xl space-y-2">
               <p class="text-[10px] font-bold text-[#9a8e8a] uppercase tracking-wide">פירוט תמחור</p>
               <div id="ws-pricing-lines" class="space-y-1.5"></div>
               <div id="ws-pricing-mode" style="display:none" class="mt-2 p-2.5 bg-white rounded-lg border border-[#e8cfc4] space-y-1.5">
@@ -7074,9 +7074,44 @@ async function executeWscPay(type, wsId) {
 }
 window.executeWscPay = executeWscPay;
 
+// Stack container for "expense already exists" banners — top-center, allows multiple to coexist.
+function getExpenseBannerStack() {
+  let stack = document.getElementById('expense-banner-stack');
+  if (!stack) {
+    stack = document.createElement('div');
+    stack.id = 'expense-banner-stack';
+    stack.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
+    document.body.appendChild(stack);
+  }
+  return stack;
+}
+
+// Banner shown when an auto-expense reminder is suppressed because the expense already exists.
+// Stacks with other banners (multiple can be visible at once). Auto-dismisses after 4 seconds.
+function showExpenseExistsBanner(message) {
+  const stack = getExpenseBannerStack();
+  const el = document.createElement('div');
+  el.style.cssText = 'pointer-events:auto;background:#fff;border:1px solid #fcd34d;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.15);max-width:340px;width:90vw;overflow:hidden;animation:fadein 0.2s ease;';
+  let closed = false;
+  const close = () => { if (closed) return; closed = true; el.remove(); };
+  el.innerHTML = `<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #fcd34d;display:flex;align-items:center;gap:8px;">
+      <i data-lucide="alert-circle" class="w-4 h-4" style="color:#b45309;"></i>
+      <span style="font-weight:700;font-size:13px;color:#b45309;">הוצאה כבר קיימת</span>
+    </div>
+    <div style="padding:12px 14px;">
+      <p style="font-size:12px;color:#4a3f3c;line-height:1.5;margin:0 0 10px 0;">${message}</p>
+      <button class="exp-banner-ok" style="width:100%;background:#d4a373;color:#fff;border:none;border-radius:50px;padding:7px 0;font-weight:700;font-size:13px;cursor:pointer;">אישור</button>
+    </div>`;
+  stack.appendChild(el);
+  el.querySelector('.exp-banner-ok').onclick = close;
+  if (typeof lucide !== 'undefined') setTimeout(()=>lucide.createIcons(),0);
+  setTimeout(close, 4000);
+}
+
 async function showStaffExpenseReminder(wsId, w) {
-  // Prevent duplicates — silently skip and chain to fuel reminder
+  // If a staff expense already exists — show banner instead of the form, then chain to fuel
   if (await hasExpenseForWorkshop(wsId, 'staff')) {
+    showExpenseExistsBanner('הוצאת עובדת כבר קיימת לסדנא זו בטבלת ההוצאות.');
     showFuelExpenseReminder(wsId);
     return;
   }
@@ -7124,13 +7159,14 @@ async function hasExpenseForWorkshop(wsId, category) {
 }
 
 // Fuel-expense reminder — opens after the staff reminder closes (Add or Skip).
-// Always shows, even if route calc failed (manual entry fallback).
-// Skipped silently if a fuel expense already exists for this workshop.
+// If a fuel expense already exists, shows a banner instead of the form.
 async function showFuelExpenseReminder(wsId) {
   const w = allWorkshops.find(x => x.id === wsId);
   if (!w) return;
-  // Prevent duplicates — silently skip
-  if (await hasExpenseForWorkshop(wsId, 'fuel')) return;
+  if (await hasExpenseForWorkshop(wsId, 'fuel')) {
+    showExpenseExistsBanner('הוצאת דלק כבר קיימת לסדנא זו בטבלת ההוצאות.');
+    return;
+  }
   const wsName = w.celebrant || w.customerName || '';
   const city = w.city || '';
   const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null;
