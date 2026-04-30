@@ -119,6 +119,7 @@ let pendingProductId         = null;   // ?product=ID from shop.html card click
 // Product gallery
 let pvImages   = [];
 let pvSlideIdx = 0;
+let pvSelectedSize = '';
 
 // Shop filters
 let shopFilterCat      = '';
@@ -177,8 +178,10 @@ function loadCart() {
 }
 function saveCart() { localStorage.setItem('charming-cart', JSON.stringify(cart)); }
 
-function addToCart(product, customizationNote) {
-  const existing = cart.find(i => i.id === product.id);
+function addToCart(product, customizationNote, size) {
+  // For sized rings, treat each size as its own line item
+  const matchSize = size || null;
+  const existing = cart.find(i => i.id === product.id && (i.size || null) === matchSize);
   if (existing) {
     existing.qty = (existing.qty || 1) + 1;
     if (customizationNote) existing.customizationNote = customizationNote;
@@ -190,6 +193,7 @@ function addToCart(product, customizationNote) {
       imageUrl:         getImages(product.data)[0] || '',
       qty:              1,
       customizationNote: customizationNote || null,
+      size:             matchSize,
     });
   }
   saveCart();
@@ -223,7 +227,16 @@ function getSale(data)   { return parseInt(data.priceSale    ?? data.salePrice) 
 function getStock(data)  { return data.stockCount ?? data.stock ?? null; }
 function getBadge(data)  { return data.badge || ''; }
 function sellPrice(data) { const p = getPrice(data), s = getSale(data); return (s > 0 && s < p) ? s : p; }
-function isOOS(data)     { const s = getStock(data); return s !== null && s <= 0; }
+function ringSizesOf(data) {
+  return Array.isArray(data.sizes) ? data.sizes.filter(s => s && String(s.size||'').trim() !== '') : [];
+}
+function isOOS(data) {
+  if (data.category === 'טבעות' && !data.isAdjustable) {
+    const sizes = ringSizesOf(data);
+    if (sizes.length) return sizes.every(s => s.stock === 0);
+  }
+  const s = getStock(data); return s !== null && s <= 0;
+}
 
 // ── Toast ──────────────────────────────────────────────────────
 function showToast(msg) {
@@ -681,12 +694,19 @@ function renderProductView() {
   const { data, id } = currentProduct;
   pvImages   = getImages(data);
   pvSlideIdx = 0;
+  pvSelectedSize = '';
 
   const price = getPrice(data);
   const sale  = getSale(data);
   const sp    = sellPrice(data);
   const oos   = isOOS(data);
   const badge = getBadge(data);
+
+  // Ring size info
+  const isRing      = data.category === 'טבעות';
+  const isAdjRing   = isRing && !!data.isAdjustable;
+  const ringSizes   = isRing && !isAdjRing ? ringSizesOf(data) : [];
+  const needsSize   = ringSizes.length > 0;
 
   const priceHtml = (sale > 0 && sale < price)
     ? `<span style="font-size:1.6rem;font-weight:700;color:var(--pink-deep);">${sp} ₪</span>
@@ -718,9 +738,39 @@ function renderProductView() {
       ).join('')}
     </div>` : '';
 
+  // Ring size selector / adjustable note
+  let ringHtml = '';
+  if (isAdjRing) {
+    ringHtml = `<div class="pv-ring-note">${t('pv_ring_adjustable','✦ טבעת מתכווננת — ניתנת להגדלה והקטנה לגודל המתאים לך')}</div>`;
+  } else if (needsSize) {
+    const pills = ringSizes.map(s => {
+      const label  = esc(String(s.size));
+      const stock  = s.stock;
+      const isOut  = stock === 0;
+      const stockTxt = isOut
+        ? t('pv_size_out','אזל')
+        : (stock === null || stock === undefined)
+          ? t('pv_size_in','במלאי')
+          : `${stock} ${t('pv_size_left','במלאי')}`;
+      return `<button type="button" class="pv-size-pill${isOut ? ' pv-size-pill--out' : ''}" data-pv-size="${label}" ${isOut ? 'disabled' : ''}>
+                <span class="pv-size-pill-label">${label}</span>
+                <span class="pv-size-pill-stock">${stockTxt}</span>
+              </button>`;
+    }).join('');
+    ringHtml = `
+      <div class="pv-sizes" id="pv-sizes">
+        <div class="pv-sizes-header">
+          <span class="pv-sizes-title">${t('pv_choose_size','בחרי מידה')}</span>
+          <span class="pv-sizes-help">${t('pv_size_help','* יש לבחור מידה לפני הוספה לסל')}</span>
+        </div>
+        <div class="pv-sizes-list">${pills}</div>
+      </div>`;
+  }
+
   const actionHtml = oos
     ? `<div style="padding:14px 18px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca;font-size:0.9rem;color:#b91c1c;text-align:center;">${t('pv_oos_msg','המוצר אזל מהמלאי — חיזרי בקרוב')}</div>`
     : `<div style="display:flex;flex-direction:column;gap:12px;">
+        ${ringHtml}
         <button id="pv-add-cart" class="btn" style="min-height:48px;font-size:0.97rem;">${t('pv_add_cart','🛒 הוספה לסל')}</button>
         <button id="pv-quick-buy" class="btn btn-outline" style="min-height:48px;font-size:0.97rem;">${t('pv_quick_buy','קנייה מהירה')}</button>
        </div>`;
@@ -768,10 +818,41 @@ function renderProductView() {
   });
 
   if (!oos) {
-    el.querySelector('#pv-add-cart').addEventListener('click', () => { addToCart(currentProduct); });
+    // Ring size pill selection
+    el.querySelectorAll('[data-pv-size]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        pvSelectedSize = btn.dataset.pvSize;
+        el.querySelectorAll('[data-pv-size]').forEach(b =>
+          b.classList.toggle('pv-size-pill--active', b.dataset.pvSize === pvSelectedSize));
+      });
+    });
+
+    const requireSize = () => {
+      if (needsSize && !pvSelectedSize) {
+        showToast(t('pv_size_required','יש לבחור מידה'));
+        const sizesEl = el.querySelector('#pv-sizes');
+        if (sizesEl) {
+          sizesEl.classList.add('pv-sizes--shake');
+          setTimeout(() => sizesEl.classList.remove('pv-sizes--shake'), 500);
+        }
+        return false;
+      }
+      return true;
+    };
+
+    el.querySelector('#pv-add-cart').addEventListener('click', () => {
+      if (!requireSize()) return;
+      addToCart(currentProduct, null, pvSelectedSize || (isAdjRing ? 'מתכווננת' : null));
+    });
     el.querySelector('#pv-quick-buy').addEventListener('click', () => {
+      if (!requireSize()) return;
       isQuickBuy    = true;
-      checkoutItems = [{ id, name: data.name, price: sellPrice(data), imageUrl: pvImages[0] || '', qty: 1 }];
+      checkoutItems = [{
+        id, name: data.name, price: sellPrice(data),
+        imageUrl: pvImages[0] || '', qty: 1,
+        size: pvSelectedSize || (isAdjRing ? 'מתכווננת' : null),
+      }];
       // Quick buy also requires login — handled in initCheckoutView / step1 next handler
       switchView('checkout');
     });
@@ -1219,6 +1300,7 @@ function renderCheckoutStep1(el) {
       <div style="flex:1;min-width:0;">
         <p style="margin:0 0 4px;font-size:0.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(item.name)}</p>
         <p style="margin:0;font-size:0.82rem;color:var(--muted);">${item.price} ₪</p>
+        ${item.size ? `<p style="margin:3px 0 0;font-size:0.78rem;color:var(--pink-deep);font-weight:600;">${t('cart_size_label','מידה:')} ${esc(item.size)}</p>` : ''}
         ${item.customizationNote ? `<p style="margin:3px 0 0;font-size:0.78rem;font-style:italic;color:var(--pink-deep);">${t('co_custom_request','בקשת התאמה:')} ${esc(item.customizationNote)}</p>` : ''}
       </div>
       ${!isQuickBuy ? `
@@ -1260,7 +1342,7 @@ function renderCheckoutStep1(el) {
     if (!isQuickBuy) {
       checkoutItems = checkoutCartItems
         .filter(i => i._selected !== false)
-        .map(i => ({ id: i.id, name: i.name, price: i.price, imageUrl: i.imageUrl, qty: i.qty || 1, customizationNote: i.customizationNote || null }));
+        .map(i => ({ id: i.id, name: i.name, price: i.price, imageUrl: i.imageUrl, qty: i.qty || 1, customizationNote: i.customizationNote || null, size: i.size || null }));
     }
     if (!checkoutItems.length) { showToast(t('cart_select_one','יש לבחור לפחות פריט אחד')); return; }
 
@@ -1379,6 +1461,7 @@ function renderCheckoutForm(el) {
       </div>
       <div class="co-summary-item-info">
         <span class="co-summary-item-name">${esc(item.name)}</span>
+        ${item.size ? `<span class="co-summary-item-note">${t('cart_size_label','מידה:')} ${esc(item.size)}</span>` : ''}
         ${item.customizationNote ? `<span class="co-summary-item-note">${esc(item.customizationNote)}</span>` : ''}
       </div>
       <span class="co-summary-item-price">${item.price * (item.qty || 1)} ₪</span>

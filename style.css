@@ -109,6 +109,9 @@ ul { list-style: none; }
   align-items: center;
   gap: 12px;
 }
+/* The <nav> wrapper around .nav-links must not take up space in the grid —
+   .nav-links itself is position:fixed so the wrapper is purely structural. */
+.nav-container > nav { display: contents; }
 
 .nav-side {
   display: flex;
