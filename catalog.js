@@ -758,10 +758,14 @@ function renderProductView() {
 
   const metaChips = [
     data.category && `<span style="background:var(--pink-light);color:var(--pink-deep);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(localCat(data.category))}</span>`,
-    data.material && `<span style="background:var(--sand);border:1px solid var(--sand-dark);color:var(--ink-soft);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(localMaterial(data.material))}</span>`,
-    data.color    && `<span style="background:var(--sand);border:1px solid var(--sand-dark);color:var(--ink-soft);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;">${esc(localColor(data.color))}</span>`,
     badge         && `<span style="background:var(--pink);color:#fff;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:50px;">${esc(localBadge(badge))}</span>`,
   ].filter(Boolean).join('');
+
+  // Material / color shown as plain inline text (label + value), no pills
+  const metaText = [
+    data.material && `<span><span style="color:var(--muted);">${t('pv_material','חומר')}:</span> ${esc(localMaterial(data.material))}</span>`,
+    data.color    && `<span><span style="color:var(--muted);">${t('pv_color','צבע')}:</span> ${esc(localColor(data.color))}</span>`,
+  ].filter(Boolean).join('<span style="color:var(--sand-dark);">|</span>');
 
   const mainImg = pvImages[0]
     ? `<img id="pv-main-img-el" src="${esc(pvImages[0])}" fetchpriority="high" decoding="async" style="width:100%;height:100%;object-fit:cover;" alt="${esc(data.name)}" />`
@@ -909,6 +913,7 @@ function renderProductView() {
             </div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">${priceHtml}</div>
             ${metaChips ? `<div style="display:flex;gap:8px;flex-wrap:wrap;">${metaChips}</div>` : ''}
+            ${metaText ? `<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:0.82rem;color:var(--ink-soft);line-height:1.5;">${metaText}</div>` : ''}
             ${localDesc(data) ? `<p style="font-size:0.97rem;color:var(--ink-soft);line-height:1.75;margin:0;">${esc(localDesc(data))}</p>` : ''}
             ${actionHtml}
           </div>
