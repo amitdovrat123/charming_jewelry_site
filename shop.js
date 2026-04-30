@@ -334,6 +334,17 @@ function render() {
     btn.addEventListener('click', () => {
       filterCat      = btn.dataset.filterCat;
       filterFeatured = btn.dataset.filterFeat === 'true';
+      // Picking a top-level category resets the sub-category — otherwise users
+      // who arrived via a sub-category link get an invisible filter that hides
+      // most products when they click "הכל" or another main category.
+      filterSubCat   = '';
+      // Keep the URL in sync so refresh / back-button match the visible state.
+      const params = new URLSearchParams(window.location.search);
+      params.delete('subCat');
+      if (filterCat)      params.set('cat', filterCat);      else params.delete('cat');
+      if (filterFeatured) params.set('featured', '1');       else params.delete('featured');
+      const qs = params.toString();
+      history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
       render();
     });
   });
