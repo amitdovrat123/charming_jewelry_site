@@ -3,7 +3,7 @@
 
 import { db } from './firebase-config.js';
 import {
-  collection, query, orderBy, onSnapshot,
+  collection, query, orderBy, getDocs, limit,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── Constants ──────────────────────────────────────────────────
@@ -430,14 +430,34 @@ function render() {
   });
 }
 
-// ── Firestore real-time subscription ──────────────────────────
-const q = query(collection(db, COL_PATH), orderBy('createdAt', 'desc'));
-onSnapshot(q, snap => {
+// ── Firestore one-shot fetch + localStorage cache ─────────────
+// Strategy: paint instantly from cache (≤5 min old) on repeat visits,
+// then fetch fresh data in the background and re-render.
+// Replaces onSnapshot to avoid real-time-listener overhead on every page load.
+const CACHE_KEY = 'charming_products_cache';
+const CACHE_TTL = 5 * 60 * 1000;
+
+try {
+  const raw = localStorage.getItem(CACHE_KEY);
+  if (raw) {
+    const cached = JSON.parse(raw);
+    if (cached && Array.isArray(cached.products) && Date.now() - cached.t < CACHE_TTL) {
+      allProducts    = cached.products;
+      productsLoaded = true;
+    }
+  }
+} catch {}
+
+const q = query(collection(db, COL_PATH), orderBy('createdAt', 'desc'), limit(100));
+getDocs(q).then(snap => {
   allProducts    = snap.docs.map(d => ({ id: d.id, data: d.data() }));
   productsLoaded = true;
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), products: allProducts }));
+  } catch {}
   render();
   updateCartBadge();
-}, err => {
+}).catch(err => {
   console.error('[shop.js] Firestore error:', err);
   productsLoaded = true;
   render();
@@ -446,7 +466,7 @@ onSnapshot(q, snap => {
 // Re-render when language changes (bilingual product names)
 window._rerenderProducts = function() { render(); };
 
-// Initial render (shows loading skeleton while Firestore loads)
+// Initial render (paints from cache instantly, or shows skeleton until fetch returns)
 document.addEventListener('DOMContentLoaded', () => {
   render();
   updateCartBadge();
