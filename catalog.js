@@ -1092,6 +1092,7 @@ function renderProfileView() {
                   <p style="margin:0;font-size:0.9rem;font-weight:600;color:var(--ink);line-height:1.3;">${esc(i.name)}</p>
                   <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
                     <span style="font-size:0.78rem;color:var(--muted);">כמות: ${qty}</span>
+                    ${i.size ? `<span style="font-size:0.78rem;color:var(--muted);">|</span><span style="font-size:0.78rem;color:var(--pink-deep);font-weight:600;">מידה: ${esc(i.size)}</span>` : ''}
                     <span style="font-size:0.78rem;color:var(--muted);">|</span>
                     <span style="font-size:0.82rem;font-weight:600;color:var(--pink-deep);">${lineTotal} ₪</span>
                   </div>
@@ -1834,6 +1835,7 @@ function renderCheckoutForm(el) {
           price:             i.price,
           quantity:          i.qty || 1,
           customizationNote: i.customizationNote || '',
+          size:              i.size || '',
           image:             i.imageUrl || '',
         })),
         summary: { subtotal, shipping: shipCost2, discount: discountAmt, total: total2, currency: 'ILS' },
@@ -2062,6 +2064,7 @@ function _unused_renderCheckoutStep3(el) {
       </div>
       <div style="flex:1;">
         <p style="margin:0 0 2px;font-size:0.9rem;font-weight:600;color:var(--ink);">${esc(item.name)}</p>
+        ${item.size ? `<p style="margin:2px 0;font-size:0.76rem;color:var(--pink-deep);font-weight:600;">${t('cart_size_label','מידה:')} ${esc(item.size)}</p>` : ''}
         ${item.customizationNote ? `<p style="margin:2px 0;font-size:0.76rem;font-style:italic;color:var(--pink-deep);">${t('co_custom_request','בקשת התאמה:')} ${esc(item.customizationNote)}</p>` : ''}
         <p style="margin:0;font-size:0.8rem;color:var(--muted);">× ${item.qty || 1}</p>
       </div>
@@ -2111,7 +2114,8 @@ function _unused_renderCheckoutStep3(el) {
 
     const itemsText    = checkoutItems.map(i => {
       const noteLine = i.customizationNote ? `\n  התאמה: ${i.customizationNote}` : '';
-      return `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪${noteLine}`;
+      const sizeLine = i.size ? `\n  מידה: ${i.size}` : '';
+      return `• ${i.name} × ${i.qty || 1} — ${i.price * (i.qty || 1)} ₪${sizeLine}${noteLine}`;
     }).join('\n');
     const isEn = typeof getLang === 'function' && getLang() === 'en';
     const deliveryTxt  = checkoutDelivery === 'delivery'

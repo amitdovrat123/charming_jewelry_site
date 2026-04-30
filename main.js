@@ -6,24 +6,46 @@ if (navbar) {
   }, { passive: true });
 }
 
-// Hamburger menu toggle
+// Hamburger menu toggle (side drawer + backdrop)
 const hamburger = document.querySelector('.nav-hamburger');
 const navLinks  = document.querySelector('.nav-links');
 
 if (hamburger && navLinks) {
+  // Lazily inject the backdrop once
+  let backdrop = document.querySelector('.nav-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'nav-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  function closeDrawer() {
+    navLinks.classList.remove('is-open');
+    backdrop.classList.remove('is-open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  function openDrawer() {
+    navLinks.classList.add('is-open');
+    backdrop.classList.add('is-open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
   hamburger.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('is-open');
-    hamburger.setAttribute('aria-expanded', String(isOpen));
-    document.body.style.overflow = isOpen ? 'hidden' : '';
+    if (navLinks.classList.contains('is-open')) closeDrawer();
+    else openDrawer();
   });
 
-  // Close menu when any nav link is tapped
+  backdrop.addEventListener('click', closeDrawer);
+
   navLinks.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      navLinks.classList.remove('is-open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    });
+    link.addEventListener('click', closeDrawer);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navLinks.classList.contains('is-open')) closeDrawer();
   });
 }
 
