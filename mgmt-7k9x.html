@@ -891,8 +891,9 @@
           <!-- Search -->
           <div id="ws-search-wrap" class="flex-1 min-w-[160px] max-w-md">
             <input id="ws-search" type="search" name="ws-search-q" placeholder="חיפוש לפי שם החוגג / איש קשר / טלפון / עיר..."
+              readonly onfocus="this.removeAttribute('readonly')"
               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" data-lpignore="true" data-1p-ignore
-              class="w-full border border-[#f0dfc0] rounded-full px-4 py-2 text-sm bg-white shadow-sm focus:outline-none focus:border-[#d4a373] transition-colors" />
+              class="w-full border border-[#f0dfc0] rounded-full px-4 py-2 text-sm bg-white shadow-sm focus:outline-none focus:border-[#d4a373] transition-colors cursor-text" />
           </div>
           <button onclick="openWorkshopModal()"
             class="bg-[#d4a373] hover:bg-[#b8893e] text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-md flex-shrink-0">
