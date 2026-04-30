@@ -6633,7 +6633,7 @@ function generateCalendarLinks(ws) {
     ? (balancePaid ? `שולם במלואו (${total} ₪)` : `מקדמה ${advanceAmount} ₪ — יתרה לתשלום: ${remaining} ₪`)
     : `לא שולמה מקדמה — סה"כ לתשלום: ${total} ₪`;
   const calNotes = [
-    `שעת התחלה בפועל: ${actualTimeStr} (היומן מוקדם ב-30 דק' לבאפר הגעה)`,
+    `שעת התחלה בפועל: ${actualTimeStr}`,
     ``,
     `שם מלא איש קשר: ${ws.customerName}`,
     `שם החוגג/חוגגת: ${ws.celebrant||''}`,
@@ -11253,7 +11253,7 @@ function buildCalendarEvent(w) {
     ? (balancePaid ? `שולם במלואו (${total} ₪)` : `מקדמה ${advanceAmount} ₪ — יתרה לתשלום: ${remaining} ₪`)
     : `לא שולמה מקדמה — סה"כ לתשלום: ${total} ₪`;
   const desc = [
-    `שעת התחלה בפועל: ${actualTimeStr} (היומן מוקדם ב-30 דק' לבאפר הגעה)`,
+    `שעת התחלה בפועל: ${actualTimeStr}`,
     ``,
     `שם מלא איש קשר: ${w.customerName || ''}`,
     `שם החוגג/חוגגת: ${w.celebrant || ''}`,
