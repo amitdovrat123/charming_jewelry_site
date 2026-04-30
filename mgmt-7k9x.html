@@ -11572,32 +11572,56 @@ window.renderAnalytics = renderAnalytics;
 const BACKUP_CLIENT_ID = '130259110676-k2ef85o71ig2j1pgnpucc3lvljh45tlg.apps.googleusercontent.com';
 const BACKUP_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar';
+const BUSINESS_CALENDAR_EMAIL = 'charming.by.vik@gmail.com';
 let calendarAccessToken = localStorage.getItem('calendar_token') || null;
+
+// Verify the OAuth token actually belongs to the business account.
+// Returns true only if the primary calendar id matches BUSINESS_CALENDAR_EMAIL.
+async function verifyCalendarTokenAccount(token) {
+  try {
+    const r = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    if (!r.ok) return false;
+    const data = await r.json();
+    const id = (data.id || '').toLowerCase();
+    return id === BUSINESS_CALENDAR_EMAIL.toLowerCase();
+  } catch(e) { return false; }
+}
 
 // ── Google Calendar Auto-Sync ──
 async function ensureCalendarToken() {
   if (calendarAccessToken) {
-    // Verify token is still valid
-    try {
-      const r = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1', {
-        headers: { Authorization: 'Bearer ' + calendarAccessToken }
-      });
-      if (r.ok) return calendarAccessToken;
-    } catch(e) {}
-    // Token expired — clear it
+    // Verify token is still valid AND belongs to the business account
+    const ok = await verifyCalendarTokenAccount(calendarAccessToken);
+    if (ok) return calendarAccessToken;
+    // Token invalid OR belongs to a different account — clear it
     calendarAccessToken = null;
     localStorage.removeItem('calendar_token');
   }
-  // Request new token
+  // Request new token — force account picker every time so the wrong account
+  // can never be used silently (e.g. on a phone signed into a personal account).
   return new Promise((resolve) => {
     if (typeof google === 'undefined' || !google.accounts?.oauth2) { resolve(null); return; }
     const tc = google.accounts.oauth2.initTokenClient({
       client_id: BACKUP_CLIENT_ID,
       scope: CALENDAR_SCOPE,
-      hint: 'charming.by.vik@gmail.com',
-      callback: (resp) => {
+      hint: BUSINESS_CALENDAR_EMAIL,
+      prompt: 'select_account',
+      callback: async (resp) => {
         if (resp.error) { console.error('Calendar OAuth error:', resp); resolve(null); return; }
-        calendarAccessToken = resp.access_token;
+        const token = resp.access_token;
+        const isBusiness = await verifyCalendarTokenAccount(token);
+        if (!isBusiness) {
+          // Wrong account picked — refuse the token, do not write anywhere
+          calendarAccessToken = null;
+          localStorage.removeItem('calendar_token');
+          showToast('שגיאה: יש להתחבר עם חשבון ' + BUSINESS_CALENDAR_EMAIL + ' בלבד');
+          alert('האירוע לא נשמר.\n\nהתחברת עם חשבון Google שאינו ' + BUSINESS_CALENDAR_EMAIL + '.\nאנא לחצי שוב ובחרי את החשבון העסקי בלבד.');
+          resolve(null);
+          return;
+        }
+        calendarAccessToken = token;
         localStorage.setItem('calendar_token', calendarAccessToken);
         resolve(calendarAccessToken);
       }
@@ -11663,7 +11687,9 @@ async function syncCalendarEvent(workshopId, wsData) {
   const token = await ensureCalendarToken();
   if (!token) { console.warn('Calendar: no token'); return; }
   const headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
-  const calId = 'primary';
+  // Always write to the business calendar explicitly — never 'primary',
+  // which would resolve to whatever account the OAuth token belongs to.
+  const calId = encodeURIComponent(BUSINESS_CALENDAR_EMAIL);
   try {
     if (w.calendarEventId) {
       // Update existing event
@@ -11702,7 +11728,7 @@ async function deleteCalendarEvent(workshopId) {
   const token = await ensureCalendarToken();
   if (!token) return;
   try {
-    const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${w.calendarEventId}`, {
+    const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(BUSINESS_CALENDAR_EMAIL)}/events/${w.calendarEventId}`, {
       method: 'DELETE', headers: { Authorization: 'Bearer ' + token }
     });
     if (r.ok || r.status === 204) {
