@@ -4922,6 +4922,10 @@ const SUBCAT_DOC = `${SETTINGS_COL}/categoriesConfig`;
 let subCatsByCat = {}; // { "טבעות": ["טבעות מתכוונות", ...], ... }
 let subCatsModalCat = '';
 let subCatsModalList = [];
+let subCatsModalOriginal = []; // snapshot at modal open — used to detect renames
+let subCatsModalRenames = {};  // { originalName: currentName } — for product migration
+let subCatsEditingIdx   = -1;  // index currently being edited inline (-1 = none)
+let subCatsEditingDraft = '';
 
 function getCurrentMainCat() {
   return document.getElementById('p-cat').value;
@@ -4959,8 +4963,12 @@ onSnapshot(doc(db, SUBCAT_DOC), (snap) => {
 function openSubCatModal() {
   const cat = getCurrentMainCat();
   if (!cat) return;
-  subCatsModalCat = cat;
-  subCatsModalList = [...(subCatsByCat[cat] || [])];
+  subCatsModalCat       = cat;
+  subCatsModalList      = [...(subCatsByCat[cat] || [])];
+  subCatsModalOriginal  = [...subCatsModalList]; // freeze original for rename detection
+  subCatsModalRenames   = {};
+  subCatsEditingIdx     = -1;
+  subCatsEditingDraft   = '';
   document.getElementById('subcat-modal-cat').textContent = cat;
   document.getElementById('subcat-new-input').value = '';
   document.getElementById('subcat-err').textContent = '';
@@ -4983,20 +4991,100 @@ function renderSubCatList() {
     ul.innerHTML = '<li class="text-gray-400 text-sm text-center py-4">אין תתי-קטגוריות עדיין. הוסיפי את הראשונה למטה.</li>';
     return;
   }
-  ul.innerHTML = subCatsModalList.map((s, i) => `
-    <li class="flex items-center gap-2 px-3 py-2 bg-[#fdf8f5] rounded-lg">
-      <span class="flex-1 text-sm text-gray-700">${s.replace(/</g, '&lt;')}</span>
-      <button type="button" data-subcat-rm="${i}" class="text-gray-400 hover:text-red-500 text-lg leading-none transition-colors" aria-label="הסירי">✕</button>
-    </li>
-  `).join('');
+  const escAttr = v => String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  ul.innerHTML = subCatsModalList.map((s, i) => {
+    if (i === subCatsEditingIdx) {
+      return `
+        <li class="flex items-center gap-2 px-3 py-2 bg-white border-2 border-[#a8705a] rounded-lg">
+          <input type="text" id="subcat-edit-input" class="flex-1 text-sm text-gray-700 bg-transparent border-none focus:outline-none px-1 py-0.5" value="${escAttr(subCatsEditingDraft)}" />
+          <button type="button" data-subcat-save-edit class="text-green-600 hover:text-green-700 text-base leading-none px-1" aria-label="שמרי שינוי">✓</button>
+          <button type="button" data-subcat-cancel-edit class="text-gray-400 hover:text-gray-500 text-base leading-none px-1" aria-label="בטלי">↩</button>
+        </li>`;
+    }
+    return `
+      <li class="flex items-center gap-2 px-3 py-2 bg-[#fdf8f5] rounded-lg">
+        <span class="flex-1 text-sm text-gray-700">${escAttr(s)}</span>
+        <button type="button" data-subcat-edit="${i}" class="text-gray-400 hover:text-[#a8705a] text-sm leading-none transition-colors px-1" aria-label="ערוך">✎</button>
+        <button type="button" data-subcat-rm="${i}" class="text-gray-400 hover:text-red-500 text-lg leading-none transition-colors px-1" aria-label="הסירי">✕</button>
+      </li>`;
+  }).join('');
+  // Auto-focus + wire input changes when entering edit mode
+  if (subCatsEditingIdx >= 0) {
+    const inp = document.getElementById('subcat-edit-input');
+    if (inp) {
+      inp.focus();
+      inp.select();
+      inp.addEventListener('input', () => { subCatsEditingDraft = inp.value; });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter')  { e.preventDefault(); document.querySelector('[data-subcat-save-edit]')?.click(); }
+        if (e.key === 'Escape') { e.preventDefault(); document.querySelector('[data-subcat-cancel-edit]')?.click(); }
+      });
+    }
+  }
 }
 
 document.getElementById('subcat-list')?.addEventListener('click', (e) => {
+  // Start inline edit
+  const startEdit = e.target.closest('[data-subcat-edit]');
+  if (startEdit) {
+    const idx = parseInt(startEdit.dataset.subcatEdit);
+    subCatsEditingIdx   = idx;
+    subCatsEditingDraft = subCatsModalList[idx];
+    document.getElementById('subcat-err').textContent = '';
+    renderSubCatList();
+    return;
+  }
+
+  // Save inline edit
+  if (e.target.closest('[data-subcat-save-edit]')) {
+    const newName = subCatsEditingDraft.trim();
+    const oldName = subCatsModalList[subCatsEditingIdx];
+    const err     = document.getElementById('subcat-err');
+    if (!newName) { err.textContent = 'שם לא יכול להיות ריק.'; return; }
+    if (newName === oldName) {
+      // No change — just exit edit mode
+      subCatsEditingIdx = -1; subCatsEditingDraft = ''; renderSubCatList(); return;
+    }
+    if (subCatsModalList.some((v, i) => i !== subCatsEditingIdx && v === newName)) {
+      err.textContent = 'תת-קטגוריה זו כבר קיימת.'; return;
+    }
+    subCatsModalList[subCatsEditingIdx] = newName;
+    // Track rename: find this item's "true original" (handles multiple successive renames)
+    const existingOriginal = Object.keys(subCatsModalRenames).find(k => subCatsModalRenames[k] === oldName);
+    if (existingOriginal) {
+      // Already renamed before — update the target to the latest name
+      subCatsModalRenames[existingOriginal] = newName;
+    } else if (subCatsModalOriginal.includes(oldName)) {
+      // First rename of an originally-stored name
+      subCatsModalRenames[oldName] = newName;
+    }
+    // (If oldName was a freshly-added item not in original, no rename to record — products won't have it yet)
+    subCatsEditingIdx = -1; subCatsEditingDraft = '';
+    err.textContent = '';
+    renderSubCatList();
+    return;
+  }
+
+  // Cancel inline edit
+  if (e.target.closest('[data-subcat-cancel-edit]')) {
+    subCatsEditingIdx = -1; subCatsEditingDraft = '';
+    document.getElementById('subcat-err').textContent = '';
+    renderSubCatList();
+    return;
+  }
+
+  // Remove
   const rm = e.target.closest('[data-subcat-rm]');
-  if (!rm) return;
-  const idx = parseInt(rm.dataset.subcatRm);
-  subCatsModalList.splice(idx, 1);
-  renderSubCatList();
+  if (rm) {
+    const idx = parseInt(rm.dataset.subcatRm);
+    const removedName = subCatsModalList[idx];
+    // If this name was a rename target, drop it from renames so we don't migrate to a deleted name
+    Object.keys(subCatsModalRenames).forEach(k => {
+      if (subCatsModalRenames[k] === removedName) delete subCatsModalRenames[k];
+    });
+    subCatsModalList.splice(idx, 1);
+    renderSubCatList();
+  }
 });
 
 document.getElementById('subcat-add-btn')?.addEventListener('click', () => {
@@ -5024,13 +5112,39 @@ document.getElementById('subcat-save')?.addEventListener('click', async () => {
   btn.disabled = true;
   err.textContent = '';
   try {
+    // 1. Save the updated config doc
     const newAll = { ...subCatsByCat, [subCatsModalCat]: subCatsModalList };
     await setDoc(doc(db, SUBCAT_DOC), {
       subCategories: newAll,
       updatedAt: serverTimestamp(),
       updatedBy: auth.currentUser?.email || '',
     }, { merge: true });
-    logAction(`תתי-קטגוריות עודכנו: ${subCatsModalCat}`);
+
+    // 2. Migrate any products that referenced renamed sub-categories.
+    // Filter out renames where the target was later deleted (defensive — already
+    // handled at delete-time, but doesn't hurt to recheck here).
+    const liveRenames = Object.entries(subCatsModalRenames)
+      .filter(([_, newName]) => subCatsModalList.includes(newName));
+    let migratedCount = 0;
+    for (const [oldName, newName] of liveRenames) {
+      const snap = await getDocs(query(
+        collection(db, COL_PATH),
+        where('category',   '==', subCatsModalCat),
+        where('collection', '==', oldName)
+      ));
+      if (snap.empty) continue;
+      const batch = writeBatch(db);
+      snap.forEach(d => batch.update(d.ref, { collection: newName }));
+      await batch.commit();
+      migratedCount += snap.size;
+    }
+
+    if (liveRenames.length) {
+      const renameDesc = liveRenames.map(([o, n]) => `${o} → ${n}`).join(', ');
+      logAction(`תתי-קטגוריות עודכנו: ${subCatsModalCat} (שינוי שם: ${renameDesc}, ${migratedCount} מוצרים עודכנו)`);
+    } else {
+      logAction(`תתי-קטגוריות עודכנו: ${subCatsModalCat}`);
+    }
     closeSubCatModal();
   } catch (ex) {
     console.error(ex);
@@ -7126,23 +7240,46 @@ function calcFuelCost(km) { return Math.round(km * FUEL_RATE); }
 // Rishon LeZion origin coordinates
 const ORIGIN_LAT = 31.9730, ORIGIN_LNG = 34.7925;
 
-// Route cache: { city: { km, baseMinutes } }
-const routeCache = {};
+// Route cache: { city: { km, baseMinutes } } — persisted in localStorage
+const ROUTE_CACHE_KEY = 'cv_route_cache_v1';
+const routeCache = (() => {
+  try { return JSON.parse(localStorage.getItem(ROUTE_CACHE_KEY) || '{}') || {}; }
+  catch(e) { return {}; }
+})();
+function saveRouteCache() {
+  try { localStorage.setItem(ROUTE_CACHE_KEY, JSON.stringify(routeCache)); } catch(e) {}
+}
+// Hydrate CITY_DISTANCE_KM from cache so card displays work after reload
+Object.keys(routeCache).forEach(k => { CITY_DISTANCE_KM[k] = routeCache[k].km; });
 
-// Live route: Nominatim geocode → OSRM route
+// Live route: Nominatim geocode → OSRM route. Tries multiple query variants
+// before giving up, so transient empty results don't lock out known cities.
 async function getRouteInfo(city) {
   if (routeCache[city]) return routeCache[city];
   const cached = Object.keys(routeCache).find(k => city.includes(k) || k.includes(city));
   if (cached) return routeCache[cached];
 
-  const query = encodeURIComponent(city + ', ישראל');
-  const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=il`, {
-    headers: { 'Accept-Language': 'he' }
-  });
-  const geoData = await geoRes.json();
-  if (!geoData.length) return null;
+  // Try several query variants — Nominatim sometimes misses the first form
+  const variants = [
+    city + ', ישראל',
+    city,
+    city + ', Israel'
+  ];
+  let geoHit = null;
+  for (const q of variants) {
+    try {
+      const geoRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=il`,
+        { headers: { 'Accept-Language': 'he' } }
+      );
+      if (!geoRes.ok) continue;
+      const geoData = await geoRes.json();
+      if (geoData && geoData.length) { geoHit = geoData[0]; break; }
+    } catch(e) { /* try next variant */ }
+  }
+  if (!geoHit) return null;
 
-  const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${ORIGIN_LNG},${ORIGIN_LAT};${geoData[0].lon},${geoData[0].lat}?overview=false`);
+  const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${ORIGIN_LNG},${ORIGIN_LAT};${geoHit.lon},${geoHit.lat}?overview=false`);
   const routeData = await routeRes.json();
   if (!routeData.routes || !routeData.routes.length) return null;
 
@@ -7150,6 +7287,7 @@ async function getRouteInfo(city) {
   const info = { km: Math.round(r.distance / 1000), baseMinutes: Math.round(r.duration / 60) };
   routeCache[city] = info;
   CITY_DISTANCE_KM[city] = info.km;
+  saveRouteCache();
   return info;
 }
 
@@ -12045,18 +12183,33 @@ const INVITE_W = 1240, INVITE_H = 1748;
 const PINK = '#c4366e';
 const GRAY = '#5a5a5a';
 
-// Pre-load fonts for canvas
-async function preloadInviteFonts() {
-  try {
-    await document.fonts.load('300 48px Assistant');
-    await document.fonts.load('700 48px Heebo');
-    await document.fonts.load('400 48px "Frank Ruhl Libre"');
-    await document.fonts.load('500 48px "Frank Ruhl Libre"');
-    await document.fonts.load('700 48px "Frank Ruhl Libre"');
-    await document.fonts.load('400 160px "Gveret Levin"');
-  } catch(e) { console.log('Font preload:', e); }
+// Pre-load fonts for canvas — מחזיר Promise יחיד שנשמר במטמון.
+// המתנה ל-Promise הזה מבטיחה שהפונטים שהקנבס משתמש בהם נטענו בפועל,
+// גם אם CSS של Google Fonts עוד לא הסתיים להתפרסר בקריאה הראשונה.
+let _inviteFontsPromise = null;
+function ensureInviteFonts() {
+  if (_inviteFontsPromise) return _inviteFontsPromise;
+  // משפחות הפונטים בהן הקנבס משתמש (גודל לא משנה — אותו קובץ):
+  const specs = [
+    '500 1em "Frank Ruhl Libre"',
+    '400 1em "Gveret Levin"',
+    '600 1em Assistant',
+  ];
+  const loadAll = () => Promise.all(specs.map(s => document.fonts.load(s)));
+  // ניסיון 1, ובדיקה: אם משפחה כלשהי עדיין לא רשומה (CSS לא נפרסר עדיין)
+  // ממתינים ל-document.fonts.ready ואז מנסים שוב.
+  _inviteFontsPromise = loadAll()
+    .then(async () => {
+      const missing = specs.some(s => !document.fonts.check(s));
+      if (missing) {
+        await document.fonts.ready;
+        await loadAll();
+      }
+    })
+    .catch(e => { console.warn('Invite fonts load:', e); });
+  return _inviteFontsPromise;
 }
-preloadInviteFonts();
+ensureInviteFonts();
 
 // Pre-load background image
 let inviteBgImg = null;
@@ -12103,8 +12256,9 @@ async function generateInvitation(w) {
 
   inviteCurrentPhone = phone;
 
-  // Ensure fonts are ready
-  await document.fonts.ready;
+  // ודא שהפונטים נטענו בפועל לפני הציור (תיקון: בקריאה הראשונה לפעמים
+  // CSS של Google Fonts עוד לא נפרסר ו-fonts.ready נפתר בלי לטעון כלום).
+  await ensureInviteFonts();
 
   // ── "הינך מוזמנת לחגוג איתנו את" (The Seasons → Frank Ruhl Libre) ──
   ctx.fillStyle = PINK;
