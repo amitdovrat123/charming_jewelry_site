@@ -898,14 +898,18 @@ function renderProductView() {
         <button id="pv-quick-buy" class="btn btn-outline" style="min-height:48px;font-size:0.97rem;">${t('pv_quick_buy','קנייה מהירה')}</button>
        </div>`;
 
-  const crumbCat = data.category || '';
+  const crumbCat    = data.category   || '';
+  const crumbSubCat = data.collection || '';
   el.innerHTML = `
     <section style="min-height:80vh;padding:100px 0 110px;background:var(--sand);">
       <div class="container">
         <nav class="pv-breadcrumb" aria-label="breadcrumb">
           <a href="index.html" id="pv-crumb-home">${t('nav_home','דף הבית')}</a>
           <span class="pv-breadcrumb-sep">/</span>
+          <a href="shop.html" id="pv-crumb-shop">${t('nav_shop','החנות')}</a>
+          <span class="pv-breadcrumb-sep">/</span>
           ${crumbCat ? `<a href="shop.html?cat=${encodeURIComponent(crumbCat)}" id="pv-crumb-cat">${esc(localCat(crumbCat))}</a><span class="pv-breadcrumb-sep">/</span>` : ''}
+          ${crumbSubCat ? `<a href="shop.html?cat=${encodeURIComponent(crumbCat)}&subCat=${encodeURIComponent(crumbSubCat)}" id="pv-crumb-subcat">${esc(crumbSubCat)}</a><span class="pv-breadcrumb-sep">/</span>` : ''}
           <span class="pv-breadcrumb-current">${esc(localName(data))}</span>
         </nav>
         <div class="pv-layout">

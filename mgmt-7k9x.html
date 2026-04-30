@@ -12184,29 +12184,36 @@ const PINK = '#c4366e';
 const GRAY = '#5a5a5a';
 
 // Pre-load fonts for canvas — מחזיר Promise יחיד שנשמר במטמון.
-// המתנה ל-Promise הזה מבטיחה שהפונטים שהקנבס משתמש בהם נטענו בפועל,
-// גם אם CSS של Google Fonts עוד לא הסתיים להתפרסר בקריאה הראשונה.
+// בעיה שטופלה: ב-קריאה הראשונה ה-CSS של Google Fonts עוד לא נפרסר ולכן
+// ה-FontFace של "Gveret Levin" / "Frank Ruhl Libre" לא רשומה ב-document.fonts,
+// ו-document.fonts.load() מחזיר ריק בשקט (no-op) במקום לטעון. כאן מחכים
+// בפולינג עד שהמשפחה רשומה ורק אז מפעילים טעינה אמיתית של קובץ הפונט.
 let _inviteFontsPromise = null;
+async function _waitForFontFace(family, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    let found = false;
+    document.fonts.forEach(ff => {
+      const fam = ff.family.replace(/^["']|["']$/g, '');
+      if (fam === family) found = true;
+    });
+    if (found) return true;
+    await new Promise(r => setTimeout(r, 80));
+  }
+  return false;
+}
 function ensureInviteFonts() {
   if (_inviteFontsPromise) return _inviteFontsPromise;
-  // משפחות הפונטים בהן הקנבס משתמש (גודל לא משנה — אותו קובץ):
-  const specs = [
-    '500 1em "Frank Ruhl Libre"',
-    '400 1em "Gveret Levin"',
-    '600 1em Assistant',
+  const targets = [
+    { family: 'Frank Ruhl Libre', spec: '500 1em "Frank Ruhl Libre"' },
+    { family: 'Gveret Levin',     spec: '400 1em "Gveret Levin"' },
+    { family: 'Assistant',        spec: '600 1em Assistant' },
   ];
-  const loadAll = () => Promise.all(specs.map(s => document.fonts.load(s)));
-  // ניסיון 1, ובדיקה: אם משפחה כלשהי עדיין לא רשומה (CSS לא נפרסר עדיין)
-  // ממתינים ל-document.fonts.ready ואז מנסים שוב.
-  _inviteFontsPromise = loadAll()
-    .then(async () => {
-      const missing = specs.some(s => !document.fonts.check(s));
-      if (missing) {
-        await document.fonts.ready;
-        await loadAll();
-      }
-    })
-    .catch(e => { console.warn('Invite fonts load:', e); });
+  _inviteFontsPromise = Promise.all(targets.map(async ({ family, spec }) => {
+    const ok = await _waitForFontFace(family);
+    if (!ok) { console.warn('Invite font not registered in time:', family); return; }
+    await document.fonts.load(spec);
+  })).catch(e => { console.warn('Invite fonts load:', e); });
   return _inviteFontsPromise;
 }
 ensureInviteFonts();
