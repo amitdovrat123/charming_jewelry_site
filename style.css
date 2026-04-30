@@ -1630,6 +1630,16 @@ ul { list-style: none; }
   margin-bottom: 52px;
 }
 
+/* Tighter edge padding around product grids */
+@media (max-width: 768px) {
+  .shop-section .container,
+  .sp-section .container { padding: 0 12px; }
+}
+@media (max-width: 375px) {
+  .shop-section .container,
+  .sp-section .container { padding: 0 8px; }
+}
+
 /* ===== Shop Shipping Bar ===== */
 .shop-shipping-bar {
   display: flex;
@@ -1691,7 +1701,13 @@ ul { list-style: none; }
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
+  gap: 14px;
+}
+@media (min-width: 768px) {
+  .shop-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+}
+@media (min-width: 1100px) {
+  .shop-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
 }
 
 .shop-card {
@@ -3165,7 +3181,8 @@ ul { list-style: none; }
 }
 
 /* Cart badge pill */
-.cart-badge {
+.cart-badge,
+.wishlist-badge {
   position: absolute;
   top: -4px;
   left: -4px;
@@ -3375,28 +3392,27 @@ ul { list-style: none; }
 .sp-shop-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 10px;
 }
 @media (min-width: 768px) {
-  .sp-shop-grid { grid-template-columns: repeat(3, 1fr); }
+  .sp-shop-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
 }
 @media (min-width: 1100px) {
-  .sp-shop-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .sp-shop-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
 }
 
 /* Shop card */
 .sp-shop-card {
-  background: var(--sand-light);
-  border-radius: 18px;
-  overflow: hidden;
+  background: transparent;
+  border-radius: 14px;
+  overflow: visible;
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease;
   display: flex;
   flex-direction: column;
 }
 .sp-shop-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(201,149,122,0.22);
+  transform: translateY(-3px);
 }
 
 .sp-card-img-wrap {
@@ -3404,6 +3420,7 @@ ul { list-style: none; }
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background: var(--pink-light);
+  border-radius: 14px;
 }
 .sp-card-img-wrap img {
   display: block;
@@ -3520,29 +3537,69 @@ ul { list-style: none; }
   background: var(--muted);
 }
 
+/* Wishlist heart on card image */
+.sp-card-fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.95);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 4;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.sp-card-fav:hover {
+  transform: scale(1.08);
+  background: #fff;
+}
+.sp-card-fav.is-fav {
+  color: var(--pink-deep);
+}
+.sp-card-fav.is-fav svg {
+  fill: var(--pink-deep);
+}
+
 .sp-card-body {
-  padding: 14px 14px 16px;
+  padding: 10px 4px 6px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 4px;
   flex: 1;
+  text-align: right;
+}
+
+.sp-card-tagline {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .sp-card-name {
-  font-size: 0.93rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 600;
   color: var(--ink);
   margin: 0;
   line-height: 1.35;
-  text-align: center;
+  text-align: right;
 }
 
 .sp-card-price-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
+  justify-content: flex-start;
+  gap: 8px;
   flex-wrap: wrap;
+  margin-top: 2px;
 }
 .sp-card-price {
   font-weight: 700;
@@ -3588,6 +3645,54 @@ ul { list-style: none; }
 .sp-card-add--oos {
   background: var(--muted);
   cursor: default;
+}
+
+/* Ring info on shop card */
+.sp-ring-note {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--pink-deep);
+  background: var(--pink-light);
+  border: 1px solid var(--sand-dark);
+  border-radius: 10px;
+  padding: 6px 10px;
+  text-align: center;
+  line-height: 1.35;
+}
+.sp-ring-sizes {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+.sp-ring-sizes-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.sp-ring-sizes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+.sp-ring-size {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--sand);
+  border: 1px solid var(--sand-dark);
+  border-radius: 50px;
+  padding: 3px 9px;
+  min-width: 28px;
+  text-align: center;
+  font-family: 'Assistant', sans-serif;
+}
+.sp-ring-size--out {
+  color: var(--muted);
+  background: transparent;
+  text-decoration: line-through;
+  border-style: dashed;
 }
 
 /* Empty state */
@@ -4712,7 +4817,7 @@ body.a11y-big-cursor-black * { cursor: url("data:image/svg+xml,%3Csvg xmlns='htt
 
   .categories-grid { gap: 10px; grid-template-columns: 1fr; }
   .category-card-label { font-size: 0.85rem; padding: 12px 14px; }
-  .shop-grid { grid-template-columns: 1fr; }
+  .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .testimonial-card { width: 260px; }
   .collage-grid { gap: 6px; grid-template-columns: repeat(2, 1fr); }
   .collage-item--wide { grid-column: span 1; }

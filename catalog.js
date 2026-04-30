@@ -300,31 +300,27 @@ function cardHTML(product) {
       ).join('')
     : `<div class="sp-card-img-placeholder">💎</div>`;
 
-  const badgeHtml = (badge && !oos) ? `<span class="sp-card-badge">${esc(localBadge(badge))}</span>` : '';
-  const oosBadge  = oos ? `<span class="sp-card-badge sp-card-badge--oos">${t('pv_oos_badge', 'אזל')}</span>` : '';
+  const taglineHtml = (badge && !oos) ? `<span class="sp-card-tagline">${esc(localBadge(badge))}</span>` : '';
+  const oosBadge    = oos ? `<span class="sp-card-badge sp-card-badge--oos">${t('pv_oos_badge', 'אזל')}</span>` : '';
 
   const priceHtml = (sale > 0 && sale < price)
     ? `<span class="sp-card-sale">${sp} ₪</span><span class="sp-card-orig">${price} ₪</span>`
     : `<span class="sp-card-price">${sp} ₪</span>`;
 
-  const customBadge = data.isCustomizable
-    ? `<div class="sp-custom-badge">${t('shop_customizable', '✦ ניתן להתאמה אישית — ציינו את בחירתכם בהזמנה')}</div>` : '';
-
-  const actionBtn = oos
-    ? `<button class="sp-card-add sp-card-add--oos" disabled>${t('shop_oos', 'אזל מהמלאי')}</button>`
-    : `<button class="sp-card-add" data-add-id="${sid}">${t('shop_add_to_cart', 'הוסיפי לסל')}</button>`;
+  const favBtn = `<button class="sp-card-fav" data-fav-id="${sid}" aria-label="${t('shop_add_to_wishlist','הוספה למוצרים שאהבתי')}" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  </button>`;
 
   const pName = localName(data);
   return `
     <div class="sp-shop-card fadein" data-product-id="${sid}" role="button" tabindex="0" aria-label="${esc(pName)}">
       <div class="sp-card-img-wrap">
-        ${imgHtml}${badgeHtml || oosBadge}
+        ${imgHtml}${oosBadge}${favBtn}
       </div>
       <div class="sp-card-body">
+        ${taglineHtml}
         <h3 class="sp-card-name">${esc(pName)}</h3>
         <div class="sp-card-price-row">${priceHtml}</div>
-        ${customBadge}
-        ${actionBtn}
       </div>
     </div>`;
 }
@@ -350,12 +346,11 @@ function bindCardClicks(container) {
     }
   });
 
-  // Add-to-cart button (does not trigger card click)
-  container.querySelectorAll('.sp-card-add:not([disabled])').forEach(btn => {
+  // Wishlist heart button (visual toggle only — full logic later)
+  container.querySelectorAll('.sp-card-fav').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const product = allProducts.find(p => p.id === btn.dataset.addId);
-      if (product) addToCart(product, null);
+      btn.classList.toggle('is-fav');
     });
   });
 }

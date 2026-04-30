@@ -4741,11 +4741,23 @@ document.getElementById('save-btn').addEventListener('click', async ()=>{
   err.textContent='';
   btn.disabled=true;
 
+  // Ring fields — only stored when category is טבעות
+  const isAdjustable = (cat === 'טבעות') && document.getElementById('p-ring-adjustable').checked;
+  let sizes = null;
+  if (cat === 'טבעות' && !isAdjustable) {
+    const cleaned = ringSizes
+      .map(s => ({ size: String(s.size||'').trim(), stock: (s.stock===null||s.stock===undefined||Number.isNaN(s.stock)) ? null : parseInt(s.stock) }))
+      .filter(s => s.size !== '');
+    sizes = cleaned.length ? cleaned : null;
+  }
+
   const data={
     name,sku,category:cat,collection:col||null,material:mat||null,color:color||null,
     priceOriginal:priceOrig,priceSale,costPrice,stockCount,
     badge:badge||null,status,isFeatured,
     isCustomizable:document.getElementById('p-customizable').checked,
+    isAdjustable,
+    sizes,
     images:imagesArr,imageUrl:imagesArr[0]||null,
     description:description||null,
     nameEn:nameEn||null,
