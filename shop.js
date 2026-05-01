@@ -3,7 +3,7 @@
 
 import { db } from './firebase-config.js';
 import {
-  collection, query, orderBy, getDocs, limit,
+  collection, query, orderBy, getDocs, limit, doc, onSnapshot,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── Constants ──────────────────────────────────────────────────
@@ -17,6 +17,10 @@ const COLORS     = ['זהב', 'כסף', 'זהב ורוד'];
 // ── State ──────────────────────────────────────────────────────
 let allProducts    = [];
 let productsLoaded = false;
+let subCatsByCat   = {}; // { "טבעות": ["טבעות לפי מידה", ...], ... }
+// Sub-cat row display target — defaults to active filterCat, but on desktop
+// hover over a different category temporarily previews that one's sub-cats.
+let subBarPreviewCat = '';
 
 // Pre-filter from URL params (e.g. from category grid on home page)
 const _p = new URLSearchParams(location.search);
@@ -224,14 +228,30 @@ function render() {
        <div style="font-size:0.74rem;color:var(--muted);margin-top:4px;">${t('shop_freeship_warn','שימי לב: הורדת פריטים שתפחית את העגלה מתחת ל־')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong> ${t('shop_freeship_warn_2','תבטל את ההטבה')}</div>`
     : `${truckSvg} ${t('shop_freeship_over', 'משלוח חינם בקנייה מעל')} <strong>${FREE_SHIP_THRESHOLD} ₪</strong>${cartSubtotal > 0 ? ` — ${t('shop_freeship_more', 'עוד')} <strong>${FREE_SHIP_THRESHOLD - cartSubtotal} ₪</strong>` : ''}`;
 
-  // Category pills — top bar (outside drawer)
+  // Category pills — top bar (outside drawer). data-cat lets hover handlers
+  // know which category to preview in the sub-cat row below.
   const catPillsHTML = [
-    `<button class="sp-cat-pill${isAllActive ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="false">${t('shop_all', 'הכל')}</button>`,
+    `<button class="sp-cat-pill${isAllActive ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="false" data-cat="">${t('shop_all', 'הכל')}</button>`,
     ...allCats.map(c =>
-      `<button class="sp-cat-pill${filterCat === c && !filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false">${esc(localCat(c))}</button>`
+      `<button class="sp-cat-pill${filterCat === c && !filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="${esc(c)}" data-filter-feat="false" data-cat="${esc(c)}">${esc(localCat(c))}</button>`
     ),
-    `<button class="sp-cat-pill${filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="true">${t('shop_featured_pill', 'מוצרים נבחרים ⭐')}</button>`,
+    `<button class="sp-cat-pill${filterFeatured ? ' sp-cat-pill--active' : ''}" data-filter-cat="" data-filter-feat="true" data-cat="">${t('shop_featured_pill', 'מוצרים נבחרים ⭐')}</button>`,
   ].join('');
+
+  // Sub-category row — shows the active category's sub-cats; on desktop, hover
+  // over another category temporarily previews its sub-cats here.
+  function buildSubcatRowHTML(cat) {
+    const subs = (cat && Array.isArray(subCatsByCat[cat])) ? subCatsByCat[cat] : [];
+    if (!subs.length) return '';
+    const allActive = !filterSubCat && cat === filterCat;
+    return `
+      <button class="sp-subcat-pill${allActive ? ' sp-subcat-pill--active' : ''}" data-filter-subcat="" data-subcat-target-cat="${esc(cat)}">${t('shop_all', 'הכל')}</button>
+      ${subs.map(s =>
+        `<button class="sp-subcat-pill${(filterSubCat === s && cat === filterCat) ? ' sp-subcat-pill--active' : ''}" data-filter-subcat="${esc(s)}" data-subcat-target-cat="${esc(cat)}">${esc(s)}</button>`
+      ).join('')}`;
+  }
+  const initialSubcatHtml = buildSubcatRowHTML(filterCat);
+  const subCatBarHTML = `<div class="sp-subcat-bar" id="sp-subcat-bar"${initialSubcatHtml ? '' : ' style="display:none;"'}>${initialSubcatHtml}</div>`;
 
   // Color pills for drawer
   const colorPillsHTML = [
@@ -284,6 +304,7 @@ function render() {
       <div class="sp-freeship-slim">${freeShipLine}</div>
 
       <div class="sp-cat-bar">${catPillsHTML}</div>
+      ${subCatBarHTML}
 
       <div class="sp-filter-trigger-row">
         <button id="sp-filter-btn" class="sp-filter-trigger">
@@ -373,6 +394,70 @@ function render() {
       render();
     });
   });
+
+  // ── Sub-category row — click to filter ──
+  el.querySelectorAll('[data-filter-subcat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newCat    = btn.dataset.subcatTargetCat || '';
+      const newSubcat = btn.dataset.filterSubcat   || '';
+      filterCat      = newCat;
+      filterSubCat   = newSubcat;
+      filterFeatured = false;
+      const params = new URLSearchParams(window.location.search);
+      if (newCat)    params.set('cat', newCat); else params.delete('cat');
+      if (newSubcat) params.set('subCat', newSubcat); else params.delete('subCat');
+      params.delete('featured');
+      const qs = params.toString();
+      history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
+      render();
+    });
+  });
+
+  // ── Desktop hover preview: show a category's sub-cats while hovering its
+  //    pill, even if it isn't the active filter. Restored on pointer leave.
+  const subBar = el.querySelector('#sp-subcat-bar');
+  el.querySelectorAll('.sp-cat-pill[data-cat]').forEach(pill => {
+    pill.addEventListener('pointerenter', () => {
+      // Skip on touch devices — preview-on-hover is a desktop affordance only,
+      // and touchstart fires pointerenter which would interfere with click.
+      if (window.matchMedia('(hover: none)').matches) return;
+      const cat = pill.dataset.cat;
+      const html = cat ? buildSubcatRowHTML(cat) : '';
+      if (!subBar) return;
+      if (html) {
+        subBar.innerHTML = html;
+        subBar.style.display = '';
+        // Re-bind clicks on the freshly-injected pills
+        subBar.querySelectorAll('[data-filter-subcat]').forEach(b => {
+          b.addEventListener('click', () => {
+            filterCat      = b.dataset.subcatTargetCat || '';
+            filterSubCat   = b.dataset.filterSubcat   || '';
+            filterFeatured = false;
+            const params = new URLSearchParams(window.location.search);
+            if (filterCat)    params.set('cat', filterCat); else params.delete('cat');
+            if (filterSubCat) params.set('subCat', filterSubCat); else params.delete('subCat');
+            params.delete('featured');
+            history.replaceState({}, '', window.location.pathname + (params.toString() ? '?' + params.toString() : ''));
+            render();
+          });
+        });
+      }
+    });
+  });
+  // Restore the sub-cat row to the active filter when the mouse leaves the
+  // entire cat-bar + subcat-bar area.
+  const restoreSubBar = () => {
+    if (!subBar) return;
+    const html = buildSubcatRowHTML(filterCat);
+    if (html) { subBar.innerHTML = html; subBar.style.display = ''; }
+    else      { subBar.innerHTML = '';   subBar.style.display = 'none'; }
+  };
+  el.querySelector('.sp-cat-bar')?.addEventListener('pointerleave', (e) => {
+    // Don't restore if the pointer moved onto the sub-cat bar itself
+    if (subBar && subBar.contains(e.relatedTarget)) return;
+    restoreSubBar();
+  });
+  subBar?.addEventListener('pointerleave', () => restoreSubBar());
 
   // ── Drawer pills — toggle visually in-place, no render ──
 
@@ -510,6 +595,13 @@ getDocs(q).then(snap => {
   productsLoaded = true;
   render();
 });
+
+// Subscribe to sub-category config — drives the sub-cat row under the cat bar
+const SUBCAT_DOC_PATH = 'artifacts/charming-3dd6f/public/data/settings/categoriesConfig';
+onSnapshot(doc(db, SUBCAT_DOC_PATH), (snap) => {
+  subCatsByCat = (snap.exists() && snap.data()?.subCategories) || {};
+  if (productsLoaded) render();
+}, (err) => console.warn('[shop] subcat config failed:', err));
 
 // Re-render when language changes (bilingual product names)
 window._rerenderProducts = function() { render(); };

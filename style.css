@@ -4386,22 +4386,56 @@ html.view-routing #view-home { display: none; }
   color: var(--ink);
 }
 
-/* Mobile: scrollable row */
+/* Mobile: wrap to multiple rows so all categories stay visible
+   (previously used overflow-x scroll which hid the last category). */
 @media (max-width: 768px) {
   .sp-cat-bar {
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 10px;
-    padding: 14px 4px 16px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 14px 4px 14px;
   }
-  .sp-cat-bar::-webkit-scrollbar { display: none; }
   .sp-cat-pill {
-    padding: 9px 16px;
+    padding: 8px 12px;
     font-size: 0.84rem;
   }
+}
+
+/* ===== Sub-category row (under main category bar) ===== */
+.sp-subcat-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 0 18px;
+  margin: -4px 0 4px;
+}
+.sp-subcat-pill {
+  padding: 5px 14px;
+  border: 1px solid var(--sand-dark);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: 'Assistant', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.sp-subcat-pill:hover {
+  border-color: var(--pink);
+  color: var(--pink-deep);
+}
+.sp-subcat-pill--active {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+  font-weight: 600;
+}
+@media (max-width: 768px) {
+  .sp-subcat-bar { gap: 6px; padding: 0 4px 14px; }
+  .sp-subcat-pill { padding: 4px 12px; font-size: 0.76rem; }
 }
 
 .sp-filter-trigger-row {
