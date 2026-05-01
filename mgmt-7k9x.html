@@ -6079,6 +6079,9 @@ function initWorkshopsTab() {
     renderWorkshopsList();
     if (wsCurrentView === 'crm') renderCrmBoard();
     if (currentDashView === 'workshops') { renderWsDashboard(); renderFinancialReports(); }
+    // Auto calendar health check: triggers a background verify+fix run.
+    // Throttled to 5 min between runs; only operates if a valid token exists.
+    try { ensureCalendarHealthMonitor(); scheduleAutoCalendarHealthCheck('snapshot'); } catch(e) {}
   }, err=>console.error('workshops:', err));
 
   // Live price calculation on any relevant field change
@@ -11705,8 +11708,9 @@ function _calDateStr(w) {
 }
 
 const _calSyncInFlight = new Set();
-async function syncCalendarEvent(workshopId, wsData) {
-  if (_calSyncInFlight.has(workshopId)) return;
+async function syncCalendarEvent(workshopId, wsData, opts = {}) {
+  const silent = !!opts.silent;
+  if (_calSyncInFlight.has(workshopId)) return { ok: false, reason: 'in_flight' };
   _calSyncInFlight.add(workshopId);
   try {
   // Always fetch the latest doc to get the freshest calendarEventId (avoid duplicates from stale snapshots)
@@ -11716,11 +11720,11 @@ async function syncCalendarEvent(workshopId, wsData) {
     if (snap.exists()) w = { id: workshopId, ...snap.data() };
   } catch(e) { console.warn('Calendar: fetch latest failed, using cached', e); }
   if (!w) w = wsData || allWorkshops.find(x => x.id === workshopId);
-  if (!w) return;
+  if (!w) return { ok: false, reason: 'no_workshop' };
   const event = buildCalendarEvent(w);
-  if (!event) return;
+  if (!event) return { ok: false, reason: 'no_event_date' };
   const token = await ensureCalendarToken();
-  if (!token) { console.warn('Calendar: no token'); return; }
+  if (!token) { console.warn('Calendar: no token'); return { ok: false, reason: 'no_token' }; }
   const headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
   // Always write to the business calendar explicitly — never 'primary',
   // which would resolve to whatever account the OAuth token belongs to.
@@ -11734,38 +11738,45 @@ async function syncCalendarEvent(workshopId, wsData) {
       if (r.ok) {
         const v = await verifyCalendarEvent(w.calendarEventId, token);
         if (v.ok) {
-          showToast(`✓ היומן עודכן ואומת — ${_calDateStr(w)}`);
-          logAction(`יומן Google עודכן ואומת — "${w.celebrant || w.customerName}" (${_calDateStr(w)})`);
+          if (!silent) {
+            showToast(`✓ היומן עודכן ואומת — ${_calDateStr(w)}`);
+            logAction(`יומן Google עודכן ואומת — "${w.celebrant || w.customerName}" (${_calDateStr(w)})`);
+          }
+          return { ok: true };
         } else {
-          alert('שים לב: עדכון היומן הסתיים אך לא ניתן היה לאמת אותו.\nאנא בדקי ידנית את יומן Charming ב-Google.');
+          if (!silent) alert('שים לב: עדכון היומן הסתיים אך לא ניתן היה לאמת אותו.\nאנא בדקי ידנית את יומן Charming ב-Google.');
+          return { ok: false, reason: 'verify_after_update_failed' };
         }
       } else if (r.status === 404) {
-        // Event was deleted — create new
-        await createCalendarEvent(workshopId, event, headers, calId, token, w);
+        // Event was deleted from calendar — create new
+        return await createCalendarEvent(workshopId, event, headers, calId, token, w, opts);
       } else {
         const errText = await r.text();
         console.error('Calendar update failed:', errText);
-        alert('שגיאה: עדכון האירוע ביומן Google נכשל.\nאנא נסי שוב.');
+        if (!silent) alert('שגיאה: עדכון האירוע ביומן Google נכשל.\nאנא נסי שוב.');
+        return { ok: false, reason: 'update_http_' + r.status };
       }
     } else {
-      await createCalendarEvent(workshopId, event, headers, calId, token, w);
+      return await createCalendarEvent(workshopId, event, headers, calId, token, w, opts);
     }
   } catch(e) {
     console.error('Calendar sync error:', e);
-    alert('שגיאה בסנכרון היומן. אנא בדקי חיבור לאינטרנט ונסי שוב.');
+    if (!silent) alert('שגיאה בסנכרון היומן. אנא בדקי חיבור לאינטרנט ונסי שוב.');
+    return { ok: false, reason: 'exception' };
   }
   } finally { _calSyncInFlight.delete(workshopId); }
 }
 
-async function createCalendarEvent(workshopId, event, headers, calId, token, w) {
+async function createCalendarEvent(workshopId, event, headers, calId, token, w, opts = {}) {
+  const silent = !!(opts && opts.silent);
   const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events`, {
     method: 'POST', headers, body: JSON.stringify(event)
   });
   if (!r.ok) {
     const errText = await r.text();
     console.error('Calendar create failed:', errText);
-    alert('שגיאה: האירוע לא נשמר ביומן Google.\nאנא בדקי חיבור לאינטרנט ונסי שוב.');
-    return;
+    if (!silent) alert('שגיאה: האירוע לא נשמר ביומן Google.\nאנא בדקי חיבור לאינטרנט ונסי שוב.');
+    return { ok: false, reason: 'create_http_' + r.status };
   }
   const data = await r.json();
   // Verify the event actually persisted by reading it back from Google
@@ -11773,18 +11784,142 @@ async function createCalendarEvent(workshopId, event, headers, calId, token, w) 
   await updateDoc(doc(db, WORKSHOPS_COL, workshopId), { calendarEventId: data.id });
   if (v.ok) {
     const dateStr = w ? _calDateStr(w) : '';
-    showToast(`✓ אירוע אומת ביומן Charming${dateStr ? ' — ' + dateStr : ''}`);
-    logAction(`אירוע Google Calendar נוצר ואומת — "${event.summary}"${dateStr ? ' (' + dateStr + ')' : ''}`);
+    if (!silent) {
+      showToast(`✓ אירוע אומת ביומן Charming${dateStr ? ' — ' + dateStr : ''}`);
+      logAction(`אירוע Google Calendar נוצר ואומת — "${event.summary}"${dateStr ? ' (' + dateStr + ')' : ''}`);
+    }
+    return { ok: true };
   } else {
-    alert('שים לב: האירוע נוצר ביומן אך לא ניתן היה לאמת אותו אוטומטית.\nאנא בדקי ידנית את יומן Charming ב-Google.');
+    if (!silent) alert('שים לב: האירוע נוצר ביומן אך לא ניתן היה לאמת אותו אוטומטית.\nאנא בדקי ידנית את יומן Charming ב-Google.');
     logAction(`אירוע Google Calendar נוצר אך לא אומת — "${event.summary}"`);
+    return { ok: false, reason: 'verify_after_create_failed' };
   }
 }
 
-// Manual full-calendar verification — checks every confirmed workshop with a
-// calendarEventId and reports a single Hebrew summary.
+// ──────────────────────────────────────────────────────────────────────
+//  AUTOMATIC CALENDAR HEALTH MONITOR
+//  Runs in the background. For every confirmed workshop:
+//    1. Verify the event exists in the business calendar at the expected time
+//    2. If missing or wrong date → auto-fix by re-syncing
+//    3. Re-verify after the fix
+//    4. Only show a Hebrew alert for the events that STILL fail after auto-fix
+//  Triggers: on every workshops snapshot (throttled 5 min), and every 30 min.
+// ──────────────────────────────────────────────────────────────────────
+let _autoCalCheckTimer = null;
+let _autoCalCheckRunning = false;
+let _lastAutoCalCheckAt = 0;
+let _calMonitorInited = false;
+const AUTO_CAL_THROTTLE_MS = 5 * 60 * 1000;
+const AUTO_CAL_INTERVAL_MS = 30 * 60 * 1000;
+const CAL_DATE_TOLERANCE_MS = 60 * 1000; // ±1 minute
+
+function scheduleAutoCalendarHealthCheck(reason) {
+  if (Date.now() - _lastAutoCalCheckAt < AUTO_CAL_THROTTLE_MS) return;
+  if (_autoCalCheckRunning) return;
+  clearTimeout(_autoCalCheckTimer);
+  _autoCalCheckTimer = setTimeout(() => {
+    runAutoCalendarHealthCheck(reason).catch(e => console.warn('auto cal check error:', e));
+  }, 3000);
+}
+
+function ensureCalendarHealthMonitor() {
+  if (_calMonitorInited) return;
+  _calMonitorInited = true;
+  setInterval(() => scheduleAutoCalendarHealthCheck('interval'), AUTO_CAL_INTERVAL_MS);
+}
+
+async function runAutoCalendarHealthCheck(reason) {
+  if (_autoCalCheckRunning) return;
+  _autoCalCheckRunning = true;
+  _lastAutoCalCheckAt = Date.now();
+  try {
+    // Only run if we already have a valid token for the business calendar.
+    // Never pop OAuth unsolicited — wait for the user's next manual action.
+    let token = calendarAccessToken;
+    if (!token) return;
+    const valid = await verifyCalendarTokenAccount(token);
+    if (!valid) {
+      calendarAccessToken = null;
+      localStorage.removeItem('calendar_token');
+      return;
+    }
+
+    // Only future-or-today confirmed workshops with an event date
+    const todayMs = new Date(); todayMs.setHours(0,0,0,0);
+    const confirmed = (allWorkshops || []).filter(w => {
+      if (w.bookingStatus !== 'confirmed' || !w.eventDate) return false;
+      const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
+      return d && d.getTime() >= todayMs.getTime();
+    });
+    if (confirmed.length === 0) return;
+
+    const fixed = [];
+    const stillBroken = [];
+
+    for (const w of confirmed) {
+      const expected = buildCalendarEvent(w);
+      if (!expected) continue;
+      const expectedMs = new Date(expected.start.dateTime).getTime();
+
+      // Check current state
+      let alreadyOk = false;
+      if (w.calendarEventId) {
+        const v = await verifyCalendarEvent(w.calendarEventId, token);
+        if (v.ok && v.dateTime && Math.abs(v.dateTime.getTime() - expectedMs) <= CAL_DATE_TOLERANCE_MS) {
+          alreadyOk = true;
+        }
+      }
+      if (alreadyOk) continue;
+
+      // Out of sync — try to auto-fix
+      const syncResult = await syncCalendarEvent(w.id, w, { silent: true });
+
+      // Re-fetch fresh state and re-verify
+      let fresh = w;
+      try {
+        const snap = await getDoc(doc(db, WORKSHOPS_COL, w.id));
+        if (snap.exists()) fresh = { id: w.id, ...snap.data() };
+      } catch(e) {}
+
+      let nowOk = false;
+      if (fresh.calendarEventId) {
+        const v2 = await verifyCalendarEvent(fresh.calendarEventId, token);
+        const freshExpected = buildCalendarEvent(fresh);
+        const freshExpectedMs = freshExpected ? new Date(freshExpected.start.dateTime).getTime() : expectedMs;
+        if (v2.ok && v2.dateTime && Math.abs(v2.dateTime.getTime() - freshExpectedMs) <= CAL_DATE_TOLERANCE_MS) {
+          nowOk = true;
+        }
+      }
+
+      if (nowOk) fixed.push(fresh);
+      else stillBroken.push(fresh);
+    }
+
+    if (fixed.length === 0 && stillBroken.length === 0) return;
+
+    if (fixed.length > 0) {
+      try { showToast(`✓ סנכרון יומן אוטומטי: תוקנו ${fixed.length} אירועים`); } catch(e) {}
+      logAction(`סנכרון יומן אוטומטי: תוקנו ${fixed.length} אירועים`);
+    }
+    if (stillBroken.length > 0) {
+      let msg = `⚠ סנכרון יומן אוטומטי — נדרשת התערבות ידנית\n\n`;
+      msg += `${stillBroken.length} אירועים לא הצליחו להסתנכרן ביומן Charming גם אחרי ניסיון תיקון אוטומטי:\n\n`;
+      msg += stillBroken.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
+      msg += `\n\nאנא פתחי כל אחד בלוח הניהול וטפלי ידנית.`;
+      if (fixed.length > 0) msg += `\n\n(${fixed.length} אירועים אחרים תוקנו אוטומטית בהצלחה.)`;
+      alert(msg);
+      logAction(`סנכרון יומן אוטומטי: ${fixed.length} תוקנו, ${stillBroken.length} דורשים טיפול ידני`);
+    }
+  } finally {
+    _autoCalCheckRunning = false;
+  }
+}
+window.runAutoCalendarHealthCheck = runAutoCalendarHealthCheck;
+
+// Manual one-click verification — same as the auto check but always reports,
+// and forces a fresh OAuth if no valid token (since the user explicitly asked).
 async function verifyAllCalendarEvents() {
-  const confirmed = (allWorkshops || []).filter(w => w.status === 'confirmed' && w.calendarEventId && w.eventDate);
+  const confirmed = (allWorkshops || []).filter(w => w.bookingStatus === 'confirmed' && w.calendarEventId && w.eventDate);
   if (confirmed.length === 0) {
     alert('אין סדנאות סגורות עם אירוע ביומן לבדיקה.');
     return;
@@ -11796,14 +11931,19 @@ async function verifyAllCalendarEvents() {
   const missing = [];
   for (const w of confirmed) {
     const v = await verifyCalendarEvent(w.calendarEventId, token);
-    if (v.ok) found.push(w); else missing.push(w);
+    const expected = buildCalendarEvent(w);
+    const expectedMs = expected ? new Date(expected.start.dateTime).getTime() : null;
+    const ok = v.ok && v.dateTime && expectedMs && Math.abs(v.dateTime.getTime() - expectedMs) <= CAL_DATE_TOLERANCE_MS;
+    if (ok) found.push(w); else missing.push(w);
   }
   let msg = `נבדקו ${confirmed.length} אירועים ביומן Charming:\n\n`;
   msg += `✓ ${found.length} אירועים אומתו ביומן בתאריך הנכון\n`;
   if (missing.length > 0) {
-    msg += `\n✗ ${missing.length} אירועים לא נמצאו ביומן:\n`;
+    msg += `\n✗ ${missing.length} אירועים לא נמצאו או בתאריך שגוי:\n`;
     msg += missing.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
-    msg += `\n\nכדאי לפתוח כל אחד מהם בלוח הניהול וללחוץ "אישור" מחדש כדי ליצור אירוע חדש.`;
+    msg += `\n\nתיקון אוטומטי ירוץ בקרוב — או לחצי על אישור הסדנה מחדש.`;
+    // Trigger an auto fix run now since the user explicitly invoked verify
+    setTimeout(() => { _lastAutoCalCheckAt = 0; scheduleAutoCalendarHealthCheck('manual_after_verify'); }, 500);
   } else {
     msg += `\nכל האירועים העתידיים מסונכרנים כראוי.`;
   }
