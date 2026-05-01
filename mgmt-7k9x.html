@@ -975,6 +975,10 @@
             <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
             <h3 class="font-bold text-sm text-gray-800">סדנאות סגורות — קרובות</h3>
             <span id="ws-confirmed-count" class="text-[10px] font-bold bg-[#f0dfc0] text-[#a8705a] rounded-full px-2 py-0.5"></span>
+            <button onclick="verifyAllCalendarEvents()" title="בדקי שכל האירועים מופיעים ביומן Google בתאריך הנכון"
+              class="ms-auto text-[10px] font-bold text-[#a8705a] hover:text-[#8a5a44] flex items-center gap-1 px-2 py-1 rounded-full hover:bg-white transition-colors">
+              <i data-lucide="calendar-check" class="w-3 h-3"></i> בדקי סנכרון יומן
+            </button>
           </div>
           <div id="ws-list-confirmed" class="divide-y divide-[#fdf6ee]"></div>
         </div>
@@ -11669,6 +11673,37 @@ function buildCalendarEvent(w) {
   };
 }
 
+// Verify a specific event still exists (and isn't cancelled) in the business calendar.
+// Retries once on 404 to handle eventual consistency right after a POST.
+async function verifyCalendarEvent(eventId, token) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(BUSINESS_CALENDAR_EMAIL)}/events/${encodeURIComponent(eventId)}`, {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (data.status === 'cancelled') return { ok: false, status: 'cancelled' };
+        const dt = data.start?.dateTime ? new Date(data.start.dateTime) : null;
+        return { ok: true, dateTime: dt, htmlLink: data.htmlLink };
+      }
+      if (r.status === 404 && attempt === 0) {
+        await new Promise(rs => setTimeout(rs, 1000));
+        continue;
+      }
+      return { ok: false, status: 'http_' + r.status };
+    } catch(e) { return { ok: false, status: 'error' }; }
+  }
+  return { ok: false };
+}
+
+// Build a Hebrew date string from a workshop for confirmation messages.
+function _calDateStr(w) {
+  const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
+  if (!d) return '';
+  return d.toLocaleString('he-IL', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+}
+
 const _calSyncInFlight = new Set();
 async function syncCalendarEvent(workshopId, wsData) {
   if (_calSyncInFlight.has(workshopId)) return;
@@ -11697,30 +11732,85 @@ async function syncCalendarEvent(workshopId, wsData) {
         method: 'PUT', headers, body: JSON.stringify(event)
       });
       if (r.ok) {
-        showToast('היומן עודכן');
-        logAction(`יומן Google עודכן — "${w.celebrant || w.customerName}"`);
+        const v = await verifyCalendarEvent(w.calendarEventId, token);
+        if (v.ok) {
+          showToast(`✓ היומן עודכן ואומת — ${_calDateStr(w)}`);
+          logAction(`יומן Google עודכן ואומת — "${w.celebrant || w.customerName}" (${_calDateStr(w)})`);
+        } else {
+          alert('שים לב: עדכון היומן הסתיים אך לא ניתן היה לאמת אותו.\nאנא בדקי ידנית את יומן Charming ב-Google.');
+        }
       } else if (r.status === 404) {
         // Event was deleted — create new
-        await createCalendarEvent(workshopId, event, headers, calId);
-      } else { console.error('Calendar update failed:', await r.text()); }
+        await createCalendarEvent(workshopId, event, headers, calId, token, w);
+      } else {
+        const errText = await r.text();
+        console.error('Calendar update failed:', errText);
+        alert('שגיאה: עדכון האירוע ביומן Google נכשל.\nאנא נסי שוב.');
+      }
     } else {
-      await createCalendarEvent(workshopId, event, headers, calId);
+      await createCalendarEvent(workshopId, event, headers, calId, token, w);
     }
-  } catch(e) { console.error('Calendar sync error:', e); }
+  } catch(e) {
+    console.error('Calendar sync error:', e);
+    alert('שגיאה בסנכרון היומן. אנא בדקי חיבור לאינטרנט ונסי שוב.');
+  }
   } finally { _calSyncInFlight.delete(workshopId); }
 }
 
-async function createCalendarEvent(workshopId, event, headers, calId) {
+async function createCalendarEvent(workshopId, event, headers, calId, token, w) {
   const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events`, {
     method: 'POST', headers, body: JSON.stringify(event)
   });
-  if (r.ok) {
-    const data = await r.json();
-    await updateDoc(doc(db, WORKSHOPS_COL, workshopId), { calendarEventId: data.id });
-    showToast('אירוע נוסף ליומן Google');
-    logAction(`אירוע Google Calendar נוצר — "${event.summary}"`);
-  } else { console.error('Calendar create failed:', await r.text()); }
+  if (!r.ok) {
+    const errText = await r.text();
+    console.error('Calendar create failed:', errText);
+    alert('שגיאה: האירוע לא נשמר ביומן Google.\nאנא בדקי חיבור לאינטרנט ונסי שוב.');
+    return;
+  }
+  const data = await r.json();
+  // Verify the event actually persisted by reading it back from Google
+  const v = token ? await verifyCalendarEvent(data.id, token) : { ok: true };
+  await updateDoc(doc(db, WORKSHOPS_COL, workshopId), { calendarEventId: data.id });
+  if (v.ok) {
+    const dateStr = w ? _calDateStr(w) : '';
+    showToast(`✓ אירוע אומת ביומן Charming${dateStr ? ' — ' + dateStr : ''}`);
+    logAction(`אירוע Google Calendar נוצר ואומת — "${event.summary}"${dateStr ? ' (' + dateStr + ')' : ''}`);
+  } else {
+    alert('שים לב: האירוע נוצר ביומן אך לא ניתן היה לאמת אותו אוטומטית.\nאנא בדקי ידנית את יומן Charming ב-Google.');
+    logAction(`אירוע Google Calendar נוצר אך לא אומת — "${event.summary}"`);
+  }
 }
+
+// Manual full-calendar verification — checks every confirmed workshop with a
+// calendarEventId and reports a single Hebrew summary.
+async function verifyAllCalendarEvents() {
+  const confirmed = (allWorkshops || []).filter(w => w.status === 'confirmed' && w.calendarEventId && w.eventDate);
+  if (confirmed.length === 0) {
+    alert('אין סדנאות סגורות עם אירוע ביומן לבדיקה.');
+    return;
+  }
+  const token = await ensureCalendarToken();
+  if (!token) return;
+  showToast(`בודקת ${confirmed.length} אירועים ביומן...`);
+  const found = [];
+  const missing = [];
+  for (const w of confirmed) {
+    const v = await verifyCalendarEvent(w.calendarEventId, token);
+    if (v.ok) found.push(w); else missing.push(w);
+  }
+  let msg = `נבדקו ${confirmed.length} אירועים ביומן Charming:\n\n`;
+  msg += `✓ ${found.length} אירועים אומתו ביומן בתאריך הנכון\n`;
+  if (missing.length > 0) {
+    msg += `\n✗ ${missing.length} אירועים לא נמצאו ביומן:\n`;
+    msg += missing.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
+    msg += `\n\nכדאי לפתוח כל אחד מהם בלוח הניהול וללחוץ "אישור" מחדש כדי ליצור אירוע חדש.`;
+  } else {
+    msg += `\nכל האירועים העתידיים מסונכרנים כראוי.`;
+  }
+  alert(msg);
+  logAction(`בדיקת סנכרון יומן: ${found.length}/${confirmed.length} תקינים`);
+}
+window.verifyAllCalendarEvents = verifyAllCalendarEvents;
 
 async function deleteCalendarEvent(workshopId) {
   const w = allWorkshops.find(x => x.id === workshopId);
