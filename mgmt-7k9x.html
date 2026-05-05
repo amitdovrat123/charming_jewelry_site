@@ -11745,7 +11745,22 @@ function showCalendarReportModal({ title, icon = 'calendar-check', sections = []
     const itemsHtml = items.map(it => {
       const extra = it.extra ? `<span class="text-[10px] font-bold ${p.text} bg-white px-2 py-0.5 rounded-full shrink-0 border ${p.border}">${esc(it.extra)}</span>` : '';
       const detail = it.detail ? `<div class="text-[11px] text-gray-500 mt-0.5">${esc(it.detail)}</div>` : '';
-      return `<li class="px-3 py-2 bg-white rounded-lg flex items-start justify-between gap-2 border ${p.border}"><div class="min-w-0 flex-1"><div class="font-semibold text-gray-800 text-[13px] truncate">${esc(it.name || '')}</div>${detail}</div>${extra}</li>`;
+      const issuesHtml = (it.issues && it.issues.length) ? `
+        <div class="mt-2 pt-2 border-t border-gray-100">
+          <div class="text-[10px] font-bold text-amber-700 mb-1 flex items-center gap-1">⚠ מה לא תקין</div>
+          <ul class="text-[11px] text-gray-700 leading-tight space-y-0.5">${it.issues.map(s => `<li class="flex gap-1"><span class="text-amber-500">•</span><span>${esc(s)}</span></li>`).join('')}</ul>
+        </div>` : '';
+      const fixesHtml = (it.fixes && it.fixes.length) ? `
+        <div class="mt-2 pt-2 border-t border-gray-100">
+          <div class="text-[10px] font-bold text-emerald-600 mb-1 flex items-center gap-1">✓ תיקון אוטומטי</div>
+          <ul class="text-[11px] text-gray-700 leading-tight space-y-0.5">${it.fixes.map(s => `<li class="flex gap-1"><span class="text-emerald-500">•</span><span>${esc(s)}</span></li>`).join('')}</ul>
+        </div>` : '';
+      return `<li class="px-3 py-2 bg-white rounded-lg border ${p.border}">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0 flex-1"><div class="font-semibold text-gray-800 text-[13px]">${esc(it.name || '')}</div>${detail}</div>
+          ${extra}
+        </div>${issuesHtml}${fixesHtml}
+      </li>`;
     }).join('');
     const block = document.createElement('div');
     block.className = `${p.bg} rounded-xl p-3 border ${p.border}`;
@@ -12072,59 +12087,165 @@ async function runAutoCalendarHealthCheck(reason) {
 }
 window.runAutoCalendarHealthCheck = runAutoCalendarHealthCheck;
 
-// Manual one-click verification — also detects duplicates and triggers a full
-// auto-fix run that will dedupe and re-sync everything that's not perfect.
+// Diagnose a single workshop's calendar state in detail.
+// Returns { state: 'ok'|'missing'|'duplicate'|'mismatch', issues, fixes, extra? }
+async function diagnoseWorkshopCalendar(w, token) {
+  const expected = buildCalendarEvent(w);
+  if (!expected) return { state: 'no_event_date', issues: [], fixes: [] };
+  const expectedStartMs = new Date(expected.start.dateTime).getTime();
+  const existing = await findCalendarEventsForWorkshop(w, token);
+
+  if (existing.length === 0) {
+    return { state: 'missing', issues: ['אין אירוע ביומן Charming לסדנה זו'], fixes: ['יווצר אירוע חדש ביומן עם כל הפרטים העדכניים'] };
+  }
+  if (existing.length > 1) {
+    return {
+      state: 'duplicate',
+      extra: `${existing.length} עותקים`,
+      issues: [`קיימים ${existing.length} אירועים מקבילים לסדנה זו ביומן`],
+      fixes: [`יישמר עותק אחד עם הנתונים העדכניים; ${existing.length - 1} עותקים יימחקו אוטומטית`]
+    };
+  }
+
+  const e = existing[0];
+  const issues = [];
+  const fixes = [];
+  const fmtTime = ms => ms ? new Date(ms).toLocaleString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' }) : '—';
+
+  const actualStartMs = e.start?.dateTime ? new Date(e.start.dateTime).getTime() : null;
+  if (!actualStartMs || Math.abs(actualStartMs - expectedStartMs) > CAL_DATE_TOLERANCE_MS) {
+    const actualEndMs = e.end?.dateTime ? new Date(e.end.dateTime).getTime() : null;
+    const eventTimeMs = actualEndMs ? actualEndMs - 2 * 60 * 60 * 1000 : actualStartMs;
+    const expectedEventTime = expectedStartMs + 30 * 60 * 1000;
+    const timeDiffMin = actualStartMs ? Math.round((expectedStartMs - actualStartMs) / 60000) : null;
+    if (timeDiffMin === 30 && Math.abs(eventTimeMs - expectedEventTime) <= CAL_DATE_TOLERANCE_MS) {
+      issues.push(`חסר חוצץ של 30 דק׳ הכנה לפני הסדנה (האירוע ביומן מתחיל ב-${fmtTime(actualStartMs)} במקום ב-${fmtTime(expectedStartMs)})`);
+      fixes.push('זמן ההתחלה ביומן יזוז 30 דקות אחורה לכלול הכנה');
+    } else {
+      issues.push(`זמן התחלה ביומן: ${fmtTime(actualStartMs)} — צפוי: ${fmtTime(expectedStartMs)}`);
+      fixes.push('זמן ההתחלה יעודכן לתאריך/שעה הנכונים');
+    }
+  }
+  if (e.summary !== expected.summary) {
+    issues.push(`כותרת ביומן: "${e.summary || '—'}" — צפוי: "${expected.summary}"`);
+    fixes.push('כותרת האירוע תעודכן');
+  }
+  if ((e.location || '') !== (expected.location || '')) {
+    issues.push(`כתובת ביומן לא תואמת לכתובת בלוח הניהול`);
+    fixes.push('כתובת האירוע תעודכן');
+  }
+  if ((e.description || '') !== (expected.description || '')) {
+    issues.push('פרטי האירוע (משתתפות, מסלול, תשלום) השתנו מאז יצירת האירוע ביומן');
+    fixes.push('תיאור האירוע יעודכן עם הפרטים העדכניים');
+  }
+  if (w.calendarEventId && e.id !== w.calendarEventId) {
+    issues.push('מזהה האירוע בלוח הניהול שונה מזה שביומן');
+    fixes.push('המזהה ב-Firestore יסונכרן לזה שביומן');
+  }
+
+  if (issues.length === 0) return { state: 'ok', issues: [], fixes: [] };
+  return { state: 'mismatch', issues, fixes };
+}
+
+// Manual verify + auto-fix flow. Filters past events, diagnoses each future
+// confirmed workshop, runs the auto-fix inline, and shows a final modal.
 async function verifyAllCalendarEvents() {
-  const confirmed = (allWorkshops || []).filter(w => w.bookingStatus === 'confirmed' && w.eventDate);
+  const todayMs = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.getTime(); })();
+  const confirmed = (allWorkshops || []).filter(w => {
+    if (w.bookingStatus !== 'confirmed' || !w.eventDate) return false;
+    const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
+    return d && d.getTime() >= todayMs;
+  });
   if (confirmed.length === 0) {
-    alert('אין סדנאות סגורות עתידיות לבדיקה.');
+    showCalendarReportModal({
+      title: 'אין סדנאות לבדיקה',
+      icon: 'calendar-x',
+      sections: [],
+      footerNote: 'אין סדנאות סגורות עתידיות'
+    });
     return;
   }
   const token = await ensureCalendarToken();
   if (!token) return;
-  showToast(`בודקת ${confirmed.length} סדנאות ביומן...`);
-  const ok = [];
-  const wrong = [];
-  const dups = [];
-  const missing = [];
+  showToast(`בודקת ${confirmed.length} סדנאות עתידיות ביומן...`);
+
+  const okList = [], missing = [], duplicates = [], mismatches = [];
   for (const w of confirmed) {
-    const expected = buildCalendarEvent(w);
-    const expectedMs = expected ? new Date(expected.start.dateTime).getTime() : null;
-    const existing = await findCalendarEventsForWorkshop(w, token);
-    if (existing.length === 0) { missing.push(w); continue; }
-    if (existing.length > 1) { dups.push({ w, count: existing.length }); continue; }
-    const e = existing[0];
-    const actualMs = e.start?.dateTime ? new Date(e.start.dateTime).getTime() : null;
-    if (actualMs && expectedMs && Math.abs(actualMs - expectedMs) <= CAL_DATE_TOLERANCE_MS) ok.push(w);
-    else wrong.push(w);
+    const d = await diagnoseWorkshopCalendar(w, token);
+    const item = {
+      name: w.celebrant || w.customerName,
+      detail: _calDateStr(w),
+      issues: d.issues || [],
+      fixes: d.fixes || [],
+      extra: d.extra
+    };
+    if (d.state === 'ok') okList.push({ w, item });
+    else if (d.state === 'missing') missing.push({ w, item });
+    else if (d.state === 'duplicate') duplicates.push({ w, item });
+    else if (d.state === 'mismatch') mismatches.push({ w, item });
   }
-  const sections = [];
-  sections.push({ type: 'success', label: 'מסונכרנות כראוי', count: ok.length });
-  if (dups.length > 0) sections.push({
-    type: 'warning', label: 'סדנאות עם כפילויות ביומן',
-    items: dups.map(({w, count}) => ({ name: w.celebrant || w.customerName, detail: _calDateStr(w), extra: `${count} עותקים` }))
-  });
-  if (wrong.length > 0) sections.push({
-    type: 'error', label: 'סדנאות בתאריך שגוי',
-    items: wrong.map(w => ({ name: w.celebrant || w.customerName, detail: _calDateStr(w) }))
-  });
-  if (missing.length > 0) sections.push({
-    type: 'error', label: 'סדנאות חסרות ביומן',
-    items: missing.map(w => ({ name: w.celebrant || w.customerName, detail: _calDateStr(w) }))
-  });
-  const hasIssues = dups.length + wrong.length + missing.length > 0;
+
+  const initialSections = [];
+  initialSections.push({ type: 'success', label: 'מסונכרנות כראוי', count: okList.length });
+  if (duplicates.length > 0) initialSections.push({ type: 'warning', label: 'סדנאות עם כפילויות', items: duplicates.map(x => x.item) });
+  if (mismatches.length > 0) initialSections.push({ type: 'warning', label: 'סדנאות עם פרטים שונים מהיומן', items: mismatches.map(x => x.item) });
+  if (missing.length > 0) initialSections.push({ type: 'error', label: 'סדנאות חסרות ביומן', items: missing.map(x => x.item) });
+
+  const issuesCount = duplicates.length + mismatches.length + missing.length;
   showCalendarReportModal({
-    title: hasIssues ? `דוח סנכרון יומן (${confirmed.length} סדנאות)` : 'היומן מסונכרן',
-    icon: hasIssues ? 'alert-triangle' : 'calendar-check',
-    sections,
-    footerNote: hasIssues
-      ? 'מפעילה תיקון אוטומטי עכשיו — תקבלי הודעה כשיסתיים'
+    title: issuesCount > 0 ? `דוח סנכרון (${confirmed.length} סדנאות עתידיות)` : 'היומן מסונכרן',
+    icon: issuesCount > 0 ? 'alert-triangle' : 'calendar-check',
+    sections: initialSections,
+    footerNote: issuesCount > 0
+      ? `מפעילה תיקון אוטומטי על ${issuesCount} הסדנאות... אנא המתיני`
       : `כל ${confirmed.length} הסדנאות העתידיות מסונכרנות כראוי`
   });
-  if (hasIssues) {
-    setTimeout(() => { _lastAutoCalCheckAt = 0; scheduleAutoCalendarHealthCheck('manual_after_verify'); }, 300);
+  logAction(`בדיקת סנכרון: ✓${okList.length} כפילויות:${duplicates.length} פרטים:${mismatches.length} חסר:${missing.length}`);
+
+  if (issuesCount === 0) return;
+
+  // Run the auto-fix inline so the final modal replaces the initial one.
+  const toFix = [...duplicates, ...mismatches, ...missing].map(x => x.w);
+  const fixed = [];
+  const stillBroken = [];
+  let totalDeleted = 0;
+  for (const w of toFix) {
+    const result = await syncCalendarEvent(w.id, w, { silent: true });
+    if (result?.deletedDuplicates) totalDeleted += result.deletedDuplicates;
+
+    let fresh = w;
+    try {
+      const snap = await getDoc(doc(db, WORKSHOPS_COL, w.id));
+      if (snap.exists()) fresh = { id: w.id, ...snap.data() };
+    } catch(e) {}
+
+    const after = await diagnoseWorkshopCalendar(fresh, token);
+    if (after.state === 'ok') fixed.push(fresh);
+    else stillBroken.push({ w: fresh, d: after });
   }
-  logAction(`בדיקת סנכרון יומן: ✓${ok.length} כפילויות:${dups.length} שגוי:${wrong.length} חסר:${missing.length}`);
+
+  const finalSections = [];
+  if (fixed.length > 0) finalSections.push({ type: 'success', label: 'תוקנו אוטומטית', count: fixed.length });
+  if (totalDeleted > 0) finalSections.push({ type: 'success', label: 'כפילויות נמחקו מהיומן', count: totalDeleted });
+  if (stillBroken.length > 0) finalSections.push({
+    type: 'error', label: 'דורשות התערבות ידנית',
+    items: stillBroken.map(x => ({
+      name: x.w.celebrant || x.w.customerName,
+      detail: _calDateStr(x.w),
+      issues: x.d.issues || [],
+      fixes: []
+    }))
+  });
+
+  showCalendarReportModal({
+    title: stillBroken.length > 0 ? 'תיקון הסתיים — נדרשת התערבות' : 'תיקון אוטומטי הסתיים',
+    icon: stillBroken.length > 0 ? 'alert-triangle' : 'check-circle',
+    sections: finalSections,
+    footerNote: stillBroken.length > 0
+      ? 'פתחי כל סדנה ולחצי "אישור" מחדש כדי לחדש את הסנכרון'
+      : `כל ${confirmed.length} הסדנאות העתידיות מסונכרנות`
+  });
+  logAction(`תיקון יומן ידני: ${fixed.length} תוקנו, ${totalDeleted} כפילויות נמחקו, ${stillBroken.length} דורשים טיפול ידני`);
 }
 window.verifyAllCalendarEvents = verifyAllCalendarEvents;
 
