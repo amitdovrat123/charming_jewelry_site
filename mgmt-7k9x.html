@@ -2231,8 +2231,8 @@ Charming by Vik 💛</textarea>
 
 <!-- ════ CALENDAR REPORT MODAL ════ -->
 <div id="cal-report-modal" data-v
-  class="fixed inset-0 z-[9999] items-center justify-center p-4"
-  style="display:none;background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
+  class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+  style="background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
   onclick="if(event.target===this)closeCalReportModal()">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col fadein">
     <div class="px-6 py-4 border-b border-[#f0dfc0] bg-gradient-to-l from-[#fdf6ee] to-white flex items-center gap-3">
@@ -11765,12 +11765,12 @@ function showCalendarReportModal({ title, icon = 'calendar-check', sections = []
     note.textContent = footerNote;
     body.appendChild(note);
   }
-  modal.style.display = 'flex';
+  modal.removeAttribute('data-v');
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 }
 function closeCalReportModal() {
   const m = document.getElementById('cal-report-modal');
-  if (m) m.style.display = 'none';
+  if (m) m.setAttribute('data-v', '');
 }
 window.closeCalReportModal = closeCalReportModal;
 
