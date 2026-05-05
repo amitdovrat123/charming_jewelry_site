@@ -2229,6 +2229,26 @@ Charming by Vik 💛</textarea>
 </div>
 
 
+<!-- ════ CALENDAR REPORT MODAL ════ -->
+<div id="cal-report-modal" data-v
+  class="fixed inset-0 z-[9999] items-center justify-center p-4"
+  style="display:none;background:rgba(44,42,41,.55);backdrop-filter:blur(6px)"
+  onclick="if(event.target===this)closeCalReportModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col fadein">
+    <div class="px-6 py-4 border-b border-[#f0dfc0] bg-gradient-to-l from-[#fdf6ee] to-white flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-[#fdf6ee] flex items-center justify-center shrink-0">
+        <i id="cal-report-icon" data-lucide="calendar-check" class="w-5 h-5 text-[#a8705a]"></i>
+      </div>
+      <h3 id="cal-report-title" class="font-black text-gray-800 text-base flex-1">דוח סנכרון יומן</h3>
+      <button onclick="closeCalReportModal()" class="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">✕</button>
+    </div>
+    <div id="cal-report-body" class="px-6 py-5 overflow-y-auto flex-1 space-y-3"></div>
+    <div class="px-6 py-3 border-t border-[#f0dfc0] flex justify-end bg-[#fdf8f5]">
+      <button onclick="closeCalReportModal()" class="bg-[#d4a373] hover:bg-[#a8705a] text-white rounded-full px-7 py-2 font-bold text-sm transition-colors shadow-sm">סגור</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════ DELETE MODAL ════ -->
 <div id="del-modal" data-v
   class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
@@ -11700,6 +11720,60 @@ async function verifyCalendarEvent(eventId, token) {
   return { ok: false };
 }
 
+// Styled calendar report modal — replaces native alert() for calendar reports.
+// sections: [{ type: 'success'|'warning'|'error', label, count?, items?: [{name, detail?, extra?}] }]
+function showCalendarReportModal({ title, icon = 'calendar-check', sections = [], footerNote = '' }) {
+  const modal = document.getElementById('cal-report-modal');
+  if (!modal) { alert(title + '\n\n' + sections.map(s => s.label + ': ' + (s.count ?? s.items?.length ?? 0)).join('\n')); return; }
+  document.getElementById('cal-report-title').textContent = title || 'דוח סנכרון יומן';
+  const iconEl = document.getElementById('cal-report-icon');
+  if (iconEl) iconEl.setAttribute('data-lucide', icon);
+  const body = document.getElementById('cal-report-body');
+  body.innerHTML = '';
+  const palette = {
+    success: { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+    warning: { bg: 'bg-amber-50',   border: 'border-amber-100',   text: 'text-amber-700',   dot: 'bg-amber-500'   },
+    error:   { bg: 'bg-red-50',     border: 'border-red-100',     text: 'text-red-600',     dot: 'bg-red-500'     },
+    info:    { bg: 'bg-[#fdf6ee]',  border: 'border-[#f0dfc0]',   text: 'text-[#a8705a]',   dot: 'bg-[#d4a373]'   },
+  };
+  for (const sec of sections) {
+    if (!sec) continue;
+    const items = sec.items || [];
+    const count = sec.count ?? items.length;
+    if (count === 0 && items.length === 0) continue;
+    const p = palette[sec.type] || palette.info;
+    const itemsHtml = items.map(it => {
+      const extra = it.extra ? `<span class="text-[10px] font-bold ${p.text} bg-white px-2 py-0.5 rounded-full shrink-0 border ${p.border}">${esc(it.extra)}</span>` : '';
+      const detail = it.detail ? `<div class="text-[11px] text-gray-500 mt-0.5">${esc(it.detail)}</div>` : '';
+      return `<li class="px-3 py-2 bg-white rounded-lg flex items-start justify-between gap-2 border ${p.border}"><div class="min-w-0 flex-1"><div class="font-semibold text-gray-800 text-[13px] truncate">${esc(it.name || '')}</div>${detail}</div>${extra}</li>`;
+    }).join('');
+    const block = document.createElement('div');
+    block.className = `${p.bg} rounded-xl p-3 border ${p.border}`;
+    block.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full ${p.dot} shrink-0"></span>
+        <span class="font-bold text-sm ${p.text} flex-1">${esc(sec.label || '')}</span>
+        <span class="font-black text-base ${p.text}">${count}</span>
+      </div>
+      ${items.length ? `<ul class="space-y-1.5 mt-2">${itemsHtml}</ul>` : ''}
+    `;
+    body.appendChild(block);
+  }
+  if (footerNote) {
+    const note = document.createElement('div');
+    note.className = 'text-xs text-gray-500 italic text-center pt-2';
+    note.textContent = footerNote;
+    body.appendChild(note);
+  }
+  modal.style.display = 'flex';
+  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+}
+function closeCalReportModal() {
+  const m = document.getElementById('cal-report-modal');
+  if (m) m.style.display = 'none';
+}
+window.closeCalReportModal = closeCalReportModal;
+
 // Build a Hebrew date string from a workshop for confirmation messages.
 function _calDateStr(w) {
   const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
@@ -11977,12 +12051,19 @@ async function runAutoCalendarHealthCheck(reason) {
       logAction(`סנכרון יומן אוטומטי: ${parts.join(', ')}`);
     }
     if (stillBroken.length > 0) {
-      let msg = `⚠ סנכרון יומן אוטומטי — נדרשת התערבות ידנית\n\n`;
-      msg += `${stillBroken.length} אירועים לא הצליחו להסתנכרן ביומן Charming גם אחרי ניסיון תיקון אוטומטי:\n\n`;
-      msg += stillBroken.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
-      msg += `\n\nאנא פתחי כל אחד בלוח הניהול וטפלי ידנית.`;
-      if (fixed.length > 0) msg += `\n\n(${fixed.length} אירועים אחרים תוקנו אוטומטית בהצלחה.)`;
-      alert(msg);
+      const sections = [];
+      if (fixed.length > 0) sections.push({ type: 'success', label: 'תוקנו אוטומטית', count: fixed.length });
+      if (totalDuplicatesRemoved > 0) sections.push({ type: 'success', label: 'כפילויות נמחקו', count: totalDuplicatesRemoved });
+      sections.push({
+        type: 'error', label: 'דורשות טיפול ידני',
+        items: stillBroken.map(w => ({ name: w.celebrant || w.customerName, detail: _calDateStr(w) }))
+      });
+      showCalendarReportModal({
+        title: 'נדרשת התערבות ידנית',
+        icon: 'alert-triangle',
+        sections,
+        footerNote: 'פתחי כל סדנה בלוח הניהול ולחצי "אישור" מחדש כדי לחדש את הסנכרון'
+      });
       logAction(`סנכרון יומן אוטומטי: ${fixed.length} תוקנו, ${stillBroken.length} דורשים טיפול ידני`);
     }
   } finally {
@@ -12017,27 +12098,32 @@ async function verifyAllCalendarEvents() {
     if (actualMs && expectedMs && Math.abs(actualMs - expectedMs) <= CAL_DATE_TOLERANCE_MS) ok.push(w);
     else wrong.push(w);
   }
-  let msg = `נבדקו ${confirmed.length} סדנאות ביומן Charming:\n\n`;
-  msg += `✓ ${ok.length} מסונכרנות כראוי\n`;
-  if (dups.length > 0) {
-    msg += `\n⚠ ${dups.length} סדנאות עם כפילויות ביומן:\n`;
-    msg += dups.map(({w, count}) => `  • ${w.celebrant || w.customerName} (${count} עותקים) — ${_calDateStr(w)}`).join('\n');
-  }
-  if (wrong.length > 0) {
-    msg += `\n\n✗ ${wrong.length} סדנאות בתאריך שגוי ביומן:\n`;
-    msg += wrong.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
-  }
-  if (missing.length > 0) {
-    msg += `\n\n✗ ${missing.length} סדנאות חסרות ביומן:\n`;
-    msg += missing.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
-  }
-  if (dups.length || wrong.length || missing.length) {
-    msg += `\n\nמפעילה תיקון אוטומטי עכשיו — תקבלי הודעה כשיסתיים.`;
+  const sections = [];
+  sections.push({ type: 'success', label: 'מסונכרנות כראוי', count: ok.length });
+  if (dups.length > 0) sections.push({
+    type: 'warning', label: 'סדנאות עם כפילויות ביומן',
+    items: dups.map(({w, count}) => ({ name: w.celebrant || w.customerName, detail: _calDateStr(w), extra: `${count} עותקים` }))
+  });
+  if (wrong.length > 0) sections.push({
+    type: 'error', label: 'סדנאות בתאריך שגוי',
+    items: wrong.map(w => ({ name: w.celebrant || w.customerName, detail: _calDateStr(w) }))
+  });
+  if (missing.length > 0) sections.push({
+    type: 'error', label: 'סדנאות חסרות ביומן',
+    items: missing.map(w => ({ name: w.celebrant || w.customerName, detail: _calDateStr(w) }))
+  });
+  const hasIssues = dups.length + wrong.length + missing.length > 0;
+  showCalendarReportModal({
+    title: hasIssues ? `דוח סנכרון יומן (${confirmed.length} סדנאות)` : 'היומן מסונכרן',
+    icon: hasIssues ? 'alert-triangle' : 'calendar-check',
+    sections,
+    footerNote: hasIssues
+      ? 'מפעילה תיקון אוטומטי עכשיו — תקבלי הודעה כשיסתיים'
+      : `כל ${confirmed.length} הסדנאות העתידיות מסונכרנות כראוי`
+  });
+  if (hasIssues) {
     setTimeout(() => { _lastAutoCalCheckAt = 0; scheduleAutoCalendarHealthCheck('manual_after_verify'); }, 300);
-  } else {
-    msg += `\nכל הסדנאות העתידיות תקינות.`;
   }
-  alert(msg);
   logAction(`בדיקת סנכרון יומן: ✓${ok.length} כפילויות:${dups.length} שגוי:${wrong.length} חסר:${missing.length}`);
 }
 window.verifyAllCalendarEvents = verifyAllCalendarEvents;
