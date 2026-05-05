@@ -239,7 +239,19 @@ function setBtnLoading(id, loading) {
 }
 
 // ── Modal control ─────────────────────────────────────────────
+// The modal contains a password input. If we inject it on every page load,
+// iOS Safari triggers an iCloud Keychain Face ID prompt on each navigation.
+// Inject lazily — only when the user actually opens the modal.
+let modalReady = false;
+function ensureModalInjected() {
+  if (modalReady) return;
+  document.body.insertAdjacentHTML('beforeend', MODAL_HTML);
+  setupEvents();
+  modalReady = true;
+}
+
 function openModal(tab = 'login') {
+  ensureModalInjected();
   const overlay = document.getElementById('auth-overlay');
   if (!overlay) return;
   overlay.classList.add('is-open');
@@ -254,7 +266,11 @@ function openModal(tab = 'login') {
 
 function closeModal() {
   const overlay = document.getElementById('auth-overlay');
-  if (!overlay) return;
+  if (!overlay) {
+    document.body.style.overflow = '';
+    skipAutoClose = false;
+    return;
+  }
   overlay.classList.remove('is-open');
   overlay.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';

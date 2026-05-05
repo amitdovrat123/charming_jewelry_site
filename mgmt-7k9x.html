@@ -11707,6 +11707,55 @@ function _calDateStr(w) {
   return d.toLocaleString('he-IL', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
 }
 
+// Find every event in the business calendar that looks like a duplicate of this workshop.
+// Match window: ±6 hours around the workshop's actual time. Filtered by celebrant or
+// customerName appearing in the event summary or description (so different customers
+// on the same day don't get cross-matched).
+async function findCalendarEventsForWorkshop(w, token) {
+  const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds * 1000) : (w.eventDate?.toDate ? w.eventDate.toDate() : null);
+  if (!d) return [];
+  const winMs = 6 * 60 * 60 * 1000;
+  const timeMin = new Date(d.getTime() - winMs).toISOString();
+  const timeMax = new Date(d.getTime() + winMs).toISOString();
+  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(BUSINESS_CALENDAR_EMAIL)}/events?` +
+    `timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&` +
+    `singleEvents=true&showDeleted=false&maxResults=100`;
+  try {
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) return [];
+    const data = await r.json();
+    const items = (data.items || []).filter(e => e.status !== 'cancelled');
+    const celebrant = (w.celebrant || '').trim();
+    const customer = (w.customerName || '').trim();
+    if (!celebrant && !customer) return items;
+    return items.filter(e => {
+      const text = (e.summary || '') + '\n' + (e.description || '');
+      return (celebrant && text.includes(celebrant)) || (customer && text.includes(customer));
+    });
+  } catch(e) { console.warn('findCalendarEventsForWorkshop failed:', e); return []; }
+}
+
+// Pick the canonical event from a list of duplicates and delete the rest.
+// Canonical = matching w.calendarEventId if present, otherwise the most recently updated event.
+async function dedupeCalendarEventsList(w, existing, token) {
+  if (!existing || existing.length === 0) return { canonical: null, deleted: 0 };
+  if (existing.length === 1) return { canonical: existing[0], deleted: 0 };
+  const sorted = [...existing].sort((a, b) => new Date(b.updated || 0) - new Date(a.updated || 0));
+  const canonical = (w.calendarEventId && existing.find(e => e.id === w.calendarEventId)) || sorted[0];
+  let deleted = 0;
+  for (const e of existing) {
+    if (e.id === canonical.id) continue;
+    try {
+      const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(BUSINESS_CALENDAR_EMAIL)}/events/${encodeURIComponent(e.id)}`, {
+        method: 'DELETE', headers: { Authorization: 'Bearer ' + token }
+      });
+      if (r.ok || r.status === 204 || r.status === 410) deleted++;
+      else console.warn('dedup delete failed:', r.status, await r.text());
+    } catch(err) { console.warn('dedup delete error:', err); }
+  }
+  return { canonical, deleted };
+}
+
 const _calSyncInFlight = new Set();
 async function syncCalendarEvent(workshopId, wsData, opts = {}) {
   const silent = !!opts.silent;
@@ -11730,35 +11779,52 @@ async function syncCalendarEvent(workshopId, wsData, opts = {}) {
   // which would resolve to whatever account the OAuth token belongs to.
   const calId = encodeURIComponent(BUSINESS_CALENDAR_EMAIL);
   try {
-    if (w.calendarEventId) {
-      // Update existing event
-      const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events/${w.calendarEventId}`, {
-        method: 'PUT', headers, body: JSON.stringify(event)
-      });
-      if (r.ok) {
-        const v = await verifyCalendarEvent(w.calendarEventId, token);
-        if (v.ok) {
-          if (!silent) {
-            showToast(`✓ היומן עודכן ואומת — ${_calDateStr(w)}`);
-            logAction(`יומן Google עודכן ואומת — "${w.celebrant || w.customerName}" (${_calDateStr(w)})`);
-          }
-          return { ok: true };
-        } else {
-          if (!silent) alert('שים לב: עדכון היומן הסתיים אך לא ניתן היה לאמת אותו.\nאנא בדקי ידנית את יומן Charming ב-Google.');
-          return { ok: false, reason: 'verify_after_update_failed' };
-        }
-      } else if (r.status === 404) {
-        // Event was deleted from calendar — create new
-        return await createCalendarEvent(workshopId, event, headers, calId, token, w, opts);
-      } else {
-        const errText = await r.text();
-        console.error('Calendar update failed:', errText);
-        if (!silent) alert('שגיאה: עדכון האירוע ביומן Google נכשל.\nאנא נסי שוב.');
-        return { ok: false, reason: 'update_http_' + r.status };
-      }
-    } else {
-      return await createCalendarEvent(workshopId, event, headers, calId, token, w, opts);
+    // Step 1: find every event in the calendar that looks like this workshop's
+    const existing = await findCalendarEventsForWorkshop(w, token);
+    // Step 2: dedupe — keep one canonical event, delete every other duplicate
+    const { canonical, deleted } = await dedupeCalendarEventsList(w, existing, token);
+    const dupNote = deleted > 0 ? ` (נמחקו ${deleted} כפילויות)` : '';
+
+    if (!canonical) {
+      // Nothing exists yet — create new
+      const created = await createCalendarEvent(workshopId, event, headers, calId, token, w, opts);
+      return { ...created, deletedDuplicates: deleted };
     }
+
+    // Step 3: update the canonical event with the latest data
+    const r = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events/${encodeURIComponent(canonical.id)}`, {
+      method: 'PUT', headers, body: JSON.stringify(event)
+    });
+
+    if (r.ok) {
+      // Make sure Firestore points to the canonical id we just updated
+      if (w.calendarEventId !== canonical.id) {
+        await updateDoc(doc(db, WORKSHOPS_COL, workshopId), { calendarEventId: canonical.id });
+      }
+      const v = await verifyCalendarEvent(canonical.id, token);
+      if (v.ok) {
+        if (!silent) {
+          showToast(`✓ היומן עודכן ואומת — ${_calDateStr(w)}${dupNote}`);
+          logAction(`יומן Google עודכן ואומת — "${w.celebrant || w.customerName}" (${_calDateStr(w)})${dupNote}`);
+        } else if (deleted > 0) {
+          logAction(`סנכרון אוטומטי: נמחקו ${deleted} כפילויות לסדנה "${w.celebrant || w.customerName}"`);
+        }
+        return { ok: true, deletedDuplicates: deleted };
+      }
+      if (!silent) alert('שים לב: עדכון היומן הסתיים אך לא ניתן היה לאמת אותו.\nאנא בדקי ידנית את יומן Charming ב-Google.');
+      return { ok: false, reason: 'verify_after_update_failed', deletedDuplicates: deleted };
+    }
+
+    if (r.status === 404) {
+      // Race: canonical was deleted between the find and the PUT — create fresh
+      const created = await createCalendarEvent(workshopId, event, headers, calId, token, w, opts);
+      return { ...created, deletedDuplicates: deleted };
+    }
+
+    const errText = await r.text();
+    console.error('Calendar update failed:', errText);
+    if (!silent) alert('שגיאה: עדכון האירוע ביומן Google נכשל.\nאנא נסי שוב.');
+    return { ok: false, reason: 'update_http_' + r.status, deletedDuplicates: deleted };
   } catch(e) {
     console.error('Calendar sync error:', e);
     if (!silent) alert('שגיאה בסנכרון היומן. אנא בדקי חיבור לאינטרנט ונסי שוב.');
@@ -11855,51 +11921,60 @@ async function runAutoCalendarHealthCheck(reason) {
 
     const fixed = [];
     const stillBroken = [];
+    let totalDuplicatesRemoved = 0;
 
     for (const w of confirmed) {
       const expected = buildCalendarEvent(w);
       if (!expected) continue;
       const expectedMs = new Date(expected.start.dateTime).getTime();
 
-      // Check current state
+      // Look up every event in the calendar matching this workshop (incl. duplicates)
+      const existing = await findCalendarEventsForWorkshop(w, token);
+
+      // Healthy = exactly 1 event, at the right time, with id matching Firestore
       let alreadyOk = false;
-      if (w.calendarEventId) {
-        const v = await verifyCalendarEvent(w.calendarEventId, token);
-        if (v.ok && v.dateTime && Math.abs(v.dateTime.getTime() - expectedMs) <= CAL_DATE_TOLERANCE_MS) {
+      if (existing.length === 1) {
+        const e = existing[0];
+        const actualMs = e.start?.dateTime ? new Date(e.start.dateTime).getTime() : null;
+        if (actualMs && Math.abs(actualMs - expectedMs) <= CAL_DATE_TOLERANCE_MS && e.id === w.calendarEventId) {
           alreadyOk = true;
         }
       }
       if (alreadyOk) continue;
 
-      // Out of sync — try to auto-fix
+      // Anything else (missing, wrong time, duplicates, id-mismatch) → auto-fix
       const syncResult = await syncCalendarEvent(w.id, w, { silent: true });
+      if (syncResult?.deletedDuplicates) totalDuplicatesRemoved += syncResult.deletedDuplicates;
 
-      // Re-fetch fresh state and re-verify
+      // Re-fetch fresh workshop state and re-verify (including duplicate check)
       let fresh = w;
       try {
         const snap = await getDoc(doc(db, WORKSHOPS_COL, w.id));
         if (snap.exists()) fresh = { id: w.id, ...snap.data() };
       } catch(e) {}
 
+      const after = await findCalendarEventsForWorkshop(fresh, token);
+      const freshExpected = buildCalendarEvent(fresh);
+      const freshExpectedMs = freshExpected ? new Date(freshExpected.start.dateTime).getTime() : expectedMs;
       let nowOk = false;
-      if (fresh.calendarEventId) {
-        const v2 = await verifyCalendarEvent(fresh.calendarEventId, token);
-        const freshExpected = buildCalendarEvent(fresh);
-        const freshExpectedMs = freshExpected ? new Date(freshExpected.start.dateTime).getTime() : expectedMs;
-        if (v2.ok && v2.dateTime && Math.abs(v2.dateTime.getTime() - freshExpectedMs) <= CAL_DATE_TOLERANCE_MS) {
-          nowOk = true;
-        }
+      if (after.length === 1) {
+        const e = after[0];
+        const actualMs = e.start?.dateTime ? new Date(e.start.dateTime).getTime() : null;
+        if (actualMs && Math.abs(actualMs - freshExpectedMs) <= CAL_DATE_TOLERANCE_MS) nowOk = true;
       }
 
       if (nowOk) fixed.push(fresh);
       else stillBroken.push(fresh);
     }
 
-    if (fixed.length === 0 && stillBroken.length === 0) return;
+    if (fixed.length === 0 && stillBroken.length === 0 && totalDuplicatesRemoved === 0) return;
 
-    if (fixed.length > 0) {
-      try { showToast(`✓ סנכרון יומן אוטומטי: תוקנו ${fixed.length} אירועים`); } catch(e) {}
-      logAction(`סנכרון יומן אוטומטי: תוקנו ${fixed.length} אירועים`);
+    if (fixed.length > 0 || totalDuplicatesRemoved > 0) {
+      const parts = [];
+      if (fixed.length > 0) parts.push(`תוקנו ${fixed.length} אירועים`);
+      if (totalDuplicatesRemoved > 0) parts.push(`נמחקו ${totalDuplicatesRemoved} כפילויות`);
+      try { showToast(`✓ סנכרון יומן אוטומטי: ${parts.join(', ')}`); } catch(e) {}
+      logAction(`סנכרון יומן אוטומטי: ${parts.join(', ')}`);
     }
     if (stillBroken.length > 0) {
       let msg = `⚠ סנכרון יומן אוטומטי — נדרשת התערבות ידנית\n\n`;
@@ -11916,39 +11991,54 @@ async function runAutoCalendarHealthCheck(reason) {
 }
 window.runAutoCalendarHealthCheck = runAutoCalendarHealthCheck;
 
-// Manual one-click verification — same as the auto check but always reports,
-// and forces a fresh OAuth if no valid token (since the user explicitly asked).
+// Manual one-click verification — also detects duplicates and triggers a full
+// auto-fix run that will dedupe and re-sync everything that's not perfect.
 async function verifyAllCalendarEvents() {
-  const confirmed = (allWorkshops || []).filter(w => w.bookingStatus === 'confirmed' && w.calendarEventId && w.eventDate);
+  const confirmed = (allWorkshops || []).filter(w => w.bookingStatus === 'confirmed' && w.eventDate);
   if (confirmed.length === 0) {
-    alert('אין סדנאות סגורות עם אירוע ביומן לבדיקה.');
+    alert('אין סדנאות סגורות עתידיות לבדיקה.');
     return;
   }
   const token = await ensureCalendarToken();
   if (!token) return;
-  showToast(`בודקת ${confirmed.length} אירועים ביומן...`);
-  const found = [];
+  showToast(`בודקת ${confirmed.length} סדנאות ביומן...`);
+  const ok = [];
+  const wrong = [];
+  const dups = [];
   const missing = [];
   for (const w of confirmed) {
-    const v = await verifyCalendarEvent(w.calendarEventId, token);
     const expected = buildCalendarEvent(w);
     const expectedMs = expected ? new Date(expected.start.dateTime).getTime() : null;
-    const ok = v.ok && v.dateTime && expectedMs && Math.abs(v.dateTime.getTime() - expectedMs) <= CAL_DATE_TOLERANCE_MS;
-    if (ok) found.push(w); else missing.push(w);
+    const existing = await findCalendarEventsForWorkshop(w, token);
+    if (existing.length === 0) { missing.push(w); continue; }
+    if (existing.length > 1) { dups.push({ w, count: existing.length }); continue; }
+    const e = existing[0];
+    const actualMs = e.start?.dateTime ? new Date(e.start.dateTime).getTime() : null;
+    if (actualMs && expectedMs && Math.abs(actualMs - expectedMs) <= CAL_DATE_TOLERANCE_MS) ok.push(w);
+    else wrong.push(w);
   }
-  let msg = `נבדקו ${confirmed.length} אירועים ביומן Charming:\n\n`;
-  msg += `✓ ${found.length} אירועים אומתו ביומן בתאריך הנכון\n`;
+  let msg = `נבדקו ${confirmed.length} סדנאות ביומן Charming:\n\n`;
+  msg += `✓ ${ok.length} מסונכרנות כראוי\n`;
+  if (dups.length > 0) {
+    msg += `\n⚠ ${dups.length} סדנאות עם כפילויות ביומן:\n`;
+    msg += dups.map(({w, count}) => `  • ${w.celebrant || w.customerName} (${count} עותקים) — ${_calDateStr(w)}`).join('\n');
+  }
+  if (wrong.length > 0) {
+    msg += `\n\n✗ ${wrong.length} סדנאות בתאריך שגוי ביומן:\n`;
+    msg += wrong.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
+  }
   if (missing.length > 0) {
-    msg += `\n✗ ${missing.length} אירועים לא נמצאו או בתאריך שגוי:\n`;
+    msg += `\n\n✗ ${missing.length} סדנאות חסרות ביומן:\n`;
     msg += missing.map(w => `  • ${w.celebrant || w.customerName} — ${_calDateStr(w)}`).join('\n');
-    msg += `\n\nתיקון אוטומטי ירוץ בקרוב — או לחצי על אישור הסדנה מחדש.`;
-    // Trigger an auto fix run now since the user explicitly invoked verify
-    setTimeout(() => { _lastAutoCalCheckAt = 0; scheduleAutoCalendarHealthCheck('manual_after_verify'); }, 500);
+  }
+  if (dups.length || wrong.length || missing.length) {
+    msg += `\n\nמפעילה תיקון אוטומטי עכשיו — תקבלי הודעה כשיסתיים.`;
+    setTimeout(() => { _lastAutoCalCheckAt = 0; scheduleAutoCalendarHealthCheck('manual_after_verify'); }, 300);
   } else {
-    msg += `\nכל האירועים העתידיים מסונכרנים כראוי.`;
+    msg += `\nכל הסדנאות העתידיות תקינות.`;
   }
   alert(msg);
-  logAction(`בדיקת סנכרון יומן: ${found.length}/${confirmed.length} תקינים`);
+  logAction(`בדיקת סנכרון יומן: ✓${ok.length} כפילויות:${dups.length} שגוי:${wrong.length} חסר:${missing.length}`);
 }
 window.verifyAllCalendarEvents = verifyAllCalendarEvents;
 
