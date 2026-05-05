@@ -383,6 +383,7 @@ async function processGoogleResult(result) {
   if (!exists) {
     await saveUserToFirestore(user, { name: user.displayName, newsletter: true });
     updateNavbar(user);
+    ensureModalInjected();
     const overlay = document.getElementById('auth-overlay');
     if (overlay && !overlay.classList.contains('is-open')) {
       overlay.classList.add('is-open');
@@ -513,8 +514,8 @@ function setupEvents() {
 }
 
 // ── Boot (modules are deferred — DOM is ready here) ──────────
-document.body.insertAdjacentHTML('beforeend', MODAL_HTML);
-setupEvents();
+// Modal is injected lazily via ensureModalInjected() to avoid iOS Keychain
+// Face ID prompts on every page load.
 // Attach the modal-open click listener to the nav button immediately,
 // without waiting for onAuthStateChanged (which is async).
 // The observer will call updateNavbar again once Firebase resolves.
