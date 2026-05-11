@@ -7982,6 +7982,7 @@ document.addEventListener('click', e => {
 // ── CRM Kanban View ─────────────────────────────────────────────
 let wsCurrentView = 'crm';
 let wsSearchQ = '';
+let wsArchiveVisible = 15; // infinite-scroll counter for archive column; grows on scroll
 function wsMatchesSearch(w) {
   if (!wsSearchQ) return true;
   return ((w.celebrant||'') + ' ' + (w.customerName||'') + ' ' + (w.phone||'') + ' ' + (w.city||'')).toLowerCase().includes(wsSearchQ);
@@ -8145,7 +8146,24 @@ function renderCrmBoard() {
   fillCol('crm-col-pending', fPending, w => crmCard(w));
   if (el('crm-count-archive')) el('crm-count-archive').textContent = fArchive.length;
   const archCol = el('crm-col-archive');
-  if (archCol) archCol.innerHTML = (wsSearchQ ? fArchive : fArchive.slice(0,15)).map(w => crmCard(w, {isArchive:true})).join('') || '';
+  if (archCol) {
+    const shown = wsSearchQ ? fArchive : fArchive.slice(0, wsArchiveVisible);
+    archCol.innerHTML = shown.map(w => crmCard(w, {isArchive:true})).join('') || '';
+    // Wire infinite-scroll once: when the user scrolls near the bottom of the
+    // archive column, load 15 more cards. Search bypasses this (shows all matches).
+    if (!archCol._scrollWired) {
+      archCol._scrollWired = true;
+      archCol.addEventListener('scroll', () => {
+        if (wsSearchQ) return;
+        const nearBottom = archCol.scrollHeight - archCol.scrollTop - archCol.clientHeight < 80;
+        if (nearBottom && wsArchiveVisible < (archCol._archiveTotal || 0)) {
+          wsArchiveVisible += 15;
+          renderCrmBoard();
+        }
+      });
+    }
+    archCol._archiveTotal = fArchive.length;
+  }
   applyWsFilters();
 }
 window.renderCrmBoard = renderCrmBoard;
