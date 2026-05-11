@@ -7145,38 +7145,6 @@ function renderWorkshopsList() {
   } else {
     listConfirmed.innerHTML = '<p class="text-gray-300 text-sm text-center py-8">אין סדנאות קרובות</p>';
   }
-
-  // Section 3: Archive
-  const secArchive = document.getElementById('ws-section-archive');
-  const listArchive = document.getElementById('ws-list-archive');
-  if (document.getElementById('ws-archive-count')) document.getElementById('ws-archive-count').textContent = archive.length;
-  if (archive.length && wsCurrentView === 'crm' && secArchive && listArchive) {
-    secArchive.style.display = '';
-    const shown = archive.slice(0, 5);
-    listArchive.innerHTML = shown.map(w => {
-      const d = w.eventDate?.seconds ? new Date(w.eventDate.seconds*1000) : null;
-      const dateStr = d ? d.toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
-      const pay = w.payment||{};
-      const payBadge = pay.balancePaid ? '<span class="text-[9px] bg-emerald-100 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold">שולם ✓</span>'
-        : pay.advancePaid ? '<span class="text-[9px] bg-amber-100 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded-full font-bold">מקדמה ✓</span>' : '';
-      return `<div class="flex items-center gap-4 px-4 py-2.5 hover:bg-[#fdf6ee] transition-colors cursor-pointer" onclick="openWsCard('${w.id}')">
-        <p class="font-bold text-sm text-gray-800 w-28 truncate">${esc(w.celebrant||w.customerName)}</p>
-        <span class="text-[10px] text-gray-500 w-14">${dateStr}</span>
-        <span class="text-[10px] text-gray-500 w-10">${w.time||''}</span>
-        <span class="text-[10px] text-gray-500 w-20 truncate">📍${esc(w.city||'')}</span>
-        <span class="text-[10px] text-gray-500 w-8">👥${w.participantCount}</span>
-        <span class="text-[10px] text-gray-500 flex-1 truncate">${w.route||''}</span>
-        ${payBadge}
-        <span class="font-bold text-sm text-[#d4a373]">${(w.total||0).toLocaleString('he-IL')} ₪</span>
-      </div>`;
-    }).join('');
-    if (archive.length > 5) {
-      listArchive.innerHTML += `<button onclick="showAllArchive()" class="w-full py-2.5 text-center text-xs text-gray-400 hover:text-[#d4a373] font-semibold transition-colors">הצג את כל ${archive.length} הסדנאות →</button>`;
-    }
-    listArchive.style.display = '';
-  } else if (secArchive) {
-    secArchive.style.display = 'none';
-  }
 }
 
 async function confirmWorkshop(id) {
@@ -7187,21 +7155,6 @@ async function confirmWorkshop(id) {
   } catch(e) { console.error(e); }
 }
 window.confirmWorkshop = confirmWorkshop;
-
-function showAllConfirmedWorkshops() {
-  const now = new Date();
-  const confirmed = allWorkshops
-    .filter(w => (w.bookingStatus || 'confirmed') === 'confirmed')
-    .filter(w => { const d = getWsDate(w); return d && d >= new Date(now.getFullYear(), now.getMonth(), now.getDate()); })
-    .sort((a, b) => { const da = getWsDate(a), db = getWsDate(b); return (da?.getTime() || 0) - (db?.getTime() || 0); });
-  const listConfirmed = document.getElementById('ws-list-confirmed');
-  listConfirmed.innerHTML = confirmed.map(w => renderWorkshopCard(w)).join('');
-  document.getElementById('ws-confirmed-show-all').style.display = 'none';
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-window.showAllConfirmedWorkshops = showAllConfirmedWorkshops;
-
-window.toggleWsArchive = function() {};
 
 async function deleteWorkshop(id) {
   const w = allWorkshops.find(x=>x.id===id);
@@ -8017,9 +7970,6 @@ function applyWsFilters() {
     const col = document.getElementById('crm-col-' + key);
     if (col?.parentElement) col.parentElement.style.display = f[key] === false ? 'none' : '';
   });
-  // Archive section
-  const archSec = document.getElementById('ws-section-archive');
-  if (archSec && f.archive === false) archSec.style.display = 'none';
 }
 window.saveWsFilters = saveWsFilters;
 document.addEventListener('DOMContentLoaded', loadWsFilters);
