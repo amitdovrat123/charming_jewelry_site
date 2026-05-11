@@ -8118,7 +8118,7 @@ function renderCrmBoard() {
   // Lead card (from inquiries)
   function leadCard(inq) {
     const dateStr = inq.createdAt?.seconds ? new Date(inq.createdAt.seconds*1000).toLocaleDateString('he-IL',{day:'numeric',month:'short'}) : '—';
-    return `<div class="bg-white rounded-xl border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer" onclick="showInquiryDetail('${inq.id}')">
+    return `<div class="bg-white rounded-xl border border-gray-100 p-3 shadow-sm hover:shadow-md hover:border-[#d4a373] transition-all cursor-pointer" onclick="window.openInquiryModal('${inq.id}')">
       <div class="flex items-start justify-between gap-2 mb-1">
         <p class="font-bold text-sm text-gray-800 leading-tight">${esc(inq.name || '—')}</p>
         <span class="text-[10px] text-gray-400 flex-shrink-0">${dateStr}</span>
